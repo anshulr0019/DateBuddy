@@ -19,7 +19,6 @@ cat > README.md << 'ENDOFFILE'
 </p>
 
 <p align="center">
-  <a href="https://datebuddy.vercel.app"><strong>🚀 Live Demo</strong></a> •
   <a href="#-quick-start"><strong>⚡ Quick Start</strong></a> •
   <a href="#-features"><strong>✨ Features</strong></a> •
   <a href="#️-tech-stack"><strong>🏗️ Tech Stack</strong></a>
