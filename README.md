@@ -570,8 +570,6 @@ git push origin feature/amazing-feature
 - ✅ Session management (HTTP-only cookies)
 - [ ] Two-factor authentication (Planned)
 
-> 🔐 Report security issues to: **security@datebuddy.com**
-
 </details>
 
 ---
@@ -593,9 +591,8 @@ MIT License — Copyright (c) 2024 Anshul Rajput
 ### Anshul Rajput
 
 [![GitHub](https://img.shields.io/badge/GitHub-anshulr0019-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anshulr0019)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/anshulrajput)
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-FF6B9D?style=for-the-badge&logo=vercel&logoColor=white)](https://anshulrajput.dev)
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:anshul@datebuddy.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)]([https://linkedin.com/in/anshulrajput](https://www.linkedin.com/in/anshul-kumar-793502274/))
+[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:anshulrajput338@gmail.com)
 
 *Full-Stack Developer | Open Source Enthusiast | Building the future of social connections*
 
@@ -624,4 +621,3 @@ MIT License — Copyright (c) 2024 Anshul Rajput
 **"Connecting hearts, one swipe at a time"**
 
 </div>
-ENDOFFILE
