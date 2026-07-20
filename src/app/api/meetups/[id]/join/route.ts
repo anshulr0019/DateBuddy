@@ -5,10 +5,13 @@ import { eq, and } from 'drizzle-orm';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const meetupId = parseInt(params.id);
+    // Await the params promise (Next.js 15+)
+    const { id } = await params;
+    const meetupId = parseInt(id);
+    
     const { userId } = await request.json();
 
     console.log('Join request:', { meetupId, userId });
@@ -55,7 +58,7 @@ export async function POST(
       .from(meetupAttendees)
       .where(eq(meetupAttendees.meetupId, meetupId));
 
-    const maxAttendees = meetup.maxAttendees || 10; // Default to 10 if null
+    const maxAttendees = meetup.maxAttendees || 10;
 
     if (currentAttendees.length >= maxAttendees) {
       return NextResponse.json(

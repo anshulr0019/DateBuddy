@@ -1,86 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { meetups, meetupAttendees, users, photos } from '@/db/schema';
-import { eq, desc, gte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
-// GET all meetups
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const city = searchParams.get('city') || 'Mumbai';
-    const category = searchParams.get('category');
-
-    let query = db.select({
-      meetup: meetups,
-      host: {
-        id: users.id,
-        name: users.name,
-        photo: photos.url,
-      }
-    })
-    .from(meetups)
-    .leftJoin(users, eq(meetups.hostId, users.id))
-    .leftJoin(photos, eq(users.id, photos.userId))
-    .where(eq(meetups.status, 'active'))
-    .orderBy(desc(meetups.date));
-
-    const allMeetups = await query;
+    // Await the params promise (Next.js 15+)
+    const { id } = await params;
+    const meetupId = parseInt(id);
     
-    // Get attendee counts
-    const meetupsWithCounts = await Promise.all(
-      allMeetups.map(async (m) => {
-        const attendees = await db.select()
-          .from(meetupAttendees)
-          .where(eq(meetupAttendees.meetupId, m.meetup.id));
-        
-        return {
-          ...m.meetup,
-          host: m.host,
-          attendeesCount: attendees.length,
-        };
-      })
-    );
+    const [meetup] = await db.select()
+      .from(meetups)
+      .where(eq(meetups.id, meetupId));
 
-    return NextResponse.json({ success: true, meetups: meetupsWithCounts });
-  } catch (error) {
-    console.error('Error fetching meetups:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch meetups' },
-      { status: 500 }
-    );
-  }
-}
+    if (!meetup) {
+      return NextResponse.json(
+        { success: false, message: 'Meetup not found' },
+        { status: 404 }
+      );
+    }
 
-// POST create meetup
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { userId, title, description, category, venueName, address, date, maxAttendees, imageUrl } = body;
+    // Get host info
+    const hostData = await db.select({
+      id: users.id,
+      name: users.name,
+      photo: photos.url,
+      verified: users.isVerified,
+    })
+    .from(users)
+    .leftJoin(photos, eq(users.id, photos.userId))
+    .where(eq(users.id, meetup.hostId))
+    .limit(1);
 
-    const [meetup] = await db.insert(meetups).values({
-      hostId: userId,
-      title,
-      description,
-      category,
-      venueName,
-      address,
-      date: new Date(date),
-      maxAttendees: maxAttendees || 10,
-      imageUrl,
-    }).returning();
+    // Get attendees
+    const attendeesData = await db.select({
+      id: users.id,
+      name: users.name,
+      photo: photos.url,
+    })
+    .from(meetupAttendees)
+    .leftJoin(users, eq(meetupAttendees.userId, users.id))
+    .leftJoin(photos, eq(users.id, photos.userId))
+    .where(eq(meetupAttendees.meetupId, meetupId));
 
-    // Auto-add host as attendee
-    await db.insert(meetupAttendees).values({
-      meetupId: meetup.id,
-      userId,
-      status: 'going',
+    return NextResponse.json({
+      success: true,
+      meetup: {
+        ...meetup,
+        host: hostData[0] || null,
+        attendees: attendeesData,
+        attendeesCount: attendeesData.length,
+      },
     });
-
-    return NextResponse.json({ success: true, meetupId: meetup.id });
   } catch (error) {
-    console.error('Error creating meetup:', error);
+    console.error('Error fetching meetup:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create meetup' },
+      { success: false, message: 'Failed to fetch meetup' },
       { status: 500 }
     );
   }
