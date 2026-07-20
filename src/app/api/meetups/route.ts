@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { meetups, meetupAttendees, users, photos } from '@/db/schema';
 import { eq, desc, gte } from 'drizzle-orm';
 
 // GET all meetups
 export async function GET(request: NextRequest) {
   try {
+    const db = getDb();
     const { searchParams } = new URL(request.url);
     const city = searchParams.get('city') || 'Mumbai';
     const category = searchParams.get('category');
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
 // POST create meetup
 export async function POST(request: NextRequest) {
   try {
+    const db = getDb();
     const body = await request.json();
     const { userId, title, description, category, venueName, address, date, maxAttendees, imageUrl } = body;
 

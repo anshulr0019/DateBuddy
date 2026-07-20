@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { meetups, meetupAttendees, users, photos } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const meetupId = parseInt(params.id);
+    const db = getDb();
+    const { id } = await params;
+    const meetupId = parseInt(id);
     
     const [meetup] = await db.select()
       .from(meetups)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { users, photos, preferences, subscriptions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   console.log('🚀 Complete onboarding API called');
   
   try {
+    const db = getDb();
     const body = await request.json();
     console.log('📥 Received data:', body);
 
