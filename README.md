@@ -446,12 +446,6 @@ npm run build
 npm start
 ```
 
-## 📝 Environment Variables
-
-```env
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
-```
 
 ## 🎉 Demo Features
 
