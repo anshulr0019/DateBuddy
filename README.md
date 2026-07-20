@@ -1,5 +1,3 @@
-Markdown
-
 <div align="center">
 
 # 💕 DateBuddy
@@ -131,8 +129,10 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 <summary><b>📊 Click to view 18-table schema</b></summary>
 
 <br>
+
+``` 
 ┌─────────────────────────────────────────────────────────────┐
-│ DateBuddy Database │
+│                    DateBuddy Database                       │
 └─────────────────────────────────────────────────────────────┘
 
 👤 USER MANAGEMENT
@@ -162,33 +162,23 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 ├── interests ─────────────── Master interest list
 ├── notifications ─────────── Push alerts
 └── reports ───────────────── Safety moderation
+Key Relationships:
 
-text
-
-
-**Key Relationships:**
-- One user → Many photos `(1:N)`
-- Users ↔ Interests `(N:M via user_interests)`
-- Users ↔ Meetups `(N:M via meetup_attendees)`
-- Matches trigger Conversations `(1:1)`
-
+One user → Many photos (1:N)
+Users ↔ Interests (N:M via user_interests)
+Users ↔ Meetups (N:M via meetup_attendees)
+Matches trigger Conversations (1:1)
 </details>
+🚀 Quick Start
+Prerequisites
+ 
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
 ✅ Node.js 18+ installed
 ✅ PostgreSQL database (Neon / Supabase / Local)
 ✅ npm or yarn package manager
+Installation
+Bash
 
-text
-
-
-### Installation
-
-```bash
 # 1️⃣ Clone the repo
 git clone https://github.com/anshulr0019/DateBuddy.git
 cd DateBuddy
@@ -218,7 +208,7 @@ DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 # Optional: For production
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
 📱 User Journey
-text
+ 
 
 📱 Sign Up
     ↓
@@ -250,8 +240,8 @@ CSS
 /* Semantic Colors */
 --color-bg: #FAFAFA;
 --color-card: #FFFFFF;
---color-text: #1A1A2E;
---color-text-muted: #6E7191;
+--color- : #1A1A2E;
+--color- -muted: #6E7191;
 
 /* Action Colors */
 --color-like: #4ECDC4;
@@ -264,13 +254,13 @@ CSS
 --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
 /* Font Sizes */
---text-xs:   0.75rem;   /* 12px */
---text-sm:   0.875rem;  /* 14px */
---text-base: 1rem;      /* 16px */
---text-lg:   1.125rem;  /* 18px */
---text-xl:   1.25rem;   /* 20px */
---text-2xl:  1.5rem;    /* 24px */
---text-3xl:  1.875rem;  /* 30px */
+-- -xs:   0.75rem;   /* 12px */
+-- -sm:   0.875rem;  /* 14px */
+-- -base: 1rem;      /* 16px */
+-- -lg:   1.125rem;  /* 18px */
+-- -xl:   1.25rem;   /* 20px */
+-- -2xl:  1.5rem;    /* 24px */
+-- -3xl:  1.875rem;  /* 30px */
 Spacing System
 CSS
 
@@ -335,7 +325,7 @@ JSON
 }
 </details>
 🎯 Project Structure
-text
+ 
 
 DateBuddy/
 ├── src/
@@ -487,34 +477,10 @@ Authentication
 🔐 Report security issues to: security@datebuddy.com
 
 </details>
-🎯 Project Structure
-text
-
-DateBuddy/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   ├── onboarding/
-│   │   ├── discover/
-│   │   ├── matches/
-│   │   ├── chat/
-│   │   ├── meetups/
-│   │   ├── profile/
-│   │   ├── settings/
-│   │   ├── premium/
-│   │   ├── components/
-│   │   └── api/
-│   └── db/
-│       ├── schema.ts
-│       └── index.ts
-├── public/
-├── tailwind.config.ts
-├── package.json
-└── drizzle.config.ts
 📄 License
 This project is licensed under the MIT License — see the LICENSE file for details.
 
-text
+ 
 
 MIT License — Copyright (c) 2024 Anshul Rajput
 👨‍💻 Author
