@@ -174,3 +174,29 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 ## 🚀 Quick Start
 
 ### Prerequisites
+✅ Node.js 18+ installed
+✅ PostgreSQL database (Neon / Supabase / Local)
+✅ npm or yarn package manager
+
+
+### Installation
+
+```bash
+# 1️⃣ Clone the repo
+git clone https://github.com/anshulr0019/DateBuddy.git
+cd DateBuddy
+
+# 2️⃣ Install dependencies
+npm install
+
+# 3️⃣ Set up environment variables
+cp .env.example .env.local
+# Add your DATABASE_URL
+
+# 4️⃣ Push database schema
+npm run db:push
+
+# 5️⃣ Run development server
+npm run dev
+
+# 🎉 Open http://localhost:3000
