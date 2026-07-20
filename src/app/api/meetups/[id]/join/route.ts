@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { meetupAttendees, meetups } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const meetupId = parseInt(params.id);
+    const db = getDb();
+    const { id } = await params;
+    const meetupId = parseInt(id);
     const { userId } = await request.json();
 
     console.log('Join request:', { meetupId, userId });
