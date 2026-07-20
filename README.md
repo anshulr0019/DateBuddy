@@ -255,3 +255,56 @@ CSS
 --space-4: 2rem;    /* 32px */
 --space-6: 3rem;    /* 48px */
 </details>
+
+<details> <summary><b>📡 Click to view all endpoints</b></summary><br>
+Authentication
+http
+
+POST /api/auth/send-otp
+POST /api/auth/verify-otp
+POST /api/auth/logout
+Users
+http
+
+GET    /api/users/:id
+POST   /api/users
+PUT    /api/users/:id
+DELETE /api/users/:id
+POST   /api/users/complete-onboarding
+Discover
+http
+
+GET  /api/discover
+POST /api/swipes
+GET  /api/matches
+Meetups
+http
+
+GET    /api/meetups
+POST   /api/meetups
+GET    /api/meetups/:id
+PUT    /api/meetups/:id
+DELETE /api/meetups/:id
+POST   /api/meetups/:id/join
+Messaging
+http
+
+GET  /api/conversations
+POST /api/messages
+GET  /api/messages/:conversationId
+Communities
+http
+
+GET  /api/communities
+POST /api/communities
+GET  /api/communities/:id
+POST /api/communities/:id/join
+Response Format
+JSON
+
+{
+  "success": true,
+  "data": { },
+  "message": "Operation successful"
+}
+</details>
