@@ -1,4 +1,4 @@
-# Dil Se - Gen Z Dating App 💕
+# Date Buddy - Social Networking Platform 💕
 
 A complete mobile-first dating application designed for the Indian Gen Z market (ages 18-30) with affordable pricing (₹50/day subscription).
 
