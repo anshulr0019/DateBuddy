@@ -18,7 +18,6 @@
 </p>
 
 <p align="center">
-  <a href="https://datebuddy.vercel.app"><strong>🚀 Live Demo</strong></a> •
   <a href="#-quick-start"><strong>⚡ Quick Start</strong></a> •
   <a href="#-features"><strong>✨ Features</strong></a> •
   <a href="#️-tech-stack"><strong>🏗️ Tech Stack</strong></a>
@@ -127,6 +126,8 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 
 <details>
 <summary><b>📊 Click to view 18-table schema</b></summary>
+
+<br>
 ┌─────────────────────────────────────────────────────────────┐
 │ DateBuddy Database │
 └─────────────────────────────────────────────────────────────┘
@@ -158,7 +159,7 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 ├── interests ─────────────── Master interest list
 ├── notifications ─────────── Push alerts
 └── reports ───────────────── Safety moderation
-<br>
+
 
 **Key Relationships:**
 - One user → Many photos `(1:N)`
@@ -173,138 +174,3 @@ DateBuddy transforms how people connect by focusing on **shared interests**, **r
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-### Installation
-
-```bash
-# 1️⃣ Clone the repo
-git clone https://github.com/anshulr0019/DateBuddy.git
-cd DateBuddy
-
-# 2️⃣ Install dependencies
-npm install
-
-# 3️⃣ Set up environment variables
-cp .env.example .env.local
-# Add your DATABASE_URL
-
-# 4️⃣ Push database schema
-npm run db:push
-
-# 5️⃣ Run development server
-npm run dev
-
-# 🎉 Open http://localhost:3000
-📱 Sign Up
-    ↓
-📞 Phone OTP Verification
-    ↓
-📝 7-Step Onboarding (Name → Location → Photos → Bio → Interests → Preferences → Review)
-    ↓
-    ┌──────────────────────────────────┐
-    │                                  │
-🔥 Discover & Swipe         📅 Browse Meetups
-    │                                  │
-    ↓                                  ↓
-💬 Match & Chat              🎉 RSVP & Attend
-    │                                  │
-    └───────────────┬──────────────────┘
-                    ↓
-           🏘️ Join Communities
-                    ↓
-           👥 Engage & Connect
-<details> <summary><b>🎨 Click to view design tokens</b></summary><br>
-Color Palette
-CSS
-
-/* Primary Gradient */
---gradient-primary: linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%);
---gradient-secondary: linear-gradient(135deg, #FFD1DC 0%, #E0BBE4 100%);
-
-/* Semantic Colors */
---color-bg: #FAFAFA;
---color-card: #FFFFFF;
---color-text: #1A1A2E;
---color-text-muted: #6E7191;
-
-/* Action Colors */
---color-like: #4ECDC4;
---color-pass: #FF6B6B;
---color-superlike: #7B68EE;
-Typography
-CSS
-
-/* Font Family */
---font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-/* Font Sizes */
---text-xs:   0.75rem;   /* 12px */
---text-sm:   0.875rem;  /* 14px */
---text-base: 1rem;      /* 16px */
---text-lg:   1.125rem;  /* 18px */
---text-xl:   1.25rem;   /* 20px */
---text-2xl:  1.5rem;    /* 24px */
---text-3xl:  1.875rem;  /* 30px */
-Spacing System
-CSS
-
-/* 8px base unit */
---space-1: 0.5rem;  /* 8px  */
---space-2: 1rem;    /* 16px */
---space-3: 1.5rem;  /* 24px */
---space-4: 2rem;    /* 32px */
---space-6: 3rem;    /* 48px */
-</details>
-
-<details> <summary><b>📡 Click to view all endpoints</b></summary><br>
-Authentication
-http
-
-POST /api/auth/send-otp
-POST /api/auth/verify-otp
-POST /api/auth/logout
-Users
-http
-
-GET    /api/users/:id
-POST   /api/users
-PUT    /api/users/:id
-DELETE /api/users/:id
-POST   /api/users/complete-onboarding
-Discover
-http
-
-GET  /api/discover
-POST /api/swipes
-GET  /api/matches
-Meetups
-http
-
-GET    /api/meetups
-POST   /api/meetups
-GET    /api/meetups/:id
-PUT    /api/meetups/:id
-DELETE /api/meetups/:id
-POST   /api/meetups/:id/join
-Messaging
-http
-
-GET  /api/conversations
-POST /api/messages
-GET  /api/messages/:conversationId
-Communities
-http
-
-GET  /api/communities
-POST /api/communities
-GET  /api/communities/:id
-POST /api/communities/:id/join
-Response Format
-JSON
-
-{
-  "success": true,
-  "data": { },
-  "message": "Operation successful"
-}
-</details>
