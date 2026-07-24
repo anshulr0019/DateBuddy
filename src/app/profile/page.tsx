@@ -1,224 +1,166 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { PEOPLE, COMMUNITIES, EVENTS } from '../data/mockData';
+import { Ic } from '../components/icons';
+import { AuroraBackground, GlassCard, OnlineDot, VerifiedBadge, GradientText, SafeImage } from '../components/shared';
+import FloatingNav from '../components/FloatingNav';
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('profile');
-
-  const userData = {
-    name: 'Rahul',
-    age: 25,
-    city: 'Mumbai',
-    photos: [
-      'https://picsum.photos/400/600?random=10',
-      'https://picsum.photos/400/600?random=11',
-      'https://picsum.photos/400/600?random=12',
-    ],
-    bio: 'Coffee enthusiast ☕ | Love exploring Mumbai street food | Weekend hiker 🏔️',
-    interests: ['📷 Photography', '✈️ Travel', '☕ Coffee', '🏃 Running', '🎵 Music'],
-    prompts: [
-      { question: "My perfect weekend is...", answer: "Exploring new cafes and taking photos" },
-    ],
-    verified: false,
-    profileStrength: 68,
-  };
+  const me = PEOPLE[0];
+  const [activeSection, setActiveSection] = useState<'posts' | 'communities' | 'events'>('posts');
 
   return (
-    <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-        <h1 className="text-2xl font-bold text-[#1A1A2E]">Profile</h1>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push('/profile/edit')}
-            className="text-[#FF6B9D] font-medium"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => router.push('/settings')}
-            className="text-xl"
-          >
-            ⚙️
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        {/* Photos Carousel */}
-        <div className="bg-white p-4 mb-2">
-          <div className="flex gap-3 overflow-x-auto">
-            {userData.photos.map((photo, index) => (
-              <div
-                key={index}
-                className="relative flex-shrink-0 w-32 h-40 rounded-xl bg-cover bg-center"
-                style={{ backgroundImage: `url(${photo})` }}
-              >
-                <button className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center text-sm">
-                  📷
+    <div className="h-[100dvh] w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[420px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+        <AuroraBackground subtle>
+          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-28 animate-page-enter">
+            {/* Hero */}
+            <div className="relative h-64 w-full overflow-hidden">
+              <SafeImage src={me.photo} name={me.name} alt={me.name} className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A2E]/30 to-transparent" />
+              <div className="absolute left-4 top-6 flex gap-2">
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer">
+                  <Ic.Settings />
                 </button>
               </div>
-            ))}
-            <button className="flex-shrink-0 w-32 h-40 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
-              <span className="text-3xl mb-2">+</span>
-              <span className="text-xs">Add Photo</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Strength */}
-        <div className="card mx-4 mb-2">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-[#1A1A2E]">Profile Strength</h3>
-            <span className="text-2xl font-bold gradient-text">{userData.profileStrength}%</span>
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-bg"
-              style={{ width: `${userData.profileStrength}%` }}
-            />
-          </div>
-          <button className="text-sm text-[#FF6B9D] mt-2">
-            Complete your profile to get more matches →
-          </button>
-        </div>
-
-        {/* Basic Info */}
-        <div className="card mx-4 mb-2">
-          <h3 className="font-semibold text-[#1A1A2E] mb-3">Basic Info</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Name</span>
-              <span className="font-medium">{userData.name}, {userData.age}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Location</span>
-              <span className="font-medium">{userData.city}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bio */}
-        <div className="card mx-4 mb-2">
-          <h3 className="font-semibold text-[#1A1A2E] mb-3">About Me</h3>
-          <p className="text-gray-700">{userData.bio}</p>
-        </div>
-
-        {/* Prompts */}
-        {userData.prompts.length > 0 && (
-          <div className="card mx-4 mb-2">
-            <h3 className="font-semibold text-[#1A1A2E] mb-3">My Answers</h3>
-            {userData.prompts.map((prompt, index) => (
-              <div key={index} className="mb-3 last:mb-0">
-                <p className="text-sm text-gray-600 mb-1">{prompt.question}</p>
-                <p className="text-[#1A1A2E]">{prompt.answer}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Interests */}
-        <div className="card mx-4 mb-2">
-          <h3 className="font-semibold text-[#1A1A2E] mb-3">Interests</h3>
-          <div className="flex flex-wrap gap-2">
-            {userData.interests.map((interest) => (
-              <span
-                key={interest}
-                className="px-3 py-1 bg-pink-50 text-[#FF6B9D] rounded-full text-sm"
-              >
-                {interest}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Verification */}
-        {!userData.verified && (
-          <div className="card mx-4 mb-2 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200">
-            <div className="flex items-start gap-3">
-              <div className="text-3xl">✓</div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-[#1A1A2E] mb-1">Get Verified</h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  Stand out and get 50% more matches
-                </p>
-                <button
-                  onClick={() => router.push('/verification')}
-                  className="btn-primary text-sm py-2"
-                >
-                  Start Verification
+              <div className="absolute right-4 top-6">
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer">
+                  <Ic.Edit />
                 </button>
               </div>
             </div>
+
+            {/* Profile info */}
+            <div className="relative -mt-16 px-4">
+              {/* Avatar */}
+              <div className="mb-4 flex items-end justify-between">
+                <div className="relative">
+                  <div className="story-ring h-[88px] w-[88px]">
+                    <div className="story-ring-inner h-full w-full overflow-hidden rounded-full">
+                      <SafeImage src={me.photo} name={me.name} alt={me.name} className="h-full w-full rounded-full object-cover" />
+                    </div>
+                  </div>
+                  <OnlineDot className="absolute bottom-1 right-1 h-4 w-4" />
+                </div>
+                <div className="flex gap-2">
+                  <button className="flex items-center gap-1.5 rounded-2xl border border-[#1A1A2E]/15 bg-white/80 px-4 py-2 text-[13px] font-medium text-[#1A1A2E] backdrop-blur-md hover:bg-white transition-all cursor-pointer">
+                    <Ic.Edit />
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+
+              {/* Name & info */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-[24px] font-semibold tracking-[-0.02em]">{me.name}</h2>
+                  {me.verified && <VerifiedBadge />}
+                </div>
+                <p className="text-[14px] text-[#1A1A2E]/55 mb-1">{me.profession} · {me.education}</p>
+                <div className="flex items-center gap-1 text-[#1A1A2E]/45">
+                  <Ic.MapPin />
+                  <span className="text-[13px]">{me.location}</span>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <GlassCard className="mb-4 p-4">
+                <div className="grid grid-cols-3 divide-x divide-[#1A1A2E]/[0.06] text-center">
+                  {[['284', 'Connections'], ['12', 'Communities'], ['47', 'Posts']].map(([n, l]) => (
+                    <div key={l} className="px-4">
+                      <p className="text-[20px] font-semibold tracking-[-0.02em]">
+                        <GradientText>{n}</GradientText>
+                      </p>
+                      <p className="text-[11px] text-[#1A1A2E]/50 mt-0.5">{l}</p>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+
+              {/* Bio */}
+              <GlassCard className="mb-4 p-5">
+                <p className="text-[14px] leading-relaxed text-[#1A1A2E]/70">{me.bio}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {me.tags.map(t => (
+                    <span key={t} className="rounded-full bg-[#FF6B9D]/10 px-3 py-1 text-[12px] font-medium text-[#FF6B9D]">{t}</span>
+                  ))}
+                </div>
+              </GlassCard>
+
+              {/* Profile completion */}
+              <GlassCard className="mb-4 p-5">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[14px] font-semibold">Profile Strength</span>
+                  <span className="text-[13px] font-semibold text-[#FF6B9D]">78%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1A1A2E]/[0.08]">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] transition-all duration-500 w-[78%]" />
+                </div>
+                <p className="mt-2 text-[12px] text-[#1A1A2E]/45">Add 2 more prompts to boost your profile</p>
+              </GlassCard>
+
+              {/* Content tabs */}
+              <div className="mb-4 flex gap-1 rounded-2xl bg-white/60 p-1 backdrop-blur-md">
+                {(['posts', 'communities', 'events'] as const).map(s => (
+                  <button key={s} onClick={() => setActiveSection(s)}
+                    className={`flex-1 rounded-xl py-2 text-[13px] font-medium transition-all capitalize cursor-pointer ${
+                      activeSection === s ? 'bg-white shadow-sm text-[#1A1A2E]' : 'text-[#1A1A2E]/45'
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Posts grid */}
+              {activeSection === 'posts' && (
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[me.photo, ...PEOPLE.slice(1, 6).map(p => p.photo)].map((src, i) => (
+                    <div key={i} className="aspect-square overflow-hidden rounded-[14px]">
+                      <SafeImage src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeSection === 'communities' && (
+                <div className="flex flex-col gap-3">
+                  {COMMUNITIES.filter(c => c.joined).map(c => (
+                    <GlassCard key={c.id} className="flex items-center gap-3 p-4">
+                      <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl">
+                        <SafeImage src={c.photo} name={c.name} alt={c.name} className="h-full w-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-semibold">{c.emoji} {c.name}</p>
+                        <p className="text-[12px] text-[#1A1A2E]/50">{c.members} members</p>
+                      </div>
+                    </GlassCard>
+                  ))}
+                </div>
+              )}
+
+              {activeSection === 'events' && (
+                <div className="flex flex-col gap-3">
+                  {EVENTS.slice(0, 2).map(e => (
+                    <GlassCard key={e.id} className="flex items-center gap-3 p-4">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF6B9D]/15 to-[#7B68EE]/15 text-2xl">
+                        {e.emoji}
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-semibold">{e.title}</p>
+                        <p className="text-[12px] text-[#1A1A2E]/50">{e.date}</p>
+                      </div>
+                    </GlassCard>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
-
-        {/* Preview Profile */}
-        <div className="p-4">
-          <button
-            onClick={() => router.push('/profile/preview')}
-            className="btn-secondary w-full"
-          >
-            Preview Profile
-          </button>
-        </div>
-
-        {/* Premium Upgrade */}
-        <div className="card mx-4 mb-4 bg-gradient-bg text-white">
-          <h3 className="font-bold text-xl mb-2">Upgrade to Premium ✨</h3>
-          <p className="text-sm opacity-90 mb-4">
-            Get unlimited likes, see who liked you, and more!
-          </p>
-          <button
-            onClick={() => router.push('/premium')}
-            className="bg-white text-[#FF6B9D] font-semibold py-3 px-6 rounded-lg w-full"
-          >
-            Starting at ₹50/day
-          </button>
-        </div>
+        </AuroraBackground>
+        {/* STATIC FOOTER NAVIGATION */}
+        <FloatingNav />
       </div>
-
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-    </div>
-  );
-}
-
-function BottomNav({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
-  const router = useRouter();
-
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === 'matches') router.push('/matches');
-    if (tab === 'profile') router.push('/profile');
-    if (tab === 'discover') router.push('/discover');
-  };
-
-  return (
-    <div className="bottom-nav">
-      <button
-        onClick={() => handleTabClick('discover')}
-        className={`bottom-nav-item ${activeTab === 'discover' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">🔥</span>
-        <span className="text-xs">Discover</span>
-      </button>
-      <button
-        onClick={() => handleTabClick('matches')}
-        className={`bottom-nav-item ${activeTab === 'matches' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">💬</span>
-        <span className="text-xs">Matches</span>
-      </button>
-      <button
-        onClick={() => handleTabClick('profile')}
-        className={`bottom-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">👤</span>
-        <span className="text-xs">Profile</span>
-      </button>
     </div>
   );
 }

@@ -1,197 +1,99 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { PEOPLE } from '../data/mockData';
+import { Ic } from '../components/icons';
+import { AuroraBackground, GlassCard, OnlineDot, VerifiedBadge, SafeImage } from '../components/shared';
+import FloatingNav from '../components/FloatingNav';
 
-const NEW_MATCHES = [
-  { id: 1, name: 'Priya', age: 24, photo: 'https://picsum.photos/100/100?random=1', isNew: true },
-  { id: 2, name: 'Ananya', age: 23, photo: 'https://picsum.photos/100/100?random=2', isNew: true },
-];
+type ConnTab = 'Friends' | 'Dating' | 'Networking' | 'Requests' | 'Suggestions'
 
-const CONVERSATIONS = [
-  {
-    id: 1,
-    name: 'Priya',
-    age: 24,
-    photo: 'https://picsum.photos/100/100?random=1',
-    lastMessage: "Hey! How's it going?",
-    timestamp: '2m ago',
-    unread: 2,
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: 'Riya',
-    age: 25,
-    photo: 'https://picsum.photos/100/100?random=3',
-    lastMessage: 'Would love to grab coffee sometime!',
-    timestamp: '1h ago',
-    unread: 0,
-    isActive: false,
-  },
-  {
-    id: 3,
-    name: 'Ananya',
-    age: 23,
-    photo: 'https://picsum.photos/100/100?random=2',
-    lastMessage: 'That sounds fun! 😄',
-    timestamp: '3h ago',
-    unread: 1,
-    isActive: true,
-  },
-];
-
-export default function MatchesPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('matches');
+export default function ConnectionsPage() {
+  const [tab, setTab] = useState<ConnTab>('Friends');
+  const tabs: ConnTab[] = ['Friends', 'Dating', 'Networking', 'Requests', 'Suggestions'];
 
   return (
-    <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-        <h1 className="text-2xl font-bold text-[#1A1A2E]">Messages</h1>
-        <div className="flex items-center gap-3">
-          <button className="text-xl">🔍</button>
-          <button className="text-xl">⚙️</button>
-        </div>
-      </div>
+    <div className="h-[100dvh] w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[420px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+        <AuroraBackground subtle>
+          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-4 pt-6 pb-28 animate-page-enter">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h1 className="text-[22px] font-semibold tracking-[-0.02em]">Connections</h1>
+                <p className="text-[13px] text-[#1A1A2E]/50">Your circle is growing 💫</p>
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#1A1A2E]/[0.08] bg-white/60 px-3 py-1 backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[#1A1A2E]/65">{PEOPLE.length} connected</span>
+              </div>
+            </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        {/* New Matches Section */}
-        {NEW_MATCHES.length > 0 && (
-          <div className="bg-white border-b border-gray-200 p-4">
-            <h2 className="text-sm font-semibold text-[#1A1A2E] mb-3">
-              New Matches ({NEW_MATCHES.length})
-            </h2>
-            <div className="flex gap-4 overflow-x-auto">
-              {NEW_MATCHES.map((match) => (
-                <button
-                  key={match.id}
-                  onClick={() => router.push(`/chat/${match.id}`)}
-                  className="flex-shrink-0 flex flex-col items-center"
-                >
-                  <div className="relative">
-                    <div
-                      className="w-16 h-16 rounded-full bg-cover bg-center border-2 border-[#FF6B9D]"
-                      style={{ backgroundImage: `url(${match.photo})` }}
-                    />
-                    {match.isNew && (
-                      <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-[#FF6B9D] text-white text-xs rounded-full">
-                        New
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs mt-2 text-[#1A1A2E] font-medium">{match.name}</p>
+            {/* Tabs */}
+            <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {tabs.map(t => (
+                <button key={t} onClick={() => setTab(t)}
+                  className={`flex-shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all cursor-pointer ${
+                    tab === t
+                      ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_4px_12px_-4px_rgba(123,104,238,0.5)]'
+                      : 'border border-[#1A1A2E]/10 bg-white/70 text-[#1A1A2E]/60'
+                  }`}>
+                  {t}
                 </button>
               ))}
             </div>
-          </div>
-        )}
 
-        {/* Conversations List */}
-        <div className="bg-white">
-          <h2 className="text-sm font-semibold text-[#1A1A2E] p-4 pb-2">
-            Messages
-          </h2>
-          <div>
-            {CONVERSATIONS.map((chat) => (
-              <button
-                key={chat.id}
-                onClick={() => router.push(`/chat/${chat.id}`)}
-                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 border-b border-gray-100 text-left"
-              >
-                <div className="relative">
-                  <div
-                    className="w-14 h-14 rounded-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${chat.photo})` }}
-                  />
-                  {chat.isActive && (
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
-                  )}
-                </div>
+            {/* Requests */}
+            {tab === 'Requests' && (
+              <div className="flex flex-col gap-3 mb-5">
+                <GlassCard className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full">
+                      <SafeImage src={PEOPLE[3].photo} name={PEOPLE[3].name} alt={PEOPLE[3].name} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-semibold text-[#1A1A2E]">{PEOPLE[3].name}</p>
+                      <p className="text-[12px] text-[#1A1A2E]/50">{PEOPLE[3].profession}</p>
+                      <p className="text-[11px] text-[#1A1A2E]/40 mt-0.5">{PEOPLE[3].mutuals} mutual connections</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] py-2 text-[13px] font-semibold text-white cursor-pointer">Accept</button>
+                    <button className="flex-1 rounded-2xl border border-[#1A1A2E]/15 py-2 text-[13px] font-medium text-[#1A1A2E]/60 cursor-pointer">Decline</button>
+                  </div>
+                </GlassCard>
+              </div>
+            )}
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-[#1A1A2E]">
-                      {chat.name}, {chat.age}
-                    </h3>
-                    {chat.isActive && (
-                      <span className="text-xs text-green-600">🟢</span>
+            {/* Grid of connections */}
+            <div className="grid grid-cols-2 gap-3">
+              {PEOPLE.map((p, i) => (
+                <GlassCard key={p.id} className="animate-float-in text-center p-4 overflow-hidden" style={{ animationDelay: `${i * 65}ms` }}>
+                  <div className="relative mx-auto mb-3 h-[88px] w-[88px] overflow-hidden rounded-full">
+                    <SafeImage src={p.photo} name={p.name} alt={p.name} className="h-full w-full object-cover" />
+                    {p.online && <OnlineDot className="absolute bottom-1 right-1 h-4 w-4" />}
+                    {p.verified && (
+                      <div className="absolute top-0 right-0">
+                        <VerifiedBadge />
+                      </div>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
-                </div>
-
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs text-gray-500">{chat.timestamp}</span>
-                  {chat.unread > 0 && (
-                    <span className="w-5 h-5 bg-[#FF6B9D] text-white text-xs rounded-full flex items-center justify-center">
-                      {chat.unread}
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
+                  <p className="text-[14px] font-semibold text-[#1A1A2E] leading-tight">{p.name}</p>
+                  <p className="text-[11px] text-[#1A1A2E]/45 mt-0.5 truncate">{p.profession}</p>
+                  <div className="mt-2 flex items-center justify-center gap-1 text-[#1A1A2E]/40">
+                    <Ic.MapPin />
+                    <span className="text-[11px]">{p.distance}</span>
+                  </div>
+                  <button className="mt-3 w-full rounded-full border border-[#FF6B9D]/30 py-1.5 text-[12px] font-medium text-[#FF6B9D] transition-all hover:bg-[#FF6B9D]/10 cursor-pointer">
+                    Message
+                  </button>
+                </GlassCard>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Empty State */}
-        {CONVERSATIONS.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 px-6">
-            <div className="text-6xl mb-4">💬</div>
-            <h3 className="text-xl font-bold text-[#1A1A2E] mb-2">No matches yet</h3>
-            <p className="text-gray-600 text-center mb-6">
-              Keep swiping to find your match!
-            </p>
-            <button
-              onClick={() => router.push('/discover')}
-              className="btn-primary"
-            >
-              Go to Discover
-            </button>
-          </div>
-        )}
+        </AuroraBackground>
+        {/* STATIC FOOTER NAVIGATION */}
+        <FloatingNav />
       </div>
-
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-    </div>
-  );
-}
-
-function BottomNav({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
-  const router = useRouter();
-
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === 'matches') router.push('/matches');
-    if (tab === 'profile') router.push('/profile');
-    if (tab === 'discover') router.push('/discover');
-  };
-
-  return (
-    <div className="bottom-nav">
-      <button
-        onClick={() => handleTabClick('discover')}
-        className={`bottom-nav-item ${activeTab === 'discover' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">🔥</span>
-        <span className="text-xs">Discover</span>
-      </button>
-      <button
-        onClick={() => handleTabClick('matches')}
-        className={`bottom-nav-item ${activeTab === 'matches' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">💬</span>
-        <span className="text-xs">Matches</span>
-      </button>
-      <button
-        onClick={() => handleTabClick('profile')}
-        className={`bottom-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-      >
-        <span className="text-2xl mb-1">👤</span>
-        <span className="text-xs">Profile</span>
-      </button>
     </div>
   );
 }

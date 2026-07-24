@@ -5,10 +5,11 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const meetupId = parseInt(params.id);
+    const { id } = await params;
+    const meetupId = parseInt(id);
     
     const [meetup] = await db.select()
       .from(meetups)
