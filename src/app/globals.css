@@ -32,11 +32,12 @@ body {
 .mobile-container {
   width: 100%;
   max-width: 440px;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   margin: 0 auto;
   background: var(--bg-main);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .gradient-bg {

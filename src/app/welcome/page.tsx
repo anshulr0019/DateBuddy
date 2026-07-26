@@ -88,7 +88,7 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E]">
+    <div className="relative h-dvh max-h-dvh w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E]">
       {/* Inject animated background CSS — self-contained, no external file needed */}
       <style dangerouslySetInnerHTML={{ __html: AURORA_CSS }} />
 
@@ -110,9 +110,9 @@ export default function WelcomePage() {
       </div>
 
       {/* Mobile frame */}
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col px-6 pt-[calc(2rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
+      <div className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col justify-between px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] overflow-hidden">
         {/* Brand row */}
-        <header className="flex items-center justify-between">
+        <header className="flex flex-shrink-0 items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] shadow-[0_10px_30px_-10px_rgba(255,107,157,0.6)]">
               <span className="text-white text-lg">💕</span>
@@ -127,169 +127,172 @@ export default function WelcomePage() {
           </a>
         </header>
 
-        {/* Hero */}
-        <section className="mt-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#1A1A2E]/8 bg-white/60 px-3 py-1 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B9D]" />
-            <span className="text-[11px] font-medium tracking-wide text-[#1A1A2E]/70 uppercase">
-              New · Gen Z Edition
-            </span>
-          </div>
-          <h1 className="mt-5 text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] text-[#1A1A2E]">
-            Find your{" "}
-            <span className="bg-gradient-to-r from-[#FF6B9D] via-[#B76CFF] to-[#7B68EE] bg-clip-text text-transparent">
-              vibe.
-            </span>
-          </h1>
-          <p className="mt-3 max-w-[300px] text-[15px] leading-relaxed text-[#1A1A2E]/60">
-            India's most loved dating app for a generation that dates differently.
-          </p>
-        </section>
-
-        {/* Card */}
-        <section className="mt-10">
-          <div className="rounded-[28px] border border-white/60 bg-white/70 p-5 shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] backdrop-blur-xl">
-            <label
-              htmlFor="phone"
-              className="block text-[12px] font-medium tracking-wide text-[#1A1A2E]/60 uppercase"
-            >
-              Phone number
-            </label>
-
-            <div
-              className={`mt-2 flex items-stretch gap-2 rounded-2xl border bg-white/80 p-1.5 transition-all duration-200 ${
-                focused
-                  ? "border-transparent ring-2 ring-[#FF6B9D]/40 shadow-[0_8px_24px_-12px_rgba(255,107,157,0.5)]"
-                  : "border-[#1A1A2E]/10"
-              }`}
-            >
-              <div className="flex items-center gap-1.5 rounded-xl bg-[#1A1A2E]/[0.04] px-3 text-[15px] font-medium text-[#1A1A2E]">
-                <span className="text-base leading-none">🇮🇳</span>
-                <span>+91</span>
-              </div>
-              <input
-                id="phone"
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel"
-                maxLength={10}
-                value={phoneNumber}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                onChange={(e) =>
-                  setPhoneNumber(e.target.value.replace(/\D/g, ""))
-                }
-                placeholder="98765 43210"
-                className="min-w-0 flex-1 bg-transparent px-2 text-[17px] font-medium tracking-wide text-[#1A1A2E] placeholder-[#1A1A2E]/25 outline-none"
-              />
-              {isValid && (
-                <div className="flex items-center pr-2 text-[#22C55E]">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleSendOTP}
-              disabled={isLoading || !isValid}
-              className="group relative mt-4 flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-[15px] font-semibold text-white shadow-[0_16px_40px_-16px_rgba(123,104,238,0.7)] transition-all duration-200 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-            >
-              <span
-                aria-hidden
-                className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                style={{
-                  background:
-                    "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%)",
-                }}
-              />
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                  Sending code…
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  Send verification code
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="transition-transform group-hover:translate-x-0.5"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              )}
-            </button>
-
-            {/* Divider */}
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-[#1A1A2E]/10" />
-              <span className="text-[11px] font-medium tracking-widest text-[#1A1A2E]/40 uppercase">
-                or continue with
+        {/* Hero & Card Container */}
+        <div className="my-auto flex flex-col justify-center flex-1 min-h-0 py-2 sm:py-4 overflow-y-auto scrollbar-none">
+          {/* Hero */}
+          <section className="flex-shrink-0 mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#1A1A2E]/8 bg-white/60 px-3 py-1 backdrop-blur-md">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B9D]" />
+              <span className="text-[11px] font-medium tracking-wide text-[#1A1A2E]/70 uppercase">
+                New · Gen Z Edition
               </span>
-              <div className="h-px flex-1 bg-[#1A1A2E]/10" />
+            </div>
+            <h1 className="mt-3 sm:mt-4 text-[34px] sm:text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] text-[#1A1A2E]">
+              Find your{" "}
+              <span className="bg-gradient-to-r from-[#FF6B9D] via-[#B76CFF] to-[#7B68EE] bg-clip-text text-transparent">
+                vibe.
+              </span>
+            </h1>
+            <p className="mt-2 max-w-[300px] text-[14px] sm:text-[15px] leading-relaxed text-[#1A1A2E]/60">
+              India's most loved dating app for a generation that dates differently.
+            </p>
+          </section>
+
+          {/* Card */}
+          <section className="flex-shrink-0">
+            <div className="rounded-[28px] border border-white/60 bg-white/70 p-4 sm:p-5 shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] backdrop-blur-xl">
+              <label
+                htmlFor="phone"
+                className="block text-[12px] font-medium tracking-wide text-[#1A1A2E]/60 uppercase"
+              >
+                Phone number
+              </label>
+
+              <div
+                className={`mt-2 flex items-stretch gap-2 rounded-2xl border bg-white/80 p-1.5 transition-all duration-200 ${
+                  focused
+                    ? "border-transparent ring-2 ring-[#FF6B9D]/40 shadow-[0_8px_24px_-12px_rgba(255,107,157,0.5)]"
+                    : "border-[#1A1A2E]/10"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-[#1A1A2E]/[0.04] px-3 text-[15px] font-medium text-[#1A1A2E]">
+                  <span className="text-base leading-none">🇮🇳</span>
+                  <span>+91</span>
+                </div>
+                <input
+                  id="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  maxLength={10}
+                  value={phoneNumber}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  onChange={(e) =>
+                    setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                  }
+                  placeholder="98765 43210"
+                  className="min-w-0 flex-1 bg-transparent px-2 text-[17px] font-medium tracking-wide text-[#1A1A2E] placeholder-[#1A1A2E]/25 outline-none"
+                />
+                {isValid && (
+                  <div className="flex items-center pr-2 text-[#22C55E]">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={handleSendOTP}
+                disabled={isLoading || !isValid}
+                className="group relative mt-3 sm:mt-4 flex h-13 sm:h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-[15px] font-semibold text-white shadow-[0_16px_40px_-16px_rgba(123,104,238,0.7)] transition-all duration-200 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none min-h-[44px]"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%)",
+                  }}
+                />
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Sending code…
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Send verification code
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform group-hover:translate-x-0.5"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+
+              {/* Divider */}
+              <div className="my-3 sm:my-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-[#1A1A2E]/10" />
+                <span className="text-[11px] font-medium tracking-widest text-[#1A1A2E]/40 uppercase">
+                  or continue with
+                </span>
+                <div className="h-px flex-1 bg-[#1A1A2E]/10" />
+              </div>
+
+              {/* Social */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px]">
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path
+                      fill="#EA4335"
+                      d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12S6.7 21.6 12 21.6c6.9 0 9.5-4.8 9.5-9.3 0-.6-.1-1.1-.2-1.6H12z"
+                    />
+                  </svg>
+                  Google
+                </button>
+                <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1A2E">
+                    <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  </svg>
+                  Apple
+                </button>
+              </div>
             </div>
 
-            {/* Social */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <button className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98]">
-                <svg width="16" height="16" viewBox="0 0 24 24">
-                  <path
-                    fill="#EA4335"
-                    d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12S6.7 21.6 12 21.6c6.9 0 9.5-4.8 9.5-9.3 0-.6-.1-1.1-.2-1.6H12z"
-                  />
-                </svg>
-                Google
-              </button>
-              <button className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1A2E">
-                  <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                </svg>
-                Apple
-              </button>
-            </div>
-          </div>
-
-          {/* Terms */}
-          <p className="mt-5 px-2 text-center text-[12px] leading-relaxed text-[#1A1A2E]/50">
-            By continuing you agree to our{" "}
-            <a
-              href="/terms"
-              className="font-medium text-[#1A1A2E]/80 underline decoration-[#FF6B9D]/40 underline-offset-2 hover:text-[#FF6B9D]"
-            >
-              Terms
-            </a>{" "}
-            and{" "}
-            <a
-              href="/privacy"
-              className="font-medium text-[#1A1A2E]/80 underline decoration-[#FF6B9D]/40 underline-offset-2 hover:text-[#FF6B9D]"
-            >
-              Privacy Policy
-            </a>
-            .
-          </p>
-        </section>
+            {/* Terms */}
+            <p className="mt-3 sm:mt-4 px-2 text-center text-[12px] leading-relaxed text-[#1A1A2E]/50">
+              By continuing you agree to our{" "}
+              <a
+                href="/terms"
+                className="font-medium text-[#1A1A2E]/80 underline decoration-[#FF6B9D]/40 underline-offset-2 hover:text-[#FF6B9D]"
+              >
+                Terms
+              </a>{" "}
+              and{" "}
+              <a
+                href="/privacy"
+                className="font-medium text-[#1A1A2E]/80 underline decoration-[#FF6B9D]/40 underline-offset-2 hover:text-[#FF6B9D]"
+              >
+                Privacy Policy
+              </a>
+              .
+            </p>
+          </section>
+        </div>
 
         {/* Footer trust badge */}
-        <div className="mt-auto pt-10">
+        <footer className="mt-auto flex-shrink-0 pt-2 pb-1">
           <div className="mx-auto flex items-center justify-center gap-2 text-[11px] font-medium tracking-wide text-[#1A1A2E]/45 uppercase">
             <svg
               width="12"
@@ -305,7 +308,7 @@ export default function WelcomePage() {
             </svg>
             Verified profiles · End-to-end secure
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@ export default function VerifyOtpPage() {
   };
 
   return (
-    <main className="min-h-dvh relative flex flex-col items-center justify-between p-6 sm:p-8 overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px] pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+    <main className="h-dvh max-h-dvh relative flex flex-col items-center justify-between p-6 sm:p-8 overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px] pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
       {/* Aurora Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-[#FF6B9D]/20 blur-[60px]" />
