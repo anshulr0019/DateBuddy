@@ -12,6 +12,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
 };
 
 const GLOBAL_ANIMATIONS_CSS = `
@@ -62,7 +63,6 @@ const GLOBAL_ANIMATIONS_CSS = `
 
   .animate-page-entry {
     animation: pageEntry 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
   }
 
   /* Floating micro animation */

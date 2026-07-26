@@ -118,10 +118,10 @@ export default function DiscoverPage() {
   /* ---- Empty state when all profiles are reviewed ---- */
   if (!currentProfile) {
     return (
-      <div className="h-[100dvh] w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-        <div className="relative h-full w-full max-w-[420px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+      <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+        <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
           <AuroraBackground subtle>
-            <div className="flex-shrink-0 z-20 px-4 pt-4 mb-3">
+            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] mb-3">
               <TopBar />
             </div>
             <div className="flex-1 flex items-center justify-center px-6 z-10 my-auto min-h-[60vh]">
@@ -156,8 +156,8 @@ export default function DiscoverPage() {
     : undefined;
 
   return (
-    <div className="h-[100dvh] w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[420px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         
         {/* Background Aurora */}
         <div aria-hidden className="aurora-stage pointer-events-none absolute inset-0 overflow-hidden z-0">
@@ -167,7 +167,7 @@ export default function DiscoverPage() {
         </div>
 
         {/* STATIC TOP HEADER */}
-        <div className="flex-shrink-0 z-20 px-4 pt-3 pb-1">
+        <div className="flex-shrink-0 z-20 px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-1">
           <TopBar />
         </div>
 
@@ -375,7 +375,7 @@ export default function DiscoverPage() {
         </div>
 
         {/* FOOTER ACTION BUTTONS REGION */}
-        <div className="flex-shrink-0 flex justify-center items-center gap-4 pt-2 pb-24 px-6 z-20">
+        <div className="flex-shrink-0 flex justify-center items-center gap-4 pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
           <button
             onClick={() => handleAction('boost')}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/10 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"

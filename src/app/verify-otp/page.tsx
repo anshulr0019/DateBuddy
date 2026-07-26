@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function VerifyOtpPage() {
@@ -10,23 +10,66 @@ export default function VerifyOtpPage() {
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(30);
 
-  const handleChange = (value: string, index: number) => {
-    if (isNaN(Number(value))) return;
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
+
+  // Auto-focus first input on mount
+  useEffect(() => {
+    inputRefs[0].current?.focus();
+  }, []);
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    if (!pastedData) return;
+
     const newOtp = [...otp];
-    newOtp[index] = value;
+    for (let i = 0; i < 4; i++) {
+      newOtp[i] = pastedData[i] || '';
+    }
+    setOtp(newOtp);
+
+    // Focus last populated input or next empty input
+    const nextIndex = Math.min(pastedData.length, 3);
+    inputRefs[nextIndex].current?.focus();
+  };
+
+  const handleChange = (value: string, index: number) => {
+    // Sanitize non-numeric input
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Handle multi-character entry (iOS OTP autofill)
+    if (cleanValue.length > 1) {
+      const newOtp = [...otp];
+      for (let i = 0; i < 4; i++) {
+        newOtp[i] = cleanValue[i] || '';
+      }
+      setOtp(newOtp);
+      const nextIdx = Math.min(cleanValue.length, 3);
+      inputRefs[nextIdx].current?.focus();
+      return;
+    }
+
+    const digit = cleanValue.slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = digit;
     setOtp(newOtp);
 
     // Auto-focus next input
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
+    if (digit && index < 3) {
+      inputRefs[index + 1].current?.focus();
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace') {
+      if (!otp[index] && index > 0) {
+        inputRefs[index - 1].current?.focus();
+      }
     }
   };
 
@@ -46,23 +89,21 @@ export default function VerifyOtpPage() {
   };
 
   return (
-    <main className="min-h-screen relative flex flex-col items-center justify-between p-6 sm:p-8 overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[420px]">
-      {/* Aurora Background with 4 blurred color blobs & dot grid overlay */}
+    <main className="min-h-dvh relative flex flex-col items-center justify-between p-6 sm:p-8 overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px] pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+      {/* Aurora Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-[#FF6B9D]/20 blur-[80px] animate-pulse" />
-        <div className="absolute top-[30%] right-[-15%] w-[320px] h-[320px] rounded-full bg-[#B76CFF]/20 blur-[90px]" />
-        <div className="absolute bottom-[-10%] left-[10%] w-[350px] h-[350px] rounded-full bg-[#E86AC7]/15 blur-[100px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] rounded-full bg-[#7B68EE]/15 blur-[80px]" />
-        
-        {/* Dot grid overlay */}
-        <div className="absolute inset-0 opacity-[0.20]" style={{ backgroundImage: 'radial-gradient(#1A1A2E 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-[#FF6B9D]/20 blur-[60px]" />
+        <div className="absolute top-[30%] right-[-15%] w-[320px] h-[320px] rounded-full bg-[#B76CFF]/20 blur-[60px]" />
+        <div className="absolute bottom-[-10%] left-[10%] w-[350px] h-[350px] rounded-full bg-[#E86AC7]/15 blur-[60px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] rounded-full bg-[#7B68EE]/15 blur-[60px]" />
       </div>
 
       {/* Top bar with Back button & Badge */}
       <div className="w-full flex items-center justify-between z-10 pt-2">
         <button
           onClick={() => router.back()}
-          className="h-12 w-12 rounded-2xl bg-white border border-[#1A1A2E]/10 flex items-center justify-center text-[#1A1A2E] shadow-sm hover:bg-white/90 transition-all cursor-pointer"
+          aria-label="Go back"
+          className="h-12 w-12 rounded-2xl bg-white border border-[#1A1A2E]/10 flex items-center justify-center text-[#1A1A2E] shadow-sm hover:bg-white/90 active:scale-95 transition-all cursor-pointer"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -91,19 +132,26 @@ export default function VerifyOtpPage() {
         </p>
 
         {/* Glass Morphism Card */}
-        <div className="w-full p-8 rounded-[28px] bg-white/70 border border-white/60 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] flex flex-col items-center">
+        <div className="w-full p-6 sm:p-8 rounded-[28px] bg-white/70 border border-white/60 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] flex flex-col items-center">
           <form onSubmit={handleVerify} className="w-full flex flex-col items-center">
-            <div className="flex justify-center gap-3 sm:gap-4 mb-6 w-full">
+            <div className="flex justify-center gap-2.5 sm:gap-4 mb-6 w-full">
               {otp.map((digit, index) => (
                 <input
                   key={index}
+                  ref={inputRefs[index]}
                   id={`otp-${index}`}
+                  name={`otp-${index}`}
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="one-time-code"
                   maxLength={1}
                   value={digit}
                   onChange={(e) => handleChange(e.target.value, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  className="w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl font-semibold rounded-2xl bg-white/80 border border-[#1A1A2E]/10 text-[#1A1A2E] focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/40 focus:border-[#FF6B9D] transition-all shadow-sm"
+                  onPaste={handlePaste}
+                  aria-label={`Digit ${index + 1} of 4`}
+                  className="w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl font-semibold rounded-2xl bg-white/90 border border-[#1A1A2E]/10 text-[#1A1A2E] focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/50 focus:border-[#FF6B9D] transition-all shadow-sm select-none"
                 />
               ))}
             </div>
@@ -117,7 +165,7 @@ export default function VerifyOtpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white font-medium text-[16px] shadow-[0_16px_40px_-16px_rgba(123,104,238,0.7)] hover:opacity-95 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center justify-center"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white font-medium text-[16px] shadow-[0_16px_40px_-16px_rgba(123,104,238,0.7)] hover:opacity-95 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center justify-center min-h-[44px]"
             >
               {loading ? 'Verifying...' : 'Verify Code'}
             </button>
@@ -127,7 +175,7 @@ export default function VerifyOtpPage() {
               <button
                 type="button"
                 onClick={() => setResendCooldown(30)}
-                className="text-[#FF6B9D] font-medium hover:underline cursor-pointer"
+                className="text-[#FF6B9D] font-medium hover:underline cursor-pointer min-h-[44px] inline-flex items-center"
               >
                 Resend
               </button>

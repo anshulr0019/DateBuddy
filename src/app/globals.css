@@ -6,10 +6,15 @@
   --pink: #FF6B9D;
   --purple: #7B68EE;
   --lavender: #E6E6FA;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 * {
   box-sizing: border-box;
+  touch-action: manipulation;
 }
 
 body {
@@ -20,12 +25,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-container {
-  max-width: 390px;
-  min-height: 844px;
+  width: 100%;
+  max-width: 440px;
+  min-height: 100dvh;
   margin: 0 auto;
   background: var(--bg-main);
   position: relative;
@@ -88,18 +95,19 @@ body {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ─────────────────────────────────────────────────
    Phase 2 Restrained Aurora & Glassmorphism System
 ───────────────────────────────────────────────── */
 
-/* Aurora blobs — Toned down to 0.12 opacity max for subtlety */
+/* Aurora blobs — Optimized GPU compositing */
 .aurora-blob {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(64px) saturate(1.1);
-  will-change: transform, opacity;
+  filter: blur(36px);
+  transform: translateZ(0);
 }
 
 .aurora-blob-1 {

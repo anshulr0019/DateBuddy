@@ -21,7 +21,7 @@ export default function SplashScreen() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full max-w-[420px] mx-auto flex-col items-center justify-center overflow-hidden bg-[#0D0B18]">
+    <div className="relative flex min-h-dvh w-full max-w-[440px] sm:max-w-lg md:max-w-xl mx-auto flex-col items-center justify-center overflow-hidden bg-[#0D0B18] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
       {/* Aurora on dark */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="aurora-blob aurora-blob-1" style={{ opacity: 0.7 }} />
@@ -42,7 +42,7 @@ export default function SplashScreen() {
         </div>
       </div>
 
-      <p className="animate-tagline-rise absolute bottom-20 text-center text-[14px] font-medium tracking-[0.08em] text-white/50 uppercase">
+      <p className="animate-tagline-rise absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] text-center text-[14px] font-medium tracking-[0.08em] text-white/50 uppercase px-4">
         Meaningful Connections Begin Here
       </p>
     </div>

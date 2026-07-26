@@ -11,10 +11,10 @@ export default function ProfilePage() {
   const [activeSection, setActiveSection] = useState<'posts' | 'communities' | 'events'>('posts');
 
   return (
-    <div className="h-[100dvh] w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[420px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         <AuroraBackground subtle>
-          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-28 animate-page-enter">
+          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             {/* Hero */}
             <div className="relative h-64 w-full overflow-hidden">
               <SafeImage src={me.photo} name={me.name} alt={me.name} className="h-full w-full object-cover" />

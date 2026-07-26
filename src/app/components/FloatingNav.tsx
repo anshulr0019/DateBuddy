@@ -31,8 +31,8 @@ export default function FloatingNav() {
   const activeIndex = NAV_TABS.findIndex(t => t.id === active);
 
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="pointer-events-auto relative flex w-full max-w-[380px] items-center justify-between rounded-[24px] border border-white/80 bg-white/80 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(26,26,46,0.12)] backdrop-blur-xl overflow-hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] pt-2">
+      <div className="pointer-events-auto relative flex w-full max-w-[390px] items-center justify-between rounded-[24px] border border-white/80 bg-white/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl overflow-hidden">
         
         {/* Sliding indicator with spring animation */}
         <div

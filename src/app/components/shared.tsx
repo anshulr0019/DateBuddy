@@ -49,6 +49,8 @@ export function SafeImage({
     <img
       src={src}
       alt={alt || name}
+      loading="lazy"
+      decoding="async"
       onError={() => setError(true)}
       onClick={onClick}
       className={className}

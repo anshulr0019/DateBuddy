@@ -88,7 +88,7 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E]">
+    <div className="relative min-h-dvh w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E]">
       {/* Inject animated background CSS — self-contained, no external file needed */}
       <style dangerouslySetInnerHTML={{ __html: AURORA_CSS }} />
 
@@ -110,7 +110,7 @@ export default function WelcomePage() {
       </div>
 
       {/* Mobile frame */}
-      <div className="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col px-6 pt-14 pb-10">
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col px-6 pt-[calc(2rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
         {/* Brand row */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
