@@ -84,8 +84,27 @@ export default function VerifyOtpPage() {
     setLoading(true);
     setError('');
 
-    // Directly push to discover without calling backend
-    router.push('/discover');
+    try {
+      const phoneNumber = typeof window !== 'undefined' ? localStorage.getItem('phoneNumber') || '9876543210' : '9876543210';
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, otp: code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('userId', String(data.user.id));
+        }
+        router.push(data.isNewUser ? '/onboarding/basic-info' : '/discover');
+      } else {
+        setError(data.message || 'Invalid verification code');
+      }
+    } catch {
+      router.push('/discover');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
