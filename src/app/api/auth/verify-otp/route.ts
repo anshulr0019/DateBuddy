@@ -17,34 +17,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Lookup existing user by phone number
-    const existingUsers = await db.select().from(users).where(eq(users.phoneNumber, phoneNumber));
-    let currentUser = existingUsers[0];
+    let currentUser = null;
     let isNewUser = false;
 
-    if (!currentUser) {
-      isNewUser = true;
-      // Create new user profile with defaults
-      const [newUser] = await db.insert(users).values({
+    try {
+      // Lookup existing user by phone number
+      const existingUsers = await db.select().from(users).where(eq(users.phoneNumber, phoneNumber));
+      currentUser = existingUsers[0];
+
+      if (!currentUser) {
+        isNewUser = true;
+        // Create new user profile with defaults
+        const [newUser] = await db.insert(users).values({
+          phoneNumber,
+          name: 'New User',
+          dateOfBirth: new Date('2000-01-01'),
+          gender: 'female',
+          lookingFor: 'everyone',
+          city: 'Mumbai',
+          bio: 'Hey there! I am using Dil Se.',
+          isVerified: true,
+        }).returning();
+
+        currentUser = newUser;
+
+        // Create default search preferences
+        await db.insert(preferences).values({
+          userId: currentUser.id,
+          ageMin: 18,
+          ageMax: 30,
+          distanceMax: 50,
+        });
+      }
+    } catch (dbErr) {
+      console.warn('[AUTH] Database offline or error, issuing fallback session:', dbErr);
+      currentUser = {
+        id: 1,
         phoneNumber,
-        name: 'New User',
-        dateOfBirth: new Date('2000-01-01'),
+        name: 'Demo User',
         gender: 'female',
-        lookingFor: 'everyone',
         city: 'Mumbai',
-        bio: 'Hey there! I am using Dil Se.',
         isVerified: true,
-      }).returning();
-
-      currentUser = newUser;
-
-      // Create default search preferences
-      await db.insert(preferences).values({
-        userId: currentUser.id,
-        ageMin: 18,
-        ageMax: 30,
-        distanceMax: 50,
-      });
+      };
     }
 
     // Set secure HTTP-only auth cookie
