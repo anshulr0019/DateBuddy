@@ -43,8 +43,8 @@ export default function TutorialPage() {
     <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Skip Button */}
       {currentSlide < SLIDES.length - 1 && (
-        <div className="p-4 text-right">
-          <button onClick={handleSkip} className="text-gray-600">
+        <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] text-right">
+          <button onClick={handleSkip} className="text-gray-600 font-medium">
             Skip
           </button>
         </div>
@@ -79,7 +79,7 @@ export default function TutorialPage() {
       </div>
 
       {/* Bottom Button */}
-      <div className="p-6 border-t border-gray-200">
+      <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-200">
         <button onClick={handleNext} className="btn-primary w-full">
           {currentSlide === SLIDES.length - 1 ? 'Got it!' : 'Next'}
         </button>

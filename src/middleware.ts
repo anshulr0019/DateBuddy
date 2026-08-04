@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
-  const protectedRoutes = ['/home', '/discover', '/matches', '/messages', '/profile', '/meetups'];
+  const protectedRoutes = ['/home', '/discover', '/matches', '/messages', '/profile', '/meetups', '/settings', '/chat'];
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isSwitchingAccount = searchParams.has('switch') || searchParams.has('logout');
 
   // If user is accessing protected page without auth token, redirect to /welcome
   if (isProtectedRoute && !token) {
@@ -14,8 +15,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(welcomeUrl);
   }
 
-  // If user is logged in and visits /welcome or /, redirect to /discover
-  if (token && (pathname === '/welcome' || pathname === '/')) {
+  // If user is logged in and visits /welcome or / without switch parameter, redirect to /discover
+  if (token && (pathname === '/welcome' || pathname === '/') && !isSwitchingAccount) {
     const discoverUrl = new URL('/discover', request.url);
     return NextResponse.redirect(discoverUrl);
   }
@@ -33,5 +34,7 @@ export const config = {
     '/messages/:path*',
     '/profile/:path*',
     '/meetups/:path*',
+    '/settings/:path*',
+    '/chat/:path*',
   ],
 };

@@ -6,77 +6,92 @@ import { getAuthSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+const SWIPE_ACTIONS = ['like', 'pass', 'super_like'] as const;
+type SwipeAction = (typeof SWIPE_ACTIONS)[number];
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getAuthSession();
-    const currentUserId = session?.userId || 1;
+    if (!session) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+    const currentUserId = session.userId;
 
-    const { swipedUserId, action } = await request.json(); // action: 'like' | 'pass' | 'super_like'
+    const { swipedUserId, action = 'like' } = await request.json();
+    const targetId = Number(swipedUserId);
 
-    if (!swipedUserId || !action) {
+    if (!Number.isInteger(targetId) || targetId <= 0) {
       return NextResponse.json(
-        { success: false, message: 'swipedUserId and action are required' },
+        { success: false, message: 'A valid swipedUserId is required' },
         { status: 400 }
       );
     }
+    if (targetId === currentUserId) {
+      return NextResponse.json({ success: false, message: 'You cannot swipe yourself' }, { status: 400 });
+    }
+    if (!SWIPE_ACTIONS.includes(action as SwipeAction)) {
+      return NextResponse.json({ success: false, message: 'Invalid swipe action' }, { status: 400 });
+    }
 
-    // Record swipe
-    await db.insert(swipes).values({
-      swiperId: currentUserId,
-      swipedId: Number(swipedUserId),
-      action,
-    });
+    const [target] = await db.select({ id: users.id }).from(users).where(eq(users.id, targetId));
+    if (!target) {
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+    }
+
+    await db
+      .insert(swipes)
+      .values({ swiperId: currentUserId, swipedId: targetId, action: action as SwipeAction })
+      .onConflictDoNothing();
 
     let isMatch = false;
     let matchedUser = null;
 
     if (action === 'like' || action === 'super_like') {
-      // Check if target user liked current user back
-      const reciprocalSwipe = await db.select()
+      const [reciprocal] = await db
+        .select()
         .from(swipes)
-        .where(and(
-          eq(swipes.swiperId, Number(swipedUserId)),
-          eq(swipes.swipedId, currentUserId)
-        ));
+        .where(and(eq(swipes.swiperId, targetId), eq(swipes.swipedId, currentUserId)));
 
-      if (reciprocalSwipe.length > 0 && (reciprocalSwipe[0].action === 'like' || reciprocalSwipe[0].action === 'super_like')) {
+      if (reciprocal && (reciprocal.action === 'like' || reciprocal.action === 'super_like')) {
         isMatch = true;
 
-        // Insert match record
-        const [newMatch] = await db.insert(matches).values({
-          user1Id: Math.min(currentUserId, Number(swipedUserId)),
-          user2Id: Math.max(currentUserId, Number(swipedUserId)),
-        }).returning();
+        const [newMatch] = await db
+          .insert(matches)
+          .values({
+            user1Id: Math.min(currentUserId, targetId),
+            user2Id: Math.max(currentUserId, targetId),
+          })
+          .onConflictDoNothing()
+          .returning();
 
-        // Create notification
-        await db.insert(notifications).values({
-          userId: Number(swipedUserId),
-          type: 'match',
-          title: "It's a Match! 🎉",
-          body: 'Someone liked you back!',
-          metadata: { matchId: newMatch.id },
-        });
+        if (newMatch) {
+          await db.insert(notifications).values({
+            userId: targetId,
+            type: 'match',
+            title: "It's a Match! 🎉",
+            body: 'Someone liked you back!',
+            metadata: { matchId: newMatch.id },
+          });
+        }
 
-        // Get matched user info
-        const [targetUser] = await db.select().from(users).where(eq(users.id, Number(swipedUserId)));
-        const targetPhotos = await db.select().from(photos).where(eq(photos.userId, Number(swipedUserId)));
-        matchedUser = {
-          ...targetUser,
-          photo: targetPhotos[0]?.url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
-        };
+        const [targetUser] = await db
+          .select({ id: users.id, name: users.name })
+          .from(users)
+          .where(eq(users.id, targetId));
+        const targetPhotos = await db.select().from(photos).where(eq(photos.userId, targetId));
+        if (targetUser) {
+          // Only the fields the match celebration needs — never spread the raw
+          // user row, which carries phone number, email and googleId.
+          matchedUser = { id: targetUser.id, name: targetUser.name, photo: targetPhotos[0]?.url ?? null };
+        }
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      action,
-      isMatch,
-      matchedUser,
-    });
+    return NextResponse.json({ success: true, action, isMatch, matchedUser });
   } catch (error) {
     console.error('Error processing swipe:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to record swipe' },
+      { success: false, message: 'Could not record swipe' },
       { status: 500 }
     );
   }

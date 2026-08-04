@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 
 export default function VerifyOtpPage() {
   const router = useRouter();
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(30);
 
   const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -24,17 +26,17 @@ export default function VerifyOtpPage() {
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
     if (!pastedData) return;
 
     const newOtp = [...otp];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       newOtp[i] = pastedData[i] || '';
     }
     setOtp(newOtp);
 
     // Focus last populated input or next empty input
-    const nextIndex = Math.min(pastedData.length, 3);
+    const nextIndex = Math.min(pastedData.length, 5);
     inputRefs[nextIndex].current?.focus();
   };
 
@@ -45,11 +47,11 @@ export default function VerifyOtpPage() {
     // Handle multi-character entry (iOS OTP autofill)
     if (cleanValue.length > 1) {
       const newOtp = [...otp];
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 6; i++) {
         newOtp[i] = cleanValue[i] || '';
       }
       setOtp(newOtp);
-      const nextIdx = Math.min(cleanValue.length, 3);
+      const nextIdx = Math.min(cleanValue.length, 5);
       inputRefs[nextIdx].current?.focus();
       return;
     }
@@ -60,7 +62,7 @@ export default function VerifyOtpPage() {
     setOtp(newOtp);
 
     // Auto-focus next input
-    if (digit && index < 3) {
+    if (digit && index < 5) {
       inputRefs[index + 1].current?.focus();
     }
   };
@@ -76,8 +78,8 @@ export default function VerifyOtpPage() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otp.join('');
-    if (code.length < 4) {
-      setError('Please enter the complete 4-digit code.');
+    if (code.length < 6) {
+      setError('Please enter the complete 6-digit code.');
       return;
     }
 
@@ -85,7 +87,13 @@ export default function VerifyOtpPage() {
     setError('');
 
     try {
-      const phoneNumber = typeof window !== 'undefined' ? localStorage.getItem('phoneNumber') || '9876543210' : '9876543210';
+      const phoneNumber = typeof window !== 'undefined' ? localStorage.getItem('phoneNumber') : null;
+      if (!phoneNumber) {
+        setError('We lost your phone number. Please start again.');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +109,7 @@ export default function VerifyOtpPage() {
         setError(data.message || 'Invalid verification code');
       }
     } catch {
-      router.push('/discover');
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -147,13 +155,13 @@ export default function VerifyOtpPage() {
           Enter Code
         </h1>
         <p className="text-[15px] leading-relaxed text-[#1A1A2E]/60 text-center mb-8 max-w-[300px]">
-          We’ve sent a 4-digit security code to your registered mobile number or email address.
+          We’ve sent a security code to your registered mobile number.
         </p>
 
         {/* Glass Morphism Card */}
-        <div className="w-full p-6 sm:p-8 rounded-[28px] bg-white/70 border border-white/60 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] flex flex-col items-center">
+        <div className="w-full p-5 sm:p-6 rounded-[28px] bg-white/70 border border-white/60 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.25)] flex flex-col items-center">
           <form onSubmit={handleVerify} className="w-full flex flex-col items-center">
-            <div className="flex justify-center gap-2.5 sm:gap-4 mb-6 w-full">
+            <div className="flex justify-center gap-1.5 sm:gap-2.5 mb-6 w-full">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -169,8 +177,8 @@ export default function VerifyOtpPage() {
                   onChange={(e) => handleChange(e.target.value, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onPaste={handlePaste}
-                  aria-label={`Digit ${index + 1} of 4`}
-                  className="w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl font-semibold rounded-2xl bg-white/90 border border-[#1A1A2E]/10 text-[#1A1A2E] focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/50 focus:border-[#FF6B9D] transition-all shadow-sm select-none"
+                  aria-label={`Digit ${index + 1} of 6`}
+                  className="w-10 h-14 sm:w-12 sm:h-16 text-center text-2xl font-semibold rounded-xl bg-white/90 border border-[#1A1A2E]/10 text-[#1A1A2E] focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/50 focus:border-[#FF6B9D] transition-all shadow-sm select-none"
                 />
               ))}
             </div>

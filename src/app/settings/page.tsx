@@ -1,215 +1,444 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useFilters } from '../context/FilterContext';
+import { AuroraBackground, GlassCard, VerifiedBadge } from '../components/shared';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { filters, setFilters } = useFilters();
+
+  const [ageRange, setAgeRange] = useState<[number, number]>([filters.ageMin, filters.ageMax]);
+  const [maxDistance, setMaxDistance] = useState<number>(filters.maxDistance);
+  const [onlyVerified, setOnlyVerified] = useState<boolean>(filters.verifiedOnly);
+
+  const [userInfo, setUserInfo] = useState({
+    name: 'Loading...',
+    email: '',
+    phoneNumber: '',
+    verified: false,
+  });
+
   const [notifications, setNotifications] = useState({
     push: true,
     matches: true,
     messages: true,
     likes: false,
+    meetups: true,
   });
-  const [onlyVerified, setOnlyVerified] = useState(false);
+
+  const [privacy, setPrivacy] = useState({
+    incognito: false,
+    hideDistance: false,
+    showOnlineStatus: true,
+  });
+
+  const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const [showEditPhoneModal, setShowEditPhoneModal] = useState(false);
+  const [newPhone, setNewPhone] = useState(userInfo.phoneNumber);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    async function loadUserInfo() {
+      // Try API first
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.success && data.user) {
+          const u = data.user;
+          setUserInfo(prev => ({
+            ...prev,
+            name: u.name || prev.name,
+            email: u.email || prev.email,
+            phoneNumber: u.phoneNumber || u.phone || prev.phoneNumber,
+            verified: u.verified ?? prev.verified,
+          }));
+          return;
+        }
+      } catch {
+        /* fall through to localStorage */
+      }
+
+      // Fallback: localStorage
+      try {
+        const googleUser = localStorage.getItem('google_user');
+        const basicInfo = localStorage.getItem('onboarding_basic');
+        const phone = localStorage.getItem('phoneNumber');
+        if (googleUser) {
+          const parsed = JSON.parse(googleUser);
+          setUserInfo(prev => ({
+            ...prev,
+            name: parsed.name || prev.name,
+            email: parsed.email || prev.email,
+          }));
+        } else if (basicInfo) {
+          const parsed = JSON.parse(basicInfo);
+          setUserInfo(prev => ({
+            ...prev,
+            name: parsed.name || prev.name,
+          }));
+        }
+        if (phone) {
+          setUserInfo(prev => ({
+            ...prev,
+            phoneNumber: phone.startsWith('+') ? phone : `+91 ${phone}`,
+          }));
+        }
+
+        const savedNotify = localStorage.getItem('app_notifications');
+        if (savedNotify) {
+          setNotifications(JSON.parse(savedNotify));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    loadUserInfo();
+  }, []);
+
+  const handleToggleNotification = (key: keyof typeof notifications) => {
+    setNotifications(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem('app_notifications', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const handleTogglePrivacy = (key: keyof typeof privacy) => {
+    setPrivacy(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleLogout = async () => {
+    if (!confirm('Are you sure you want to log out?')) return;
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+      window.location.href = '/welcome?switch=true';
+    } catch {
+      window.location.href = '/welcome?switch=true';
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('⚠️ Are you sure you want to delete your account? This action is permanent and cannot be undone.')) return;
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+      window.location.href = '/welcome?switch=true';
+    } catch {
+      window.location.href = '/welcome?switch=true';
+    }
+  };
 
   return (
-    <div className="mobile-container min-h-screen bg-[#FAFAFA]">
-      {/* Header */}
-      <div className="flex items-center p-4 border-b border-gray-200 bg-white">
-        <button onClick={() => router.back()} className="text-2xl mr-3">
-          ←
-        </button>
-        <h1 className="text-2xl font-bold text-[#1A1A2E]">Settings</h1>
+    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+        <AuroraBackground subtle>
+          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-20">
+            {/* Header */}
+            <div className="sticky top-0 z-20 flex items-center justify-between px-5 py-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-[#FAFAF7]/80 backdrop-blur-xl border-b border-[#1A1A2E]/[0.06]">
+              <button
+                onClick={() => router.back()}
+                aria-label="Go back"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#1A1A2E]/10 text-[#1A1A2E] shadow-sm active:scale-95 transition-all cursor-pointer"
+              >
+                ←
+              </button>
+              <h1 className="text-[18px] font-extrabold text-[#1A1A2E]">Settings</h1>
+              <div className="w-10" />
+            </div>
+
+            <div className="p-4 space-y-4">
+              {/* Profile Card Header */}
+              <GlassCard className="p-4 flex items-center justify-between border border-gray-200/60 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-[#F43F5E] text-white font-bold flex items-center justify-center text-lg shadow-2xs">
+                    {userInfo.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-[16px] font-bold text-[#1E293B]">{userInfo.name}</h2>
+                      {userInfo.verified && <VerifiedBadge />}
+                    </div>
+                    <p className="text-[12px] text-[#1E293B]/55">{userInfo.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => router.push('/onboarding/basic-info')}
+                  className="px-3 py-1.5 text-[12px] font-bold text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 rounded-xl hover:bg-[#F43F5E] hover:text-white transition-all cursor-pointer shadow-2xs active:scale-95"
+                >
+                  Edit Profile
+                </button>
+              </GlassCard>
+
+              {/* Account Settings Section */}
+              <div className="space-y-1">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1E293B]/45 px-2 mb-1.5">
+                  Account Settings
+                </p>
+                <GlassCard className="divide-y divide-gray-100 border border-gray-200/60 shadow-2xs">
+                  <div className="flex items-center justify-between p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1E293B]">Phone Number</p>
+                      <p className="text-[12px] text-[#1E293B]/50">{userInfo.phoneNumber}</p>
+                    </div>
+                    <button
+                      onClick={() => setShowEditPhoneModal(true)}
+                      className="text-[12px] font-bold text-[#F43F5E] cursor-pointer hover:underline"
+                    >
+                      Change
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1E293B]">Google Email</p>
+                      <p className="text-[12px] text-[#1E293B]/50">{userInfo.email}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                      Connected
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => router.push('/verification')}
+                    className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-gray-50 transition-all"
+                  >
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1E293B]">Identity Verification</p>
+                      <p className="text-[12px] text-emerald-600 font-semibold">✓ Blue Tick Verified</p>
+                    </div>
+                    <span className="text-[14px] text-[#1E293B]/40">›</span>
+                  </div>
+                </GlassCard>
+              </div>
+
+              {/* Discovery Settings */}
+              <div className="space-y-1">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1E293B]/45 px-2 mb-1.5">
+                  Discovery Preferences
+                </p>
+                <GlassCard className="p-4 space-y-4 border border-gray-200/60 shadow-2xs">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[14px] font-medium text-[#1E293B]">Age Preference</span>
+                      <span className="text-[13px] font-bold text-[#F43F5E]">{ageRange[0]} - {ageRange[1]} yrs</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="18"
+                        max="50"
+                        value={ageRange[1]}
+                        onChange={(e) => setAgeRange([18, Number(e.target.value)])}
+                        className="w-full accent-[#F43F5E] cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[14px] font-medium text-[#1E293B]">Maximum Distance</span>
+                      <span className="text-[13px] font-bold text-[#F43F5E]">{maxDistance} km</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="100"
+                      step="5"
+                      value={maxDistance}
+                      onChange={(e) => setMaxDistance(Number(e.target.value))}
+                      className="w-full accent-[#F43F5E] cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1E293B]">Verified Profiles Only</p>
+                      <p className="text-[11px] text-[#1E293B]/45">Only show users with blue badge</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={onlyVerified}
+                        onChange={(e) => setOnlyVerified(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F43F5E]"></div>
+                    </label>
+                  </div>
+                </GlassCard>
+              </div>
+
+              {/* Notification Toggles */}
+              <div className="space-y-1">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1A1A2E]/40 px-2 mb-1.5">
+                  Notifications & Alerts
+                </p>
+                <GlassCard className="divide-y divide-[#1A1A2E]/[0.06]">
+                  {[
+                    { key: 'push', label: 'Push Notifications', sub: 'Instant updates on your device' },
+                    { key: 'matches', label: 'New Matches', sub: 'When someone likes you back' },
+                    { key: 'messages', label: 'Chat Messages', sub: 'DMs and voice note alerts' },
+                    { key: 'meetups', label: 'Meetup Invites', sub: 'Nearby group activity invites' },
+                  ].map((item) => (
+                    <div key={item.key} className="flex items-center justify-between p-3.5">
+                      <div>
+                        <p className="text-[14px] font-medium text-[#1A1A2E]">{item.label}</p>
+                        <p className="text-[11px] text-[#1A1A2E]/45">{item.sub}</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notifications[item.key as keyof typeof notifications]}
+                          onChange={() => handleToggleNotification(item.key as keyof typeof notifications)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6B9D]"></div>
+                      </label>
+                    </div>
+                  ))}
+                </GlassCard>
+              </div>
+
+              {/* Privacy Controls */}
+              <div className="space-y-1">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1A1A2E]/40 px-2 mb-1.5">
+                  Privacy & Safety
+                </p>
+                <GlassCard className="divide-y divide-[#1A1A2E]/[0.06]">
+                  <div className="flex items-center justify-between p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1A1A2E]">Incognito Mode</p>
+                      <p className="text-[11px] text-[#1A1A2E]/45">Hide profile from public discovery</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={privacy.incognito}
+                        onChange={() => handleTogglePrivacy('incognito')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7B68EE]"></div>
+                    </label>
+                  </div>
+
+                  <div
+                    onClick={() => setShowBlockedModal(true)}
+                    className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-[#1A1A2E]/[0.02] transition-all"
+                  >
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1A1A2E]">Blocked Users</p>
+                      <p className="text-[11px] text-[#1A1A2E]/45">Manage blocked contacts</p>
+                    </div>
+                    <span className="text-[14px] text-[#1A1A2E]/40">›</span>
+                  </div>
+                </GlassCard>
+              </div>
+
+              {/* Premium Plan Banner */}
+              <GlassCard
+                onClick={() => router.push('/premium')}
+                className="p-4 bg-gradient-to-r from-[#FF6B9D]/15 via-[#B76CFF]/15 to-[#7B68EE]/15 border-none cursor-pointer hover:scale-[1.01] transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[10px] font-black uppercase tracking-wider mb-1 shadow-sm">
+                      ✨ Dil Se Gold
+                    </div>
+                    <h3 className="text-[15px] font-bold text-[#1A1A2E]">Unlimited Swipes & See Who Liked You</h3>
+                  </div>
+                  <span className="text-[20px]">👑</span>
+                </div>
+              </GlassCard>
+
+              {/* Logout & Delete Account Actions */}
+              <div className="pt-2 space-y-2.5">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full py-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 text-rose-600 text-[14.5px] font-bold hover:bg-rose-100/60 active:scale-[0.985] transition-all cursor-pointer"
+                >
+                  {isLoggingOut ? 'Logging out…' : 'Log Out & Switch Account'}
+                </button>
+
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={isLoggingOut}
+                  className="w-full py-2 text-center text-[12.5px] font-medium text-gray-400 hover:text-rose-500 transition-colors cursor-pointer"
+                >
+                  Delete Account Permanently
+                </button>
+              </div>
+            </div>
+          </div>
+        </AuroraBackground>
       </div>
 
-      {/* Main Content */}
-      <div className="pb-6">
-        {/* Account Settings */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">Account Settings</h3>
-          <div className="space-y-4">
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Phone Number</span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">+91 98765*****</span>
-                <span className="text-gray-400">›</span>
-              </div>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Email</span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Add email</span>
-                <span className="text-gray-400">›</span>
-              </div>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Connected Accounts</span>
-              <span className="text-gray-400">›</span>
+      {/* Blocked Users Sheet */}
+      {showBlockedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+          <div
+            onClick={() => setShowBlockedModal(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)]"
+            style={{ willChange: 'backdrop-filter, opacity' }}
+          />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry">
+            <h3 className="text-[18px] font-bold text-[#1A1A2E]">Blocked Users</h3>
+            <p className="text-[13px] text-gray-500">You currently have no blocked users on DateBuddy.</p>
+            <button
+              onClick={() => setShowBlockedModal(false)}
+              className="w-full py-2.5 rounded-xl bg-[#1A1A2E] text-white text-[14px] font-bold"
+            >
+              Close
             </button>
           </div>
         </div>
+      )}
 
-        {/* Discovery Settings */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">Discovery Settings</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-700">Age Range</span>
-                <span className="text-sm text-gray-500">18 - 30</span>
-              </div>
-              <input
-                type="range"
-                className="w-full"
-                min="18"
-                max="50"
-                defaultValue="30"
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-700">Maximum Distance</span>
-                <span className="text-sm text-gray-500">50 km</span>
-              </div>
-              <input
-                type="range"
-                className="w-full"
-                min="5"
-                max="100"
-                step="5"
-                defaultValue="50"
-              />
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="text-gray-700">Only show verified profiles</span>
-              <label className="relative inline-block w-12 h-6">
-                <input
-                  type="checkbox"
-                  checked={onlyVerified}
-                  onChange={(e) => setOnlyVerified(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-full h-full bg-gray-300 peer-checked:bg-[#FF6B9D] rounded-full peer transition-all"></div>
-                <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-6"></div>
-              </label>
+      {/* Edit Phone Modal */}
+      {showEditPhoneModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+          <div
+            onClick={() => setShowEditPhoneModal(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)]"
+            style={{ willChange: 'backdrop-filter, opacity' }}
+          />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry">
+            <h3 className="text-[18px] font-bold text-[#1A1A2E]">Update Phone Number</h3>
+            <input
+              type="text"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-[16px] outline-none focus:border-[#FF6B9D]"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowEditPhoneModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-[14px] font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setUserInfo(prev => ({ ...prev, phoneNumber: newPhone }));
+                  setShowEditPhoneModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Notifications */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">Notifications</h3>
-          <div className="space-y-4">
-            {[
-              { key: 'push', label: 'Push Notifications' },
-              { key: 'matches', label: 'New Matches' },
-              { key: 'messages', label: 'Messages' },
-              { key: 'likes', label: 'Likes' },
-            ].map((item) => (
-              <div key={item.key} className="flex items-center justify-between">
-                <span className="text-gray-700">{item.label}</span>
-                <label className="relative inline-block w-12 h-6">
-                  <input
-                    type="checkbox"
-                    checked={notifications[item.key as keyof typeof notifications]}
-                    onChange={(e) => setNotifications({
-                      ...notifications,
-                      [item.key]: e.target.checked,
-                    })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-full h-full bg-gray-300 peer-checked:bg-[#FF6B9D] rounded-full peer transition-all"></div>
-                  <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-6"></div>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Privacy & Safety */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">Privacy & Safety</h3>
-          <div className="space-y-4">
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Blocked Users</span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Two-Factor Authentication</span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Privacy Policy</span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Terms of Service</span>
-              <span className="text-gray-400">›</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Premium */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">Premium</h3>
-          <button
-            onClick={() => router.push('/premium')}
-            className="w-full flex items-center justify-between py-2"
-          >
-            <span className="text-gray-700">Upgrade to Premium</span>
-            <span className="text-gray-400">›</span>
-          </button>
-        </div>
-
-        {/* About */}
-        <div className="bg-white mt-2 p-4">
-          <h3 className="font-semibold text-[#1A1A2E] mb-4">About</h3>
-          <div className="space-y-4">
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Help & Support</span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <button className="w-full flex items-center justify-between py-2">
-              <span className="text-gray-700">Community Guidelines</span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <div className="py-2">
-              <span className="text-gray-500 text-sm">App Version 1.0.0</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Logout */}
-        <div className="px-4 mt-6">
-          <button
-            onClick={() => {
-              if (confirm('Are you sure you want to logout?')) {
-                localStorage.clear();
-                router.push('/welcome');
-              }
-            }}
-            className="w-full py-3 text-red-500 font-semibold"
-          >
-            Logout
-          </button>
-        </div>
-
-        {/* Delete Account */}
-        <div className="px-4 mt-2">
-          <button
-            onClick={() => {
-              if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-                localStorage.clear();
-                router.push('/welcome');
-              }
-            }}
-            className="w-full py-3 text-red-600 font-semibold"
-          >
-            Delete Account
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

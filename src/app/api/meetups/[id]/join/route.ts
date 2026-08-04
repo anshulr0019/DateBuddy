@@ -1,85 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { meetupAttendees, meetups } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
+import { getAuthSession } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Await the params promise (Next.js 15+)
+    const session = await getAuthSession();
+    if (!session) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.userId;
+
     const { id } = await params;
-    const meetupId = parseInt(id);
-    
-    const { userId } = await request.json();
-
-    console.log('Join request:', { meetupId, userId });
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'User ID required' },
-        { status: 400 }
-      );
+    const meetupId = Number(id);
+    if (!Number.isInteger(meetupId) || meetupId <= 0) {
+      return NextResponse.json({ success: false, message: 'Invalid meetup id' }, { status: 400 });
     }
 
-    // Get the meetup first
-    const [meetup] = await db.select()
-      .from(meetups)
-      .where(eq(meetups.id, meetupId));
-
+    const [meetup] = await db.select().from(meetups).where(eq(meetups.id, meetupId));
     if (!meetup) {
-      return NextResponse.json(
-        { success: false, message: 'Meetup not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'Meetup not found' }, { status: 404 });
     }
 
-    // Check if already joined
-    const existing = await db.select()
+    const existing = await db
+      .select()
       .from(meetupAttendees)
-      .where(and(
-        eq(meetupAttendees.meetupId, meetupId),
-        eq(meetupAttendees.userId, userId)
-      ));
+      .where(and(eq(meetupAttendees.meetupId, meetupId), eq(meetupAttendees.userId, userId)));
 
     if (existing.length > 0) {
-      // Leave meetup
-      await db.delete(meetupAttendees)
-        .where(and(
-          eq(meetupAttendees.meetupId, meetupId),
-          eq(meetupAttendees.userId, userId)
-        ));
+      await db
+        .delete(meetupAttendees)
+        .where(and(eq(meetupAttendees.meetupId, meetupId), eq(meetupAttendees.userId, userId)));
       return NextResponse.json({ success: true, action: 'left' });
     }
 
-    // Check capacity
-    const currentAttendees = await db.select()
+    const [{ attendees }] = await db
+      .select({ attendees: count() })
       .from(meetupAttendees)
       .where(eq(meetupAttendees.meetupId, meetupId));
 
-    const maxAttendees = meetup.maxAttendees || 10;
-
-    if (currentAttendees.length >= maxAttendees) {
-      return NextResponse.json(
-        { success: false, message: 'Event is full' },
-        { status: 400 }
-      );
+    if (Number(attendees) >= (meetup.maxAttendees ?? 10)) {
+      return NextResponse.json({ success: false, message: 'Event is full' }, { status: 409 });
     }
 
-    // Join meetup
-    await db.insert(meetupAttendees).values({
-      meetupId,
-      userId,
-      status: 'going',
-    });
+    // Unique index on (meetupId, userId) makes the concurrent double-join a no-op.
+    const inserted = await db
+      .insert(meetupAttendees)
+      .values({ meetupId, userId, status: 'going' })
+      .onConflictDoNothing()
+      .returning();
 
-    return NextResponse.json({ success: true, action: 'joined' });
+    return NextResponse.json({ success: true, action: inserted.length ? 'joined' : 'already_joined' });
   } catch (error) {
     console.error('Error updating RSVP:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to update RSVP' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Failed to update RSVP' }, { status: 500 });
   }
 }

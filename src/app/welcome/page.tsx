@@ -2,17 +2,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import GoogleSignInModal from '@/app/components/GoogleSignInModal';
+
 
 /* ------------------------------------------------------------------ */
 /*  All animated-background CSS lives right here — no external file.  */
 /* ------------------------------------------------------------------ */
 const AURORA_CSS = `
 .aurora-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   background:
-    radial-gradient(circle at 50% 112%, rgba(255,107,157,0.5), transparent 34%),
-    radial-gradient(circle at 18% 88%, rgba(255,180,208,0.48), transparent 32%),
-    radial-gradient(circle at 86% 82%, rgba(123,104,238,0.38), transparent 34%),
-    linear-gradient(180deg,#fffafc 0%,#fafaf7 48%,#fff3f8 100%);
+    radial-gradient(circle at 50% 112%, rgba(255,107,157,0.55), transparent 38%),
+    radial-gradient(circle at 18% 88%, rgba(255,180,208,0.48), transparent 35%),
+    radial-gradient(circle at 86% 82%, rgba(123,104,238,0.42), transparent 38%),
+    linear-gradient(180deg, #FFF0F6 0%, #F5E6FF 50%, #ECE0FF 100%);
 }
 .aurora-stage::before,
 .aurora-stage::after {
@@ -68,32 +73,49 @@ export default function WelcomePage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [otpError, setOtpError] = useState("");
 
   const isValid = phoneNumber.length === 10;
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async () => {
     if (!isValid) return;
     setIsLoading(true);
+    setOtpError("");
     try {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("phoneNumber", phoneNumber);
       }
-    } catch {
-      /* ignore */
-    }
-    setTimeout(() => {
+
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        setOtpError(data.message || 'Could not send the code. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(false);
       router.push("/verify-otp");
-    }, 900);
+    } catch {
+      setIsLoading(false);
+      setOtpError('Network error. Please check your connection and try again.');
+    }
   };
 
   return (
-    <div className="relative h-dvh max-h-dvh w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E]">
+    <div className="fixed inset-0 h-full w-full overflow-hidden bg-gradient-to-b from-[#FFF0F6] to-[#ECE0FF] text-[#1A1A2E]">
+      <GoogleSignInModal isOpen={showGoogleModal} onClose={() => setShowGoogleModal(false)} />
       {/* Inject animated background CSS — self-contained, no external file needed */}
       <style dangerouslySetInnerHTML={{ __html: AURORA_CSS }} />
 
       {/* Ambient aurora background */}
-      <div aria-hidden className="aurora-stage pointer-events-none absolute inset-0 overflow-hidden">
+      <div aria-hidden className="aurora-stage pointer-events-none fixed inset-0 overflow-hidden">
         <div className="aurora-blob aurora-blob-1" />
         <div className="aurora-blob aurora-blob-2" />
         <div className="aurora-blob aurora-blob-3" />
@@ -110,7 +132,7 @@ export default function WelcomePage() {
       </div>
 
       {/* Mobile frame */}
-      <div className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col justify-between px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] overflow-hidden">
+      <div className="relative mx-auto flex h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col justify-between px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 overflow-hidden">
         {/* Brand row */}
         <header className="flex flex-shrink-0 items-center justify-between">
           <div className="flex items-center gap-2">
@@ -202,6 +224,12 @@ export default function WelcomePage() {
                 )}
               </div>
 
+              {otpError && (
+                <div className="mt-2.5 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-[12.5px] font-semibold text-center leading-snug">
+                  {otpError}
+                </div>
+              )}
+
               <button
                 onClick={handleSendOTP}
                 disabled={isLoading || !isValid}
@@ -252,7 +280,10 @@ export default function WelcomePage() {
 
               {/* Social */}
               <div className="grid grid-cols-2 gap-2.5">
-                <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px]">
+                <button
+                  onClick={() => setShowGoogleModal(true)}
+                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] cursor-pointer min-h-[44px]"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24">
                     <path
                       fill="#EA4335"
@@ -261,7 +292,13 @@ export default function WelcomePage() {
                   </svg>
                   Google
                 </button>
-                <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px]">
+                <button
+                  onClick={() => {
+                    localStorage.setItem('google_user', JSON.stringify({ name: 'Apple User', email: 'apple.user@icloud.com' }));
+                    router.push('/onboarding/basic-info');
+                  }}
+                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px] cursor-pointer"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1A2E">
                     <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </svg>

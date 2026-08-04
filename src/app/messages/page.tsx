@@ -1,102 +1,186 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { CONVOS } from '../data/mockData';
-import { Ic } from '../components/icons';
-import { AuroraBackground, OnlineDot, SafeImage } from '../components/shared';
-import FloatingNav from '../components/FloatingNav';
+import { Ic, WhatsAppDoubleTick } from '../components/icons';
+import { AuroraBackground, SafeImage } from '../components/shared';
+import { useNotifications } from '../context/NotificationContext';
 
 export default function MessagesPage() {
+  const router = useRouter();
+  const { openNotifications, unreadCount } = useNotifications();
   const [search, setSearch] = useState('');
-  const filtered = CONVOS.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const [conversations, setConversations] = useState<any[]>(() => {
+    return CONVOS.map(c => {
+      try {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem(`last_msg_${c.id}`);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            return {
+              ...c,
+              lastMsg: parsed.lastMsg || c.lastMsg,
+              time: parsed.time || c.time,
+            };
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+      return c;
+    });
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadConversations() {
+      try {
+        const res = await fetch('/api/conversations');
+        const data = await res.json();
+        if (data.success && data.conversations && data.conversations.length > 0) {
+          const merged = data.conversations.map((c: any) => {
+            try {
+              const saved = localStorage.getItem(`last_msg_${c.id}`);
+              if (saved) {
+                const parsed = JSON.parse(saved);
+                return {
+                  ...c,
+                  lastMsg: parsed.lastMsg || c.lastMsg,
+                  time: parsed.time || c.time,
+                };
+              }
+            } catch {
+              /* ignore */
+            }
+            return c;
+          });
+          setConversations(merged);
+        }
+      } catch (err) {
+        console.warn('⚠️ Error loading conversations:', err);
+      }
+    }
+    loadConversations();
+  }, []);
+
+  const filtered = conversations.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         <AuroraBackground subtle>
-          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
-            {/* Header */}
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h1 className="text-[22px] font-semibold tracking-[-0.02em]">Messages</h1>
-                <p className="text-[13px] text-[#1A1A2E]/50">{CONVOS.filter(c => c.unread > 0).length} unread conversations</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/70 shadow-sm backdrop-blur-md hover:bg-white/90 transition-all cursor-pointer">
-                  <Ic.Bell />
-                </button>
-                <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_6px_20px_-8px_rgba(123,104,238,0.6)] transition hover:scale-105 cursor-pointer">
-                  <Ic.Plus />
-                </button>
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-5">
-              <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#1A1A2E]/30">
-                <Ic.Search />
-              </div>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search conversations…"
-                className="h-12 w-full rounded-2xl border border-[#1A1A2E]/10 bg-white/80 pl-10 pr-4 text-[15px] text-[#1A1A2E] placeholder-[#1A1A2E]/25 outline-none backdrop-blur-md transition-all focus:border-transparent focus:ring-2 focus:ring-[#FF6B9D]/40 focus:shadow-[0_8px_24px_-12px_rgba(255,107,157,0.5)]"
-              />
-            </div>
-
-            {/* Active stories row */}
-            <div className="mb-5">
-              <span className="mb-3 block text-[12px] font-medium uppercase tracking-wide text-[#1A1A2E]/50">Active Now</span>
-              <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-none">
-                {CONVOS.filter(c => c.online).map(c => (
-                  <button key={c.id} className="flex flex-shrink-0 flex-col items-center gap-1.5 cursor-pointer">
-                    <div className="story-ring h-[62px] w-[62px]">
-                      <div className="story-ring-inner h-full w-full overflow-hidden rounded-full">
-                        <SafeImage src={c.photo} name={c.name} alt={c.name} className="h-full w-full object-cover" />
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-medium text-[#1A1A2E]/60">{c.name.split(' ')[0]}</span>
+          <div className="flex flex-col h-full w-full z-10 overflow-hidden">
+            
+            {/* SMOOTH BLENDED HEADER & SEARCH */}
+            <div className="flex-shrink-0 z-20 px-5 pt-[max(3rem,calc(1.25rem+env(safe-area-inset-top,0px)))] pb-3.5 bg-white/40 backdrop-blur-xl border-b border-white/50 shadow-xs">
+              <div className="mb-3.5 flex items-center justify-between">
+                <h1 className="text-[26px] font-extrabold tracking-tight text-[#191C1E]">Chats</h1>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={openNotifications}
+                    aria-label="Open notifications"
+                    className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/70 border border-white/80 shadow-xs hover:bg-white transition-all cursor-pointer backdrop-blur-md"
+                  >
+                    <Ic.Bell />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#F43F5E] text-[8px] font-bold text-white ring-2 ring-white shadow-xs px-1">
+                        {unreadCount}
+                      </span>
+                    )}
                   </button>
-                ))}
+                </div>
+              </div>
+
+              {/* Search input */}
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-400">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search chats…"
+                  className="h-11 w-full rounded-2xl border border-white/60 bg-white/50 pl-11 pr-4 text-[16px] text-[#191C1E] placeholder-gray-400 outline-none backdrop-blur-md transition-all focus:bg-white/90 focus:ring-2 focus:ring-[#F43F5E]/20"
+                />
               </div>
             </div>
 
-            {/* Conversation list */}
-            <div className="flex flex-col gap-0.5">
-              {filtered.map((c, i) => (
-                <button key={c.id}
-                  className="animate-float-in relative flex w-full items-center gap-3.5 rounded-[22px] p-3.5 text-left transition-all hover:bg-white/55 active:scale-[0.99] cursor-pointer"
-                  style={{ animationDelay: `${i * 50}ms` }}>
-                  {c.pinned && (
-                    <div className="absolute right-8 text-[#7B68EE]/40">
-                      <Ic.Pin />
-                    </div>
-                  )}
-                  <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full">
-                    <SafeImage src={c.photo} name={c.name} alt={c.name} className="h-full w-full object-cover" />
-                    {c.online && <OnlineDot className="absolute bottom-0 right-0 h-3.5 w-3.5" />}
+            {/* CONVERSATION LIST */}
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
+              {loading ? (
+                <div className="space-y-3 pt-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-16 rounded-[22px] bg-white/50 animate-pulse" />
+                  ))}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 shadow-sm text-2xl">
+                    💬
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[15px] ${c.unread > 0 ? 'font-semibold' : 'font-medium'} text-[#1A1A2E]`}>{c.name}</span>
-                      <span className="text-[12px] text-[#1A1A2E]/40">{c.time}</span>
-                    </div>
-                    <div className="mt-0.5 flex items-center justify-between">
-                      <span className={`truncate text-[13px] ${c.unread > 0 ? 'text-[#1A1A2E]/65' : 'text-[#1A1A2E]/40'}`}>{c.lastMsg}</span>
-                      {c.unread > 0 && (
-                        <div className="ml-2 flex h-5 min-w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-1 text-[10px] font-bold text-white">
-                          {c.unread}
+                  <h3 className="text-[18px] font-bold text-[#1A1A2E] mb-1">No chats yet</h3>
+                  <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">
+                    {search ? 'No matches found for your search.' : 'Start discovering profiles and when you both like each other, your conversations will appear here!'}
+                  </p>
+                  <button
+                    onClick={() => router.push('/discover')}
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                  >
+                    Start Discovering ✨
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {filtered.map((c, i) => (
+                    <button
+                      key={c.id}
+                      onClick={() => router.push(`/chat/${c.id}`)}
+                      className="animate-float-in relative flex w-full items-center gap-3.5 rounded-[22px] p-3 text-left transition-all hover:bg-white/70 active:scale-[0.99] cursor-pointer border border-transparent hover:border-white/60"
+                      style={{ animationDelay: `${i * 35}ms` }}
+                    >
+                      {/* Avatar */}
+                      <div className="relative h-13 w-13 flex-shrink-0 overflow-hidden rounded-full border border-white/60 shadow-xs">
+                        <SafeImage src={c.photo} name={c.name} alt={c.name} className="h-full w-full object-cover" />
+                        {c.online && (
+                          <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-[#22C55E] ring-2 ring-white shadow-xs" />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[15px] font-bold text-[#191C1E] leading-tight truncate">{c.name}</span>
+                          <span className="text-[11.5px] font-medium text-gray-400 flex-shrink-0">{c.time}</span>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
+
+                        <div className="mt-0.5 flex items-center justify-between">
+                          <span className={`truncate text-[13px] ${c.unread > 0 ? 'text-[#191C1E] font-bold' : 'text-gray-400 font-normal'}`}>
+                            {c.lastMsg}
+                          </span>
+
+                          {c.unread > 0 ? (
+                            <div className="ml-2 flex h-5 min-w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[#F43F5E] px-1.5 text-[11px] font-bold text-white shadow-xs">
+                              {c.unread}
+                            </div>
+                          ) : (
+                            <div className="ml-2 flex items-center">
+                              <WhatsAppDoubleTick className="w-4 h-3.5 text-[#F43F5E]" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
           </div>
         </AuroraBackground>
-        {/* STATIC FOOTER NAVIGATION */}
-        <FloatingNav />
       </div>
     </div>
   );

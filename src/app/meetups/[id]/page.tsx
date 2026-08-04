@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { AuroraBackground } from '@/app/components/shared';
 
 interface MeetupDetail {
   id: number;
@@ -31,20 +32,18 @@ export default function MeetupDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchMeetup();
-  }, [params.id]);
+    if (params?.id) {
+      fetchMeetup();
+    }
+  }, [params?.id]);
 
   const fetchMeetup = async () => {
     try {
       const response = await fetch(`/api/meetups/${params.id}`);
       const data = await response.json();
       
-      console.log('Meetup data:', data);
-      
-      if (data.success) {
+      if (data.success && data.meetup) {
         setMeetup(data.meetup);
-        
-        // Check if current user is attending
         const userId = localStorage.getItem('userId');
         if (userId && data.meetup.attendees) {
           setIsJoined(data.meetup.attendees.some((a: any) => a.id === parseInt(userId)));
@@ -68,159 +67,164 @@ export default function MeetupDetailPage() {
       });
 
       const data = await response.json();
-      
       if (data.success) {
         setIsJoined(data.action === 'joined');
-        fetchMeetup(); // Refresh data
-      } else {
-        alert(data.message || 'Failed to update RSVP');
+        fetchMeetup();
       }
     } catch (error) {
       console.error('Error joining:', error);
-      alert('Failed to update RSVP');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-2">⏳</div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!meetup) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-2">😕</div>
-          <p className="text-gray-600">Meetup not found</p>
-          <button onClick={() => router.back()} className="mt-4 text-[#FF6B9D]">
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const isFull = meetup.attendeesCount >= meetup.maxAttendees;
+  const isFull = meetup ? meetup.attendeesCount >= meetup.maxAttendees : false;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pb-24">
-      {/* Hero Image */}
-      <div className="relative h-72 bg-gray-200">
-        <img 
-          src={meetup.imageUrl || 'https://picsum.photos/400/300?random=1'} 
-          alt={meetup.title}
-          className="w-full h-full object-cover"
-        />
-        <button 
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center text-xl shadow-md"
-        >
-          ←
-        </button>
-        <div className="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium capitalize">
-          {meetup.category}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1A1A2E] mb-2">{meetup.title}</h1>
-          <div className="flex items-center gap-2 text-gray-600">
-            <span>📅 {new Date(meetup.date).toLocaleString()}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600 mt-1">
-            <span>📍 {meetup.venueName}</span>
-          </div>
-        </div>
-
-        {/* Host Section */}
-        {meetup.host && (
-          <div className="bg-white p-4 rounded-xl border border-gray-100">
-            <p className="text-sm text-gray-600 mb-3">Hosted by</p>
-            <div className="flex items-center gap-3">
-              <img 
-                src={meetup.host.photo || 'https://picsum.photos/100/100'} 
-                className="w-12 h-12 rounded-full object-cover"
-                alt={meetup.host.name}
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-[#1A1A2E]">{meetup.host.name}</h3>
-                  {meetup.host.verified && <span className="text-blue-500">✓</span>}
-                </div>
-                <p className="text-sm text-gray-600">Event organizer</p>
+    <div className="h-dvh w-full bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+        <AuroraBackground subtle>
+          <div className="flex flex-col h-full w-full z-10 overflow-hidden">
+            
+            {isLoading ? (
+              <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+                <div className="h-8 w-8 rounded-full border-3 border-[#FF6B9D] border-t-transparent animate-spin" />
+                <p className="text-[14px] font-semibold text-[#1A1A2E]/60">Loading squad details...</p>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Description */}
-        <div className="bg-white p-4 rounded-xl border border-gray-100">
-          <h3 className="font-semibold mb-2 text-[#1A1A2E]">About this event</h3>
-          <p className="text-gray-700 leading-relaxed">
-            {meetup.description || 'No description provided.'}
-          </p>
-        </div>
-
-        {/* Attendees */}
-        <div className="bg-white p-4 rounded-xl border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-[#1A1A2E]">
-              Attendees ({meetup.attendeesCount}/{meetup.maxAttendees})
-            </h3>
-          </div>
-          <div className="flex -space-x-2 overflow-hidden">
-            {meetup.attendees && meetup.attendees.length > 0 ? (
-              <>
-                {meetup.attendees.slice(0, 5).map((attendee, i) => (
-                  <img 
-                    key={i}
-                    src={attendee.photo || 'https://picsum.photos/100/100'} 
-                    className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                    alt={attendee.name}
-                  />
-                ))}
-                {meetup.attendeesCount > 5 && (
-                  <div className="w-10 h-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs text-gray-600">
-                    +{meetup.attendeesCount - 5}
-                  </div>
-                )}
-              </>
+            ) : !meetup ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="text-[40px]">🔍</div>
+                <h2 className="text-[20px] font-extrabold text-[#1A1A2E]">Squad Not Found</h2>
+                <button
+                  onClick={() => router.back()}
+                  className="px-5 py-2.5 rounded-2xl bg-[#FF6B9D] text-white text-[13px] font-bold shadow-md cursor-pointer"
+                >
+                  ← Go Back
+                </button>
+              </div>
             ) : (
-              <p className="text-sm text-gray-500">No attendees yet</p>
+              <>
+                {/* Scrollable Body */}
+                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none pb-24">
+                  {/* Hero Banner */}
+                  <div className="relative h-64 w-full bg-gray-900">
+                    <img
+                      src={meetup.imageUrl || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80'}
+                      alt={meetup.title}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    
+                    {/* Back Button with Notch Clearance */}
+                    <button
+                      onClick={() => router.back()}
+                      className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] left-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-md text-[#1A1A2E] shadow-lg active:scale-95 transition-all cursor-pointer z-20"
+                    >
+                      ←
+                    </button>
+
+                    <span className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold uppercase tracking-wider z-20">
+                      {meetup.category}
+                    </span>
+
+                    <div className="absolute bottom-4 left-5 right-5 text-white z-20">
+                      <h1 className="text-[22px] font-extrabold leading-snug drop-shadow-md">{meetup.title}</h1>
+                      <p className="text-[13px] text-white/80 mt-1 flex items-center gap-1.5 font-medium">
+                        <span>📍 {meetup.venueName || 'Mumbai'}</span>
+                        <span>·</span>
+                        <span>👥 {meetup.attendeesCount || 1} / {meetup.maxAttendees}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 space-y-4">
+                    {/* Date & Time Pill */}
+                    <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-[#FF6B9D]/10 flex items-center justify-center text-[18px]">
+                          📅
+                        </div>
+                        <div>
+                          <div className="text-[13px] font-bold text-[#1A1A2E]">
+                            {meetup.date ? new Date(meetup.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Upcoming Date'}
+                          </div>
+                          <div className="text-[11px] text-[#1A1A2E]/50 font-medium">
+                            {meetup.date ? new Date(meetup.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '7:00 PM'}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-[#7B68EE]/10 text-[#7B68EE] text-[11px] font-extrabold">
+                        Confirmed
+                      </span>
+                    </div>
+
+                    {/* Host Card */}
+                    {meetup.host && (
+                      <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#1A1A2E]/40 mb-2 block">Squad Host</span>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={meetup.host.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                            className="h-12 w-12 rounded-full object-cover border border-[#1A1A2E]/10"
+                            alt={meetup.host.name}
+                          />
+                          <div className="flex-1">
+                            <h3 className="text-[15px] font-bold text-[#1A1A2E]">{meetup.host.name}</h3>
+                            <p className="text-[12px] text-[#1A1A2E]/50">Community Host</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm space-y-2">
+                      <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#1A1A2E]/50">About Squad</h3>
+                      <p className="text-[14px] text-[#1A1A2E]/80 leading-relaxed">
+                        {meetup.description || 'Join this squad for a fun group activity! Be punctual and bring good vibes.'}
+                      </p>
+                    </div>
+
+                    {/* Attendees Stack */}
+                    <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#1A1A2E]/50">
+                          Squad Members ({meetup.attendeesCount || 1} / {meetup.maxAttendees})
+                        </h3>
+                      </div>
+                      <div className="flex items-center -space-x-2">
+                        {(meetup.attendees || []).map((att: any, idx: number) => (
+                          <img
+                            key={idx}
+                            src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                            alt={att.name || 'Member'}
+                            className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-xs"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action CTA */}
+                <div className="flex-shrink-0 p-5 bg-white/90 backdrop-blur-md border-t border-[#1A1A2E]/5 z-20">
+                  <button
+                    onClick={handleJoin}
+                    disabled={isFull && !isJoined}
+                    className={`w-full h-13 rounded-2xl font-extrabold text-[15px] shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      isJoined
+                        ? 'bg-white border border-[#1A1A2E]/15 text-[#1A1A2E]'
+                        : isFull
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                          : 'bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white shadow-[#FF6B9D]/30 active:scale-[0.99]'
+                    }`}
+                  >
+                    {isJoined ? '✓ Joined Squad (Tap to Leave)' : isFull ? 'Squad Full' : 'Join Squad 🚀'}
+                  </button>
+                </div>
+              </>
             )}
+
           </div>
-        </div>
-
-        {/* Location */}
-        <div className="bg-gray-100 p-4 rounded-xl">
-          <h3 className="font-semibold mb-2 text-[#1A1A2E]">Location</h3>
-          <p className="text-sm text-gray-700">{meetup.address}</p>
-        </div>
-      </div>
-
-      {/* Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 pb-8">
-        <button
-          onClick={handleJoin}
-          disabled={isFull && !isJoined}
-          className={`w-full py-3 rounded-full font-semibold text-lg transition-all ${
-            isJoined 
-              ? 'border-2 border-gray-300 text-gray-700' 
-              : isFull 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-lg'
-          }`}
-        >
-          {isJoined ? 'Leave Meetup' : isFull ? 'Event Full' : 'Join Meetup'}
-        </button>
+        </AuroraBackground>
       </div>
     </div>
   );

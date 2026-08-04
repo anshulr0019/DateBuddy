@@ -1,4 +1,14 @@
 @import "tailwindcss";
+@source "../**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-pink: #FF6B9D;
+  --color-purple: #7B68EE;
+  --color-navy: #1A1A2E;
+  --color-lavender: #E6E6FA;
+  --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
 
 :root {
   --bg-main: #FAFAF7;
@@ -12,21 +22,32 @@
   --sar: env(safe-area-inset-right, 0px);
 }
 
-* {
-  box-sizing: border-box;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   touch-action: manipulation;
 }
 
 body {
-  margin: 0;
-  padding: 0;
   background: var(--bg-main);
   color: var(--navy);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
+}
+
+/* iOS Safari auto-zooms any focused input with font-size < 16px.
+   max() keeps inputs that are already larger at their current size. */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  font-size: max(16px, 1em);
 }
 
 .mobile-container {
@@ -87,6 +108,31 @@ body {
 .input-field:focus {
   outline: none;
   border-color: var(--pink);
+}
+
+/* iOS WebKit Date Input Layout & Overflow Fixes */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  display: block;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em;
+  margin: 0;
+  padding: 0;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
 }
 
 /* Hide scrollbar utility */
@@ -179,11 +225,18 @@ body {
 
 /* Page enter animation */
 @keyframes page-enter {
-  0% { opacity: 0; transform: translateY(6px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0.15;
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 .animate-page-enter {
-  animation: page-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-enter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
 /* Solid Story Ring for Phase 2 Restraint */
@@ -259,13 +312,50 @@ body {
   background-color: #E2E8F0;
 }
 
+/* ─────────────────────────────────────────────────
+   Cinematic Minimal Animations for Chat & UI
+───────────────────────────────────────────────── */
+@keyframes popover-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.93);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-popover-enter {
+  opacity: 0;
+  animation: popover-enter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes bubble-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-bubble-enter {
+  opacity: 0;
+  animation: bubble-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob, .animate-logo-bloom,
   .animate-float-in, .animate-page-enter, .pulse-glow, .nav-indicator-spring,
-  .animate-card-swipe-right, .animate-card-swipe-left, .animate-card-depth-enter {
+  .animate-card-swipe-right, .animate-card-swipe-left, .animate-card-depth-enter,
+  .animate-popover-enter, .animate-bubble-enter {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
   }
 }
+

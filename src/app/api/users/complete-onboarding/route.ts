@@ -2,161 +2,108 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users, photos, preferences, subscriptions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAuthSession } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
+
+const GENDERS = ['male', 'female', 'non-binary', 'other'];
+const LOOKING_FOR = ['men', 'women', 'everyone'];
+const MAX_PHOTOS = 6;
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 Complete onboarding API called');
-  
   try {
-    const body = await request.json();
-    console.log('📥 Received data:', body);
+    const session = await getAuthSession();
+    if (!session) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.userId;
 
-    const { 
-      phoneNumber, 
-      basicInfo, 
-      location, 
-      photos: photoUrls, 
-      bio, 
-      interests: selectedInterests, 
-      preferences: userPrefs 
+    const body = await request.json();
+    const {
+      basicInfo = {},
+      location,
+      photos: photoUrls = [],
+      bio = {},
+      preferences: userPrefs = {},
     } = body;
 
-    // Validate required fields
-    if (!phoneNumber) {
-      return NextResponse.json(
-        { success: false, message: 'Phone number required' },
-        { status: 400 }
-      );
+    if (typeof basicInfo.name !== 'string' || !basicInfo.name.trim()) {
+      return NextResponse.json({ success: false, message: 'Name is required' }, { status: 400 });
+    }
+    if (basicInfo.gender && !GENDERS.includes(basicInfo.gender)) {
+      return NextResponse.json({ success: false, message: 'Invalid gender' }, { status: 400 });
+    }
+    if (basicInfo.lookingFor && !LOOKING_FOR.includes(basicInfo.lookingFor)) {
+      return NextResponse.json({ success: false, message: 'Invalid lookingFor' }, { status: 400 });
     }
 
-    if (!basicInfo?.name || !basicInfo?.dateOfBirth) {
-      return NextResponse.json(
-        { success: false, message: 'Name and date of birth required' },
-        { status: 400 }
-      );
+    const dob =
+      basicInfo.dateOfBirth && !isNaN(Date.parse(basicInfo.dateOfBirth))
+        ? new Date(basicInfo.dateOfBirth)
+        : null;
+    if (!dob) {
+      return NextResponse.json({ success: false, message: 'A valid date of birth is required' }, { status: 400 });
     }
 
-    console.log('✅ Validation passed');
+    const age = (Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+    if (age < 18) {
+      return NextResponse.json({ success: false, message: 'You must be 18 or older' }, { status: 400 });
+    }
 
-    // Check if user exists
-    const existingUser = await db.select()
-      .from(users)
-      .where(eq(users.phoneNumber, phoneNumber))
-      .limit(1);
-
-    let user;
-
-    if (existingUser.length > 0) {
-      console.log('👤 User exists, updating...');
-      // Update existing user
-      const [updated] = await db.update(users)
-        .set({
-          name: basicInfo.name,
-          dateOfBirth: new Date(basicInfo.dateOfBirth),
-          gender: basicInfo.gender || 'other',
-          lookingFor: basicInfo.lookingFor || 'everyone',
-          city: location || null,
-          bio: bio?.bio || bio?.promptAnswer || null,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, existingUser[0].id))
-        .returning();
-      
-      user = updated;
-    } else {
-      console.log('👤 Creating new user...');
-      // Create new user
-      const [newUser] = await db.insert(users).values({
-        phoneNumber,
-        name: basicInfo.name,
-        dateOfBirth: new Date(basicInfo.dateOfBirth),
+    const [updated] = await db
+      .update(users)
+      .set({
+        name: basicInfo.name.trim().slice(0, 100),
+        dateOfBirth: dob,
         gender: basicInfo.gender || 'other',
         lookingFor: basicInfo.lookingFor || 'everyone',
-        city: location || null,
-        bio: bio?.bio || bio?.promptAnswer || null,
-      }).returning();
-      
-      user = newUser;
+        city: typeof location === 'string' ? location.slice(0, 100) : '',
+        bio: (bio?.bio || bio?.promptAnswer || '').slice(0, 500) || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) {
+      return NextResponse.json({ success: false, message: 'Account not found' }, { status: 401 });
     }
 
-    console.log('✅ User created/updated:', user.id);
+    const validPhotos = (Array.isArray(photoUrls) ? photoUrls : [])
+      .filter((url: unknown): url is string => typeof url === 'string' && url.trim().length > 0)
+      .slice(0, MAX_PHOTOS);
 
-    // Save photos
-    if (photoUrls && photoUrls.length > 0) {
-      // Delete existing photos for this user
-      await db.delete(photos).where(eq(photos.userId, user.id));
-      
-      const validPhotos = photoUrls.filter((url: string) => url && url.trim());
-      
-      if (validPhotos.length > 0) {
-        await db.insert(photos).values(
-          validPhotos.map((url: string, index: number) => ({
-            userId: user.id,
-            url,
-            orderIndex: index,
-          }))
-        );
-        console.log('✅ Photos saved:', validPhotos.length);
-      }
+    if (validPhotos.length > 0) {
+      await db.delete(photos).where(eq(photos.userId, userId));
+      await db.insert(photos).values(
+        validPhotos.map((url, index) => ({ userId, url, orderIndex: index }))
+      );
     }
 
-    // Save/update preferences
-    const existingPrefs = await db.select()
+    const prefValues = {
+      ageMin: Number(userPrefs?.ageRange?.[0]) || 18,
+      ageMax: Number(userPrefs?.ageRange?.[1]) || 30,
+      distanceMax: Number(userPrefs?.distance) || 50,
+    };
+
+    const existingPrefs = await db
+      .select()
       .from(preferences)
-      .where(eq(preferences.userId, user.id))
+      .where(eq(preferences.userId, userId))
       .limit(1);
 
     if (existingPrefs.length > 0) {
-      await db.update(preferences)
-        .set({
-          ageMin: userPrefs?.ageRange?.[0] || 18,
-          ageMax: userPrefs?.ageRange?.[1] || 30,
-          distanceMax: userPrefs?.distance || 50,
-        })
-        .where(eq(preferences.userId, user.id));
+      await db.update(preferences).set(prefValues).where(eq(preferences.userId, userId));
     } else {
-      await db.insert(preferences).values({
-        userId: user.id,
-        ageMin: userPrefs?.ageRange?.[0] || 18,
-        ageMax: userPrefs?.ageRange?.[1] || 30,
-        distanceMax: userPrefs?.distance || 50,
-      });
-    }
-    console.log('✅ Preferences saved');
-
-    // Save subscription (only if new user)
-    if (existingUser.length === 0) {
-      await db.insert(subscriptions).values({
-        userId: user.id,
-        tier: 'free',
-      });
-      console.log('✅ Subscription saved');
+      await db.insert(preferences).values({ userId, ...prefValues });
     }
 
-    console.log('🎉 Onboarding completed!');
+    await db.insert(subscriptions).values({ userId, tier: 'free' }).onConflictDoNothing();
 
-    return NextResponse.json({ 
-      success: true, 
-      userId: user.id,
-      message: 'Onboarding completed successfully' 
-    });
-
+    return NextResponse.json({ success: true, userId, message: 'Onboarding completed' });
   } catch (error) {
-    console.error('❌ Error:', error);
-    
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
-    }
-
+    console.error('Onboarding failed:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        message: 'Failed to complete onboarding',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { success: false, message: 'Could not save your profile. Please try again.' },
       { status: 500 }
     );
   }

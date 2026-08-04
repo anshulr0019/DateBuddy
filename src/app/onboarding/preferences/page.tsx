@@ -11,218 +11,171 @@ export default function PreferencesPage() {
   const [errorDetails, setErrorDetails] = useState('');
 
   const handleNext = async () => {
-    console.log('🟢 Next button clicked');
-    
     const preferences = { ageRange, distance };
     localStorage.setItem('onboarding_preferences', JSON.stringify(preferences));
-    
+
     setIsLoading(true);
     setErrorDetails('');
 
     try {
-      // Get all data from localStorage
-      const phoneNumber = localStorage.getItem('phoneNumber');
       const basicInfoStr = localStorage.getItem('onboarding_basic');
-      const location = localStorage.getItem('onboarding_location');
-      const photosStr = localStorage.getItem('onboarding_photos');
-      const bioStr = localStorage.getItem('onboarding_bio');
-      const interestsStr = localStorage.getItem('onboarding_interests');
-
-      console.log('📦 LocalStorage Data:', {
-        phoneNumber,
-        hasBasicInfo: !!basicInfoStr,
-        hasLocation: !!location,
-        hasPhotos: !!photosStr,
-        hasBio: !!bioStr,
-        hasInterests: !!interestsStr,
-      });
-
-      // Validate we have required data
-      if (!phoneNumber) {
-        alert('Phone number missing! Please restart onboarding.');
-        router.push('/welcome');
-        return;
-      }
-
       if (!basicInfoStr) {
-        alert('Basic info missing! Going back to basic info.');
-        router.push('/onboarding/basic-info');
+        setErrorDetails('Your profile details are missing. Please start again from the beginning.');
         return;
       }
 
       const payload = {
-        phoneNumber,
-        basicInfo: basicInfoStr ? JSON.parse(basicInfoStr) : {},
-        location: location || 'Mumbai',
-        photos: photosStr ? JSON.parse(photosStr) : [],
-        bio: bioStr ? JSON.parse(bioStr) : {},
-        interests: interestsStr ? JSON.parse(interestsStr) : [],
+        basicInfo: JSON.parse(basicInfoStr),
+        location: localStorage.getItem('onboarding_location') || '',
+        photos: JSON.parse(localStorage.getItem('onboarding_photos') || '[]'),
+        bio: JSON.parse(localStorage.getItem('onboarding_bio') || '{}'),
+        interests: JSON.parse(localStorage.getItem('onboarding_interests') || '[]'),
         preferences,
       };
 
-      console.log('📤 Sending payload:', payload);
-
-      const url = '/api/users/complete-onboarding';
-      console.log('🌐 URL:', url);
-
-      const response = await fetch(url, {
+      const response = await fetch('/api/users/complete-onboarding', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      console.log('📡 Response received');
-      console.log('Status:', response.status);
-      console.log('Status Text:', response.statusText);
-      console.log('OK:', response.ok);
-
-      // Try to parse response
-      let data;
-      const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
-
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-        console.log('📥 Response data:', data);
-      } else {
-        const text = await response.text();
-        console.log('📄 Response text:', text);
-        throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}`);
+      if (response.status === 401) {
+        router.push('/welcome');
+        return;
       }
+
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok && data.success) {
-        console.log('✅ Success! User ID:', data.userId);
-        localStorage.setItem('userId', data.userId);
         router.push('/onboarding/review');
       } else {
-        const errorMsg = data.message || data.error || 'Unknown error';
-        console.error('❌ Server error:', errorMsg);
-        setErrorDetails(errorMsg);
-        alert(`Server Error: ${errorMsg}`);
+        setErrorDetails(data.message || 'Could not save your profile. Please try again.');
       }
-
-    } catch (error) {
-      console.error('❌ Caught exception:', error);
-      
-      let errorMessage = 'Unknown error';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = 'Network error - cannot reach server. Is the dev server running?';
-      }
-
-      setErrorDetails(errorMessage);
-      alert(`Error: ${errorMessage}`);
-      
+    } catch {
+      setErrorDetails('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Progress Bar */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <button onClick={() => router.back()} className="text-2xl">←</button>
-          <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-bg" style={{ width: '84%' }}></div>
+    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+        {/* Progress Bar Header */}
+        <div className="flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <button
+              onClick={() => router.back()}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 border border-[#1A1A2E]/10 text-[#1A1A2E] shadow-sm backdrop-blur-md hover:bg-white transition-all cursor-pointer"
+            >
+              ←
+            </button>
+            <div className="flex-1 h-2 bg-black/5 rounded-full overflow-hidden p-0.5 border border-white/60">
+              <div className="h-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] rounded-full transition-all duration-500" style={{ width: '84%' }} />
+            </div>
+            <span className="text-[12px] font-bold text-[#1A1A2E]/50">6/7</span>
           </div>
         </div>
-        <p className="text-sm text-gray-600">Step 6 of 7</p>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 px-6 pb-24">
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-6">Who would you like to meet?</h1>
-
-        {errorDetails && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{errorDetails}</p>
+        {/* Main Content */}
+        <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6">
+          <div className="mb-6">
+            <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Who would you like to meet?</h1>
+            <p className="text-[14px] text-[#1A1A2E]/60 mt-1">Set your discovery preferences for age and distance</p>
           </div>
-        )}
 
-        <div className="space-y-8">
-          {/* Age Range */}
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A2E] mb-4">
-              Age Range: {ageRange[0]} - {ageRange[1]}
-            </label>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-gray-600">Min Age: {ageRange[0]}</label>
-                <input
-                  type="range"
-                  min="18"
-                  max="50"
-                  value={ageRange[0]}
-                  onChange={(e) => {
-                    const newMin = parseInt(e.target.value);
-                    if (newMin < ageRange[1]) {
-                      setAgeRange([newMin, ageRange[1]]);
-                    }
-                  }}
-                  className="w-full"
-                />
+          {errorDetails && (
+            <div className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-2xl">
+              <p className="text-rose-600 text-xs font-semibold">{errorDetails}</p>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Age Range Card */}
+            <div className="rounded-[20px] border border-white/80 bg-white/80 p-5 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.06)] backdrop-blur-md">
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-[13px] font-bold text-[#1A1A2E] uppercase tracking-wider">Age Preference</label>
+                <span className="text-[15px] font-extrabold text-[#FF6B9D] bg-[#FF6B9D]/10 px-3 py-1 rounded-full">
+                  {ageRange[0]} - {ageRange[1]} yrs
+                </span>
               </div>
-              <div>
-                <label className="text-xs text-gray-600">Max Age: {ageRange[1]}</label>
-                <input
-                  type="range"
-                  min="18"
-                  max="50"
-                  value={ageRange[1]}
-                  onChange={(e) => {
-                    const newMax = parseInt(e.target.value);
-                    if (newMax > ageRange[0]) {
-                      setAgeRange([ageRange[0], newMax]);
-                    }
-                  }}
-                  className="w-full"
-                />
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-[12px] font-medium text-[#1A1A2E]/50 mb-1">
+                    <span>Minimum Age</span>
+                    <span>{ageRange[0]} yrs</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="18"
+                    max="50"
+                    value={ageRange[0]}
+                    onChange={(e) => {
+                      const newMin = parseInt(e.target.value);
+                      if (newMin < ageRange[1]) {
+                        setAgeRange([newMin, ageRange[1]]);
+                      }
+                    }}
+                    className="w-full accent-[#FF6B9D] cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between text-[12px] font-medium text-[#1A1A2E]/50 mb-1">
+                    <span>Maximum Age</span>
+                    <span>{ageRange[1]} yrs</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="18"
+                    max="50"
+                    value={ageRange[1]}
+                    onChange={(e) => {
+                      const newMax = parseInt(e.target.value);
+                      if (newMax > ageRange[0]) {
+                        setAgeRange([ageRange[0], newMax]);
+                      }
+                    }}
+                    className="w-full accent-[#7B68EE] cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Distance */}
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A2E] mb-4">
-              Maximum Distance: {distance} km
-            </label>
-            <input
-              type="range"
-              min="5"
-              max="100"
-              step="5"
-              value={distance}
-              onChange={(e) => setDistance(parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
+            {/* Distance Card */}
+            <div className="rounded-[20px] border border-white/80 bg-white/80 p-5 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.06)] backdrop-blur-md">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-[13px] font-bold text-[#1A1A2E] uppercase tracking-wider">Distance Radius</label>
+                <span className="text-[15px] font-extrabold text-[#7B68EE] bg-[#7B68EE]/10 px-3 py-1 rounded-full">
+                  {distance} km
+                </span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="100"
+                step="5"
+                value={distance}
+                onChange={(e) => setDistance(parseInt(e.target.value))}
+                className="w-full accent-[#FF6B9D] cursor-pointer mt-2"
+              />
+            </div>
 
-          <p className="text-sm text-gray-500 text-center">
-            These can be changed later in settings
-          </p>
+            <p className="text-[12px] text-[#1A1A2E]/45 text-center pt-2">
+              You can adjust these preferences anytime in settings
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Next Button */}
-      <div className="p-6 border-t border-gray-200">
-        <button 
-          onClick={handleNext} 
-          disabled={isLoading}
-          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Saving...' : 'Next'}
-        </button>
+        {/* Footer Button */}
+        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/5">
+          <button 
+            onClick={handleNext} 
+            disabled={isLoading}
+            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Saving Profile...' : 'Save & Continue →'}
+          </button>
+        </div>
       </div>
     </div>
   );

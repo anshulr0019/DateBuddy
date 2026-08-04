@@ -4,7 +4,7 @@
 export interface Person {
   id: number; name: string; age: number; location: string
   bio: string; profession: string; education: string
-  distance: string; photo: string; online: boolean
+  distance: string; photo: string; photos?: string[]; online: boolean
   verified: boolean; tags: string[]; mutuals: number
   prompts: { q: string; a: string }[]
 }
@@ -14,11 +14,29 @@ export interface Convo { id: number; name: string; lastMsg: string; time: string
 export interface Story { id: number; name: string; photo: string; hasNew: boolean; isMe?: boolean }
 export interface Post { id: number; author: string; avatar: string; time: string; content: string; photo?: string; likes: number; comments: number; liked: boolean }
 
+export interface GymSquad {
+  id: number;
+  hostId: number;
+  title: string;
+  category: 'Gym' | 'Badminton' | 'Football' | 'Running' | 'Yoga' | 'Tennis';
+  hostName: string;
+  hostAvatar: string;
+  venue: string;
+  timeSlot: string;
+  level: string;
+  equipment?: string;
+  rules?: string;
+  maxSlots: number;
+  joinedSlots: number;
+  joined: boolean;
+  attendees: Array<{ id: number; name: string; avatar: string; role: 'host' | 'member' }>;
+}
+
 /* ─────────────────────────────────────────────────
    Mock Data
 ───────────────────────────────────────────────── */
 export const PEOPLE: Person[] = [
-  { id:1, name:'Priya Sharma', age:24, location:'Mumbai, MH', bio:'Day dreamer 🌸 | Coffee & sunsets | Finding more of myself these days ✨', profession:'UX Designer at Swiggy', education:'NID Ahmedabad', distance:'800m away', photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=800&fit=crop&crop=faces', online:true, verified:true, tags:['Yoga','Travel','Design','Coffee'], mutuals:4, prompts:[{q:'I can talk for hours about…', a:'The intersection of design and human emotion.'},{q:'My perfect weekend…', a:'Farmers market, long drive, good book.'}] },
+  { id:1, name:'Priya Sharma', age:24, location:'Mumbai, MH', bio:'Day dreamer 🌸 | Coffee & sunsets | Finding more of myself these days ✨', profession:'UX Designer at Swiggy', education:'NID Ahmedabad', distance:'800m away', photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=800&fit=crop&crop=faces', photos: ['https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=800&fit=crop&crop=faces', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop&crop=faces'], online:true, verified:true, tags:['Yoga','Travel','Design','Coffee'], mutuals:4, prompts:[{q:'I can talk for hours about…', a:'The intersection of design and human emotion.'},{q:'My perfect weekend…', a:'Farmers market, long drive, good book.'}] },
   { id:2, name:'Ananya Gupta', age:26, location:'Delhi, DL', bio:"Bookworm 📚 | Chai over coffee | Let's spark real conversations 💬", profession:'Product Manager at Razorpay', education:'IIT Delhi', distance:'3km away', photo:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop&crop=faces', online:false, verified:true, tags:['Books','Music','Art','Films'], mutuals:7, prompts:[{q:'Current obsession…', a:'Learning to play the guitar between meetings.'},{q:'Fun fact…', a:'I can name every Oscar Best Picture since 1980.'}] },
   { id:3, name:'Kavya Menon', age:22, location:'Bangalore, KA', bio:'Engineer by day, dancer by night 💃 | Vibe check: good energy only', profession:'SDE at Google', education:'BITS Pilani', distance:'1.2km away', photo:'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=600&h=800&fit=crop&crop=faces', online:true, verified:false, tags:['Dance','Tech','Hiking','Anime'], mutuals:2, prompts:[{q:'Favorite destination…', a:'Coorg during monsoon. Nothing beats it.'},{q:'My perfect weekend…', a:'Hackathon on Saturday, trek on Sunday.'}] },
   { id:4, name:'Meera Nair', age:28, location:'Chennai, TN', bio:'Startup founder | Foodie | Occasional philosopher 🧠', profession:'Founder at Meera Studios', education:'IIM Bangalore', distance:'5km away', photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=800&fit=crop&crop=faces', online:false, verified:true, tags:['Business','Food','Philosophy','Fitness'], mutuals:11, prompts:[{q:'I can talk for hours about…', a:'Behavioral economics and why people do what they do.'},{q:'Current obsession…', a:'Building in public and open startups.'}] },
@@ -44,6 +62,109 @@ export const EVENTS: Event[] = [
   { id:4, title:'Indie Book Club July', emoji:'📖', date:'Wed, 30 Jul · 7pm', location:'Atta Galatta, Koramangala', attendees:22, photo:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=240&fit=crop', tag:'Books' },
 ]
 
+export const GYM_SQUADS: GymSquad[] = [
+  {
+    id: 1,
+    hostId: 3,
+    title: 'Leg Day & Heavy Lifts 🏋️',
+    category: 'Gym',
+    hostName: 'Kavya Menon',
+    hostAvatar: 'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=100&h=100&fit=crop&crop=faces',
+    venue: 'Cult.fit Gym, Bandra West',
+    timeSlot: 'Today · 6:30 PM',
+    level: 'Advanced',
+    equipment: 'Lifting belt, wrist wraps & chalk',
+    rules: 'Warmup starts at 6:30 sharp. Respect turn rotations!',
+    maxSlots: 4,
+    joinedSlots: 3,
+    joined: false,
+    attendees: [
+      { id: 3, name: 'Kavya Menon', avatar: 'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=100&h=100&fit=crop&crop=faces', role: 'host' },
+      { id: 2, name: 'Ananya Gupta', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=faces', role: 'member' },
+      { id: 5, name: 'Riya Kapoor', avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=faces', role: 'member' },
+    ],
+  },
+  {
+    id: 2,
+    hostId: 2,
+    title: 'Badminton Doubles Smash 🏸',
+    category: 'Badminton',
+    hostName: 'Ananya Gupta',
+    hostAvatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=faces',
+    venue: 'Willingdon Sports Club, Mahalaxmi',
+    timeSlot: 'Tomorrow · 7:00 AM',
+    level: 'Intermediate',
+    equipment: 'Yonex Racket & non-marking court shoes',
+    rules: 'Court reserved for 2 hours. Shuttlecocks provided.',
+    maxSlots: 4,
+    joinedSlots: 3,
+    joined: true,
+    attendees: [
+      { id: 2, name: 'Ananya Gupta', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=faces', role: 'host' },
+      { id: 1, name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', role: 'member' },
+      { id: 4, name: 'Meera Nair', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces', role: 'member' },
+    ],
+  },
+  {
+    id: 3,
+    hostId: 4,
+    title: 'Sunrise Promenade 5K Run 🏃',
+    category: 'Running',
+    hostName: 'Meera Nair',
+    hostAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces',
+    venue: 'Marine Drive Promenade',
+    timeSlot: 'Sun · 6:00 AM',
+    level: 'All Levels',
+    equipment: 'Running shoes & hydration bottle',
+    rules: 'Pace group 5:30/km and 6:30/km. Post-run chai included!',
+    maxSlots: 10,
+    joinedSlots: 7,
+    joined: false,
+    attendees: [
+      { id: 4, name: 'Meera Nair', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces', role: 'host' },
+      { id: 6, name: 'Aisha Khan', avatar: 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=100&h=100&fit=crop&crop=faces', role: 'member' },
+    ],
+  },
+  {
+    id: 4,
+    hostId: 6,
+    title: 'Turf Football 7v7 ⚽',
+    category: 'Football',
+    hostName: 'Aisha Khan',
+    hostAvatar: 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=100&h=100&fit=crop&crop=faces',
+    venue: 'Kick-Off Turf, BKC',
+    timeSlot: 'Sat · 5:00 PM',
+    level: 'Casual & Fun',
+    equipment: 'Turf boots / studs & shin guards',
+    rules: 'Friendly game, no harsh tackles. Bibs provided at venue.',
+    maxSlots: 14,
+    joinedSlots: 14,
+    joined: false,
+    attendees: [
+      { id: 6, name: 'Aisha Khan', avatar: 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=100&h=100&fit=crop&crop=faces', role: 'host' },
+    ],
+  },
+  {
+    id: 5,
+    hostId: 1,
+    title: 'Sunset Beach Yoga & Stretch 🧘',
+    category: 'Yoga',
+    hostName: 'Priya Sharma',
+    hostAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces',
+    venue: 'Juhu Beach (Near Hotel Novotel)',
+    timeSlot: 'Sat · 6:15 PM',
+    level: 'Beginner Friendly',
+    equipment: 'Yoga mat or beach towel',
+    rules: 'Mindful sunset flow followed by sound bath meditation.',
+    maxSlots: 8,
+    joinedSlots: 5,
+    joined: false,
+    attendees: [
+      { id: 1, name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', role: 'host' },
+    ],
+  },
+];
+
 export const CONVOS: Convo[] = [
   { id:1, name:'Priya Sharma', lastMsg:"Can't wait! See you tomorrow 🌸", time:'now', unread:3, photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', online:true, pinned:true },
   { id:2, name:'Design Minds', lastMsg:'Ananya: That prototype looks 🔥', time:'2m', unread:7, photo:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop', online:false },
@@ -51,7 +172,7 @@ export const CONVOS: Convo[] = [
   { id:4, name:'Meera Nair', lastMsg:'Loved your take on the podcast 🎙️', time:'2h', unread:0, photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces', online:false },
   { id:5, name:'Travel Tribe', lastMsg:'Anyone going to Goa next month?', time:'4h', unread:0, photo:'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=100&h=100&fit=crop', online:false },
   { id:6, name:'Riya Kapoor', lastMsg:'Check out this shot I took today 📷', time:'Yesterday', unread:0, photo:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=faces', online:true },
-]
+];
 
 export const STORIES: Story[] = [
   { id:0, name:'My Story', photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', hasNew:false, isMe:true },
@@ -60,10 +181,10 @@ export const STORIES: Story[] = [
   { id:3, name:'Riya', photo:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=faces', hasNew:true },
   { id:4, name:'Meera', photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces', hasNew:false },
   { id:5, name:'Aisha', photo:'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=100&h=100&fit=crop&crop=faces', hasNew:true },
-]
+];
 
 export const POSTS: Post[] = [
   { id:1, author:'Ananya Gupta', avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&h=80&fit=crop&crop=faces', time:'2h ago', content:"Just wrapped up a 3-hour deep work session and honestly? The focus was unreal. No phone, no notifications. Just me, my notebook, and a playlist of lo-fi jazz. This is the life. 🎵✨", photo:'https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=600&h=400&fit=crop', likes:142, comments:18, liked:false },
   { id:2, author:'Kavya Menon', avatar:'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=80&h=80&fit=crop&crop=faces', time:'5h ago', content:"Gave a talk at Google today on distributed systems and the audience was incredible. Questions were so sharp 💡 Always humbling to be in a room of brilliant people.", likes:287, comments:34, liked:true },
   { id:3, author:'Riya Kapoor', avatar:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=faces', time:'8h ago', content:"Golden hour from Spiti Valley last weekend. Words don't do it justice — so here's the photo. 🏔️", photo:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop', likes:534, comments:61, liked:false },
-]
+];

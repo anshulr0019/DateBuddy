@@ -1,17 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import FloatingNav from "./components/FloatingNav";
+import { NotificationProvider } from "./context/NotificationContext";
+import { FilterProvider } from "./context/FilterContext";
 
 export const metadata: Metadata = {
   title: "Dil Se - Find Your Vibe",
-  description: "India's coolest dating app for Gen Z. Connect with people nearby and find your perfect match.",
+  description: "India's coolest dating & connections app for Gen Z. Connect with people nearby and find your perfect match.",
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "Dil Se - Find Your Vibe",
+    description: "Connect with people nearby and find your vibe.",
+    url: "https://dilse.app",
+    siteName: "Dil Se",
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 };
 
@@ -88,9 +98,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <style dangerouslySetInnerHTML={{ __html: GLOBAL_ANIMATIONS_CSS }} />
       </head>
       <body className="bg-[#FAFAF7] text-[#1A1A2E] min-h-screen overflow-x-hidden antialiased font-sans selection:bg-[#FF6B9D]/25 selection:text-[#1A1A2E]">
-        <div className="animate-page-entry min-h-screen w-full">
-          {children}
-        </div>
+        <NotificationProvider>
+          <FilterProvider>
+            <main className="min-h-screen w-full">
+              {children}
+            </main>
+            <FloatingNav />
+          </FilterProvider>
+        </NotificationProvider>
       </body>
     </html>
   );

@@ -17,10 +17,12 @@ export async function GET() {
     }
 
     const [user] = await db.select().from(users).where(eq(users.id, session.userId));
+
     if (!user) {
+      // Session points at a deleted account — force a re-login.
       return NextResponse.json(
-        { success: false, message: 'User not found' },
-        { status: 404 }
+        { success: false, message: 'Account no longer exists' },
+        { status: 401 }
       );
     }
 
@@ -36,7 +38,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return NextResponse.json(
-      { success: false, message: 'Server error' },
+      { success: false, message: 'Failed to load profile' },
       { status: 500 }
     );
   }

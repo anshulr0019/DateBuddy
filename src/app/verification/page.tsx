@@ -33,8 +33,8 @@ export default function VerificationPage() {
   if (step === 'info') {
     return (
       <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
-        <div className="p-4">
-          <button onClick={() => router.back()} className="text-2xl">←</button>
+        <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))]">
+          <button onClick={() => router.back()} className="text-2xl" aria-label="Go back">←</button>
         </div>
 
         <div className="flex-1 flex flex-col justify-center px-6 pb-32">
@@ -174,7 +174,7 @@ export default function VerificationPage() {
 
   if (step === 'success') {
     return (
-      <div className="mobile-container min-h-screen psychedelic-bg flex flex-col items-center justify-center px-6">
+      <div className="mobile-container min-h-screen bg-gradient-to-br from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] flex flex-col items-center justify-center px-6">
         <div className="pulse text-8xl mb-6">✓</div>
         <h1 className="text-3xl font-bold text-white mb-4">You're Verified!</h1>
         <p className="text-white/90 text-center mb-8">

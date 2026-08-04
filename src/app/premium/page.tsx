@@ -34,8 +34,8 @@ export default function PremiumPage() {
   return (
     <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
-      <div className="psychedelic-bg text-white p-6 pb-12">
-        <button onClick={() => router.back()} className="text-2xl mb-4">
+      <div className="bg-gradient-to-br from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-12">
+        <button onClick={() => router.back()} className="text-2xl mb-4" aria-label="Close">
           ✕
         </button>
         <h1 className="text-3xl font-bold mb-2">Upgrade Your Experience ✨</h1>

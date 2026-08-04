@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean, varchar, jsonb, decimal, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, timestamp, integer, boolean, varchar, jsonb, decimal, pgEnum, uniqueIndex, index } from 'drizzle-orm/pg-core';
 
 // Enums
 export const genderEnum = pgEnum('gender', ['male', 'female', 'non-binary', 'other']);
@@ -12,7 +12,9 @@ export const reportReasonEnum = pgEnum('report_reason', ['inappropriate', 'spam'
 // Users table
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  phoneNumber: varchar('phone_number', { length: 15 }).notNull().unique(),
+  phoneNumber: varchar('phone_number', { length: 15 }).unique(),
+  email: varchar('email', { length: 255 }).unique(),
+  googleId: varchar('google_id', { length: 100 }).unique(),
   name: varchar('name', { length: 100 }).notNull(),
   dateOfBirth: timestamp('date_of_birth').notNull(),
   gender: genderEnum('gender').notNull(),
@@ -87,7 +89,9 @@ export const swipes = pgTable('swipes', {
   swipedId: integer('swiped_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   action: swipeActionEnum('action').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  swiperSwipedUnique: uniqueIndex('swipes_swiper_swiped_unique').on(table.swiperId, table.swipedId),
+}));
 
 // Matches table
 export const matches = pgTable('matches', {
@@ -96,7 +100,9 @@ export const matches = pgTable('matches', {
   user2Id: integer('user2_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   matchedAt: timestamp('matched_at').defaultNow(),
   isActive: boolean('is_active').default(true),
-});
+}, (table) => ({
+  matchPairUnique: uniqueIndex('matches_pair_unique').on(table.user1Id, table.user2Id),
+}));
 
 // Messages table
 export const messages = pgTable('messages', {
@@ -216,7 +222,9 @@ export const meetupAttendees = pgTable('meetup_attendees', {
   userId: integer('user_id').notNull().references(() => users.id),
   status: varchar('status', { length: 20 }).default('going'), // going, maybe, cancelled
   joinedAt: timestamp('joined_at').defaultNow(),
-});
+}, (table) => ({
+  attendeeUnique: uniqueIndex('meetup_attendees_unique').on(table.meetupId, table.userId),
+}));
 
 // Groups/Communities
 export const groups = pgTable('groups', {
@@ -262,3 +270,16 @@ export const checkIns = pgTable('check_ins', {
   checkedInAt: timestamp('checked_in_at').defaultNow(),
   expiresAt: timestamp('expires_at'),
 });
+
+// Phone OTP codes (hashed, single-use, short-lived)
+export const otpCodes = pgTable('otp_codes', {
+  id: serial('id').primaryKey(),
+  phoneNumber: varchar('phone_number', { length: 15 }).notNull(),
+  codeHash: varchar('code_hash', { length: 64 }).notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  consumedAt: timestamp('consumed_at'),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  phoneIdx: index('otp_codes_phone_idx').on(table.phoneNumber),
+}));

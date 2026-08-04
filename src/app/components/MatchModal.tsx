@@ -31,7 +31,7 @@ export default function MatchModal({ isOpen, onClose, match, currentUserPhoto }:
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 psychedelic-bg opacity-95" onClick={onClose} />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] opacity-95" onClick={onClose} />
 
       {/* Modal Content */}
       <div className="relative z-10 text-center px-6">

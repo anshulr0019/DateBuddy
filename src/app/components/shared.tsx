@@ -73,9 +73,9 @@ export function AuroraBackground({ subtle = false, children, className = '' }: {
   );
 }
 
-export function GlassCard({ children, className = '', style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
+export function GlassCard({ children, className = '', style, onClick }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void }) {
   return (
-    <div className={`rounded-[24px] border border-white/80 bg-white/80 shadow-[0_10px_30px_-15px_rgba(26,26,46,0.08)] backdrop-blur-md ${className}`} style={style}>
+    <div onClick={onClick} className={`rounded-[24px] border border-white/80 bg-white/80 shadow-[0_10px_30px_-15px_rgba(26,26,46,0.08)] backdrop-blur-md ${className}`} style={style}>
       {children}
     </div>
   );
@@ -84,7 +84,7 @@ export function GlassCard({ children, className = '', style }: { children: React
 export function PrimaryButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button onClick={onClick}
-      className={`group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-[15px] font-semibold text-white shadow-[0_12px_30px_-10px_rgba(255,107,157,0.5)] transition-all duration-200 active:scale-[0.985] cursor-pointer ${className}`}>
+      className={`group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-[#F43F5E] hover:bg-[#E11D48] text-[15px] font-semibold text-white shadow-2xs transition-all duration-200 active:scale-95 cursor-pointer ${className}`}>
       <span className="relative z-10">{children}</span>
     </button>
   );
@@ -96,7 +96,7 @@ export function OnlineDot({ className = '' }: { className?: string }) {
 
 export function VerifiedBadge() {
   return (
-    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6B9D] text-white">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F43F5E] text-white shadow-2xs">
       <Ic.Check />
     </div>
   );
