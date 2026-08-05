@@ -204,45 +204,217 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ─────────────────────────────────────────────────
-   Splash launch sequence — transform/opacity/filter
-   only (compositor-driven, no layout or paint work)
+   Splash — "Obsidian Bloom" launch sequence
+   Dark-field logo reveal: rotating conic aurora,
+   masked sheen sweep, heartbeat pulse + rings.
+   Every loop animates transform/opacity ONLY so the
+   whole sequence stays on the compositor (60fps in
+   Capacitor WKWebView). The one-shot blur on the
+   mark reveal is the single filter animation.
 ───────────────────────────────────────────────── */
-@keyframes splash-mark-in {
-  0% { opacity: 0; transform: scale(0.92) translateZ(0); filter: blur(8px); }
-  100% { opacity: 1; transform: scale(1) translateZ(0); filter: blur(0); }
-}
-@keyframes splash-fade-up {
-  0% { opacity: 0; transform: translate3d(0, 14px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-@keyframes splash-glow-in {
-  0% { opacity: 0; }
-  100% { opacity: 0.55; }
-}
-@keyframes splash-glow-breathe {
-  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1) translateZ(0); }
-  50% { opacity: 0.75; transform: translate(-50%, -50%) scale(1.07) translateZ(0); }
-}
-.splash-mark {
-  animation: splash-mark-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.splash-wordmark {
-  animation: splash-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
-}
-.splash-tagline {
-  animation: splash-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
-}
-.splash-glow {
-  opacity: 0;
-  animation:
-    splash-glow-in 0.9s ease-out 0.2s both,
-    splash-glow-breathe 3.2s ease-in-out 1.1s infinite;
-}
 .splash-root {
-  transition: opacity 0.35s ease;
+  background:
+    radial-gradient(120% 85% at 50% 40%, #181129 0%, #0d0919 55%, #060410 100%);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4, 0, 1, 1);
 }
 .splash-exit {
   opacity: 0;
+  transform: scale(1.045) translateZ(0);
+}
+
+/* Atmosphere entrance */
+@keyframes splash-atmos-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.splash-atmosphere {
+  animation: splash-atmos-in 1.1s ease-out both;
+}
+
+/* Drifting corner orbs — pre-softened radial gradients,
+   no filter: blur (too expensive at this size on iOS) */
+.splash-orb {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.splash-orb-1 {
+  width: min(78vmax, 980px); height: min(78vmax, 980px);
+  left: -28%; top: -18%;
+  background: radial-gradient(circle, rgba(255,107,157,0.16) 0%, rgba(255,107,157,0.07) 38%, transparent 66%);
+  animation: splash-orb-drift-1 9s ease-in-out infinite alternate;
+}
+.splash-orb-2 {
+  width: min(84vmax, 1060px); height: min(84vmax, 1060px);
+  right: -34%; bottom: -24%;
+  background: radial-gradient(circle, rgba(123,104,238,0.15) 0%, rgba(123,104,238,0.06) 40%, transparent 66%);
+  animation: splash-orb-drift-2 11s ease-in-out infinite alternate;
+}
+@keyframes splash-orb-drift-1 {
+  0% { transform: translate3d(-24px, 18px, 0) scale(0.97); }
+  100% { transform: translate3d(36px, -26px, 0) scale(1.06); }
+}
+@keyframes splash-orb-drift-2 {
+  0% { transform: translate3d(22px, 26px, 0) scale(0.96); }
+  100% { transform: translate3d(-38px, -14px, 0) scale(1.07); }
+}
+
+/* Rotating conic aurora blooming behind the mark.
+   Soft stops + radial mask read as light, not geometry. */
+.splash-aurora {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: min(120vmax, 1300px); height: min(120vmax, 1300px);
+  border-radius: 9999px;
+  will-change: transform;
+}
+.splash-aurora-a {
+  background: conic-gradient(from 40deg,
+    transparent 0%, rgba(255,107,157,0.20) 12%, transparent 30%,
+    rgba(123,104,238,0.18) 46%, transparent 62%,
+    rgba(255,71,126,0.14) 78%, transparent 95%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 26%, transparent 52%);
+  mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 26%, transparent 52%);
+  animation: splash-spin 18s linear infinite;
+}
+.splash-aurora-b {
+  background: conic-gradient(from 210deg,
+    transparent 0%, rgba(123,104,238,0.15) 15%, transparent 34%,
+    rgba(255,107,157,0.12) 55%, transparent 72%,
+    rgba(183,108,255,0.12) 86%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle, transparent 6%, rgba(0,0,0,0.7) 26%, transparent 50%);
+  mask-image: radial-gradient(circle, transparent 6%, rgba(0,0,0,0.7) 26%, transparent 50%);
+  animation: splash-spin-rev 26s linear infinite;
+}
+@keyframes splash-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes splash-spin-rev {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+/* Film grain — hides gradient banding, adds texture.
+   Static SVG noise tile; zero animation cost. */
+.splash-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.05;
+}
+
+/* Ambient glow breathing behind the mark — pre-soft
+   radial gradient, breathes via transform/opacity */
+@keyframes splash-glow-in {
+  0% { opacity: 0; }
+  100% { opacity: 0.85; }
+}
+@keyframes splash-glow-breathe {
+  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1) translateZ(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08) translateZ(0); }
+}
+.splash-glow {
+  opacity: 0;
+  background: radial-gradient(circle,
+    rgba(255,107,157,0.30) 0%, rgba(255,107,157,0.16) 24%,
+    rgba(123,104,238,0.13) 44%, rgba(123,104,238,0.05) 60%, transparent 72%);
+  animation:
+    splash-glow-in 1s ease-out 0.25s both,
+    splash-glow-breathe 3.4s ease-in-out 1.4s infinite;
+}
+
+/* Logo reveal — blur-in with premium deceleration */
+@keyframes splash-mark-in {
+  0% { opacity: 0; transform: scale(0.78) translateZ(0); filter: blur(16px); }
+  62% { filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) translateZ(0); filter: blur(0); }
+}
+.splash-mark {
+  animation: splash-mark-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+/* Heartbeat double-pulse — ba-bump, then settle */
+@keyframes splash-heartbeat {
+  0%, 100% { transform: scale(1) translateZ(0); }
+  16% { transform: scale(1.065) translateZ(0); }
+  32% { transform: scale(0.985) translateZ(0); }
+  48% { transform: scale(1.04) translateZ(0); }
+  68% { transform: scale(1) translateZ(0); }
+}
+.splash-beat {
+  animation: splash-heartbeat 1s ease-in-out 1.5s forwards;
+}
+
+/* Specular sheen sweeping across the mark only —
+   masked to the logo alpha, luxury-card style */
+.splash-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: url('/brand/logo-mark.png');
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-image: url('/brand/logo-mark.png');
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+.splash-sheen::after {
+  content: '';
+  position: absolute;
+  top: -30%; bottom: -30%; left: 0;
+  width: 46%;
+  background: linear-gradient(100deg,
+    transparent 8%, rgba(255,255,255,0.5) 44%,
+    rgba(255,255,255,0.85) 50%,
+    rgba(255,255,255,0.5) 56%, transparent 92%);
+  transform: translate3d(-140%, 0, 0) skewX(-14deg);
+  animation: splash-sheen-sweep 0.9s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;
+}
+@keyframes splash-sheen-sweep {
+  to { transform: translate3d(330%, 0, 0) skewX(-14deg); }
+}
+
+/* Pulse rings rippling out on the heartbeat */
+.splash-ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 200px; height: 200px;
+  margin: -100px 0 0 -100px;
+  border-radius: 9999px;
+  opacity: 0;
+  transform: scale(0.55) translateZ(0);
+  will-change: transform, opacity;
+}
+.splash-ring-1 {
+  border: 1.5px solid rgba(255,107,157,0.5);
+  animation: splash-ring-out 1.3s cubic-bezier(0.22, 1, 0.36, 1) 1.58s forwards;
+}
+.splash-ring-2 {
+  border: 1px solid rgba(123,104,238,0.45);
+  animation: splash-ring-out 1.5s cubic-bezier(0.22, 1, 0.36, 1) 1.76s forwards;
+}
+@keyframes splash-ring-out {
+  0% { opacity: 0; transform: scale(0.55) translateZ(0); }
+  18% { opacity: 0.65; }
+  100% { opacity: 0; transform: scale(2.15) translateZ(0); }
+}
+
+/* Floating embers — tiny dots drifting up, staggered */
+.splash-particle {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: splash-particle-float var(--pd, 4.5s) linear var(--pdelay, 0s) infinite;
+}
+@keyframes splash-particle-float {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  14% { opacity: var(--po, 0.6); }
+  80% { opacity: var(--po, 0.6); }
+  100% { opacity: 0; transform: translate3d(var(--px, 0px), -34vh, 0); }
 }
 
 /* Float-in animation */
@@ -381,17 +553,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .aurora-blob, .splash-mark, .splash-wordmark, .splash-tagline,
-  .animate-float-in, .animate-page-enter, .pulse-glow, .nav-indicator-spring,
-  .animate-card-swipe-right, .animate-card-swipe-left, .animate-card-depth-enter,
-  .animate-popover-enter, .animate-bubble-enter {
+  .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow,
+  .nav-indicator-spring, .animate-card-swipe-right, .animate-card-swipe-left,
+  .animate-card-depth-enter, .animate-popover-enter, .animate-bubble-enter {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
   }
-  .splash-glow {
+
+  /* Splash: static composition — mark + glow, no motion */
+  .splash-atmosphere, .splash-orb, .splash-aurora, .splash-mark,
+  .splash-beat, .splash-glow, .splash-sheen::after {
     animation: none !important;
-    opacity: 0.55 !important;
+  }
+  .splash-atmosphere { opacity: 1; }
+  .splash-mark { opacity: 1; transform: none; filter: none; }
+  .splash-glow { opacity: 0.7; }
+  .splash-sheen::after { opacity: 0; }
+  .splash-ring, .splash-particle {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  .splash-root {
+    transition: opacity 0.2s ease;
+    transform: none !important;
   }
 }
 
