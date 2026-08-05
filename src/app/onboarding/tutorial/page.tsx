@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 const SLIDES = [
   {
@@ -22,19 +21,20 @@ const SLIDES = [
 ];
 
 export default function TutorialPage() {
-  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleNext = () => {
     if (currentSlide < SLIDES.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      router.push('/discover');
+      // Hard navigation: see review page — a stale prefetched /discover
+      // redirect in the router cache would bounce back into onboarding.
+      window.location.assign('/discover');
     }
   };
 
   const handleSkip = () => {
-    router.push('/discover');
+    window.location.assign('/discover');
   };
 
   const slide = SLIDES[currentSlide];

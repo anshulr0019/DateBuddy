@@ -54,7 +54,7 @@ export default function ReviewPage() {
       const data = await response.json().catch(() => ({}));
 
       if (response.status === 401) {
-        router.push('/welcome');
+        window.location.assign('/welcome');
         return;
       }
 
@@ -63,7 +63,12 @@ export default function ReviewPage() {
         return;
       }
 
-      router.push('/discover');
+      // Hard navigation, NOT router.push: the client router may hold a
+      // prefetched /discover entry from before the session cookie was
+      // re-minted (the middleware's redirect to /onboarding/basic-info gets
+      // cached), which would bounce the user straight back into onboarding.
+      // A full-page load always re-runs the middleware with the fresh cookie.
+      window.location.assign('/discover');
     } catch {
       setError('Network error. Please check your connection and try again.');
     } finally {
