@@ -1,10 +1,10 @@
 {
-  "name": "Dil Se - Find Your Vibe",
-  "short_name": "Dil Se",
+  "name": "DateBuddy - Find Your Vibe",
+  "short_name": "DateBuddy",
   "description": "India's coolest dating & connections app for Gen Z. Connect with people nearby and find your vibe.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAFAF7",
+  "background_color": "#0D0B18",
   "theme_color": "#FF6B9D",
   "orientation": "portrait",
   "icons": [

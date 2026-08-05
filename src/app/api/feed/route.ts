@@ -10,7 +10,7 @@ import {
   prompts,
   userPromptAnswers,
 } from '@/db/schema';
-import { eq, notInArray, inArray, and, gt, asc } from 'drizzle-orm';
+import { eq, ne, notInArray, inArray, and, gt, asc } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -60,45 +60,57 @@ export async function GET(request: NextRequest) {
     const cursor = cursorParam !== null ? Number(cursorParam) : null;
     const validCursor = cursor !== null && Number.isInteger(cursor) && cursor > 0 ? cursor : null;
 
-    const [viewer] = await db
-      .select({ latitude: users.latitude, longitude: users.longitude })
-      .from(users)
-      .where(eq(users.id, currentUserId));
+    // Exclusions run as subqueries inside the candidates query so the
+    // whole selection is a single database round trip instead of two
+    // sequential stages. All excluded-id columns are NOT NULL, so the
+    // NOT IN subqueries are safe.
+    const swipedByMe = db
+      .select({ id: swipes.swipedId })
+      .from(swipes)
+      .where(eq(swipes.swiperId, currentUserId));
+    const blockedByMe = db
+      .select({ id: blocks.blockedId })
+      .from(blocks)
+      .where(eq(blocks.blockerId, currentUserId));
+    const blockedMe = db
+      .select({ id: blocks.blockerId })
+      .from(blocks)
+      .where(eq(blocks.blockedId, currentUserId));
 
-    const [userSwipes, blockedByMe, blockedMe] = await Promise.all([
-      db.select({ swipedId: swipes.swipedId }).from(swipes).where(eq(swipes.swiperId, currentUserId)),
-      db.select({ blockedId: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, currentUserId)),
-      db.select({ blockerId: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, currentUserId)),
-    ]);
-
-    const excludedIds = [
-      currentUserId,
-      ...userSwipes.map((s) => s.swipedId),
-      ...blockedByMe.map((b) => b.blockedId),
-      ...blockedMe.map((b) => b.blockerId),
+    const conditions = [
+      ne(users.id, currentUserId),
+      eq(users.isActive, true),
+      notInArray(users.id, swipedByMe),
+      notInArray(users.id, blockedByMe),
+      notInArray(users.id, blockedMe),
     ];
-
-    const conditions = [notInArray(users.id, excludedIds), eq(users.isActive, true)];
     if (validCursor !== null) {
       conditions.push(gt(users.id, validCursor));
     }
 
-    const candidateUsers = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        dateOfBirth: users.dateOfBirth,
-        city: users.city,
-        bio: users.bio,
-        latitude: users.latitude,
-        longitude: users.longitude,
-        isVerified: users.isVerified,
-        lastActiveAt: users.lastActiveAt,
-      })
-      .from(users)
-      .where(and(...conditions))
-      .orderBy(asc(users.id))
-      .limit(PAGE_SIZE);
+    // Viewer coordinates and candidates are independent — fetch in parallel.
+    const [[viewer], candidateUsers] = await Promise.all([
+      db
+        .select({ latitude: users.latitude, longitude: users.longitude })
+        .from(users)
+        .where(eq(users.id, currentUserId)),
+      db
+        .select({
+          id: users.id,
+          name: users.name,
+          dateOfBirth: users.dateOfBirth,
+          city: users.city,
+          bio: users.bio,
+          latitude: users.latitude,
+          longitude: users.longitude,
+          isVerified: users.isVerified,
+          lastActiveAt: users.lastActiveAt,
+        })
+        .from(users)
+        .where(and(...conditions))
+        .orderBy(asc(users.id))
+        .limit(PAGE_SIZE),
+    ]);
 
     if (candidateUsers.length === 0) {
       return NextResponse.json({ success: true, profiles: [], nextCursor: null });

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import GoogleSignInModal from '@/app/components/GoogleSignInModal';
+import BrandLogo from '@/app/components/BrandLogo';
 
 
 /* ------------------------------------------------------------------ */
@@ -135,12 +136,7 @@ export default function WelcomePage() {
       <div className="relative mx-auto flex h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col justify-between px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 overflow-hidden">
         {/* Brand row */}
         <header className="flex flex-shrink-0 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] shadow-[0_10px_30px_-10px_rgba(255,107,157,0.6)]">
-              <span className="text-white text-lg">💕</span>
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight">Dil Se</span>
-          </div>
+          <BrandLogo size={32} withWordmark />
           <a
             href="/help"
             className="text-[13px] font-medium text-[#1A1A2E]/60 transition hover:text-[#1A1A2E]"

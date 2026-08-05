@@ -6,14 +6,14 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { FilterProvider } from "./context/FilterContext";
 
 export const metadata: Metadata = {
-  title: "Dil Se - Find Your Vibe",
+  title: "DateBuddy - Find Your Vibe",
   description: "India's coolest dating & connections app for Gen Z. Connect with people nearby and find your perfect match.",
   manifest: "/manifest.json",
   openGraph: {
-    title: "Dil Se - Find Your Vibe",
+    title: "DateBuddy - Find Your Vibe",
     description: "Connect with people nearby and find your vibe.",
-    url: "https://dilse.app",
-    siteName: "Dil Se",
+    url: "https://datebuddy.app",
+    siteName: "DateBuddy",
     locale: "en_US",
     type: "website",
   },

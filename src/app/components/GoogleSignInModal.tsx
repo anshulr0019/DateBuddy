@@ -42,7 +42,7 @@ export default function GoogleSignInModal({ isOpen, onClose }: GoogleSignInModal
             </svg>
           </div>
           <h2 className="text-[20px] font-extrabold text-[#1A1A2E]">Sign in with Google</h2>
-          <p className="text-[13px] text-[#1A1A2E]/55 mt-1">Connect your Google account to Dil Se</p>
+          <p className="text-[13px] text-[#1A1A2E]/55 mt-1">Connect your Google account to DateBuddy</p>
         </div>
 
         <div className="space-y-3">

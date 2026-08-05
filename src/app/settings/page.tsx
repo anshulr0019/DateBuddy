@@ -351,7 +351,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[10px] font-black uppercase tracking-wider mb-1 shadow-sm">
-                      ✨ Dil Se Gold
+                      ✨ DateBuddy Gold
                     </div>
                     <h3 className="text-[15px] font-bold text-[#1A1A2E]">Unlimited Swipes & See Who Liked You</h3>
                   </div>

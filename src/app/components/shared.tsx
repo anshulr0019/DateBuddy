@@ -14,6 +14,7 @@ export function SafeImage({
   className = '',
   style,
   onClick,
+  eager = false,
 }: {
   src?: string;
   alt?: string;
@@ -21,6 +22,8 @@ export function SafeImage({
   className?: string;
   style?: React.CSSProperties;
   onClick?: (e: React.MouseEvent<HTMLDivElement | HTMLImageElement>) => void;
+  /* Set for above-the-fold/LCP images so they are not lazy-loaded */
+  eager?: boolean;
 }) {
   const [error, setError] = useState(false);
 
@@ -49,7 +52,8 @@ export function SafeImage({
     <img
       src={src}
       alt={alt || name}
-      loading="lazy"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchPriority={eager ? 'high' : undefined}
       decoding="async"
       onError={() => setError(true)}
       onClick={onClick}

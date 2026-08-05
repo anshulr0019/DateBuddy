@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Ic } from './icons';
 import { useNotifications } from '../context/NotificationContext';
+import { prefetchFeed } from '../lib/feedCache';
 
 type NavTab = 'discover' | 'home' | 'connections' | 'messages' | 'profile';
 
@@ -19,6 +20,12 @@ export default function FloatingNav() {
   const router = useRouter();
   const pathname = usePathname();
   const { unreadCount } = useNotifications();
+
+  // Warm the Discover deck while the user is elsewhere so entering
+  // /discover renders instantly. No-op when already cached or in flight.
+  useEffect(() => {
+    if (!pathname.startsWith('/discover')) prefetchFeed();
+  }, [pathname]);
 
   // Hide floating nav on standalone flow pages (onboarding, chat, meetups, etc.)
   const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium'];

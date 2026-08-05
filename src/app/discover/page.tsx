@@ -3,8 +3,18 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
+import BrandLogo from '../components/BrandLogo';
 import { AuroraBackground, SafeImage, PrimaryButton } from '../components/shared';
 import { useNotifications } from '../context/NotificationContext';
+import {
+  type FeedProfile,
+  getCachedFeed,
+  setCachedFeed,
+  markCacheFresh,
+  isCacheStale,
+  loadFeedPage,
+  preloadDeckImages,
+} from '../lib/feedCache';
 
 /* ─────────────────────────────────────────────────
    Scoped micro-interaction animations
@@ -31,19 +41,7 @@ const REPORT_REASONS = [
   { value: 'other', label: 'Something else' },
 ] as const;
 
-type Profile = {
-  id: number;
-  name: string;
-  age: number;
-  city: string | null;
-  bio: string | null;
-  verified: boolean;
-  online: boolean;
-  distance: string | null;
-  photos: string[];
-  tags: string[];
-  prompts: { q: string; a: string }[];
-};
+type Profile = FeedProfile;
 
 type MatchedUser = { id: number; name: string; photo: string | null };
 
@@ -52,10 +50,14 @@ type Status = 'loading' | 'ready' | 'error';
 export default function DiscoverPage() {
   const router = useRouter();
 
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [status, setStatus] = useState<Status>('loading');
-  const [nextCursor, setNextCursor] = useState<number | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  // Seed from the navigation-surviving cache so re-entering Discover
+  // (or entering after the nav prefetch landed) renders instantly.
+  const [profiles, setProfiles] = useState<Profile[]>(() => getCachedFeed()?.profiles ?? []);
+  const [status, setStatus] = useState<Status>(() =>
+    (getCachedFeed()?.profiles.length ?? 0) > 0 ? 'ready' : 'loading'
+  );
+  const [nextCursor, setNextCursor] = useState<number | null>(() => getCachedFeed()?.nextCursor ?? null);
+  const [hasMore, setHasMore] = useState(() => getCachedFeed()?.hasMore ?? true);
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [animatingSwipe, setAnimatingSwipe] = useState<'right' | 'left' | null>(null);
@@ -83,26 +85,25 @@ export default function DiscoverPage() {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     try {
-      const url = cursor === null ? '/api/feed' : `/api/feed?cursor=${cursor}`;
-      const res = await fetch(url);
+      // First-page loads are deduped with the nav prefetch inside loadFeedPage.
+      const result = await loadFeedPage(cursor);
 
-      if (res.status === 401) {
+      if (result.kind === 'unauthorized') {
         router.replace('/welcome');
         return;
       }
-      if (!res.ok) throw new Error(`Feed request failed (${res.status})`);
+      if (result.kind === 'error') throw new Error('Could not load profiles');
 
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'Could not load profiles');
-
-      const incoming: Profile[] = data.profiles ?? [];
+      const incoming: Profile[] = result.profiles;
       setProfiles((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
         return [...prev, ...incoming.filter((p) => !existingIds.has(p.id))];
       });
-      setNextCursor(data.nextCursor ?? null);
-      setHasMore(data.nextCursor !== null && incoming.length > 0);
+      setNextCursor(result.nextCursor);
+      setHasMore(result.nextCursor !== null && incoming.length > 0);
       setStatus('ready');
+      markCacheFresh();
+      preloadDeckImages(incoming);
     } catch {
       // Only surface a full-page error when there is nothing to show.
       setStatus((prev) => (prev === 'ready' ? 'ready' : 'error'));
@@ -112,8 +113,23 @@ export default function DiscoverPage() {
   }, [router]);
 
   useEffect(() => {
+    // Cache hit: skip the network entirely unless the deck is stale,
+    // in which case refresh in the background (dedup keeps it safe —
+    // already-swiped people are excluded server-side).
+    if (profiles.length > 0) {
+      if (isCacheStale()) loadFeed(null);
+      return;
+    }
     loadFeed(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadFeed]);
+
+  // Keep the cache in sync with the live deck so leaving and returning
+  // resumes exactly where the user left off.
+  useEffect(() => {
+    if (status !== 'ready') return;
+    setCachedFeed({ profiles, nextCursor, hasMore });
+  }, [status, profiles, nextCursor, hasMore]);
 
   // Top up the deck before it runs dry so there is no dead end.
   useEffect(() => {
@@ -313,6 +329,15 @@ export default function DiscoverPage() {
       img.src = next;
     }
   }, [currentProfile, currentPhotoIndex]);
+
+  // Preload the next card's first photo so swiping never shows a blank card.
+  useEffect(() => {
+    const upcoming = profiles[1]?.photos?.[0];
+    if (upcoming) {
+      const img = new Image();
+      img.src = upcoming;
+    }
+  }, [profiles]);
 
   /* ---- Loading ---- */
   if (status === 'loading') {
@@ -803,14 +828,11 @@ function TopBar() {
 
   return (
     <header className="flex items-center justify-between rounded-2xl border border-white/75 bg-white/70 px-5 py-2.5 shadow-[0_6px_24px_-8px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_4px_12px_-2px_rgba(255,107,157,0.35)]">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-          </svg>
-        </div>
-        <span className="text-[17px] font-extrabold tracking-tight text-[#1A1A2E] leading-none block">Dil Se</span>
-      </div>
+      <BrandLogo
+        size={34}
+        withWordmark
+        wordmarkClassName="text-[17px] font-extrabold tracking-tight text-[#1A1A2E] leading-none"
+      />
       <button
         onClick={openNotifications}
         aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}

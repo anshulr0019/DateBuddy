@@ -170,7 +170,7 @@ export default function ConnectionsPage() {
                     <GlassCard
                       key={p.id}
                       className="animate-bubble-enter flex flex-col justify-between items-center text-center p-4 overflow-hidden border border-gray-200/70 hover:border-[#F43F5E]/30 transition-all shadow-2xs"
-                      style={{ animationDelay: `${i * 35}ms` }}
+                      style={{ animationDelay: `${Math.min(i, 8) * 35}ms` }}
                     >
                       <div className="flex flex-col items-center w-full">
                         <div className="relative mx-auto mb-2.5 h-20 w-20 overflow-hidden rounded-full shadow-2xs">

@@ -10,7 +10,6 @@ export interface Person {
 }
 export interface Community { id: number; name: string; emoji: string; members: string; category: string; photo: string; joined: boolean }
 export interface Event { id: number; title: string; emoji: string; date: string; location: string; attendees: number; photo: string; tag: string }
-export interface Convo { id: number; name: string; lastMsg: string; time: string; unread: number; photo: string; online: boolean; pinned?: boolean }
 export interface Story { id: number; name: string; photo: string; hasNew: boolean; isMe?: boolean }
 export interface Post { id: number; author: string; avatar: string; time: string; content: string; photo?: string; likes: number; comments: number; liked: boolean }
 
@@ -165,14 +164,6 @@ export const GYM_SQUADS: GymSquad[] = [
   },
 ];
 
-export const CONVOS: Convo[] = [
-  { id:1, name:'Priya Sharma', lastMsg:"Can't wait! See you tomorrow 🌸", time:'now', unread:3, photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', online:true, pinned:true },
-  { id:2, name:'Design Minds', lastMsg:'Ananya: That prototype looks 🔥', time:'2m', unread:7, photo:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop', online:false },
-  { id:3, name:'Kavya Menon', lastMsg:'When are you free this week?', time:'18m', unread:1, photo:'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=100&h=100&fit=crop&crop=faces', online:true },
-  { id:4, name:'Meera Nair', lastMsg:'Loved your take on the podcast 🎙️', time:'2h', unread:0, photo:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=faces', online:false },
-  { id:5, name:'Travel Tribe', lastMsg:'Anyone going to Goa next month?', time:'4h', unread:0, photo:'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=100&h=100&fit=crop', online:false },
-  { id:6, name:'Riya Kapoor', lastMsg:'Check out this shot I took today 📷', time:'Yesterday', unread:0, photo:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=faces', online:true },
-];
 
 export const STORIES: Story[] = [
   { id:0, name:'My Story', photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', hasNew:false, isMe:true },

@@ -15,8 +15,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(welcomeUrl);
   }
 
-  // If user is logged in and visits /welcome or / without switch parameter, redirect to /discover
-  if (token && (pathname === '/welcome' || pathname === '/') && !isSwitchingAccount) {
+  // If user is logged in and visits /welcome without switch parameter, redirect to /discover.
+  // "/" is deliberately excluded: the launch splash always plays there and routes onward itself.
+  if (token && pathname === '/welcome' && !isSwitchingAccount) {
     const discoverUrl = new URL('/discover', request.url);
     return NextResponse.redirect(discoverUrl);
   }

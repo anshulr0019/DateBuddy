@@ -295,7 +295,7 @@ export default function HomePage() {
                       key={person.id}
                       onClick={() => router.push('/discover')}
                       className="animate-bubble-enter p-3.5 overflow-hidden border border-gray-200/70 hover:border-[#F43F5E]/30 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
-                      style={{ animationDelay: `${i * 40}ms` }}
+                      style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                     >
                       <div className="flex items-center gap-3.5">
                         {/* Avatar */}
@@ -381,7 +381,7 @@ export default function HomePage() {
                         key={sq.id}
                         onClick={() => setSelectedDetailSquad(sq)}
                         className="animate-bubble-enter p-4 border border-gray-200/70 hover:border-[#F43F5E]/30 transition-all flex flex-col justify-between cursor-pointer active:scale-[0.99] group"
-                        style={{ animationDelay: `${i * 40}ms` }}
+                        style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2.5">
                           <div className="flex items-center gap-2.5">
@@ -488,7 +488,7 @@ export default function HomePage() {
                       key={e.id}
                       onClick={() => router.push('/discover/meetups')}
                       className="animate-bubble-enter min-w-[250px] max-w-[270px] p-4 flex-shrink-0 snap-start border border-gray-200/70 hover:border-[#F43F5E]/30 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98]"
-                      style={{ animationDelay: `${i * 50}ms` }}
+                      style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
                     >
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 shadow-2xs">

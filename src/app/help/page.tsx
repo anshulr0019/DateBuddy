@@ -7,9 +7,9 @@ export default function HelpPage() {
   const router = useRouter();
 
   const faqs = [
-    { q: 'How does Dil Se work?', a: 'Dil Se is a dating and connections app designed for Gen Z. You can swipe profiles, host or join sports squads, and connect with people who share your vibe.' },
+    { q: 'How does DateBuddy work?', a: 'DateBuddy is a dating and connections app designed for Gen Z. You can swipe profiles, host or join sports squads, and connect with people who share your vibe.' },
     { q: 'How do I complete phone verification?', a: 'Enter your 10-digit Indian phone number on the welcome screen, then enter the 6-digit code we text you. The code expires after 5 minutes.' },
-    { q: 'Is Dil Se free to use?', a: 'Yes! Dil Se is 100% free with unlimited likes, real database messaging, and profile customization.' },
+    { q: 'Is DateBuddy free to use?', a: 'Yes! DateBuddy is 100% free with unlimited likes, real database messaging, and profile customization.' },
     { q: 'How do I edit my profile photos?', a: 'Go to your Profile tab, click "Edit Profile" or gear icon to update your bio, interests, and photos.' },
   ];
 
@@ -53,7 +53,7 @@ export default function HelpPage() {
             <div className="rounded-[20px] bg-white border border-[#1A1A2E]/8 p-5 text-center shadow-2xs">
               <p className="text-[13px] font-medium text-[#1A1A2E]/60 mb-2">Still need assistance?</p>
               <a
-                href="mailto:support@dilse.app"
+                href="mailto:support@datebuddy.app"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1A1A2E]/5 text-[#FF6B9D] font-bold text-[14px] hover:bg-[#FF6B9D]/10 transition-colors"
               >
                 📧 Email Support

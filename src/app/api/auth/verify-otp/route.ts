@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
             gender: 'female',
             lookingFor: 'everyone',
             city: 'Mumbai',
-            bio: 'Hey there! Connected on Dil Se 💕',
+            bio: 'Hey there! Connected on DateBuddy 💕',
             isVerified: true,
           })
           .returning()
