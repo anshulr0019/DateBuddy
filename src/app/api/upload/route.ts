@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { randomUUID } from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,18 +41,14 @@ export async function POST(request: NextRequest) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
     if (!cloudName || !uploadPreset) {
-      // Dev fallback: a data URL here would be multiple MB per photo, which
-      // overflows localStorage during onboarding and bloats the photos table.
-      // Save to public/uploads and return a short URL instead.
-      console.log('[UPLOAD] Cloudinary not configured — saving to public/uploads (dev-only fallback).');
+      // Fallback: convert to base64 data URL. Works on Vercel's read-only
+      // filesystem and local dev alike. Photos are stored in the DB via the
+      // photos table, so the data URL is persisted there.
+      console.log('[UPLOAD] Cloudinary not configured — using base64 data URL fallback.');
       const buffer = Buffer.from(await file.arrayBuffer());
-      const ext =
-        { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic' }[file.type] ?? 'jpg';
-      const fileName = `${randomUUID()}.${ext}`;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await fs.mkdir(uploadDir, { recursive: true });
-      await fs.writeFile(path.join(uploadDir, fileName), buffer);
-      return NextResponse.json({ success: true, url: `/uploads/${fileName}` });
+      const base64 = buffer.toString('base64');
+      const dataUrl = `data:${file.type};base64,${base64}`;
+      return NextResponse.json({ success: true, url: dataUrl });
     }
 
     const cloudFormData = new FormData();
