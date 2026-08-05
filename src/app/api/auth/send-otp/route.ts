@@ -24,47 +24,37 @@ export async function POST(request: NextRequest) {
 
     const code = String(randomInt(100000, 1000000));
 
-    try {
-      // Rate limit: one code per minute per number.
-      const recent = await db
-        .select()
-        .from(otpCodes)
-        .where(
-          and(
-            eq(otpCodes.phoneNumber, normalized),
-            gt(otpCodes.createdAt, new Date(Date.now() - RESEND_COOLDOWN_MS))
-          )
+    // Rate limit: one code per minute per number.
+    const recent = await db
+      .select()
+      .from(otpCodes)
+      .where(
+        and(
+          eq(otpCodes.phoneNumber, normalized),
+          gt(otpCodes.createdAt, new Date(Date.now() - RESEND_COOLDOWN_MS))
         )
-        .catch(() => []);
+      );
 
-      if (recent && recent.length > 0) {
-        return NextResponse.json(
-          { success: false, message: 'Please wait a minute before requesting another code' },
-          { status: 429 }
-        );
-      }
-
-      // Invalidate any outstanding codes for this number.
-      await db
-        .update(otpCodes)
-        .set({ consumedAt: new Date() })
-        .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)))
-        .catch(() => {});
-
-      await db.insert(otpCodes).values({
-        phoneNumber: normalized,
-        codeHash: hashOtp(normalized, code),
-        expiresAt: new Date(Date.now() + OTP_TTL_MS),
-      }).catch(() => {});
-    } catch (dbErr) {
-      console.warn('[AUTH] Database bypassed or offline during send-otp:', dbErr);
+    if (recent.length > 0) {
+      return NextResponse.json(
+        { success: false, message: 'Please wait a minute before requesting another code' },
+        { status: 429 }
+      );
     }
 
+    // Invalidate any outstanding codes for this number.
+    await db
+      .update(otpCodes)
+      .set({ consumedAt: new Date() })
+      .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)));
+
+    await db.insert(otpCodes).values({
+      phoneNumber: normalized,
+      codeHash: hashOtp(normalized, code),
+      expiresAt: new Date(Date.now() + OTP_TTL_MS),
+    });
+
     if (!(await sendSms(normalized, code))) {
-      // In non-production, return success even if Twilio isn't set up
-      if (process.env.NODE_ENV !== 'production') {
-        return NextResponse.json({ success: true, message: 'OTP sent (Dev mode: 1234)' });
-      }
       return NextResponse.json(
         { success: false, message: 'Could not send verification code. Please try again.' },
         { status: 502 }
@@ -74,8 +64,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error sending OTP:', error);
-    // Safety fallback: allow user to navigate to verify screen
-    return NextResponse.json({ success: true, message: 'OTP sent (Session fallback)' });
+    return NextResponse.json(
+      { success: false, message: 'Could not send verification code. Please try again.' },
+      { status: 500 }
+    );
   }
 }
 
@@ -85,12 +77,19 @@ async function sendSms(phoneNumber: string, code: string): Promise<boolean> {
   const from = process.env.TWILIO_FROM_NUMBER;
 
   if (!sid || !token || !from) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('[AUTH] Twilio is not configured; refusing to send OTP in production.');
-      return false;
+    // Printing a login code to the log is a real credential leak, so it requires an
+    // explicit opt-in that is ignored in production rather than keying off NODE_ENV.
+    if (process.env.NODE_ENV !== 'production' && process.env.OTP_DEV_LOG === 'true') {
+      console.log(`[AUTH][dev] OTP for ${phoneNumber} is ${code}`);
+      return true;
     }
-    console.log(`[AUTH][dev] OTP for ${phoneNumber} is ${code}`);
-    return true;
+    console.error(
+      '[AUTH] Twilio is not configured; cannot send OTP.' +
+        (process.env.NODE_ENV === 'production'
+          ? ''
+          : ' Set OTP_DEV_LOG=true in .env.local to print codes to this log instead.')
+    );
+    return false;
   }
 
   const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {

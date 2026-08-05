@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
+import { randomUUID } from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getAuthSession();
     if (!session) {
-      console.warn('[UPLOAD] No active session cookie — processing photo upload as guest/onboarding session.');
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
     const formData = await request.formData();
@@ -41,13 +44,18 @@ export async function POST(request: NextRequest) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
     if (!cloudName || !uploadPreset) {
-      console.log('[UPLOAD] Cloudinary not configured — processing image into local Data URL.');
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const mimeType = file.type || 'image/jpeg';
-      const base64Data = buffer.toString('base64');
-      const dataUrl = `data:${mimeType};base64,${base64Data}`;
-      return NextResponse.json({ success: true, url: dataUrl });
+      // Dev fallback: a data URL here would be multiple MB per photo, which
+      // overflows localStorage during onboarding and bloats the photos table.
+      // Save to public/uploads and return a short URL instead.
+      console.log('[UPLOAD] Cloudinary not configured — saving to public/uploads (dev-only fallback).');
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const ext =
+        { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic' }[file.type] ?? 'jpg';
+      const fileName = `${randomUUID()}.${ext}`;
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(path.join(uploadDir, fileName), buffer);
+      return NextResponse.json({ success: true, url: `/uploads/${fileName}` });
     }
 
     const cloudFormData = new FormData();

@@ -107,10 +107,11 @@ export async function GET(request: NextRequest) {
       await db.insert(subscriptions).values({ userId: user.id, tier: 'free' }).onConflictDoNothing();
     }
 
-    await setAuthSession(user.id, user.phoneNumber ?? '');
+    const onboardingComplete = !isNewUser && user.onboardingCompletedAt !== null;
+    await setAuthSession(user.id, user.phoneNumber ?? '', onboardingComplete);
 
     // Send brand-new accounts through onboarding; returning users straight in.
-    const destination = isNewUser || !user.city ? '/onboarding/basic-info' : '/discover';
+    const destination = onboardingComplete ? '/discover' : '/onboarding/basic-info';
     const response = NextResponse.redirect(new URL(destination, origin));
     response.cookies.delete('oauth_state');
     return response;

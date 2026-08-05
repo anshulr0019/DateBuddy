@@ -75,7 +75,7 @@ export default function BasicInfoPage() {
             </div>
           )}
           <div className="mb-6">
-            <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Let's get to know you</h1>
+            <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Let&apos;s get to know you</h1>
             <p className="text-[14px] text-[#1A1A2E]/60 mt-1">This info appears on your profile for others to discover</p>
           </div>
 

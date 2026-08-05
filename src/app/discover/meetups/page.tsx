@@ -41,6 +41,10 @@ export default function DiscoverMeetupsPage() {
     async function fetchMeetups() {
       try {
         const res = await fetch('/api/meetups');
+        if (res.status === 401) {
+          router.replace('/welcome');
+          return;
+        }
         if (!res.ok) throw new Error('Failed to fetch meetups');
         const data = await res.json();
         if (data.success && data.meetups) {
@@ -53,7 +57,7 @@ export default function DiscoverMeetupsPage() {
       }
     }
     fetchMeetups();
-  }, []);
+  }, [router]);
 
   const filteredMeetups = meetups.filter((m) => {
     const matchesSearch =

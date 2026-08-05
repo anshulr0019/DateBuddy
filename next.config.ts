@@ -20,9 +20,6 @@ const nextConfig: NextConfig = {
     'http://192.168.1.43:3000',
     'capacitor://localhost'
   ],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },

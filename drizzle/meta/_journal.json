@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1785825316028,
+      "tag": "0000_fixed_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785919411961,
+      "tag": "0001_quick_skreet",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785921013432,
+      "tag": "0002_strange_sue_storm",
+      "breakpoints": true
+    }
+  ]
+}

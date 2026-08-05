@@ -105,7 +105,7 @@ export default function VerifyOtpPage() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('userId', String(data.user.id));
         }
-        router.push(data.isNewUser ? '/onboarding/basic-info' : '/discover');
+        router.push(data.onboardingComplete ? '/discover' : '/onboarding/basic-info');
       } else {
         setError(data.message || 'Invalid verification code');
       }
@@ -195,7 +195,7 @@ export default function VerifyOtpPage() {
             </button>
 
             <div className="mt-6 flex items-center justify-center gap-2 text-[14px] text-[#1A1A2E]/60">
-              <span>Didn't receive code?</span>
+              <span>Didn&apos;t receive code?</span>
               <button
                 type="button"
                 onClick={() => setResendCooldown(30)}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import GoogleSignInModal from '@/app/components/GoogleSignInModal';
 import BrandLogo from '@/app/components/BrandLogo';
@@ -69,6 +69,16 @@ const AURORA_CSS = `
 }
 `;
 
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  google_auth_failed: 'Google sign-in was cancelled or failed. Please try again.',
+  invalid_state: 'Your sign-in session expired. Please try again.',
+  missing_google_client_id: 'Google sign-in is not configured (missing client ID). Restart the server after setting NEXT_PUBLIC_GOOGLE_CLIENT_ID.',
+  missing_credentials: 'Google sign-in is not configured (missing credentials on the server).',
+  token_exchange_failed: 'Could not verify your Google account. Please try again.',
+  invalid_user_data: 'Google did not return a verified account. Please use a verified Google account.',
+  oauth_exception: 'Something went wrong during Google sign-in. Please try again.',
+};
+
 export default function WelcomePage() {
   const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -76,6 +86,15 @@ export default function WelcomePage() {
   const [focused, setFocused] = useState(false);
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const [authError, setAuthError] = useState("");
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('error');
+    if (!code) return;
+    setAuthError(OAUTH_ERROR_MESSAGES[code] ?? 'Sign-in failed. Please try again.');
+    // Strip the param so middleware resumes normal redirects and a reload doesn't re-show the error.
+    window.history.replaceState(null, '', '/welcome');
+  }, []);
 
   const isValid = phoneNumber.length === 10;
 
@@ -162,7 +181,7 @@ export default function WelcomePage() {
               </span>
             </h1>
             <p className="mt-2 max-w-[300px] text-[14px] sm:text-[15px] leading-relaxed text-[#1A1A2E]/60">
-              India's most loved dating app for a generation that dates differently.
+              India&apos;s most loved dating app for a generation that dates differently.
             </p>
           </section>
 
@@ -274,10 +293,19 @@ export default function WelcomePage() {
                 <div className="h-px flex-1 bg-[#1A1A2E]/10" />
               </div>
 
+              {authError && (
+                <div className="mb-2.5 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-[12.5px] font-semibold text-center leading-snug">
+                  {authError}
+                </div>
+              )}
+
               {/* Social */}
               <div className="grid grid-cols-2 gap-2.5">
                 <button
-                  onClick={() => setShowGoogleModal(true)}
+                  onClick={() => {
+                    setAuthError("");
+                    setShowGoogleModal(true);
+                  }}
                   className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] cursor-pointer min-h-[44px]"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24">
@@ -289,16 +317,15 @@ export default function WelcomePage() {
                   Google
                 </button>
                 <button
-                  onClick={() => {
-                    localStorage.setItem('google_user', JSON.stringify({ name: 'Apple User', email: 'apple.user@icloud.com' }));
-                    router.push('/onboarding/basic-info');
-                  }}
-                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E] transition-all hover:border-[#1A1A2E]/25 hover:shadow-sm active:scale-[0.98] min-h-[44px] cursor-pointer"
+                  type="button"
+                  disabled
+                  title="Apple sign-in is coming soon"
+                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-[#1A1A2E]/10 bg-white text-[14px] font-medium text-[#1A1A2E]/35 min-h-[44px] cursor-not-allowed"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1A2E">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </svg>
-                  Apple
+                  Apple — soon
                 </button>
               </div>
             </div>

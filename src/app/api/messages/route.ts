@@ -17,6 +17,7 @@ async function requireParticipation(matchId: number, userId: number) {
     .where(
       and(
         eq(matches.id, matchId),
+        eq(matches.isActive, true),
         or(eq(matches.user1Id, userId), eq(matches.user2Id, userId))
       )
     );

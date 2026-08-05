@@ -6,6 +6,8 @@ import { getAuthSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+
 export async function GET() {
   try {
     const session = await getAuthSession();
@@ -17,7 +19,12 @@ export async function GET() {
     const userMatches = await db
       .select()
       .from(matches)
-      .where(or(eq(matches.user1Id, currentUserId), eq(matches.user2Id, currentUserId)))
+      .where(
+        and(
+          eq(matches.isActive, true),
+          or(eq(matches.user1Id, currentUserId), eq(matches.user2Id, currentUserId))
+        )
+      )
       .orderBy(desc(matches.matchedAt))
       .limit(200);
 
@@ -59,6 +66,7 @@ export async function GET() {
     const lastMsgByMatch = new Map(lastMessages.map((m) => [m.matchId, m]));
     const unreadByMatch = new Map(unreadCounts.map((u) => [u.matchId, Number(u.unread)]));
 
+    const now = Date.now();
     const conversations = userMatches.map((m) => {
       const partnerId = m.user1Id === currentUserId ? m.user2Id : m.user1Id;
       const partner = partnerById.get(partnerId);
@@ -83,7 +91,9 @@ export async function GET() {
         lastMsg: displayMsg,
         time: lastMsg?.createdAt ?? m.matchedAt,
         unread: unreadByMatch.get(m.id) ?? 0,
-        online: partner?.isActive ?? false,
+        online: partner?.lastActiveAt
+          ? now - new Date(partner.lastActiveAt).getTime() < ONLINE_WINDOW_MS
+          : false,
       };
     });
 

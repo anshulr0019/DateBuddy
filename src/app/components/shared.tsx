@@ -16,7 +16,7 @@ export function SafeImage({
   onClick,
   eager = false,
 }: {
-  src?: string;
+  src?: string | null;
   alt?: string;
   name?: string;
   className?: string;

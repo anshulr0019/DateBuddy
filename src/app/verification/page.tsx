@@ -1,25 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
+type Step = 'info' | 'camera' | 'processing' | 'submitted' | 'pending' | 'verified' | 'failed';
 
 export default function VerificationPage() {
   const router = useRouter();
-  const [step, setStep] = useState<'info' | 'camera' | 'processing' | 'success' | 'failed'>('info');
+  const [step, setStep] = useState<Step>('info');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    async function loadStatus() {
+      try {
+        const res = await fetch('/api/users/verification');
+        if (res.status === 401) {
+          router.replace('/welcome');
+          return;
+        }
+        if (!res.ok) return;
+        const data = await res.json();
+        const status = data?.verification?.status;
+        if (status === 'pending') setStep('pending');
+        else if (status === 'verified') setStep('verified');
+      } catch {
+        /* offline — the info screen is still usable */
+      }
+    }
+    loadStatus();
+  }, [router]);
 
   const handleStartVerification = () => {
     setStep('camera');
   };
 
-  const handleTakePhoto = () => {
+  const handleTakePhoto = async () => {
     setStep('processing');
-    
-    // Simulate AI verification
-    setTimeout(() => {
-      // Random success/failure for demo
-      const isSuccess = Math.random() > 0.3;
-      setStep(isSuccess ? 'success' : 'failed');
-    }, 2000);
+    setError('');
+    try {
+      const res = await fetch('/api/users/verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      if (res.status === 401) {
+        router.replace('/welcome');
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Could not submit your verification.');
+        setStep('failed');
+        return;
+      }
+      setStep(data.status === 'verified' ? 'verified' : 'submitted');
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+      setStep('failed');
+    }
   };
 
   const handleRetry = () => {
@@ -63,7 +101,7 @@ export default function VerificationPage() {
               <li className="flex items-start gap-3">
                 <span className="text-xl">🛡️</span>
                 <div>
-                  <p className="font-medium text-[#1A1A2E]">Show you're the real deal</p>
+                  <p className="font-medium text-[#1A1A2E]">Show you&apos;re the real deal</p>
                   <p className="text-sm text-gray-600">Build trust with potential matches</p>
                 </div>
               </li>
@@ -79,11 +117,11 @@ export default function VerificationPage() {
               </li>
               <li className="flex gap-2">
                 <span className="font-semibold">2.</span>
-                <span>Our AI verifies it's really you (takes less than 30 seconds)</span>
+                <span>Our team reviews your submission</span>
               </li>
               <li className="flex gap-2">
                 <span className="font-semibold">3.</span>
-                <span>Get your verified badge instantly!</span>
+                <span>You&apos;ll get your badge once it&apos;s approved</span>
               </li>
             </ol>
           </div>
@@ -164,7 +202,7 @@ export default function VerificationPage() {
     return (
       <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center px-6">
         <div className="spinner mb-6"></div>
-        <h2 className="text-2xl font-bold text-[#1A1A2E] mb-2">Verifying...</h2>
+        <h2 className="text-2xl font-bold text-[#1A1A2E] mb-2">Submitting…</h2>
         <p className="text-gray-600 text-center">
           This will only take a moment
         </p>
@@ -172,13 +210,30 @@ export default function VerificationPage() {
     );
   }
 
-  if (step === 'success') {
+  if (step === 'submitted' || step === 'pending') {
+    return (
+      <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center px-6">
+        <div className="text-7xl mb-6">⏳</div>
+        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-3 text-center">Verification under review</h1>
+        <p className="text-gray-600 text-center mb-8">
+          {step === 'submitted'
+            ? "Thanks! Our team will review your submission and your badge will appear on your profile once it's approved."
+            : "You've already submitted a verification. Our team is reviewing it — your badge will appear once it's approved."}
+        </p>
+        <button onClick={handleFinish} className="btn-primary w-full">
+          Back to Profile
+        </button>
+      </div>
+    );
+  }
+
+  if (step === 'verified') {
     return (
       <div className="mobile-container min-h-screen bg-gradient-to-br from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] flex flex-col items-center justify-center px-6">
         <div className="pulse text-8xl mb-6">✓</div>
-        <h1 className="text-3xl font-bold text-white mb-4">You're Verified!</h1>
+        <h1 className="text-3xl font-bold text-white mb-4">You&apos;re Verified!</h1>
         <p className="text-white/90 text-center mb-8">
-          Your profile now has a verified badge
+          Your profile has a verified badge
         </p>
         <button onClick={handleFinish} className="btn-primary bg-white text-[#FF6B9D]">
           Done
@@ -191,15 +246,10 @@ export default function VerificationPage() {
     return (
       <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center px-6">
         <div className="text-6xl mb-6">😕</div>
-        <h2 className="text-2xl font-bold text-[#1A1A2E] mb-4">Couldn't verify</h2>
+        <h2 className="text-2xl font-bold text-[#1A1A2E] mb-4">Couldn&apos;t submit</h2>
         <p className="text-gray-600 text-center mb-8">
-          We couldn't verify your identity. Please make sure:
+          {error || 'Something went wrong while submitting your verification.'}
         </p>
-        <ul className="text-left text-gray-700 mb-8 space-y-2">
-          <li>• Your face is clearly visible</li>
-          <li>• You're in a well-lit area</li>
-          <li>• You follow the pose instructions</li>
-        </ul>
         <div className="space-y-3 w-full">
           <button onClick={handleRetry} className="btn-primary w-full">
             Try Again

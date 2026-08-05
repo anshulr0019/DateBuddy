@@ -44,6 +44,9 @@ Thumbs.db
 *~
 
 # Database
-drizzle/
+# Migrations are version-controlled — a fresh clone needs them to build the schema.
+drizzle/meta/_journal.json.bak
 *.db
 *.sqlite
+# dev-only upload fallback
+/public/uploads/

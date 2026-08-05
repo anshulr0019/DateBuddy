@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
 import { AuroraBackground, GlassCard, VerifiedBadge } from '../components/shared';
@@ -38,6 +38,54 @@ export default function SettingsPage() {
   const [showEditPhoneModal, setShowEditPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState(userInfo.phoneNumber);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  const persistSettings = useCallback(async (patch: Record<string, unknown>) => {
+    setSaveError('');
+    try {
+      const res = await fetch('/api/users/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      if (res.status === 401) {
+        router.replace('/welcome?switch=true');
+        return;
+      }
+      if (!res.ok) setSaveError('Could not save that change. Please try again.');
+    } catch {
+      setSaveError('Network error — your change was not saved.');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/users/settings');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success || !data.settings) return;
+        const s = data.settings;
+        setNotifications(s.notifications);
+        setPrivacy(s.privacy);
+        setAgeRange([s.discovery.ageMin, s.discovery.ageMax]);
+        setMaxDistance(s.discovery.distanceMax);
+        setOnlyVerified(s.discovery.onlyVerified);
+        setFilters(prev => ({
+          ...prev,
+          ageMin: s.discovery.ageMin,
+          ageMax: s.discovery.ageMax,
+          maxDistance: s.discovery.distanceMax,
+          verifiedOnly: s.discovery.onlyVerified,
+        }));
+      } catch {
+        /* keep local defaults — the toggles stay usable offline */
+      }
+    }
+    loadSettings();
+  }, [setFilters]);
 
   useEffect(() => {
     async function loadUserInfo() {
@@ -52,7 +100,7 @@ export default function SettingsPage() {
             name: u.name || prev.name,
             email: u.email || prev.email,
             phoneNumber: u.phoneNumber || u.phone || prev.phoneNumber,
-            verified: u.verified ?? prev.verified,
+            verified: u.isVerified ?? prev.verified,
           }));
           return;
         }
@@ -100,14 +148,33 @@ export default function SettingsPage() {
   const handleToggleNotification = (key: keyof typeof notifications) => {
     setNotifications(prev => {
       const next = { ...prev, [key]: !prev[key] };
-      localStorage.setItem('app_notifications', JSON.stringify(next));
+      persistSettings({ notifications: next });
       return next;
     });
   };
 
   const handleTogglePrivacy = (key: keyof typeof privacy) => {
-    setPrivacy(prev => ({ ...prev, [key]: !prev[key] }));
+    setPrivacy(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      persistSettings({ privacy: next });
+      return next;
+    });
   };
+
+  // Sliders fire continuously while dragging, so the write is deferred to release.
+  const commitDiscovery = useCallback(
+    (next: { ageMin: number; ageMax: number; distanceMax: number; onlyVerified: boolean }) => {
+      setFilters(prev => ({
+        ...prev,
+        ageMin: next.ageMin,
+        ageMax: next.ageMax,
+        maxDistance: next.distanceMax,
+        verifiedOnly: next.onlyVerified,
+      }));
+      persistSettings({ discovery: next });
+    },
+    [setFilters, persistSettings]
+  );
 
   const handleLogout = async () => {
     if (!confirm('Are you sure you want to log out?')) return;
@@ -125,15 +192,26 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (!confirm('⚠️ Are you sure you want to delete your account? This action is permanent and cannot be undone.')) return;
-    setIsLoggingOut(true);
+    const typed = prompt('This permanently erases your profile, photos, matches and messages.\n\nType DELETE to confirm.');
+    if (typed !== 'DELETE') return;
+
+    setIsDeleting(true);
+    setDeleteError('');
     try {
-      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      const res = await fetch('/api/users/me', { method: 'DELETE' });
+      if (!res.ok && res.status !== 401) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.message || 'Could not delete your account. Please try again.');
+        setIsDeleting(false);
+        return;
+      }
       localStorage.clear();
       sessionStorage.clear();
       document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
       window.location.href = '/welcome?switch=true';
     } catch {
-      window.location.href = '/welcome?switch=true';
+      setDeleteError('Network error. Please check your connection and try again.');
+      setIsDeleting(false);
     }
   };
 
@@ -238,6 +316,12 @@ export default function SettingsPage() {
                         max="50"
                         value={ageRange[1]}
                         onChange={(e) => setAgeRange([18, Number(e.target.value)])}
+                        onPointerUp={() =>
+                          commitDiscovery({ ageMin: 18, ageMax: ageRange[1], distanceMax: maxDistance, onlyVerified })
+                        }
+                        onKeyUp={() =>
+                          commitDiscovery({ ageMin: 18, ageMax: ageRange[1], distanceMax: maxDistance, onlyVerified })
+                        }
                         className="w-full accent-[#F43F5E] cursor-pointer"
                       />
                     </div>
@@ -255,6 +339,12 @@ export default function SettingsPage() {
                       step="5"
                       value={maxDistance}
                       onChange={(e) => setMaxDistance(Number(e.target.value))}
+                      onPointerUp={() =>
+                        commitDiscovery({ ageMin: 18, ageMax: ageRange[1], distanceMax: maxDistance, onlyVerified })
+                      }
+                      onKeyUp={() =>
+                        commitDiscovery({ ageMin: 18, ageMax: ageRange[1], distanceMax: maxDistance, onlyVerified })
+                      }
                       className="w-full accent-[#F43F5E] cursor-pointer"
                     />
                   </div>
@@ -268,7 +358,15 @@ export default function SettingsPage() {
                       <input
                         type="checkbox"
                         checked={onlyVerified}
-                        onChange={(e) => setOnlyVerified(e.target.checked)}
+                        onChange={(e) => {
+                          setOnlyVerified(e.target.checked);
+                          commitDiscovery({
+                            ageMin: 18,
+                            ageMax: ageRange[1],
+                            distanceMax: maxDistance,
+                            onlyVerified: e.target.checked,
+                          });
+                        }}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F43F5E]"></div>
@@ -361,20 +459,25 @@ export default function SettingsPage() {
 
               {/* Logout & Delete Account Actions */}
               <div className="pt-2 space-y-2.5">
+                {(saveError || deleteError) && (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600" role="alert">
+                    {deleteError || saveError}
+                  </div>
+                )}
                 <button
                   onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="w-full py-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 text-rose-600 text-[14.5px] font-bold hover:bg-rose-100/60 active:scale-[0.985] transition-all cursor-pointer"
+                  disabled={isLoggingOut || isDeleting}
+                  className="w-full py-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 text-rose-600 text-[14.5px] font-bold hover:bg-rose-100/60 active:scale-[0.985] transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isLoggingOut ? 'Logging out…' : 'Log Out & Switch Account'}
                 </button>
 
                 <button
                   onClick={handleDeleteAccount}
-                  disabled={isLoggingOut}
-                  className="w-full py-2 text-center text-[12.5px] font-medium text-gray-400 hover:text-rose-500 transition-colors cursor-pointer"
+                  disabled={isLoggingOut || isDeleting}
+                  className="w-full py-2 text-center text-[12.5px] font-medium text-gray-400 hover:text-rose-500 transition-colors cursor-pointer disabled:opacity-60"
                 >
-                  Delete Account Permanently
+                  {isDeleting ? 'Deleting your account…' : 'Delete Account Permanently'}
                 </button>
               </div>
             </div>

@@ -24,11 +24,11 @@ export default function PremiumPage() {
     { free: '❌', premium: '✓', label: 'Ad-Free Experience' },
   ];
 
-  const handleSubscribe = async () => {
-    const selectedPlanData = plans.find(p => p.id === selectedPlan);
-    alert(`Subscribing to ${selectedPlanData?.name} plan for ₹${selectedPlanData?.price}`);
-    // In real app, integrate with payment gateway
-    router.push('/discover');
+  const [notice, setNotice] = useState('');
+
+  // No payment gateway is wired up yet — say so rather than faking a charge.
+  const handleSubscribe = () => {
+    setNotice('Payments are not available yet. Subscriptions open soon — no charge has been made.');
   };
 
   return (
@@ -114,6 +114,11 @@ export default function PremiumPage() {
 
       {/* Subscribe Button */}
       <div className="p-6 border-t border-gray-200 bg-white">
+        {notice && (
+          <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-[13px] font-semibold text-amber-700" role="status">
+            {notice}
+          </div>
+        )}
         <button onClick={handleSubscribe} className="btn-primary w-full mb-3">
           Get Premium - ₹{plans.find(p => p.id === selectedPlan)?.price}
         </button>

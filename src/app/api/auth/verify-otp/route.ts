@@ -2,13 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { db } from '@/db';
 import { users, preferences, otpCodes } from '@/db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import { setAuthSession } from '@/lib/auth';
 import { hashOtp, normalizePhone } from '@/lib/otp';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_ATTEMPTS = 5;
+
+const INVALID_CODE = NextResponse.json(
+  { success: false, message: 'Invalid or expired verification code' },
+  { status: 401 }
+);
+
+function hashesMatch(a: string, b: string): boolean {
+  const left = Buffer.from(a, 'utf8');
+  const right = Buffer.from(b, 'utf8');
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,85 +34,86 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let currentUser = null;
-    let isNewUser = false;
+    const [record] = await db
+      .select()
+      .from(otpCodes)
+      .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)))
+      .orderBy(desc(otpCodes.createdAt))
+      .limit(1);
 
-    try {
-      // 1. Check if DB has pending OTP record
-      const [record] = await db
-        .select()
-        .from(otpCodes)
-        .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)))
-        .orderBy(desc(otpCodes.createdAt))
-        .limit(1)
-        .catch(() => []);
+    if (!record) return INVALID_CODE;
 
-      if (record) {
-        // Single-use: mark code consumed
-        await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id)).catch(() => {});
-      }
-
-      // 2. Lookup existing user by phone number
-      const existing = await db.select().from(users).where(eq(users.phoneNumber, normalized)).catch(() => []);
-      if (existing && existing.length > 0) {
-        currentUser = existing[0];
-      } else {
-        isNewUser = true;
-        const [newUser] = await db
-          .insert(users)
-          .values({
-            phoneNumber: normalized,
-            name: 'New User',
-            dateOfBirth: new Date('2000-01-01'),
-            gender: 'female',
-            lookingFor: 'everyone',
-            city: 'Mumbai',
-            bio: 'Hey there! Connected on DateBuddy 💕',
-            isVerified: true,
-          })
-          .returning()
-          .catch(() => []);
-
-        currentUser = newUser;
-
-        if (currentUser?.id) {
-          await db.insert(preferences).values({
-            userId: currentUser.id,
-            ageMin: 18,
-            ageMax: 30,
-            distanceMax: 50,
-          }).catch(() => {});
-        }
-      }
-    } catch (dbErr) {
-      console.warn('[AUTH] DB error during verify-otp, issuing session fallback:', dbErr);
+    if (record.attempts >= MAX_ATTEMPTS) {
+      await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+      return NextResponse.json(
+        { success: false, message: 'Too many incorrect attempts. Request a new code.' },
+        { status: 429 }
+      );
     }
 
-    // 3. Fallback user object if DB offline
-    if (!currentUser) {
-      currentUser = {
-        id: 1,
+    if (record.expiresAt.getTime() < Date.now()) {
+      await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+      return INVALID_CODE;
+    }
+
+    if (!hashesMatch(record.codeHash, hashOtp(normalized, otp))) {
+      await db
+        .update(otpCodes)
+        .set({ attempts: sql`${otpCodes.attempts} + 1` })
+        .where(eq(otpCodes.id, record.id));
+      return INVALID_CODE;
+    }
+
+    // Correct code: burn it so it cannot be replayed.
+    await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+
+    const [existing] = await db.select().from(users).where(eq(users.phoneNumber, normalized)).limit(1);
+
+    if (existing) {
+      const onboardingComplete = existing.onboardingCompletedAt !== null;
+      await setAuthSession(existing.id, existing.phoneNumber ?? normalized, onboardingComplete);
+      return NextResponse.json({
+        success: true,
+        user: { id: existing.id, name: existing.name, phoneNumber: existing.phoneNumber },
+        isNewUser: false,
+        onboardingComplete,
+      });
+    }
+
+    const [newUser] = await db
+      .insert(users)
+      .values({
         phoneNumber: normalized,
-        name: 'Demo User',
+        name: 'New User',
+        dateOfBirth: new Date('2000-01-01'),
         gender: 'female',
+        lookingFor: 'everyone',
         city: 'Mumbai',
+        bio: null,
         isVerified: true,
-      };
-    }
+      })
+      .returning();
 
-    // 4. Issue HTTP-only auth cookie session
-    await setAuthSession(currentUser.id, currentUser.phoneNumber ?? normalized);
+    await db.insert(preferences).values({
+      userId: newUser.id,
+      ageMin: 18,
+      ageMax: 30,
+      distanceMax: 50,
+    });
 
-    return NextResponse.json({ success: true, user: currentUser, isNewUser });
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
-    // Emergency session fallback so test users are never stuck
-    const fallbackId = 1;
-    await setAuthSession(fallbackId, '+919876543210');
+    await setAuthSession(newUser.id, newUser.phoneNumber ?? normalized, false);
+
     return NextResponse.json({
       success: true,
-      user: { id: fallbackId, phoneNumber: '+919876543210', name: 'Demo User' },
-      isNewUser: false,
+      user: { id: newUser.id, name: newUser.name, phoneNumber: newUser.phoneNumber },
+      isNewUser: true,
+      onboardingComplete: false,
     });
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    return NextResponse.json(
+      { success: false, message: 'Could not verify code. Please try again.' },
+      { status: 500 }
+    );
   }
 }

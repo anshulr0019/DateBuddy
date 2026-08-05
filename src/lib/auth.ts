@@ -1,21 +1,12 @@
 import { cookies } from 'next/headers';
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT } from 'jose';
+import { COOKIE_NAME, MAX_AGE_SECONDS, getSecret, verifyAuthToken, type Session } from './session-token';
 
-const COOKIE_NAME = 'auth_token';
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
+export type { Session };
+export { verifyAuthToken };
 
-function getSecret(): Uint8Array {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error('SESSION_SECRET must be set to a random string of at least 32 characters');
-  }
-  return new TextEncoder().encode(secret);
-}
-
-export type Session = { userId: number; phoneNumber: string };
-
-export async function setAuthSession(userId: number, phoneNumber: string) {
-  const token = await new SignJWT({ phoneNumber })
+export async function setAuthSession(userId: number, phoneNumber: string, onboardingComplete = false) {
+  const token = await new SignJWT({ phoneNumber, onboardingComplete })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(userId))
     .setIssuedAt()
@@ -36,15 +27,7 @@ export async function getAuthSession(): Promise<Session | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
-
-  try {
-    const { payload } = await jwtVerify(token, getSecret(), { algorithms: ['HS256'] });
-    const userId = Number(payload.sub);
-    if (!Number.isInteger(userId) || userId <= 0) return null;
-    return { userId, phoneNumber: String(payload.phoneNumber ?? '') };
-  } catch {
-    return null;
-  }
+  return verifyAuthToken(token);
 }
 
 export async function clearAuthSession() {

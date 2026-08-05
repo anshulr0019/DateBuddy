@@ -9,12 +9,6 @@ import { AuroraBackground, GlassCard, VerifiedBadge, GradientText, SafeImage, Sk
    Types & helpers
 ───────────────────────────────────────────────── */
 
-interface ApiPhoto {
-  id?: number;
-  url?: string;
-  orderIndex?: number;
-}
-
 interface Profile {
   name: string;
   age: number | null;
@@ -73,18 +67,18 @@ function calcStrength(p: Profile): StrengthResult {
     return { percent, hint: `Add ${n} more photo${n > 1 ? 's' : ''} to boost your profile`, route: '/onboarding/photos' };
   }
   if (p.bio.trim().length < 20) {
-    return { percent, hint: 'Write a short bio so people get to know you', route: '/onboarding/bio' };
+    return { percent, hint: 'Write a short bio so people get to know you', route: 'edit' };
   }
   if (p.interests.length < 3) {
-    return { percent, hint: 'Add a few interests to get better matches', route: '/onboarding/interests' };
+    return { percent, hint: 'Add a few interests to get better matches', route: 'edit' };
   }
   if (!p.verified) {
     return { percent, hint: 'Verify your profile to earn the badge', route: '/verification' };
   }
   if (percent < 100) {
-    return { percent, hint: 'Complete your basic info to reach 100%', route: '/onboarding/basic-info' };
+    return { percent, hint: 'Complete your basic info to reach 100%', route: 'edit' };
   }
-  return { percent: 100, hint: 'Your profile is complete', route: '/onboarding/basic-info' };
+  return { percent: 100, hint: 'Your profile is complete', route: 'edit' };
 }
 
 const TABS = [
@@ -92,6 +86,14 @@ const TABS = [
   { id: 'communities', label: 'Communities' },
   { id: 'events', label: 'Events' },
 ] as const;
+
+const INTEREST_OPTIONS = [
+  '📷 Photography', '✈️ Travel', '🎵 Music', '💪 Fitness', '🍕 Food',
+  '🎨 Art', '🎮 Gaming', '📚 Reading', '🎬 Movies', '💃 Dancing',
+  '👨‍🍳 Cooking', '⚽ Sports', '👗 Fashion', '🐶 Pets', '🏃 Running',
+  '🧘 Yoga', '🎤 Karaoke', '🌱 Plants', '☕ Coffee', '🍺 Beer',
+  '🎭 Theater', '📱 Tech', '🏔️ Hiking', '🏖️ Beach', '🌃 Nightlife',
+];
 
 type TabId = (typeof TABS)[number]['id'];
 
@@ -107,6 +109,62 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>(EMPTY_PROFILE);
   const [connections, setConnections] = useState<number | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState({ name: '', bio: '', city: '', interests: [] as string[] });
+  const [editError, setEditError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openEditor = useCallback(() => {
+    setEditDraft({
+      name: profile.name,
+      bio: profile.bio,
+      city: profile.location,
+      interests: profile.interests,
+    });
+    setEditError('');
+    setIsEditing(true);
+  }, [profile]);
+
+  const saveProfile = useCallback(async () => {
+    if (!editDraft.name.trim()) {
+      setEditError('Name cannot be empty');
+      return;
+    }
+    if (!editDraft.city.trim()) {
+      setEditError('City cannot be empty');
+      return;
+    }
+    setIsSaving(true);
+    setEditError('');
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editDraft.name.trim(),
+          bio: editDraft.bio.trim(),
+          city: editDraft.city.trim(),
+          interests: editDraft.interests,
+        }),
+      });
+      if (res.status === 401) {
+        router.replace('/welcome?switch=true');
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setEditError(data.message || 'Could not save your changes');
+        return;
+      }
+      setIsEditing(false);
+      setReloadKey(k => k + 1);
+    } catch {
+      setEditError('Network error. Please check your connection.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editDraft, router]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -124,7 +182,7 @@ export default function ProfilePage() {
       setStatus('loading');
       setIsCached(false);
       try {
-        const res = await fetch('/api/auth/me', { signal });
+        const res = await fetch('/api/users/me', { signal });
 
         if (res.status === 401) {
           // Session expired or account deleted — never show stale local data.
@@ -140,10 +198,7 @@ export default function ProfilePage() {
 
         const u = data.user;
         const sortedPhotos: string[] = Array.isArray(u.photos)
-          ? [...(u.photos as ApiPhoto[])]
-              .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
-              .map(p => p.url)
-              .filter((url): url is string => Boolean(url))
+          ? (u.photos as string[]).filter((url): url is string => typeof url === 'string' && url.length > 0)
           : [];
 
         setProfile({
@@ -260,7 +315,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="absolute right-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
                     <button
-                      onClick={() => router.push('/onboarding/basic-info')}
+                      onClick={openEditor}
                       aria-label="Edit profile"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer active:scale-95"
                     >
@@ -285,7 +340,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => router.push('/onboarding/basic-info')}
+                      onClick={openEditor}
                       className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[#1A1A2E]/15 bg-white/80 px-4 py-2 text-[13px] font-medium text-[#1A1A2E] backdrop-blur-md hover:bg-white transition-all cursor-pointer active:scale-95 shadow-sm"
                     >
                       <Ic.Edit />
@@ -339,7 +394,7 @@ export default function ProfilePage() {
                       <p className="text-[14px] leading-relaxed text-[#1A1A2E]/75">{profile.bio}</p>
                     ) : (
                       <button
-                        onClick={() => router.push('/onboarding/bio')}
+                        onClick={openEditor}
                         className="flex min-h-[44px] w-full items-center gap-2 text-[14px] text-[#F43F5E] font-medium cursor-pointer"
                       >
                         <Ic.Plus />
@@ -353,7 +408,7 @@ export default function ProfilePage() {
                         </span>
                       ))}
                       <button
-                        onClick={() => router.push('/onboarding/interests')}
+                        onClick={openEditor}
                         aria-label="Add interests"
                         className="flex items-center gap-1 rounded-full border border-dashed border-[#1A1A2E]/25 px-3 py-1 text-[12px] font-medium text-[#1A1A2E]/60 hover:border-[#F43F5E]/50 hover:text-[#F43F5E] transition-all cursor-pointer"
                       >
@@ -365,7 +420,7 @@ export default function ProfilePage() {
 
                   {/* Profile completion — computed from real profile data */}
                   <button
-                    onClick={() => router.push(strength.route)}
+                    onClick={() => (strength.route === 'edit' ? openEditor() : router.push(strength.route))}
                     className="mb-4 block w-full rounded-[24px] border border-white/80 bg-white/80 p-5 text-left shadow-[0_10px_30px_-15px_rgba(26,26,46,0.08)] backdrop-blur-md cursor-pointer hover:border-[#F43F5E]/30 transition-all active:scale-[0.99]"
                   >
                     <div className="mb-2 flex items-center justify-between">
@@ -478,7 +533,7 @@ export default function ProfilePage() {
                         title="No upcoming events"
                         subtitle="Meet people in real life at meetups near you"
                         cta="Explore meetups"
-                        onCta={() => router.push('/meetups')}
+                        onCta={() => router.push('/discover/meetups')}
                       />
                     </div>
                   )}
@@ -486,6 +541,101 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+
+          {isEditing && (
+            <div
+              className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Edit profile"
+              onClick={() => !isSaving && setIsEditing(false)}
+            >
+              <div
+                onClick={e => e.stopPropagation()}
+                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl sm:rounded-[28px]"
+              >
+                <h2 className="mb-5 text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
+
+                {editError && (
+                  <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600">
+                    {editError}
+                  </div>
+                )}
+
+                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">Name</label>
+                <input
+                  value={editDraft.name}
+                  onChange={e => setEditDraft(d => ({ ...d, name: e.target.value }))}
+                  maxLength={100}
+                  className="mb-4 w-full rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                />
+
+                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">City</label>
+                <input
+                  value={editDraft.city}
+                  onChange={e => setEditDraft(d => ({ ...d, city: e.target.value }))}
+                  maxLength={100}
+                  className="mb-4 w-full rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                />
+
+                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">
+                  Bio <span className="font-normal text-[#1A1A2E]/40">({editDraft.bio.length}/500)</span>
+                </label>
+                <textarea
+                  value={editDraft.bio}
+                  onChange={e => setEditDraft(d => ({ ...d, bio: e.target.value.slice(0, 500) }))}
+                  rows={4}
+                  className="mb-4 w-full resize-none rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                />
+
+                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">
+                  Interests <span className="font-normal text-[#1A1A2E]/40">({editDraft.interests.length} selected)</span>
+                </label>
+                <div className="mb-6 flex flex-wrap gap-2">
+                  {INTEREST_OPTIONS.map(opt => {
+                    const on = editDraft.interests.includes(opt);
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          setEditDraft(d => ({
+                            ...d,
+                            interests: on ? d.interests.filter(i => i !== opt) : [...d.interests, opt],
+                          }))
+                        }
+                        className={`rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-all cursor-pointer active:scale-95 ${
+                          on
+                            ? 'border-transparent bg-[#F43F5E] text-white'
+                            : 'border-[#1A1A2E]/10 bg-white text-[#1A1A2E]/75 hover:border-[#1A1A2E]/25'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    disabled={isSaving}
+                    className="h-12 flex-1 rounded-2xl border border-[#1A1A2E]/15 bg-white text-[14px] font-semibold text-[#1A1A2E] transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveProfile}
+                    disabled={isSaving}
+                    className="h-12 flex-1 rounded-2xl bg-[#F43F5E] text-[14px] font-bold text-white transition-all hover:bg-[#E11D48] active:scale-95 cursor-pointer disabled:opacity-60"
+                  >
+                    {isSaving ? 'Saving…' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </AuroraBackground>
       </div>
     </div>

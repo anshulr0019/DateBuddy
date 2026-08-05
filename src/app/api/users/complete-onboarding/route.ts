@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users, photos, preferences, subscriptions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getAuthSession } from '@/lib/auth';
+import { getAuthSession, setAuthSession } from '@/lib/auth';
+import { syncUserInterests } from '@/lib/interests';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
       location,
       photos: photoUrls = [],
       bio = {},
+      interests: interestNames = [],
       preferences: userPrefs = {},
     } = body;
 
@@ -59,6 +61,7 @@ export async function POST(request: NextRequest) {
         lookingFor: basicInfo.lookingFor || 'everyone',
         city: typeof location === 'string' ? location.slice(0, 100) : '',
         bio: (bio?.bio || bio?.promptAnswer || '').slice(0, 500) || null,
+        onboardingCompletedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
@@ -79,6 +82,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await syncUserInterests(userId, interestNames);
+
     const prefValues = {
       ageMin: Number(userPrefs?.ageRange?.[0]) || 18,
       ageMax: Number(userPrefs?.ageRange?.[1]) || 30,
@@ -98,6 +103,9 @@ export async function POST(request: NextRequest) {
     }
 
     await db.insert(subscriptions).values({ userId, tier: 'free' }).onConflictDoNothing();
+
+    // Re-mint the cookie so middleware stops gating this user at onboarding.
+    await setAuthSession(userId, updated.phoneNumber ?? session.phoneNumber, true);
 
     return NextResponse.json({ success: true, userId, message: 'Onboarding completed' });
   } catch (error) {

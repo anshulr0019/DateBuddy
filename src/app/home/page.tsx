@@ -1,235 +1,114 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { PEOPLE, EVENTS, GYM_SQUADS, GymSquad } from '../data/mockData';
 import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from '../components/shared';
 import { useNotifications } from '../context/NotificationContext';
-import { PERSONAS, DEFAULT_PERSONA, computePersona, UserBehaviorData } from '@/lib/personaGreeting';
+import { PERSONAS, DEFAULT_PERSONA } from '@/lib/personaGreeting';
+
+type Pick = {
+  id: number;
+  name: string;
+  age: number | null;
+  city: string | null;
+  distance: string | null;
+  photos: string[];
+  online: boolean;
+  verified: boolean;
+};
+
+type Meetup = {
+  id: number;
+  title: string;
+  category: string;
+  venueName: string | null;
+  city: string | null;
+  date: string;
+  maxAttendees: number | null;
+  hostName: string;
+  attendeesCount: number;
+  joined: boolean;
+};
+
+const CATEGORIES = ['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const;
+const CATEGORY_EMOJI: Record<string, string> = {
+  Gym: '🏋️ ',
+  Badminton: '🏸 ',
+  Football: '⚽ ',
+  Running: '🏃 ',
+  Yoga: '🧘 ',
+};
+
+function formatWhen(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
 
 export default function HomePage() {
   const router = useRouter();
   const { openNotifications, unreadCount, addNotification } = useNotifications();
-  const todaysPicks = PEOPLE.slice(0, 4);
 
-  const [activePersona, setActivePersona] = useState<{ title: string; subline: string; personaId: string }>({
-    title: 'Flirt Mode 😏',
-    subline: 'Behaving today?',
-    personaId: 'flirt_mode',
+  const [picks, setPicks] = useState<Pick[]>([]);
+  const [meetups, setMeetups] = useState<Meetup[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [activePersona, setActivePersona] = useState({
+    title: DEFAULT_PERSONA.title,
+    subline: DEFAULT_PERSONA.sublines[0],
+    personaId: DEFAULT_PERSONA.id,
   });
-
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
 
-  // Squads & Activity Buddies State
-  const [squads, setSquads] = useState<GymSquad[]>(GYM_SQUADS);
-  const [squadFilter, setSquadFilter] = useState<'All' | 'Gym' | 'Badminton' | 'Football' | 'Running' | 'Yoga'>('All');
+  const [squadFilter, setSquadFilter] = useState<'All' | (typeof CATEGORIES)[number]>('All');
   const [showHostModal, setShowHostModal] = useState(false);
-  const [selectedDetailSquad, setSelectedDetailSquad] = useState<GymSquad | null>(null);
-  const [confirmLeaveSquadId, setConfirmLeaveSquadId] = useState<number | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<Meetup | null>(null);
+  const [confirmLeaveId, setConfirmLeaveId] = useState<number | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
 
   const [hostTitle, setHostTitle] = useState('');
-  const [hostCategory, setHostCategory] = useState<'Gym' | 'Badminton' | 'Football' | 'Running' | 'Yoga'>('Gym');
+  const [hostCategory, setHostCategory] = useState<(typeof CATEGORIES)[number]>('Gym');
   const [hostVenue, setHostVenue] = useState('');
-  const [hostTimeSlot, setHostTimeSlot] = useState('');
+  const [hostDate, setHostDate] = useState('');
   const [hostSlots, setHostSlots] = useState(4);
+  const [hostError, setHostError] = useState('');
+  const [publishing, setPublishing] = useState(false);
 
-  const filteredSquads = squads.filter((s) => squadFilter === 'All' || s.category === squadFilter);
-
-  // Handle Joining & Leaving Logic across all cases
-  const handleToggleJoinSquad = (sq: GymSquad) => {
-    if (sq.joined) {
-      // Case E: Prompt Leave Confirmation
-      setConfirmLeaveSquadId(sq.id);
-      return;
-    }
-
-    // Case D: Full Capacity Check
-    if (sq.joinedSlots >= sq.maxSlots) {
-      addNotification({
-        title: 'Waitlist Joined ⏳',
-        message: `You are on the waitlist for '${sq.title}'. You'll be notified if a spot opens up!`,
-        emoji: '⏳',
-        actionUrl: '/home',
-      });
-      return;
-    }
-
-    // Case A & B: Join Success & Dispatch Notifications
-    setSquads((prev) =>
-      prev.map((item) => {
-        if (item.id === sq.id) {
-          const nextAttendees = [
-            ...item.attendees,
-            { id: 1, name: 'Priya Sharma (You)', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', role: 'member' as const },
-          ];
-          return {
-            ...item,
-            joined: true,
-            joinedSlots: item.joinedSlots + 1,
-            attendees: nextAttendees,
-          };
-        }
-        return item;
-      })
-    );
-
-    // Also update selectedDetailSquad if open
-    if (selectedDetailSquad?.id === sq.id) {
-      setSelectedDetailSquad((prev) =>
-        prev
-          ? {
-              ...prev,
-              joined: true,
-              joinedSlots: prev.joinedSlots + 1,
-              attendees: [
-                ...prev.attendees,
-                { id: 1, name: 'Priya Sharma (You)', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', role: 'member' },
-              ],
-            }
-          : null
-      );
-    }
-
-    // Dispatch real-time in-app notification to attendee
-    addNotification({
-      title: 'Squad Joined! 🎉',
-      message: `You joined '${sq.title}' with ${sq.hostName}. Squad chat unlocked in Messages!`,
-      type: 'event',
-      avatar: sq.hostAvatar,
-      actionUrl: `/chat/${sq.hostId}`,
-    });
-  };
-
-  // Confirm Leaving Squad
-  const handleConfirmLeave = (id: number) => {
-    const sq = squads.find((s) => s.id === id);
-    setSquads((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            joined: false,
-            joinedSlots: Math.max(1, item.joinedSlots - 1),
-            attendees: item.attendees.filter((a) => a.id !== 1),
-          };
-        }
-        return item;
-      })
-    );
-
-    if (selectedDetailSquad?.id === id) {
-      setSelectedDetailSquad((prev) =>
-        prev
-          ? {
-              ...prev,
-              joined: false,
-              joinedSlots: Math.max(1, prev.joinedSlots - 1),
-              attendees: prev.attendees.filter((a) => a.id !== 1),
-            }
-          : null
-      );
-    }
-
-    setConfirmLeaveSquadId(null);
-
-    if (sq) {
-      addNotification({
-        title: 'Left Squad 👟',
-        message: `You left '${sq.title}'. ${sq.hostName} was notified to re-open the spot.`,
-        type: 'system',
-        actionUrl: '/home',
-      });
-    }
-  };
-
-  const handlePublishSquad = async () => {
-    if (!hostTitle.trim() || !hostVenue.trim()) return;
-    const newSquad: GymSquad = {
-      id: Date.now(),
-      hostId: 1,
-      title: hostTitle.trim(),
-      category: hostCategory,
-      hostName: 'Priya Sharma',
-      hostAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces',
-      venue: hostVenue.trim(),
-      timeSlot: hostTimeSlot.trim() || 'Today · 7:00 PM',
-      level: 'All Levels',
-      equipment: 'Bring your own workout gear',
-      rules: 'Be punctual & bring positive energy!',
-      maxSlots: hostSlots || 4,
-      joinedSlots: 1,
-      joined: true,
-      attendees: [
-        { id: 1, name: 'Priya Sharma (Host)', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces', role: 'host' },
-      ],
-    };
-
-    // Save to PostgreSQL Database
-    try {
-      await fetch('/api/meetups/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: hostTitle.trim(),
-          category: hostCategory,
-          venueName: hostVenue.trim(),
-          maxAttendees: hostSlots || 4,
-        }),
-      }).catch(() => {});
-    } catch {
-      /* ignore */
-    }
-
-    setSquads((prev) => [newSquad, ...prev]);
-    setShowHostModal(false);
-    setHostTitle('');
-    setHostVenue('');
-    setHostTimeSlot('');
-
-    addNotification({
-      title: 'Squad Published! 🚀',
-      message: `'${newSquad.title}' is live on the Home feed. Activity partners can now join!`,
-      type: 'system',
-      actionUrl: '/home',
-    });
-  };
+  const loadMeetups = useCallback(async () => {
+    const res = await fetch('/api/meetups');
+    const data = await res.json();
+    if (data.success) setMeetups(data.meetups);
+  }, []);
 
   useEffect(() => {
-    try {
-      const savedPersona = localStorage.getItem('user_active_persona');
-      if (savedPersona) {
-        setActivePersona(JSON.parse(savedPersona));
-      } else {
-        const currentHour = new Date().getHours();
-        const mockData: UserBehaviorData = {
-          daysInactive: 0,
-          matchesReceivedSpike: false,
-          profileViewsSpike: false,
-          emojiCount: 8,
-          avgReplyTimeMinutes: 3,
-          outgoingMessageRate: 15,
-          avgMessageLength: 60,
-          replyRate: 0.8,
-          longChatDuration: false,
-          swipeLikeRatio: 0.4,
-          matchSuccessRate: 0.5,
-          sessionTimeBuckets: {
-            earlyMorning: currentHour >= 5 && currentHour < 9 ? 5 : 1,
-            day: currentHour >= 9 && currentHour < 17 ? 5 : 1,
-            evening: currentHour >= 17 && currentHour < 22 ? 5 : 1,
-            lateNight: (currentHour >= 22 || currentHour < 3) ? 8 : 1,
-          },
-          profileViewsCount: 10,
-          likesSentCount: 12,
-          messagesSentCount: 15,
-        };
-
-        const computed = computePersona(mockData);
-        setActivePersona(computed);
+    async function load() {
+      try {
+        const [feedRes] = await Promise.all([fetch('/api/feed'), loadMeetups()]);
+        const feed = await feedRes.json();
+        if (feed.success) setPicks(feed.profiles.slice(0, 4));
+      } catch {
+        /* sections render their own empty states */
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      /* ignore */
+    }
+    load();
+  }, [loadMeetups]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('user_active_persona');
+    if (saved) {
+      try {
+        setActivePersona(JSON.parse(saved));
+      } catch {
+        /* keep default */
+      }
     }
   }, []);
 
@@ -240,13 +119,121 @@ export default function HomePage() {
     setShowPersonaPicker(false);
   };
 
+  const filteredMeetups = meetups.filter((m) => squadFilter === 'All' || m.category === squadFilter);
+
+  const toggleJoin = async (m: Meetup) => {
+    if (m.joined) {
+      setConfirmLeaveId(m.id);
+      return;
+    }
+    setBusyId(m.id);
+    try {
+      const res = await fetch(`/api/meetups/${m.id}/join`, { method: 'POST' });
+      const data = await res.json();
+      if (!data.success) {
+        addNotification({
+          title: res.status === 409 ? 'Session Full 🔒' : 'Could not join',
+          message: data.message ?? 'Please try again.',
+          type: 'system',
+          actionUrl: '/home',
+        });
+        return;
+      }
+      await loadMeetups();
+      setSelectedDetail(null);
+      addNotification({
+        title: 'Session Joined! 🎉',
+        message: `You joined '${m.title}' hosted by ${m.hostName}.`,
+        type: 'event',
+        actionUrl: '/home',
+      });
+    } catch {
+      addNotification({
+        title: 'Network error',
+        message: 'Could not update your RSVP.',
+        type: 'system',
+        actionUrl: '/home',
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmLeave = async (id: number) => {
+    const m = meetups.find((x) => x.id === id);
+    setConfirmLeaveId(null);
+    setBusyId(id);
+    try {
+      await fetch(`/api/meetups/${id}/join`, { method: 'POST' });
+      await loadMeetups();
+      setSelectedDetail(null);
+      if (m) {
+        addNotification({
+          title: 'Left Session 👟',
+          message: `You left '${m.title}'. Your spot has been re-opened.`,
+          type: 'system',
+          actionUrl: '/home',
+        });
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const publishSquad = async () => {
+    setHostError('');
+    if (!hostTitle.trim() || !hostVenue.trim() || !hostDate) {
+      setHostError('Title, venue and date are all required.');
+      return;
+    }
+    if (new Date(hostDate).getTime() <= Date.now()) {
+      setHostError('Pick a date and time in the future.');
+      return;
+    }
+
+    setPublishing(true);
+    try {
+      const res = await fetch('/api/meetups/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: hostTitle.trim(),
+          category: hostCategory,
+          venueName: hostVenue.trim(),
+          date: new Date(hostDate).toISOString(),
+          maxAttendees: hostSlots,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setHostError(data.message ?? 'Could not publish this session.');
+        return;
+      }
+
+      await loadMeetups();
+      setShowHostModal(false);
+      setHostTitle('');
+      setHostVenue('');
+      setHostDate('');
+      addNotification({
+        title: 'Session Published! 🚀',
+        message: `'${data.meetup.title}' is live. Activity partners can now join!`,
+        type: 'system',
+        actionUrl: '/home',
+      });
+    } catch {
+      setHostError('Network error. Please try again.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
-            
-            {/* FIXED TOP HEADER (Behavior Persona Greeting & Notifications) */}
+
             <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between shadow-2xs">
               <div>
                 <div className="flex items-center gap-2">
@@ -277,10 +264,9 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* SCROLLABLE FEED BODY */}
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] space-y-6">
-              
-              {/* TODAY'S PICKS SECTION */}
+
+              {/* TODAY'S PICKS */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-[#1E293B]/45">Today&apos;s Picks</h2>
@@ -289,8 +275,23 @@ export default function HomePage() {
                   </button>
                 </div>
 
+                {loading && (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-24 rounded-3xl bg-white/60 animate-pulse" />
+                    ))}
+                  </div>
+                )}
+
+                {!loading && picks.length === 0 && (
+                  <GlassCard className="p-5 text-center border border-gray-200/70">
+                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No new profiles right now</p>
+                    <p className="text-[12px] text-[#1E293B]/50 mt-1">Check back soon, or widen your filters in Discover.</p>
+                  </GlassCard>
+                )}
+
                 <div className="space-y-3">
-                  {todaysPicks.map((person, i) => (
+                  {picks.map((person, i) => (
                     <GlassCard
                       key={person.id}
                       onClick={() => router.push('/discover')}
@@ -298,26 +299,26 @@ export default function HomePage() {
                       style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                     >
                       <div className="flex items-center gap-3.5">
-                        {/* Avatar */}
                         <div className="relative h-18 w-18 flex-shrink-0 overflow-hidden rounded-2xl shadow-2xs">
-                          <SafeImage src={person.photo} name={person.name} alt={person.name} className="h-full w-full object-cover" />
+                          <SafeImage src={person.photos[0] ?? null} name={person.name} alt={person.name} className="h-full w-full object-cover" />
                           {person.online && <OnlineDot className="absolute bottom-1 right-1 h-3.5 w-3.5" />}
                         </div>
 
-                        {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="text-[15.5px] font-bold text-[#1E293B] truncate">{person.name}, {person.age}</h3>
+                            <h3 className="text-[15.5px] font-bold text-[#1E293B] truncate">
+                              {person.name}{person.age ? `, ${person.age}` : ''}
+                            </h3>
                             {person.verified && <VerifiedBadge />}
                           </div>
-                          <p className="text-[12px] text-[#1E293B]/60 truncate mb-1">{person.profession}</p>
-                          <div className="flex items-center gap-1 text-[#1E293B]/45 text-[11px]">
-                            <Ic.MapPin />
-                            <span>{person.distance}</span>
-                          </div>
+                          {(person.distance || person.city) && (
+                            <div className="flex items-center gap-1 text-[#1E293B]/45 text-[11px]">
+                              <Ic.MapPin />
+                              <span>{person.distance ?? person.city}</span>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Connect Button */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -334,7 +335,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* GYM & ACTIVITY SQUADS (HUDDLE STYLE) SECTION */}
+              {/* ACTIVITY SQUADS */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <div>
@@ -349,9 +350,8 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                {/* Filter horizontal pills */}
                 <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none">
-                  {(['All', 'Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const).map((cat) => (
+                  {(['All', ...CATEGORIES] as const).map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSquadFilter(cat)}
@@ -361,111 +361,72 @@ export default function HomePage() {
                           : 'bg-white border border-gray-200/80 text-[#1E293B]/60 hover:text-[#1E293B] hover:bg-gray-50'
                       }`}
                     >
-                      {cat === 'Gym' && '🏋️ '}
-                      {cat === 'Badminton' && '🏸 '}
-                      {cat === 'Football' && '⚽ '}
-                      {cat === 'Running' && '🏃 '}
-                      {cat === 'Yoga' && '🧘 '}
-                      {cat}
+                      {CATEGORY_EMOJI[cat] ?? ''}{cat}
                     </button>
                   ))}
                 </div>
 
-                {/* Squad Cards Feed */}
+                {!loading && filteredMeetups.length === 0 && (
+                  <GlassCard className="p-5 text-center border border-gray-200/70">
+                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No sessions here yet</p>
+                    <p className="text-[12px] text-[#1E293B]/50 mt-1">Be the first — tap <span className="font-bold">+ Host</span> to start one.</p>
+                  </GlassCard>
+                )}
+
                 <div className="space-y-3">
-                  {filteredSquads.map((sq, i) => {
-                    const isFull = sq.joinedSlots >= sq.maxSlots;
+                  {filteredMeetups.map((m, i) => {
+                    const capacity = m.maxAttendees ?? 10;
+                    const isFull = m.attendeesCount >= capacity;
 
                     return (
                       <GlassCard
-                        key={sq.id}
-                        onClick={() => setSelectedDetailSquad(sq)}
+                        key={m.id}
+                        onClick={() => setSelectedDetail(m)}
                         className="animate-bubble-enter p-4 border border-gray-200/70 hover:border-[#F43F5E]/30 transition-all flex flex-col justify-between cursor-pointer active:scale-[0.99] group"
                         style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2.5">
-                          <div className="flex items-center gap-2.5">
-                            <div className="h-10 w-10 overflow-hidden rounded-full border border-gray-200/80 shadow-2xs flex-shrink-0 group-hover:scale-105 transition-transform">
-                              <SafeImage src={sq.hostAvatar} name={sq.hostName} alt="" className="h-full w-full object-cover" />
-                            </div>
-                            <div>
-                              <p className="text-[14.5px] font-bold text-[#1E293B] leading-snug group-hover:text-[#F43F5E] transition-colors">{sq.title}</p>
-                              <p className="text-[11.5px] text-[#1E293B]/55">Hosted by <span className="font-semibold text-[#1E293B]">{sq.hostName}</span></p>
-                            </div>
+                          <div>
+                            <p className="text-[14.5px] font-bold text-[#1E293B] leading-snug group-hover:text-[#F43F5E] transition-colors">{m.title}</p>
+                            <p className="text-[11.5px] text-[#1E293B]/55">Hosted by <span className="font-semibold text-[#1E293B]">{m.hostName}</span></p>
                           </div>
-
                           <span className="px-2.5 py-0.5 rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[10.5px] font-bold text-[#F43F5E] flex-shrink-0">
-                            {sq.level}
+                            {m.category}
                           </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 my-2 py-2 px-3 rounded-xl bg-gray-50/80 border border-gray-100 text-[12px] text-[#1E293B]/70">
                           <div className="flex items-center gap-1.5 truncate">
                             <Ic.MapPin className="w-3.5 h-3.5 text-[#F43F5E] flex-shrink-0" />
-                            <span className="truncate">{sq.venue}</span>
+                            <span className="truncate">{m.venueName ?? m.city ?? 'TBA'}</span>
                           </div>
                           <div className="flex items-center gap-1.5 truncate">
                             <Ic.Clock className="w-3.5 h-3.5 text-[#F43F5E] flex-shrink-0" />
-                            <span className="truncate">{sq.timeSlot}</span>
+                            <span className="truncate">{formatWhen(m.date)}</span>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                          {/* Attendee Avatar Stack */}
-                          <div className="flex items-center -space-x-2">
-                            {sq.attendees.map((att, idx) => (
-                              <div key={idx} className="h-6 w-6 rounded-full overflow-hidden border-2 border-white shadow-2xs">
-                                <SafeImage src={att.avatar} name={att.name} alt="" className="h-full w-full object-cover" />
-                              </div>
-                            ))}
-                            <span className="text-[11.5px] font-bold text-[#1E293B]/65 ml-3">
-                              {sq.joinedSlots} / {sq.maxSlots} Joined
-                            </span>
-                          </div>
+                          <span className="text-[11.5px] font-bold text-[#1E293B]/65">
+                            {m.attendeesCount} / {capacity} Joined
+                          </span>
 
-                          {/* Quick Action Buttons */}
-                          <div className="flex items-center gap-1.5">
-                            {sq.joined && (
-                              <>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    router.push(`/chat/${sq.hostId}`);
-                                  }}
-                                  className="px-2.5 py-1.5 rounded-xl bg-gray-100 text-[#1E293B] text-[11.5px] font-bold hover:bg-gray-200 active:scale-95 transition-all cursor-pointer shadow-2xs"
-                                  title="Direct message host"
-                                >
-                                  Host 💬
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    router.push('/messages');
-                                  }}
-                                  className="px-2.5 py-1.5 rounded-xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] text-[11.5px] font-bold hover:bg-[#F43F5E] hover:text-white active:scale-95 transition-all cursor-pointer shadow-2xs"
-                                  title="Squad group room"
-                                >
-                                  Squad 👥
-                                </button>
-                              </>
-                            )}
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleToggleJoinSquad(sq);
-                              }}
-                              className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs ${
-                                sq.joined
-                                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
-                                  : isFull
-                                  ? 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
-                                  : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
-                              }`}
-                            >
-                              {sq.joined ? 'Joined ✓' : isFull ? 'Squad Full 🔒' : 'Join Squad'}
-                            </button>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleJoin(m);
+                            }}
+                            disabled={busyId === m.id || (isFull && !m.joined)}
+                            className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs disabled:opacity-60 ${
+                              m.joined
+                                ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                                : isFull
+                                ? 'bg-gray-100 border border-gray-200 text-gray-500'
+                                : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
+                            }`}
+                          >
+                            {m.joined ? 'Joined ✓' : isFull ? 'Full 🔒' : 'Join'}
+                          </button>
                         </div>
                       </GlassCard>
                     );
@@ -473,7 +434,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* EVENTS NEAR YOU SECTION */}
+              {/* EVENTS NEAR YOU */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-[#1E293B]/45">Events Near You</h2>
@@ -482,29 +443,35 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
-                  {EVENTS.map((e, i) => (
-                    <GlassCard
-                      key={e.id}
-                      onClick={() => router.push('/discover/meetups')}
-                      className="animate-bubble-enter min-w-[250px] max-w-[270px] p-4 flex-shrink-0 snap-start border border-gray-200/70 hover:border-[#F43F5E]/30 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98]"
-                      style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 shadow-2xs">
-                          <Ic.Compass className="w-5 h-5 text-[#F43F5E]" />
+                {!loading && meetups.length === 0 ? (
+                  <GlassCard className="p-5 text-center border border-gray-200/70">
+                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No upcoming events</p>
+                  </GlassCard>
+                ) : (
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+                    {meetups.map((e, i) => (
+                      <GlassCard
+                        key={e.id}
+                        onClick={() => router.push(`/meetups/${e.id}`)}
+                        className="animate-bubble-enter min-w-[250px] max-w-[270px] p-4 flex-shrink-0 snap-start border border-gray-200/70 hover:border-[#F43F5E]/30 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98]"
+                        style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 shadow-2xs">
+                            <Ic.Compass className="w-5 h-5 text-[#F43F5E]" />
+                          </div>
+                          <span className="rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-2.5 py-0.5 text-[10px] font-bold text-[#F43F5E]">
+                            {e.category}
+                          </span>
                         </div>
-                        <span className="rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-2.5 py-0.5 text-[10px] font-bold text-[#F43F5E]">
-                          {e.tag}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-bold text-[#1E293B] leading-tight mb-1">{e.title}</p>
-                        <p className="text-[12px] text-[#1E293B]/55">{e.date} · {e.attendees} going</p>
-                      </div>
-                    </GlassCard>
-                  ))}
-                </div>
+                        <div>
+                          <p className="text-[14px] font-bold text-[#1E293B] leading-tight mb-1">{e.title}</p>
+                          <p className="text-[12px] text-[#1E293B]/55">{formatWhen(e.date)} · {e.attendeesCount} going</p>
+                        </div>
+                      </GlassCard>
+                    ))}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -513,7 +480,7 @@ export default function HomePage() {
         </AuroraBackground>
       </div>
 
-      {/* PERSONA PICKER MODAL */}
+      {/* PERSONA PICKER */}
       {showPersonaPicker && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
@@ -524,8 +491,8 @@ export default function HomePage() {
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
-                <h3 className="text-[17px] font-extrabold text-[#1E293B]">Behavior Persona Engine</h3>
-                <p className="text-[12px] text-[#1E293B]/50">Select or preview user personas</p>
+                <h3 className="text-[17px] font-extrabold text-[#1E293B]">Your Vibe</h3>
+                <p className="text-[12px] text-[#1E293B]/50">Pick how you&apos;re showing up today</p>
               </div>
               <button
                 onClick={() => setShowPersonaPicker(false)}
@@ -560,7 +527,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* HOST SQUAD MODAL */}
+      {/* HOST MODAL */}
       {showHostModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
@@ -584,9 +551,9 @@ export default function HomePage() {
 
             <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-none text-[13px]">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Select Activity Category</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Activity Category</label>
                 <div className="flex flex-wrap gap-2">
-                  {(['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const).map((cat) => (
+                  {CATEGORIES.map((cat) => (
                     <button
                       key={cat}
                       type="button"
@@ -597,12 +564,7 @@ export default function HomePage() {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      {cat === 'Gym' && '🏋️ '}
-                      {cat === 'Badminton' && '🏸 '}
-                      {cat === 'Football' && '⚽ '}
-                      {cat === 'Running' && '🏃 '}
-                      {cat === 'Yoga' && '🧘 '}
-                      {cat}
+                      {CATEGORY_EMOJI[cat]}{cat}
                     </button>
                   ))}
                 </div>
@@ -614,13 +576,13 @@ export default function HomePage() {
                   type="text"
                   value={hostTitle}
                   onChange={(e) => setHostTitle(e.target.value)}
-                  placeholder="e.g. Leg Day & Heavy Squats 🏋️"
+                  placeholder="e.g. Leg Day &amp; Heavy Squats 🏋️"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Venue / Gym Location</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Venue / Location</label>
                 <input
                   type="text"
                   value={hostVenue}
@@ -631,18 +593,17 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Date &amp; Time Slot</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Date &amp; Time</label>
                 <input
-                  type="text"
-                  value={hostTimeSlot}
-                  onChange={(e) => setHostTimeSlot(e.target.value)}
-                  placeholder="e.g. Today · 6:30 PM"
+                  type="datetime-local"
+                  value={hostDate}
+                  onChange={(e) => setHostDate(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Partner Slots Required</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Partner Slots</label>
                 <div className="flex gap-2">
                   {[2, 4, 6, 8, 10].map((num) => (
                     <button
@@ -653,150 +614,99 @@ export default function HomePage() {
                         hostSlots === num ? 'bg-[#F43F5E] text-white shadow-2xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      {num} Slots
+                      {num}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {hostError && (
+                <p className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[12px] font-semibold text-red-600">
+                  {hostError}
+                </p>
+              )}
+
               <button
-                onClick={handlePublishSquad}
-                className="w-full py-3 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[14px] shadow-md hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer mt-2"
+                onClick={publishSquad}
+                disabled={publishing}
+                className="w-full py-3 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[14px] shadow-md hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer mt-2 disabled:opacity-60"
               >
-                Publish Squad Session 🚀
+                {publishing ? 'Publishing…' : 'Publish Squad Session 🚀'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* RICH SQUAD DETAIL SHEET MODAL (CASE F & ALL CONTACT OPTIONS) */}
-      {selectedDetailSquad && (
+      {/* DETAIL SHEET */}
+      {selectedDetail && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
-            onClick={() => setSelectedDetailSquad(null)}
+            onClick={() => setSelectedDetail(null)}
             className="absolute inset-0 bg-black/45 backdrop-blur-md transition-all duration-300"
           />
           <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[90dvh] flex flex-col shadow-2xl animate-popover-enter">
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
-            
-            {/* Modal Header */}
+
             <div className="flex items-start justify-between border-b border-gray-100 pb-3">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl overflow-hidden border border-gray-200 shadow-2xs flex-shrink-0">
-                  <SafeImage src={selectedDetailSquad.hostAvatar} name={selectedDetailSquad.hostName} alt="" className="h-full w-full object-cover" />
-                </div>
-                <div>
-                  <h3 className="text-[17px] font-extrabold text-[#1E293B] leading-tight">{selectedDetailSquad.title}</h3>
-                  <p className="text-[12px] text-[#1E293B]/60 font-medium">Hosted by <span className="font-bold text-[#1E293B]">{selectedDetailSquad.hostName}</span></p>
-                </div>
+              <div>
+                <h3 className="text-[17px] font-extrabold text-[#1E293B] leading-tight">{selectedDetail.title}</h3>
+                <p className="text-[12px] text-[#1E293B]/60 font-medium">
+                  Hosted by <span className="font-bold text-[#1E293B]">{selectedDetail.hostName}</span>
+                </p>
               </div>
               <button
-                onClick={() => setSelectedDetailSquad(null)}
+                onClick={() => setSelectedDetail(null)}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-700 cursor-pointer active:scale-90 transition-transform"
               >
                 ✕
               </button>
             </div>
 
-            {/* Scrollable Detail Body */}
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none text-[13px]">
-              {/* Session Meta Badges */}
               <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-gray-50 border border-gray-200/80">
                 <div className="flex items-center gap-2">
                   <Ic.MapPin className="w-4 h-4 text-[#F43F5E]" />
                   <div>
                     <p className="text-[10px] font-bold uppercase text-gray-400">Venue</p>
-                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{selectedDetailSquad.venue}</p>
+                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{selectedDetail.venueName ?? selectedDetail.city ?? 'TBA'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Ic.Clock className="w-4 h-4 text-[#F43F5E]" />
                   <div>
-                    <p className="text-[10px] font-bold uppercase text-gray-400">Time Slot</p>
-                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{selectedDetailSquad.timeSlot}</p>
+                    <p className="text-[10px] font-bold uppercase text-gray-400">When</p>
+                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{formatWhen(selectedDetail.date)}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Equipment & Guidelines */}
-              {selectedDetailSquad.equipment && (
-                <div className="p-3.5 rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#F43F5E]">Required Equipment</p>
-                  <p className="text-[13px] text-[#2D1B28] font-medium">{selectedDetailSquad.equipment}</p>
-                </div>
-              )}
-
-              {selectedDetailSquad.rules && (
-                <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200/70 space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">Session Guidelines</p>
-                  <p className="text-[12.5px] text-gray-700">{selectedDetailSquad.rules}</p>
-                </div>
-              )}
-
-              {/* Live Attendees Roster */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Confirmed Attendees ({selectedDetailSquad.joinedSlots} / {selectedDetailSquad.maxSlots})</p>
-                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    {selectedDetailSquad.maxSlots - selectedDetailSquad.joinedSlots} Spots Left
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {selectedDetailSquad.attendees.map((att) => (
-                    <div key={att.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-gray-200/70 shadow-2xs">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full overflow-hidden border border-gray-200">
-                          <SafeImage src={att.avatar} name={att.name} alt="" className="h-full w-full object-cover" />
-                        </div>
-                        <span className="text-[13px] font-bold text-[#1E293B]">{att.name}</span>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        att.role === 'host' ? 'bg-[#FFF0F4] text-[#F43F5E] border border-[#F9C0D0]/60' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {att.role === 'host' ? 'Host 👑' : 'Member'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">
+                  Attendees ({selectedDetail.attendeesCount} / {selectedDetail.maxAttendees ?? 10})
+                </p>
+                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  {Math.max(0, (selectedDetail.maxAttendees ?? 10) - selectedDetail.attendeesCount)} Spots Left
+                </span>
               </div>
 
-              {/* Direct Communication Bar */}
-              <div className="pt-2 border-t border-gray-100 space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      setSelectedDetailSquad(null);
-                      router.push(`/chat/${selectedDetailSquad.hostId}`);
-                    }}
-                    className="py-2.5 px-3 rounded-xl bg-gray-100 text-[#1E293B] text-[12.5px] font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Message Host 💬</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setSelectedDetailSquad(null);
-                      router.push('/messages');
-                    }}
-                    className="py-2.5 px-3 rounded-xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] text-[12.5px] font-bold hover:bg-[#F43F5E] hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Squad Group 👥</span>
-                  </button>
-                </div>
-
+              <div className="pt-2 border-t border-gray-100">
                 <button
-                  onClick={() => handleToggleJoinSquad(selectedDetailSquad)}
-                  className={`w-full py-3 rounded-2xl text-[14px] font-extrabold transition-all cursor-pointer shadow-md ${
-                    selectedDetailSquad.joined
+                  onClick={() => toggleJoin(selectedDetail)}
+                  disabled={busyId === selectedDetail.id}
+                  className={`w-full py-3 rounded-2xl text-[14px] font-extrabold transition-all cursor-pointer shadow-md disabled:opacity-60 ${
+                    selectedDetail.joined
                       ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
-                      : selectedDetailSquad.joinedSlots >= selectedDetailSquad.maxSlots
-                      ? 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+                      : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
+                      ? 'bg-gray-100 border border-gray-200 text-gray-500'
                       : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
                   }`}
                 >
-                  {selectedDetailSquad.joined ? 'Joined ✓ (Tap to Leave)' : selectedDetailSquad.joinedSlots >= selectedDetailSquad.maxSlots ? 'Squad Full (Join Waitlist ⏳)' : 'Join Squad Session 🚀'}
+                  {selectedDetail.joined
+                    ? 'Joined ✓ (Tap to Leave)'
+                    : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
+                    ? 'Session Full 🔒'
+                    : 'Join Session 🚀'}
                 </button>
               </div>
             </div>
@@ -804,28 +714,28 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* CONFIRM LEAVE DIALOG (CASE E) */}
-      {confirmLeaveSquadId && (
+      {/* CONFIRM LEAVE */}
+      {confirmLeaveId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-popover-enter">
           <div className="w-full max-w-[340px] bg-white rounded-[28px] p-5 shadow-2xl space-y-4 text-center">
             <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl font-bold">
               👟
             </div>
             <div>
-              <h3 className="text-[17px] font-extrabold text-[#1E293B]">Leave Squad?</h3>
+              <h3 className="text-[17px] font-extrabold text-[#1E293B]">Leave Session?</h3>
               <p className="text-[12.5px] text-gray-500 mt-1">
-                Are you sure you want to leave this session? The host will be notified to re-open your spot to waitlisted members.
+                Your spot will be re-opened for someone else to join.
               </p>
             </div>
             <div className="flex gap-2 pt-2">
               <button
-                onClick={() => setConfirmLeaveSquadId(null)}
+                onClick={() => setConfirmLeaveId(null)}
                 className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-[13px] font-bold hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleConfirmLeave(confirmLeaveSquadId)}
+                onClick={() => confirmLeave(confirmLeaveId)}
                 className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-bold hover:bg-red-700 transition-colors cursor-pointer shadow-2xs"
               >
                 Yes, Leave

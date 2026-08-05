@@ -78,7 +78,12 @@ export default function PhotosPage() {
     }
     setError('');
 
-    localStorage.setItem('onboarding_photos', JSON.stringify(validPhotos));
+    try {
+      localStorage.setItem('onboarding_photos', JSON.stringify(validPhotos));
+    } catch {
+      setError('Your photos are too large to save. Please remove them and add smaller images.');
+      return;
+    }
     router.push('/onboarding/bio');
   };
 

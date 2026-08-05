@@ -25,6 +25,8 @@ export const users = pgTable('users', {
   bio: text('bio'),
   isVerified: boolean('is_verified').default(false),
   isActive: boolean('is_active').default(true),
+  settings: jsonb('settings'),
+  onboardingCompletedAt: timestamp('onboarding_completed_at'),
   lastActiveAt: timestamp('last_active_at').defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
