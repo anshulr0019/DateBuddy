@@ -7,7 +7,12 @@ import { setAuthSession } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
+  let origin = request.nextUrl.origin;
+  const host = request.headers.get('host') || '';
+  if (origin.includes('0.0.0.0') || host.includes('0.0.0.0')) {
+    origin = origin.replace('0.0.0.0', 'localhost');
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');

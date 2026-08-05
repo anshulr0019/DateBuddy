@@ -4,7 +4,12 @@ import { randomBytes } from 'crypto';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
+  let origin = request.nextUrl.origin;
+  const host = request.headers.get('host') || '';
+  if (origin.includes('0.0.0.0') || host.includes('0.0.0.0')) {
+    origin = origin.replace('0.0.0.0', 'localhost');
+  }
+
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
 
