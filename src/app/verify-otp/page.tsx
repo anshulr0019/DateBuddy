@@ -14,6 +14,7 @@ export default function VerifyOtpPage() {
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(RESEND_SECONDS);
   const [resending, setResending] = useState(false);
+  const [shaking, setShaking] = useState(false);
 
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -77,10 +78,16 @@ export default function VerifyOtpPage() {
     }
   };
 
+  const triggerShake = () => {
+    setShaking(true);
+    setTimeout(() => setShaking(false), 500);
+  };
+
   const submitCode = useCallback(async (code: string) => {
     if (code.length < 6) {
       setError('Please enter the complete 6-digit code.');
       hapticWarning();
+      triggerShake();
       return;
     }
     setLoading(true);
@@ -90,6 +97,7 @@ export default function VerifyOtpPage() {
       if (!phoneNumber) {
         setError('We lost your phone number. Please start again.');
         hapticWarning();
+        triggerShake();
         setLoading(false);
         return;
       }
@@ -106,12 +114,14 @@ export default function VerifyOtpPage() {
       } else {
         hapticWarning();
         setError(data.message || 'Invalid verification code. Please try again.');
-        // Clear inputs on wrong code so user can re-enter cleanly
+        // Shake + clear so user can re-enter cleanly
+        triggerShake();
         setOtp(['', '', '', '', '', '']);
         setTimeout(() => inputRefs.current[0]?.focus(), 50);
       }
     } catch {
       hapticWarning();
+      triggerShake();
       setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -204,9 +214,9 @@ export default function VerifyOtpPage() {
         {/* Glass card */}
         <div className="w-full rounded-[28px] border border-white/60 bg-white/75 p-5 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.2)] flex flex-col items-center">
           <form onSubmit={handleVerify} className="w-full flex flex-col items-center">
-            {/* OTP inputs */}
+            {/* OTP inputs — shake on wrong code */}
             <div
-              className="flex justify-center gap-2 sm:gap-3 mb-5 w-full"
+              className={`flex justify-center gap-2 sm:gap-3 mb-5 w-full ${shaking ? 'animate-shake' : ''}`}
               role="group"
               aria-label="6-digit verification code"
             >

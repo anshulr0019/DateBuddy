@@ -189,28 +189,40 @@ export default function MessagesPage() {
                       role="listitem"
                       onClick={() => router.push(`/chat/${c.id}`)}
                       aria-label={`Chat with ${c.name}${c.unread > 0 ? `, ${c.unread} unread message${c.unread === 1 ? '' : 's'}` : ''}. Last message: ${c.lastMsg}`}
-                      className="animate-float-in relative flex w-full items-center gap-3.5 rounded-[22px] p-3 text-left transition-all hover:bg-white/70 active:scale-[0.99] cursor-pointer border border-transparent hover:border-white/60"
+                      className={`animate-float-in relative flex w-full items-center gap-3.5 rounded-[22px] px-3.5 py-3 text-left transition-all active:scale-[0.99] cursor-pointer border ${
+                        c.unread > 0
+                          ? 'bg-white/80 border-[#F43F5E]/12 shadow-[0_2px_12px_-6px_rgba(244,63,94,0.10)]'
+                          : 'border-transparent hover:bg-white/70 hover:border-white/60'
+                      }`}
                       style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
                     >
-                      {/* Avatar */}
-                      <div className="relative h-13 w-13 flex-shrink-0 overflow-hidden rounded-full border border-white/60 shadow-xs">
+                      {/* Avatar with online dot */}
+                      <div className="relative h-[58px] w-[58px] flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-[0_2px_8px_-4px_rgba(26,26,46,0.12)]">
                         <SafeImage src={c.photo ?? undefined} name={c.name} alt="" className="h-full w-full object-cover" />
+                        {/* Online indicator — shown when conversation was recently active */}
+                        {c.unread > 0 && (
+                          <span aria-hidden className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full bg-[#22C55E] border-2 border-white shadow-sm" />
+                        )}
                       </div>
 
                       {/* Content */}
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[15px] font-bold text-[#191C1E] leading-tight truncate">{c.name}</span>
-                          <span className="text-[11.5px] font-medium text-gray-400 flex-shrink-0">{formatListTime(c.time)}</span>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className={`text-[15px] leading-tight truncate ${c.unread > 0 ? 'font-bold text-[#191C1E]' : 'font-semibold text-[#191C1E]/85'}`}>
+                            {c.name}
+                          </span>
+                          <span className={`text-[11.5px] flex-shrink-0 ml-2 ${c.unread > 0 ? 'font-bold text-[#F43F5E]' : 'font-medium text-gray-400'}`}>
+                            {formatListTime(c.time)}
+                          </span>
                         </div>
 
-                        <div className="mt-0.5 flex items-center justify-between">
-                          <span className={`truncate text-[13px] ${c.unread > 0 ? 'text-[#191C1E] font-bold' : 'text-gray-400 font-normal'}`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`truncate text-[13px] leading-snug ${c.unread > 0 ? 'text-[#191C1E]/80 font-semibold' : 'text-gray-400 font-normal'}`}>
                             {c.lastMsg}
                           </span>
 
                           {c.unread > 0 && (
-                            <div aria-hidden className="ml-2 flex h-5 min-w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[#F43F5E] px-1.5 text-[11px] font-bold text-white shadow-xs">
+                            <div aria-hidden className="ml-1 flex h-5 min-w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#F43F5E] to-[#FB7185] px-1.5 text-[11px] font-bold text-white shadow-[0_2px_6px_-2px_rgba(244,63,94,0.4)]">
                               {c.unread > 99 ? '99+' : c.unread}
                             </div>
                           )}

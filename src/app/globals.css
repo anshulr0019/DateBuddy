@@ -443,14 +443,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
-/* Solid Story Ring for Phase 2 Restraint */
+/* Gradient story ring — Instagram-style */
 .story-ring {
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 9999px;
-  background: #FF6B9D;
+  background: linear-gradient(135deg, #FF6B9D 0%, #B76CFF 50%, #7B68EE 100%);
 }
 .story-ring-inner {
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 9999px;
   background: #FAFAF7;
 }
@@ -515,19 +515,50 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
 }
 
-/* Skeleton Loading Pulse */
-@keyframes skeletonPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+/* Skeleton Loading — shimmer sweep (LinkedIn/Telegram-style).
+   GPU-only: the shimmer is a translated gradient overlay on top
+   of a static base colour, so no opacity flicker on the content. */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }
 .animate-skeleton {
-  animation: skeletonPulse 1.5s ease-in-out infinite;
-  background-color: #E2E8F0;
+  position: relative;
+  overflow: hidden;
+  background-color: #EEF0F3;
+}
+.animate-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.72) 40%,
+    rgba(255,255,255,0.9) 50%,
+    rgba(255,255,255,0.72) 60%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.6s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* ─────────────────────────────────────────────────
    Cinematic Minimal Animations for Chat & UI
 ───────────────────────────────────────────────── */
+
+/* Bottom-sheet slide up — used by all modal sheets */
+@keyframes sheet-slide-up {
+  0%   { opacity: 0; transform: translateY(100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-sheet-up {
+  animation: sheet-slide-up 0.38s cubic-bezier(0.32, 1, 0.4, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Popover enter — dialogs, alerts, modals */
 @keyframes popover-enter {
   0% {
     opacity: 0;
@@ -544,6 +575,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
+/* Card/item bubble enter */
 @keyframes bubble-enter {
   0% {
     opacity: 0;
@@ -560,15 +592,69 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
-/* Reduced motion */
+/* Chat message slide-in — sender vs receiver get mirrored origins */
+@keyframes msg-in-mine {
+  0%   { opacity: 0; transform: translateX(18px) scale(0.97); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes msg-in-theirs {
+  0%   { opacity: 0; transform: translateX(-18px) scale(0.97); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+.animate-msg-mine {
+  animation: msg-in-mine 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+.animate-msg-theirs {
+  animation: msg-in-theirs 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+/* Shake — wrong OTP, form validation errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  16%       { transform: translateX(-8px); }
+  33%       { transform: translateX(7px); }
+  50%       { transform: translateX(-5px); }
+  67%       { transform: translateX(4px); }
+  83%       { transform: translateX(-2px); }
+}
+.animate-shake {
+  animation: shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Scale-pop — success moments, match celebration, haptic confirmations */
+@keyframes scale-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+.animate-scale-pop {
+  animation: scale-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Pulse ring — match celebration ripple */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.85); opacity: 0.7; }
+  100% { transform: scale(2.2);  opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Reduced motion — disable all motion except instant show */
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow,
   .nav-indicator-spring, .animate-card-swipe-right, .animate-card-swipe-left,
   .animate-card-swipe-up, .animate-card-depth-enter, .animate-popover-enter,
-  .animate-bubble-enter {
+  .animate-bubble-enter, .animate-sheet-up, .animate-msg-mine,
+  .animate-msg-theirs, .animate-shake, .animate-scale-pop, .animate-pulse-ring,
+  .animate-skeleton::after {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
+    transform: none !important;
   }
 
   /* Splash: static composition — mark + glow, no motion */

@@ -825,7 +825,7 @@ export default function DiscoverPage() {
             </div>
             <div
               ref={nopeStampRef}
-              className={`absolute top-12 right-6 z-30 rotate-12 border-4 border-[#94A3B8] text-[#E2E8F0] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl pointer-events-none transition-opacity duration-150 ${
+              className={`absolute top-12 right-6 z-30 rotate-12 border-4 border-[#F43F5E] text-[#FF8FA3] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl pointer-events-none transition-opacity duration-150 ${
                 exit && !exit.viaDrag && exit.dir === 'left' ? 'opacity-100' : 'opacity-0'
               }`}
             >
@@ -1001,55 +1001,60 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* ACTION BUTTONS */}
-      <div className="flex-shrink-0 flex justify-center items-center gap-2.5 sm:gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
+      {/* ACTION BUTTONS — sized like Tinder/Hinge: pass < super < like > undo/report */}
+      <div className="flex-shrink-0 flex justify-center items-center gap-3 sm:gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
+        {/* Report / more */}
         <button
           onClick={() => setSafetySheetOpen(true)}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94]"
+          className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_4px_12px_-6px_rgba(26,26,46,0.10)] transition-all duration-200 active:scale-[0.90] hover:shadow-[0_6px_20px_-8px_rgba(26,26,46,0.15)]"
           aria-label={`Report or block ${currentProfile.name}`}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1A1A2E" className="opacity-60">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="#1A1A2E" className="opacity-50">
             <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
           </svg>
         </button>
 
+        {/* Pass — smaller; muted since it's a negative action */}
         <button
           onClick={() => commitSwipe('pass', false)}
-          className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white border-2 border-[#1A1A2E]/10 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94]"
+          className="relative flex h-[58px] w-[58px] items-center justify-center rounded-full bg-white border-2 border-[#1A1A2E]/10 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.10)] transition-all duration-200 active:scale-[0.90] hover:border-[#F43F5E]/30 hover:shadow-[0_6px_20px_-8px_rgba(244,63,94,0.20)]"
           aria-label={`Pass on ${currentProfile.name}`}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-55">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
+        {/* Super Like — elevated center position */}
         <button
           onClick={() => commitSwipe('super_like', false)}
-          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#7B68EE] hover:bg-[#6A5AE0] shadow-[0_8px_24px_-6px_rgba(123,104,238,0.5)] transition-transform duration-200 active:scale-90 cursor-pointer"
+          className="relative flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#7B68EE] shadow-[0_8px_28px_-8px_rgba(123,104,238,0.55)] transition-all duration-200 active:scale-[0.90] hover:bg-[#6A5AE0] hover:shadow-[0_10px_32px_-8px_rgba(123,104,238,0.65)] cursor-pointer"
           aria-label={`Super Like ${currentProfile.name}`}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-sm">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-sm">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
         </button>
 
+        {/* Like — largest; positive primary action */}
         <button
           onClick={() => commitSwipe('like', false)}
-          className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#F43F5E] hover:bg-[#E11D48] shadow-[0_8px_24px_-6px_rgba(244,63,94,0.5)] transition-transform duration-200 active:scale-90 cursor-pointer"
+          className="relative flex h-[66px] w-[66px] items-center justify-center rounded-full bg-gradient-to-br from-[#F43F5E] to-[#FB7185] shadow-[0_8px_28px_-8px_rgba(244,63,94,0.6)] transition-all duration-200 active:scale-[0.90] hover:shadow-[0_10px_32px_-8px_rgba(244,63,94,0.7)] cursor-pointer"
           aria-label={`Like ${currentProfile.name}`}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-sm">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-sm">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         </button>
 
+        {/* Undo */}
         <button
           onClick={handleUndo}
           disabled={!lastSwipe || undoBusy}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94] disabled:opacity-40 disabled:active:scale-100 cursor-pointer disabled:cursor-default"
+          className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_4px_12px_-6px_rgba(26,26,46,0.10)] transition-all duration-200 active:scale-[0.90] disabled:opacity-35 disabled:active:scale-100 cursor-pointer disabled:cursor-default"
           aria-label="Undo last swipe"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="opacity-55">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
           </svg>
         </button>
@@ -1065,7 +1070,7 @@ export default function DiscoverPage() {
           onClick={() => !reportSubmitting && setSafetySheetOpen(false)}
         >
           <div
-            className="w-full max-w-[440px] sm:max-w-[400px] bg-[#FAFAF7] rounded-t-[28px] sm:rounded-[28px] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] animate-popover-enter"
+            className="w-full max-w-[440px] sm:max-w-[400px] bg-[#FAFAF7] rounded-t-[28px] sm:rounded-[28px] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] animate-sheet-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center pb-3 sm:hidden">
@@ -1115,29 +1120,42 @@ export default function DiscoverPage() {
           aria-modal="true"
           aria-label="It's a match"
         >
-          <div className="w-full max-w-[360px] rounded-[28px] bg-white p-8 text-center shadow-2xl flex flex-col items-center">
-            <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 px-4 py-1.5 rounded-full">✨ New Connection</div>
-            <h2 className="text-[30px] font-extrabold text-[#1A1A2E] mb-1 tracking-tight">It&apos;s a Match!</h2>
+          <div className="w-full max-w-[360px] rounded-[32px] bg-white p-8 text-center shadow-2xl flex flex-col items-center overflow-hidden">
+            {/* Ambient gradient behind the card */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[32px] overflow-hidden">
+              <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-[#FF6B9D]/12 blur-[40px]" />
+              <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-[#7B68EE]/12 blur-[40px]" />
+            </div>
+
+            <div className="relative mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 px-4 py-1.5 rounded-full animate-scale-pop">
+              ✨ New Connection
+            </div>
+            <h2 className="text-[32px] font-extrabold text-[#1A1A2E] mb-1 tracking-tight leading-tight">
+              It&apos;s a Match!
+            </h2>
             <p className="text-[14px] text-[#1A1A2E]/60 mb-8">
-              You and {matchedUser.name ? matchedUser.name.split(' ')[0] : 'your match'} liked each other.
+              You and {matchedUser.name ? matchedUser.name.split(' ')[0] : 'your match'} liked each other 💕
             </p>
 
+            {/* Avatar pair with animated heart */}
             <div className="relative mb-8 flex items-center justify-center">
-              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-md z-10 -mr-5">
+              {/* Pulse rings behind heart */}
+              <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 h-14 w-14 rounded-full bg-[#F43F5E]/20 animate-pulse-ring" />
+              <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 h-14 w-14 rounded-full bg-[#F43F5E]/15 animate-pulse-ring" style={{ animationDelay: '0.22s' }} />
+
+              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-lg z-20 -mr-5 ring-2 ring-[#F43F5E]/20">
                 <SafeImage src={myPhoto ?? undefined} name={myName} alt="Your profile photo" className="h-full w-full object-cover" />
               </div>
-              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-md z-0">
+              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-lg z-20 ring-2 ring-[#7B68EE]/20">
                 <SafeImage src={matchedUser.photo ?? undefined} name={matchedUser.name} alt={`${matchedUser.name}'s profile photo`} className="h-full w-full object-cover" />
               </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-[#F43F5E] text-white shadow-md animate-bounce">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#F43F5E] to-[#FF7B8F] text-white shadow-[0_4px_16px_-4px_rgba(244,63,94,0.5)] animate-scale-pop">
                 <Ic.Heart filled />
               </div>
             </div>
 
-            <div className="w-full space-y-3">
+            <div className="relative w-full space-y-3 z-10">
               <PrimaryButton onClick={() => {
-                // Consume our own history entry before navigating, otherwise the
-                // rewind would fire after the route change and bounce the user back.
                 pushedOverlayRef.current = false;
                 closingFromPopRef.current = true;
                 setMatchedUser(null);

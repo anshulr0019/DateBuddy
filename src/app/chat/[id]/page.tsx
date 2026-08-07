@@ -302,14 +302,17 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* New messages chip */}
+            {/* New messages chip — SVG arrow, proper button */}
             {showNewChip && (
-              <div className="relative z-30">
+              <div className="relative z-30 flex justify-center">
                 <button
                   onClick={() => scrollToBottom()}
-                  className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-[#F43F5E] px-4 py-1.5 text-[12px] font-bold text-white shadow-lg hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer animate-popover-enter"
+                  className="absolute -top-14 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F43F5E] to-[#FB7185] px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_-6px_rgba(244,63,94,0.6)] hover:shadow-[0_6px_20px_-6px_rgba(244,63,94,0.7)] active:scale-95 transition-all cursor-pointer animate-popover-enter"
                 >
-                  ↓ New messages
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                  New messages
                 </button>
               </div>
             )}

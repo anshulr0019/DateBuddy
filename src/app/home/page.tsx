@@ -6,6 +6,7 @@ import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from '../components/shared';
 import { useNotifications } from '../context/NotificationContext';
 import { PERSONAS, DEFAULT_PERSONA } from '@/lib/personaGreeting';
+import { hapticLight, hapticMedium } from '../lib/haptics';
 
 type Pick = {
   id: number;
@@ -354,7 +355,7 @@ export default function HomePage() {
                   {(['All', ...CATEGORIES] as const).map((cat) => (
                     <button
                       key={cat}
-                      onClick={() => setSquadFilter(cat)}
+                      onClick={() => { hapticLight(); setSquadFilter(cat); }}
                       className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all duration-200 flex-shrink-0 cursor-pointer ${
                         squadFilter === cat
                           ? 'bg-[#F43F5E] text-white shadow-2xs scale-105'
@@ -487,7 +488,7 @@ export default function HomePage() {
             onClick={() => setShowPersonaPicker(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-popover-enter">
+          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-sheet-up">
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
@@ -534,7 +535,7 @@ export default function HomePage() {
             onClick={() => setShowHostModal(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-popover-enter">
+          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-sheet-up">
             {/* handle */}
             <div className="pt-3 pb-0 flex-shrink-0 flex justify-center">
               <div className="h-1 w-10 bg-gray-300 rounded-full" />
@@ -652,7 +653,7 @@ export default function HomePage() {
             onClick={() => setSelectedDetail(null)}
             className="absolute inset-0 bg-black/45 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[90dvh] flex flex-col shadow-2xl animate-popover-enter">
+          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[90dvh] flex flex-col shadow-2xl animate-sheet-up">
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
 
             <div className="flex items-start justify-between border-b border-gray-100 pb-3">

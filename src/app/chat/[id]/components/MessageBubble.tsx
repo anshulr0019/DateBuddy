@@ -78,7 +78,7 @@ function MessageBubbleInner({
   const isImage = message.type === 'photo' || message.type === 'gif';
 
   return (
-    <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+    <div className={`flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'}`}>
       <div
         onPointerDown={startPress}
         onPointerUp={cancelPress}

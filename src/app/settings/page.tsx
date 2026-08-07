@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
-import { AuroraBackground, GlassCard, VerifiedBadge } from '../components/shared';
+import { AuroraBackground, GlassCard, VerifiedBadge, SafeImage } from '../components/shared';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function SettingsPage() {
     email: '',
     phoneNumber: '',
     verified: false,
+    photo: '' as string,
   });
 
   const [notifications, setNotifications] = useState({
@@ -104,6 +105,7 @@ export default function SettingsPage() {
             email: u.email || prev.email,
             phoneNumber: u.phoneNumber || u.phone || prev.phoneNumber,
             verified: u.isVerified ?? prev.verified,
+            photo: Array.isArray(u.photos) && u.photos.length > 0 ? u.photos[0] : prev.photo,
           }));
           return;
         }
@@ -237,19 +239,25 @@ export default function SettingsPage() {
               {/* Profile Card Header */}
               <GlassCard className="p-4 flex items-center justify-between border border-gray-200/60 shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-[#F43F5E] text-white font-bold flex items-center justify-center text-lg shadow-2xs">
-                    {userInfo.name.charAt(0)}
+                  <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-[#F43F5E]/20 shadow-sm flex-shrink-0">
+                    <SafeImage
+                      src={userInfo.photo || null}
+                      name={userInfo.name}
+                      alt="Your profile photo"
+                      eager
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h2 className="text-[16px] font-bold text-[#1E293B]">{userInfo.name}</h2>
                       {userInfo.verified && <VerifiedBadge />}
                     </div>
-                    <p className="text-[12px] text-[#1E293B]/55">{userInfo.email}</p>
+                    <p className="text-[12px] text-[#1E293B]/55">{userInfo.email || userInfo.phoneNumber}</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => router.push('/onboarding/basic-info')}
+                  onClick={() => router.push('/profile')}
                   className="px-3 py-1.5 text-[12px] font-bold text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 rounded-xl hover:bg-[#F43F5E] hover:text-white transition-all cursor-pointer shadow-2xs active:scale-95"
                 >
                   Edit Profile
@@ -517,7 +525,7 @@ export default function SettingsPage() {
               </svg>
             </div>
             <h3 className="text-[18px] font-bold text-[#1A1A2E] text-center">Log Out?</h3>
-            <p className="text-[14px] text-[#1A1A2E]/60 text-center leading-relaxed">You'll need to sign in again next time you open the app.</p>
+            <p className="text-[14px] text-[#1A1A2E]/60 text-center leading-relaxed">You&apos;ll need to sign in again next time you open the app.</p>
             <div className="flex gap-3 pt-2">
               <button onClick={() => setConfirmSheet(null)} className="flex-1 py-3 rounded-2xl border border-[#1A1A2E]/15 bg-white text-[#1A1A2E] text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
                 Cancel

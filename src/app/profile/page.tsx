@@ -299,11 +299,11 @@ export default function ProfilePage() {
 
             {status === 'ready' && (
               <>
-                {/* Hero */}
-                <div className="relative h-64 w-full overflow-hidden">
+                {/* Hero — taller, like Hinge/Instagram */}
+                <div className="relative w-full overflow-hidden" style={{ height: 'min(42dvh, 360px)' }}>
                   <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A2E]/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent" />
                   <div className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
                     <button
                       onClick={() => router.push('/settings')}
@@ -552,7 +552,7 @@ export default function ProfilePage() {
             >
               <div
                 onClick={e => e.stopPropagation()}
-                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-popover-enter"
+                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-sheet-up"
               >
                 <h2 className="mb-5 text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
 
