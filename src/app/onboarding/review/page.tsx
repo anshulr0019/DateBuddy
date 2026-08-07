@@ -1,218 +1,274 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { hapticMedium, hapticSuccess, hapticWarning } from '../../lib/haptics';
+
+const BackChevron = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+interface ProfilePreview {
+  name: string;
+  age: number;
+  photo: string;
+  bio: string;
+  interests: string[];
+}
+
+function calcAge(dob: string): number {
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return 24;
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  if (today.getMonth() + 1 < d.getMonth() + 1 ||
+    (today.getMonth() + 1 === d.getMonth() + 1 && today.getDate() < d.getDate())) {
+    age -= 1;
+  }
+  return Math.max(18, age);
+}
+
+function calcStrength(): number {
+  try {
+    const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]') as string[];
+    const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}') as Record<string, string>;
+    const interests = JSON.parse(localStorage.getItem('onboarding_interests') || '[]') as string[];
+    let s = 30;
+    s += Math.min(photos.filter(p => p?.trim()).length, 4) * 10; // up to 40
+    if (bio.bio?.trim().length >= 15 || bio.promptAnswer?.trim().length >= 10) s += 20;
+    s += Math.min(interests.length, 1) * 10; // at least 1 interest = +10
+    return Math.min(s, 100);
+  } catch { return 50; }
+}
 
 export default function ReviewPage() {
   const router = useRouter();
-  const [profileData, setProfileData] = useState<any>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profile, setProfile] = useState<ProfilePreview | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [strengthPct, setStrengthPct] = useState(0);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    const basicInfo = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
-    const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]');
-    const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}');
-    const interests = JSON.parse(localStorage.getItem('onboarding_interests') || '[]');
+    // Load preview from localStorage
+    try {
+      const basic = JSON.parse(localStorage.getItem('onboarding_basic') || '{}') as Record<string, string>;
+      const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]') as string[];
+      const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}') as Record<string, string>;
+      const interests = JSON.parse(localStorage.getItem('onboarding_interests') || '[]') as string[];
+      const valid = photos.filter(p => p?.trim());
 
-    let age = 24;
-    if (basicInfo.dateOfBirth) {
-      const dobYear = new Date(basicInfo.dateOfBirth).getFullYear();
-      if (!isNaN(dobYear)) {
-        age = new Date().getFullYear() - dobYear;
-      }
-    }
+      setProfile({
+        name: basic.name || 'You',
+        age: basic.dateOfBirth ? calcAge(basic.dateOfBirth) : 24,
+        photo: valid[0] || '',
+        bio: bio.bio?.trim() || bio.promptAnswer?.trim() || '',
+        interests: (interests as string[]).slice(0, 4),
+      });
+    } catch { /* use defaults */ }
 
-    const validPhotos = Array.isArray(photos) ? photos.filter((p: string) => p && p.trim().length > 0) : [];
-
-    setProfileData({
-      name: basicInfo.name || 'Alex',
-      age,
-      photo: validPhotos[0] || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=800&fit=crop&crop=faces',
-      bio: bio.bio || bio.promptAnswer || 'Finding more of myself these days ✨',
-      interests: Array.isArray(interests) ? interests.slice(0, 3) : ['Coffee', 'Travel', 'Design'],
-    });
+    // Animate strength ring after mount
+    const pct = calcStrength();
+    const t = setTimeout(() => { if (mountedRef.current) setStrengthPct(pct); }, 350);
+    return () => { mountedRef.current = false; clearTimeout(t); };
   }, []);
 
-  const handleStartDiscovering = async () => {
-    setIsSubmitting(true);
+  const handleSubmit = async () => {
+    setSubmitting(true);
     setError('');
+    hapticMedium();
     try {
       const basicInfo = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
-      const location = localStorage.getItem('onboarding_location') || 'Mumbai';
+      const location = localStorage.getItem('onboarding_location') || '';
       const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]');
       const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}');
       const interests = JSON.parse(localStorage.getItem('onboarding_interests') || '[]');
-      const preferences = JSON.parse(localStorage.getItem('onboarding_preferences') || '{}');
+      const preferences = JSON.parse(localStorage.getItem('onboarding_preferences') || '');
 
-      const response = await fetch('/api/users/complete-onboarding', {
+      const res = await fetch('/api/users/complete-onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ basicInfo, location, photos, bio, interests, preferences }),
       });
+      const data = await res.json().catch(() => ({}));
 
-      const data = await response.json().catch(() => ({}));
-
-      if (response.status === 401) {
-        window.location.assign('/welcome');
-        return;
-      }
-
-      if (!response.ok || !data.success) {
+      if (res.status === 401) { window.location.assign('/welcome'); return; }
+      if (!res.ok || !data.success) {
+        hapticWarning();
         setError(data.message || 'Could not save your profile. Please try again.');
         return;
       }
-
-      // Hard navigation, NOT router.push: the client router may hold a
-      // prefetched /discover entry from before the session cookie was
-      // re-minted (the middleware's redirect to /onboarding/basic-info gets
-      // cached), which would bounce the user straight back into onboarding.
-      // A full-page load always re-runs the middleware with the fresh cookie.
+      hapticSuccess();
+      // Hard navigate so middleware re-runs with fresh cookie
       window.location.assign('/discover');
     } catch {
+      hapticWarning();
       setError('Network error. Please check your connection and try again.');
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  const calculateProfileStrength = () => {
-    let strength = 40;
-    const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]');
-    const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}');
-    
-    if (Array.isArray(photos)) {
-      strength += photos.filter((p: string) => p && p.trim().length > 0).length * 10;
-    }
-    if (bio.bio || bio.promptAnswer) strength += 10;
-    
-    return Math.min(strength, 100);
-  };
-
-  if (!profileData) {
-    return (
-      <div className="h-dvh w-full bg-[#FAFAF7] flex items-center justify-center font-sans">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#FF6B9D] border-t-transparent" />
-      </div>
-    );
-  }
+  const circumference = 2 * Math.PI * 28;
 
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
-        {/* Progress Bar Header */}
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+
+        {/* Ambient */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
+          <div className="absolute -left-20 top-1/4 h-64 w-64 rounded-full bg-[#FF6B9D]/08 blur-[60px]" />
+          <div className="absolute -right-16 bottom-1/4 h-64 w-64 rounded-full bg-[#7B68EE]/07 blur-[60px]" />
+        </div>
+
+        {/* Header */}
         <div className="flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1 h-2 bg-black/5 rounded-full overflow-hidden p-0.5 border border-white/60">
-              <div className="h-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] rounded-full transition-all duration-500 w-full" />
+            <button
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.12)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] cursor-pointer"
+            >
+              {BackChevron}
+            </button>
+            <div
+              className="flex-1 h-[6px] rounded-full bg-[#1A1A2E]/[0.06] overflow-hidden"
+              role="progressbar"
+              aria-valuenow={7}
+              aria-valuemin={1}
+              aria-valuemax={7}
+              aria-label="Onboarding complete"
+            >
+              <div className="h-full w-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)]" />
             </div>
-            <span className="text-[12px] font-bold text-[#FF6B9D]">Ready!</span>
+            <span className="text-[12px] font-bold text-[#22C55E]">Done!</span>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6">
+        {/* Content */}
+        <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6 animate-page-enter">
           <div className="mb-6">
-            <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Looking good! 🔥</h1>
-            <p className="text-[14px] text-[#1A1A2E]/60 mt-1">Here is a sneak peek of your profile in Discover</p>
+            <h1 className="text-[28px] font-black text-[#1A1A2E] tracking-tight leading-[1.1]">
+              Looking good! 🔥
+            </h1>
+            <p className="text-[14.5px] text-[#1A1A2E]/55 mt-1.5">Here&apos;s your profile in Discover</p>
           </div>
 
-          {/* Profile Preview Card */}
-          <div className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_-15px_rgba(26,26,46,0.12)] backdrop-blur-md mb-5">
-            <div className="relative mb-3 overflow-hidden rounded-[20px]">
-              <div
-                className="w-full aspect-[3/4] bg-cover bg-center"
-                style={{ backgroundImage: `url(${profileData.photo})` }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-end">
-                <h2 className="text-white text-2xl font-black drop-shadow-md">
-                  {profileData.name}, {profileData.age}
-                </h2>
+          {/* Profile preview card */}
+          {profile && (
+            <div className="rounded-[24px] border border-white/80 bg-white/80 shadow-[0_10px_30px_-15px_rgba(26,26,46,0.12)] backdrop-blur-md mb-4 overflow-hidden">
+              {/* Photo */}
+              <div className="relative aspect-[4/5] w-full overflow-hidden">
+                {profile.photo ? (
+                  <img
+                    src={profile.photo}
+                    alt={`${profile.name}'s photo`}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#FF6B9D]/20 to-[#7B68EE]/20 flex items-center justify-center">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.2 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <h2 className="text-white text-[24px] font-extrabold drop-shadow-md tracking-tight">
+                    {profile.name}, {profile.age}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {profile.bio && (
+                  <p className="text-[14px] font-medium text-[#1A1A2E]/75 mb-3 leading-relaxed">{profile.bio}</p>
+                )}
+                {profile.interests.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.interests.map((i) => (
+                      <span key={i} className="rounded-full bg-[#FF6B9D]/10 border border-[#FF6B9D]/20 px-3 py-1 text-[12px] font-semibold text-[#FF6B9D]">
+                        {i}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            
-            <p className="text-[13.5px] font-medium text-[#1A1A2E]/80 mb-3 px-1">{profileData.bio}</p>
-            
-            <div className="flex flex-wrap gap-2 px-1">
-              {profileData.interests.map((interest: string) => (
-                <span
-                  key={interest}
-                  className="px-3 py-1 bg-[#FF6B9D]/10 text-[#FF6B9D] rounded-full text-[12px] font-semibold"
-                >
-                  {interest}
-                </span>
-              ))}
-            </div>
-          </div>
+          )}
 
-          {/* Profile Strength Card */}
-          <div className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_-15px_rgba(26,26,46,0.12)] backdrop-blur-md flex items-center gap-4">
-            <div className="relative w-16 h-16 flex-shrink-0">
-              <svg className="transform -rotate-90 w-16 h-16">
+          {/* Profile strength */}
+          <div className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.08)] backdrop-blur-md flex items-center gap-4">
+            <div className="relative h-16 w-16 flex-shrink-0">
+              <svg className="-rotate-90 h-16 w-16" viewBox="0 0 64 64" aria-hidden>
+                <circle cx="32" cy="32" r="28" stroke="#E2E8F0" strokeWidth="5" fill="none" />
                 <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="#E0E0E0"
-                  strokeWidth="6"
+                  cx="32" cy="32" r="28"
+                  stroke="url(#rv-grad)"
+                  strokeWidth="5"
                   fill="none"
-                />
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="url(#gradient)"
-                  strokeWidth="6"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 28}`}
-                  strokeDashoffset={`${2 * Math.PI * 28 * (1 - calculateProfileStrength() / 100)}`}
                   strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={circumference * (1 - strengthPct / 100)}
+                  style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1)' }}
                 />
                 <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient id="rv-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#FF6B9D" />
                     <stop offset="100%" stopColor="#7B68EE" />
                   </linearGradient>
                 </defs>
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-[15px] font-black text-[#1A1A2E]">
-                {calculateProfileStrength()}%
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[14px] font-black text-[#1A1A2E]">{strengthPct}%</span>
               </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-[15px] font-bold text-[#1A1A2E]">Profile Strength</h3>
-              <p className="text-[12px] text-[#1A1A2E]/55 mt-0.5">
-                Your profile is live and ready for nearby matches!
+            <div>
+              <p className="text-[15px] font-bold text-[#1A1A2E]">Profile Strength</p>
+              <p className="text-[12.5px] text-[#1A1A2E]/55 mt-0.5 leading-snug">
+                {strengthPct >= 90 ? "You're all set — start discovering!" :
+                  strengthPct >= 70 ? "Looking great! You can always add more later." :
+                  "Your profile is live. Add more to get better matches."}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Footer Navigation Buttons */}
-        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/5 space-y-2.5">
+        {/* Footer */}
+        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/[0.04] space-y-2.5">
           {error && (
-            <p role="alert" className="text-[13px] font-semibold text-[#D92D5E] text-center">
+            <div role="alert" className="flex items-start gap-2 rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-rose-600 text-[13px] font-semibold leading-snug">
+              <svg className="flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {error}
-            </p>
+            </div>
           )}
           <button
-            onClick={handleStartDiscovering}
-            disabled={isSubmitting}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_28px_-8px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:active:scale-100"
           >
-            {isSubmitting ? (
+            {submitting ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                </svg>
                 Saving Profile…
               </>
             ) : (
-              'Start Discovering ✨'
+              <>
+                Start Discovering ✨
+              </>
             )}
           </button>
           <button
             onClick={() => router.push('/onboarding/basic-info')}
-            disabled={isSubmitting}
-            className="w-full h-12 rounded-2xl border border-[#1A1A2E]/10 bg-white/80 text-[#1A1A2E] text-[13.5px] font-bold hover:bg-white transition-all cursor-pointer shadow-sm disabled:opacity-50"
+            disabled={submitting}
+            className="w-full h-12 rounded-2xl border border-[#1A1A2E]/10 bg-white/80 text-[#1A1A2E] text-[13.5px] font-bold hover:bg-white transition-all cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.98]"
           >
             Edit Profile Details
           </button>

@@ -552,7 +552,7 @@ export default function ProfilePage() {
             >
               <div
                 onClick={e => e.stopPropagation()}
-                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl sm:rounded-[28px]"
+                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-popover-enter"
               >
                 <h2 className="mb-5 text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
 

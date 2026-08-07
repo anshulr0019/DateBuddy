@@ -76,11 +76,19 @@ export default function ConnectionsPage() {
               )}
 
               {!loading && error && (
-                <div className="text-center py-16">
-                  <p className="text-[15px] font-bold text-[#1E293B]/70">Couldn&apos;t load your connections</p>
+                <div className="text-center py-16 px-6">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 mx-auto shadow-sm">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  </div>
+                  <h3 className="text-[18px] font-bold text-[#1E293B] mb-2">Couldn&apos;t load your connections</h3>
+                  <p className="text-[14px] text-[#1E293B]/55 max-w-[260px] mx-auto leading-relaxed mb-6">
+                    Check your connection and try again.
+                  </p>
                   <button
                     onClick={() => window.location.reload()}
-                    className="mt-4 rounded-full bg-[#F43F5E] px-5 py-2 text-[13px] font-bold text-white cursor-pointer active:scale-95"
+                    className="rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 hover:shadow-[0_8px_24px_-8px_rgba(255,107,157,0.45)] transition-all shadow-sm"
                   >
                     Try again
                   </button>
@@ -88,14 +96,23 @@ export default function ConnectionsPage() {
               )}
 
               {!loading && !error && matches.length === 0 && (
-                <div className="text-center py-16">
-                  <p className="text-[15px] font-bold text-[#1E293B]/70">No connections yet</p>
-                  <p className="mt-1.5 text-[13px] text-[#1E293B]/50">Start swiping to find your people ✨</p>
+                <div className="text-center py-16 px-6">
+                  <div className="relative mb-6">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF6B9D]/15 to-[#7B68EE]/15 border border-[#FF6B9D]/25 mx-auto shadow-sm">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <h3 className="text-[20px] font-bold text-[#1E293B] mb-2">No connections yet</h3>
+                  <p className="text-[14.5px] text-[#1E293B]/55 max-w-[280px] mx-auto leading-relaxed mb-6">
+                    Start swiping to find your people. When you both like each other, you&apos;ll match and can start chatting! ✨
+                  </p>
                   <button
                     onClick={() => router.push('/discover')}
-                    className="mt-5 rounded-full bg-[#F43F5E] px-5 py-2 text-[13px] font-bold text-white cursor-pointer active:scale-95 hover:bg-[#E11D48] transition-all"
+                    className="rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 hover:shadow-[0_8px_24px_-8px_rgba(255,107,157,0.45)] transition-all shadow-sm"
                   >
-                    Go to Discover
+                    Start Discovering
                   </button>
                 </div>
               )}

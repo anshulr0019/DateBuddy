@@ -41,6 +41,9 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [saveError, setSaveError] = useState('');
+  // Confirmation sheet state
+  const [confirmSheet, setConfirmSheet] = useState<'logout' | 'delete' | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const persistSettings = useCallback(async (patch: Record<string, unknown>) => {
     setSaveError('');
@@ -177,7 +180,6 @@ export default function SettingsPage() {
   );
 
   const handleLogout = async () => {
-    if (!confirm('Are you sure you want to log out?')) return;
     setIsLoggingOut(true);
     try {
       await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
@@ -191,10 +193,6 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm('⚠️ Are you sure you want to delete your account? This action is permanent and cannot be undone.')) return;
-    const typed = prompt('This permanently erases your profile, photos, matches and messages.\n\nType DELETE to confirm.');
-    if (typed !== 'DELETE') return;
-
     setIsDeleting(true);
     setDeleteError('');
     try {
@@ -227,7 +225,9 @@ export default function SettingsPage() {
                 aria-label="Go back"
                 className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#1A1A2E]/10 text-[#1A1A2E] shadow-sm active:scale-95 transition-all cursor-pointer"
               >
-                ←
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
               </button>
               <h1 className="text-[18px] font-extrabold text-[#1A1A2E]">Settings</h1>
               <div className="w-10" />
@@ -465,7 +465,7 @@ export default function SettingsPage() {
                   </div>
                 )}
                 <button
-                  onClick={handleLogout}
+                  onClick={() => setConfirmSheet('logout')}
                   disabled={isLoggingOut || isDeleting}
                   className="w-full py-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 text-rose-600 text-[14.5px] font-bold hover:bg-rose-100/60 active:scale-[0.985] transition-all cursor-pointer disabled:opacity-60"
                 >
@@ -473,7 +473,7 @@ export default function SettingsPage() {
                 </button>
 
                 <button
-                  onClick={handleDeleteAccount}
+                  onClick={() => setConfirmSheet('delete')}
                   disabled={isLoggingOut || isDeleting}
                   className="w-full py-2 text-center text-[12.5px] font-medium text-gray-400 hover:text-rose-500 transition-colors cursor-pointer disabled:opacity-60"
                 >
@@ -502,6 +502,70 @@ export default function SettingsPage() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation */}
+      {confirmSheet === 'logout' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-black/40 backdrop-blur-md animate-popover-enter" />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-[28px] p-5 space-y-4 shadow-2xl animate-popover-enter">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-500 mb-2 mx-auto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </div>
+            <h3 className="text-[18px] font-bold text-[#1A1A2E] text-center">Log Out?</h3>
+            <p className="text-[14px] text-[#1A1A2E]/60 text-center leading-relaxed">You'll need to sign in again next time you open the app.</p>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setConfirmSheet(null)} className="flex-1 py-3 rounded-2xl border border-[#1A1A2E]/15 bg-white text-[#1A1A2E] text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+                Cancel
+              </button>
+              <button onClick={() => { setConfirmSheet(null); handleLogout(); }} className="flex-1 py-3 rounded-2xl bg-rose-500 text-white text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {confirmSheet === 'delete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-black/40 backdrop-blur-md animate-popover-enter" />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-[28px] p-5 space-y-4 shadow-2xl animate-popover-enter">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-500 mb-2 mx-auto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <h3 className="text-[18px] font-bold text-[#1A1A2E] text-center">Delete Account?</h3>
+            <p className="text-[14px] text-[#1A1A2E]/60 text-center leading-relaxed">This permanently erases your profile, photos, matches, and messages. This action cannot be undone.</p>
+            <div className="rounded-2xl border border-rose-200/60 bg-rose-50 p-3">
+              <label htmlFor="delete-confirm" className="block text-[12px] font-bold text-rose-600 mb-2">Type DELETE to confirm</label>
+              <input
+                id="delete-confirm"
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full h-11 px-3 rounded-xl border border-rose-200 bg-white text-[#1A1A2E] text-[16px] font-medium focus:outline-none focus:border-rose-400"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => { setConfirmSheet(null); setDeleteConfirmText(''); }} className="flex-1 py-3 rounded-2xl border border-[#1A1A2E]/15 bg-white text-[#1A1A2E] text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+                Cancel
+              </button>
+              <button
+                onClick={() => { if (deleteConfirmText === 'DELETE') { setConfirmSheet(null); setDeleteConfirmText(''); handleDeleteAccount(); } }}
+                disabled={deleteConfirmText !== 'DELETE'}
+                className="flex-1 py-3 rounded-2xl bg-rose-500 text-white text-[14px] font-bold active:scale-95 transition-all cursor-pointer disabled:opacity-40 disabled:active:scale-100"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
