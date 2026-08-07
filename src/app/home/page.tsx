@@ -482,7 +482,7 @@ export default function HomePage() {
 
       {/* PERSONA PICKER */}
       {showPersonaPicker && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
             onClick={() => setShowPersonaPicker(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
@@ -529,14 +529,18 @@ export default function HomePage() {
 
       {/* HOST MODAL */}
       {showHostModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
             onClick={() => setShowHostModal(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[85dvh] flex flex-col shadow-2xl animate-popover-enter">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-popover-enter">
+            {/* handle */}
+            <div className="pt-3 pb-0 flex-shrink-0 flex justify-center">
+              <div className="h-1 w-10 bg-gray-300 rounded-full" />
+            </div>
+            {/* header */}
+            <div className="flex items-center justify-between px-5 pt-3 pb-3 border-b border-gray-100 flex-shrink-0">
               <div>
                 <h3 className="text-[17px] font-extrabold text-[#1E293B]">Host a Squad Session</h3>
                 <p className="text-[12px] text-[#1E293B]/50">Find gym partners &amp; activity teammates</p>
@@ -549,7 +553,8 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-none text-[13px]">
+            {/* scrollable fields */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 scrollbar-none text-[13px] min-h-0">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Activity Category</label>
                 <div className="flex flex-wrap gap-2">
@@ -576,7 +581,7 @@ export default function HomePage() {
                   type="text"
                   value={hostTitle}
                   onChange={(e) => setHostTitle(e.target.value)}
-                  placeholder="e.g. Leg Day &amp; Heavy Squats 🏋️"
+                  placeholder="e.g. Leg Day & Heavy Squats 🏋️"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
                 />
               </div>
@@ -619,17 +624,19 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+            </div>
 
+            {/* sticky footer — always visible above safe-area */}
+            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100 bg-white rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
               {hostError && (
                 <p className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[12px] font-semibold text-red-600">
                   {hostError}
                 </p>
               )}
-
               <button
                 onClick={publishSquad}
                 disabled={publishing}
-                className="w-full py-3 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[14px] shadow-md hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer mt-2 disabled:opacity-60"
+                className="w-full py-3 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[14px] shadow-md hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60"
               >
                 {publishing ? 'Publishing…' : 'Publish Squad Session 🚀'}
               </button>
@@ -640,7 +647,7 @@ export default function HomePage() {
 
       {/* DETAIL SHEET */}
       {selectedDetail && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
             onClick={() => setSelectedDetail(null)}
             className="absolute inset-0 bg-black/45 backdrop-blur-md transition-all duration-300"
@@ -716,7 +723,7 @@ export default function HomePage() {
 
       {/* CONFIRM LEAVE */}
       {confirmLeaveId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-popover-enter">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-popover-enter">
           <div className="w-full max-w-[340px] bg-white rounded-[28px] p-5 shadow-2xl space-y-4 text-center">
             <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl font-bold">
               👟

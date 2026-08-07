@@ -96,3 +96,53 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/* Undo the caller's most recent swipe on a user. Swipes that already
+   became a match cannot be undone — the other person has seen it. */
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getAuthSession();
+    if (!session) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+    const currentUserId = session.userId;
+
+    const { swipedUserId } = await request.json();
+    const targetId = Number(swipedUserId);
+
+    if (!Number.isInteger(targetId) || targetId <= 0) {
+      return NextResponse.json(
+        { success: false, message: 'A valid swipedUserId is required' },
+        { status: 400 }
+      );
+    }
+
+    const [existingMatch] = await db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(
+        and(
+          eq(matches.user1Id, Math.min(currentUserId, targetId)),
+          eq(matches.user2Id, Math.max(currentUserId, targetId))
+        )
+      );
+    if (existingMatch) {
+      return NextResponse.json(
+        { success: false, message: "You already matched — this swipe can't be undone." },
+        { status: 409 }
+      );
+    }
+
+    await db
+      .delete(swipes)
+      .where(and(eq(swipes.swiperId, currentUserId), eq(swipes.swipedId, targetId)));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error undoing swipe:', error);
+    return NextResponse.json(
+      { success: false, message: 'Could not undo swipe' },
+      { status: 500 }
+    );
+  }
+}

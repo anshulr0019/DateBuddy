@@ -15,6 +15,8 @@ import {
   loadFeedPage,
   preloadDeckImages,
 } from '../lib/feedCache';
+import { hapticLight, hapticMedium, hapticSuccess, hapticWarning } from '../lib/haptics';
+import { useFilters } from '../context/FilterContext';
 
 /* ─────────────────────────────────────────────────
    Scoped micro-interaction animations
@@ -30,7 +32,13 @@ const DISCOVER_STYLES = `
 `;
 
 const SWIPE_ANIMATION_MS = 380;
+const REDUCED_EXIT_MS = 160;
 const REFILL_THRESHOLD = 3;
+
+/* Drag physics */
+const STAMP_DRAG_RANGE_PX = 90;     // drag distance at which LIKE/NOPE reach full opacity
+const COMMIT_DISTANCE_RATIO = 0.32; // fraction of card width that commits a swipe on release
+const COMMIT_VELOCITY = 0.55;       // px/ms fling that commits a swipe below the distance threshold
 
 const REPORT_REASONS = [
   { value: 'inappropriate', label: 'Inappropriate content' },
@@ -47,6 +55,24 @@ type MatchedUser = { id: number; name: string; photo: string | null };
 
 type Status = 'loading' | 'ready' | 'error';
 
+type SwipeAction = 'like' | 'pass' | 'super_like';
+type ExitDir = 'left' | 'right' | 'up';
+type SwipeResponse = { unauthorized?: boolean; isMatch?: boolean; matchedUser?: MatchedUser | null };
+type LastSwipe = { profile: Profile; action: SwipeAction; promise: Promise<SwipeResponse> };
+
+type DragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  cardW: number;
+  grabTop: boolean;
+  locked: boolean;
+  dx: number;
+  dy: number;
+  crossedThreshold: boolean;
+  samples: { t: number; x: number; y: number }[];
+};
+
 export default function DiscoverPage() {
   const router = useRouter();
 
@@ -60,9 +86,12 @@ export default function DiscoverPage() {
   const [hasMore, setHasMore] = useState(() => getCachedFeed()?.hasMore ?? true);
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [animatingSwipe, setAnimatingSwipe] = useState<'right' | 'left' | null>(null);
+  const [exit, setExit] = useState<{ dir: ExitDir; viaDrag: boolean } | null>(null);
+  const [enterAnim, setEnterAnim] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [cardKey, setCardKey] = useState(0);
+  const [lastSwipe, setLastSwipe] = useState<LastSwipe | null>(null);
+  const [undoBusy, setUndoBusy] = useState(false);
 
   const [matchedUser, setMatchedUser] = useState<MatchedUser | null>(null);
   const [myPhoto, setMyPhoto] = useState<string | null>(null);
@@ -75,8 +104,16 @@ export default function DiscoverPage() {
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const underCardRef = useRef<HTMLDivElement>(null);
+  const likeStampRef = useRef<HTMLDivElement>(null);
+  const nopeStampRef = useRef<HTMLDivElement>(null);
   const swipeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const actionInFlightRef = useRef(false);
+  const exitLockRef = useRef(false);
+  const pendingAdvanceRef = useRef<{ id: number } | null>(null);
+  const matchedIdsRef = useRef<Set<number>>(new Set());
+  const dragRef = useRef<DragState | null>(null);
+  const didDragRef = useRef(false);
+  const reducedMotionRef = useRef(false);
   const fetchingRef = useRef(false);
 
   const currentProfile = profiles[0];
@@ -162,58 +199,139 @@ export default function DiscoverPage() {
     };
   }, []);
 
-  const advanceCard = useCallback((targetId: number) => {
-    swipeTimerRef.current = setTimeout(() => {
-      setAnimatingSwipe(null);
-      setCurrentPhotoIndex(0);
-      setScrollProgress(0);
-      if (scrollRef.current) scrollRef.current.scrollTop = 0;
-      setCardKey((k) => k + 1);
-      setProfiles((prev) => prev.filter((p) => p.id !== targetId));
-      actionInFlightRef.current = false;
-    }, SWIPE_ANIMATION_MS);
+  useEffect(() => {
+    reducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
 
-  const handleAction = useCallback(async (action: 'like' | 'pass' | 'super_like') => {
-    if (actionInFlightRef.current) return;
+  /* Drag visuals write straight to the DOM — they run on every pointer
+     frame, and a React render per frame would drop the deck to jank. */
+  const setDragVisuals = useCallback((dx: number, dy: number, grabTop: boolean, cardW: number) => {
+    const card = scrollRef.current;
+    if (card) {
+      const rot = (dx / cardW) * 14 * (grabTop ? 1 : -1);
+      card.style.transition = 'none';
+      card.style.transform = `translate3d(${dx}px, ${dy * 0.35}px, 0) rotate(${rot}deg)`;
+    }
+    const progress = Math.min(Math.abs(dx) / STAMP_DRAG_RANGE_PX, 1);
+    const like = likeStampRef.current;
+    const nope = nopeStampRef.current;
+    if (like) { like.style.transition = 'none'; like.style.opacity = dx > 0 ? String(progress) : '0'; }
+    if (nope) { nope.style.transition = 'none'; nope.style.opacity = dx < 0 ? String(progress) : '0'; }
+    const under = underCardRef.current;
+    if (under && !reducedMotionRef.current) {
+      under.style.transition = 'none';
+      under.style.transform = `scale(${0.96 + 0.04 * progress}) translateY(${8 * (1 - progress)}px)`;
+    }
+  }, []);
 
-    const targetUser = profiles[0];
-    if (!targetUser) return;
+  const resetDragVisuals = useCallback((animate: boolean) => {
+    const card = scrollRef.current;
+    if (card) {
+      card.style.transition = animate ? 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none';
+      card.style.transform = '';
+      card.style.opacity = '';
+      card.style.willChange = '';
+    }
+    for (const stamp of [likeStampRef.current, nopeStampRef.current]) {
+      if (stamp) { stamp.style.transition = ''; stamp.style.opacity = ''; }
+    }
+    const under = underCardRef.current;
+    if (under) {
+      under.style.transition = animate ? 'transform 0.3s ease-out' : 'none';
+      under.style.transform = 'scale(0.96) translateY(8px)';
+    }
+  }, []);
 
-    actionInFlightRef.current = true;
+  /* Optimistic swipe: the card leaves on animation time, never network
+     time. The request runs in the background; a failure puts the card
+     back on top of the deck with an error. */
+  const commitSwipe = useCallback((action: SwipeAction, viaDrag: boolean) => {
+    if (exitLockRef.current) return;
+    const target = profiles[0];
+    if (!target) return;
+
+    exitLockRef.current = true;
     setActionError(null);
-    setAnimatingSwipe(action === 'pass' ? 'left' : 'right');
+    hapticMedium();
+    const dir: ExitDir = action === 'pass' ? 'left' : action === 'super_like' ? 'up' : 'right';
+    setExit({ dir, viaDrag });
 
-    try {
-      const res = await fetch('/api/swipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ swipedUserId: targetUser.id, action }),
-      });
-
+    const promise: Promise<SwipeResponse> = fetch('/api/swipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ swipedUserId: target.id, action }),
+    }).then(async (res) => {
       if (res.status === 401) {
         router.replace('/welcome');
-        return;
+        return { unauthorized: true };
       }
       if (!res.ok) throw new Error(`Swipe failed (${res.status})`);
+      return res.json();
+    });
 
-      const data = await res.json();
-      if (data.isMatch && data.matchedUser) setMatchedUser(data.matchedUser);
+    promise
+      .then((data) => {
+        if (data.unauthorized) return;
+        if (data.isMatch && data.matchedUser) {
+          // Matches can't be undone — the other person already sees it.
+          matchedIdsRef.current.add(target.id);
+          setLastSwipe((cur) => (cur && cur.profile.id === target.id ? null : cur));
+          setMatchedUser(data.matchedUser);
+          hapticSuccess();
+        }
+      })
+      .catch(() => {
+        hapticWarning();
+        if (pendingAdvanceRef.current?.id === target.id) {
+          // Failed before the card left the deck — cancel the advance in place.
+          if (swipeTimerRef.current) clearTimeout(swipeTimerRef.current);
+          pendingAdvanceRef.current = null;
+          setExit(null);
+          resetDragVisuals(false);
+          setEnterAnim(true);
+          setCardKey((k) => k + 1);
+          exitLockRef.current = false;
+        } else {
+          // Already advanced — put them back on top (or next-in-deck if
+          // another card is mid-exit, to avoid yanking it away).
+          setProfiles((prev) => {
+            if (prev.some((p) => p.id === target.id)) return prev;
+            if (exitLockRef.current && prev.length > 0) return [prev[0], target, ...prev.slice(1)];
+            return [target, ...prev];
+          });
+          setLastSwipe((cur) => (cur && cur.profile.id === target.id ? null : cur));
+          if (!exitLockRef.current) {
+            setCurrentPhotoIndex(0);
+            setScrollProgress(0);
+            setEnterAnim(true);
+            setCardKey((k) => k + 1);
+          }
+        }
+        setActionError('Something went wrong. Check your connection and try again.');
+      });
 
-      advanceCard(targetUser.id);
-    } catch {
-      // Keep the profile in the deck — losing it silently is worse than an error.
-      actionInFlightRef.current = false;
-      setAnimatingSwipe(null);
-      setActionError('Something went wrong. Check your connection and try again.');
-    }
-  }, [profiles, router, advanceCard]);
+    pendingAdvanceRef.current = { id: target.id };
+    swipeTimerRef.current = setTimeout(() => {
+      pendingAdvanceRef.current = null;
+      setExit(null);
+      setCurrentPhotoIndex(0);
+      setScrollProgress(0);
+      // Drag exits already promoted the next card to full size, so the
+      // incoming top card renders in place; button exits play the enter.
+      setEnterAnim(!viaDrag);
+      setCardKey((k) => k + 1);
+      setProfiles((prev) => prev.filter((p) => p.id !== target.id));
+      setLastSwipe(matchedIdsRef.current.has(target.id) ? null : { profile: target, action, promise });
+      exitLockRef.current = false;
+    }, reducedMotionRef.current ? REDUCED_EXIT_MS : SWIPE_ANIMATION_MS);
+  }, [profiles, router, resetDragVisuals]);
 
   const togglePromptLike = useCallback((promptKey: string) => {
+    if (exitLockRef.current) return;
     const willLike = !likedPrompts[promptKey];
     setLikedPrompts((prev) => ({ ...prev, [promptKey]: willLike }));
-    if (willLike) handleAction('like');
-  }, [likedPrompts, handleAction]);
+    if (willLike) commitSwipe('like', false);
+  }, [likedPrompts, commitSwipe]);
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
@@ -238,6 +356,7 @@ export default function DiscoverPage() {
       setProfiles((prev) => prev.filter((p) => p.id !== target.id));
       setCurrentPhotoIndex(0);
       setScrollProgress(0);
+      setEnterAnim(true);
       setCardKey((k) => k + 1);
     } catch {
       setActionError('Could not block this person. Please try again.');
@@ -265,6 +384,7 @@ export default function DiscoverPage() {
       setProfiles((prev) => prev.filter((p) => p.id !== target.id));
       setCurrentPhotoIndex(0);
       setScrollProgress(0);
+      setEnterAnim(true);
       setCardKey((k) => k + 1);
     } catch {
       setSafetySheetOpen(false);
@@ -321,6 +441,172 @@ export default function DiscoverPage() {
     };
   }, [overlayOpen]);
 
+  /* ---- Drag gesture ----
+     touch-action: pan-y keeps vertical scrolling native; horizontal
+     movement is ours. The gesture locks to one axis on first intent:
+     horizontal → drag the card, vertical → hand the pointer back to
+     the scroller (the browser then fires pointercancel). */
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (exitLockRef.current || overlayOpen || dragRef.current) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    didDragRef.current = false;
+    const rect = e.currentTarget.getBoundingClientRect();
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      cardW: e.currentTarget.clientWidth || 1,
+      grabTop: e.clientY - rect.top < rect.height / 2,
+      locked: false,
+      dx: 0,
+      dy: 0,
+      crossedThreshold: false,
+      samples: [{ t: performance.now(), x: e.clientX, y: e.clientY }],
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (!drag.locked) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) + 4) {
+        drag.locked = true;
+        didDragRef.current = true; // suppresses the trailing click on photo tap zones
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* unsupported */ }
+        const card = scrollRef.current;
+        if (card) {
+          card.style.willChange = 'transform';
+          card.style.animation = 'none'; // a drag interrupts the enter animation
+        }
+      } else if (Math.abs(dy) > 12) {
+        dragRef.current = null; // vertical intent — the native scroller owns it
+        return;
+      } else {
+        return;
+      }
+    }
+
+    drag.dx = dx;
+    drag.dy = dy;
+    drag.samples.push({ t: performance.now(), x: e.clientX, y: e.clientY });
+    if (drag.samples.length > 8) drag.samples.shift();
+
+    setDragVisuals(dx, dy, drag.grabTop, drag.cardW);
+
+    const past = Math.abs(dx) >= STAMP_DRAG_RANGE_PX;
+    if (past && !drag.crossedThreshold) {
+      drag.crossedThreshold = true;
+      hapticLight();
+    } else if (!past) {
+      drag.crossedThreshold = false;
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    dragRef.current = null;
+    if (!drag.locked) return;
+
+    const { dx, dy, cardW, grabTop, samples } = drag;
+    const now = performance.now();
+    const recent = samples.filter((s) => now - s.t < 120);
+    const first = recent[0] ?? samples[0];
+    const last = samples[samples.length - 1];
+    const dt = Math.max(last.t - first.t, 1);
+    const vx = (last.x - first.x) / dt;
+    const vy = (last.y - first.y) / dt;
+
+    const shouldCommit =
+      Math.abs(dx) > cardW * COMMIT_DISTANCE_RATIO ||
+      (Math.abs(vx) > COMMIT_VELOCITY && Math.sign(vx) === Math.sign(dx) && Math.abs(dx) > 24);
+
+    if (!shouldCommit) {
+      resetDragVisuals(!reducedMotionRef.current);
+      return;
+    }
+
+    // Fling the card along the release trajectory, then commit.
+    const card = scrollRef.current;
+    const stamp = dx > 0 ? likeStampRef.current : nopeStampRef.current;
+    if (stamp) stamp.style.opacity = '1';
+    if (card) {
+      if (reducedMotionRef.current) {
+        card.style.transition = 'opacity 0.15s ease';
+        card.style.opacity = '0';
+      } else {
+        const flyX = Math.sign(dx) * cardW * 1.45;
+        const flyY = dy * 0.35 + Math.max(-140, Math.min(200, vy * 120));
+        const rot = (flyX / cardW) * 16 * (grabTop ? 1 : -1);
+        card.style.transition = `transform ${SWIPE_ANIMATION_MS}ms cubic-bezier(0.22, 0.7, 0.4, 1), opacity ${SWIPE_ANIMATION_MS}ms ease-in`;
+        card.style.transform = `translate3d(${flyX}px, ${flyY}px, 0) rotate(${rot}deg)`;
+        card.style.opacity = '0';
+      }
+    }
+    const under = underCardRef.current;
+    if (under && !reducedMotionRef.current) {
+      under.style.transition = `transform ${SWIPE_ANIMATION_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+      under.style.transform = 'scale(1) translateY(0px)';
+    }
+    commitSwipe(dx > 0 ? 'like' : 'pass', true);
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    dragRef.current = null;
+    if (drag.locked) resetDragVisuals(!reducedMotionRef.current);
+  };
+
+  /* ---- Undo ---- */
+  const handleUndo = async () => {
+    const record = lastSwipe;
+    if (!record || undoBusy || exitLockRef.current) return;
+    setUndoBusy(true);
+    setActionError(null);
+    try {
+      // If the original swipe never landed, its rollback already restored the card.
+      const original = await record.promise.catch(() => null);
+      if (!original || original.unauthorized) {
+        setLastSwipe((cur) => (cur === record ? null : cur));
+        return;
+      }
+      const res = await fetch('/api/swipes', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ swipedUserId: record.profile.id }),
+      });
+      if (res.status === 401) {
+        router.replace('/welcome');
+        return;
+      }
+      if (!res.ok) {
+        let message = 'Couldn’t undo that swipe. Please try again.';
+        try {
+          const data = await res.json();
+          if (data?.message) message = data.message;
+        } catch { /* keep the default copy */ }
+        setActionError(message);
+        if (res.status === 409) setLastSwipe((cur) => (cur === record ? null : cur));
+        return;
+      }
+      hapticLight();
+      setProfiles((prev) => (prev.some((p) => p.id === record.profile.id) ? prev : [record.profile, ...prev]));
+      setLastSwipe((cur) => (cur === record ? null : cur));
+      setCurrentPhotoIndex(0);
+      setScrollProgress(0);
+      setEnterAnim(true);
+      setCardKey((k) => k + 1);
+    } catch {
+      setActionError('Couldn’t undo that swipe. Please try again.');
+    } finally {
+      setUndoBusy(false);
+    }
+  };
+
   // Preload the next photo so advancing never shows a blank frame.
   useEffect(() => {
     const next = currentProfile?.photos?.[currentPhotoIndex + 1];
@@ -349,9 +635,10 @@ export default function DiscoverPage() {
         <div className="flex-1 min-h-0 z-10 mx-6 my-1.5">
           <div className="h-full w-full rounded-[28px] animate-skeleton" />
         </div>
-        <div className="flex-shrink-0 flex justify-center items-center gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
+        <div className="flex-shrink-0 flex justify-center items-center gap-2.5 sm:gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
           <div className="h-12 w-12 rounded-full animate-skeleton" />
           <div className="h-16 w-16 rounded-full animate-skeleton" />
+          <div className="h-14 w-14 rounded-full animate-skeleton" />
           <div className="h-16 w-16 rounded-full animate-skeleton" />
           <div className="h-12 w-12 rounded-full animate-skeleton" />
         </div>
@@ -447,15 +734,51 @@ export default function DiscoverPage() {
         <TopBar />
       </div>
 
-      {/* PROFILE CARD */}
+      {/* CARD STACK */}
+      <div className="relative flex-1 min-h-0 z-10 mx-6 my-1.5">
+
+      {/* Next card peeking from behind — scales up as the top card is dragged away */}
+      {profiles[1] && (
+        <div
+          key={profiles[1].id}
+          ref={underCardRef}
+          aria-hidden
+          className="absolute inset-0 rounded-[28px] border border-white/80 shadow-[0_12px_40px_-12px_rgba(26,26,46,0.15)] overflow-hidden bg-white pointer-events-none"
+          style={{ transform: 'scale(0.96) translateY(8px)' }}
+        >
+          <SafeImage
+            eager
+            src={profiles[1].photos[0]}
+            name={profiles[1].name}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pt-16 pb-11 px-6">
+            <h2 className="text-[26px] sm:text-[30px] font-extrabold leading-[1.1] text-white tracking-tight drop-shadow-lg">
+              {profiles[1].name}, {profiles[1].age}
+            </h2>
+          </div>
+        </div>
+      )}
+
+      {/* TOP CARD — scrollable profile, horizontally draggable */}
       <div
         key={cardKey}
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`flex-1 min-h-0 z-10 mx-6 my-1.5 overflow-y-auto overflow-x-hidden rounded-[28px] scrollbar-none touch-pan-y ${
-          animatingSwipe === 'right' ? 'animate-card-swipe-right'
-            : animatingSwipe === 'left' ? 'animate-card-swipe-left'
-            : 'animate-card-depth-enter'
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onDragStart={(e) => e.preventDefault()}
+        className={`absolute inset-0 overflow-y-auto overflow-x-hidden rounded-[28px] scrollbar-none touch-pan-y ${
+          exit
+            ? exit.viaDrag
+              ? '' // drag exits fly on inline styles that keep the release trajectory
+              : exit.dir === 'right' ? 'animate-card-swipe-right'
+                : exit.dir === 'left' ? 'animate-card-swipe-left'
+                : 'animate-card-swipe-up'
+            : enterAnim ? 'animate-card-depth-enter' : ''
         }`}
       >
         <div className="relative min-h-full rounded-[28px] border border-white/80 shadow-[0_12px_40px_-12px_rgba(26,26,46,0.15)] overflow-hidden bg-white flex flex-col">
@@ -466,6 +789,7 @@ export default function DiscoverPage() {
             style={{ height: 'calc(100dvh - 240px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', minHeight: '380px' }}
           >
             <SafeImage
+              eager
               src={currentProfile.photos[currentPhotoIndex]}
               name={currentProfile.name}
               alt={`${currentProfile.name}'s profile photo`}
@@ -475,10 +799,12 @@ export default function DiscoverPage() {
                 transform: `scale(${1 + scrollProgress * 0.05})`,
               }}
               onClick={(e) => {
+                if (didDragRef.current) return; // a drag release is not a tap
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 const maxPhotos = currentProfile.photos.length || 1;
                 if (maxPhotos < 2) return;
+                hapticLight();
                 if (clickX > rect.width / 2) {
                   setCurrentPhotoIndex((prev) => (prev + 1) % maxPhotos);
                 } else {
@@ -487,16 +813,31 @@ export default function DiscoverPage() {
               }}
             />
 
-            {animatingSwipe === 'right' && (
-              <div className="absolute top-12 left-6 z-30 transform -rotate-12 border-4 border-[#22C55E] text-[#22C55E] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl animate-popover-enter">
-                LIKE ❤️
-              </div>
-            )}
-            {animatingSwipe === 'left' && (
-              <div className="absolute top-12 right-6 z-30 transform rotate-12 border-4 border-[#94A3B8] text-[#E2E8F0] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl animate-popover-enter">
-                NOPE
-              </div>
-            )}
+            {/* Swipe stamps — opacity tracks drag progress (inline, via refs)
+                and snaps to full on button-triggered exits (via class). */}
+            <div
+              ref={likeStampRef}
+              className={`absolute top-12 left-6 z-30 -rotate-12 border-4 border-[#22C55E] text-[#22C55E] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl pointer-events-none transition-opacity duration-150 ${
+                exit && !exit.viaDrag && exit.dir === 'right' ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              LIKE
+            </div>
+            <div
+              ref={nopeStampRef}
+              className={`absolute top-12 right-6 z-30 rotate-12 border-4 border-[#94A3B8] text-[#E2E8F0] bg-black/30 backdrop-blur-xs font-black text-[28px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl pointer-events-none transition-opacity duration-150 ${
+                exit && !exit.viaDrag && exit.dir === 'left' ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              NOPE
+            </div>
+            <div
+              className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-30 border-4 border-[#7B68EE] text-[#DDD6FE] bg-black/30 backdrop-blur-xs font-black text-[24px] uppercase tracking-wider px-4 py-1.5 rounded-2xl shadow-xl pointer-events-none transition-opacity duration-150 whitespace-nowrap ${
+                exit?.dir === 'up' ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              SUPER LIKE
+            </div>
 
             <div
               className="absolute inset-0 pointer-events-none transition-opacity duration-150"
@@ -646,6 +987,7 @@ export default function DiscoverPage() {
           )}
         </div>
       </div>
+      </div>
 
       {/* Inline action error */}
       {actionError && (
@@ -660,7 +1002,7 @@ export default function DiscoverPage() {
       )}
 
       {/* ACTION BUTTONS */}
-      <div className="flex-shrink-0 flex justify-center items-center gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
+      <div className="flex-shrink-0 flex justify-center items-center gap-2.5 sm:gap-4 pt-1 mb-2 pb-[calc(4.65rem+env(safe-area-inset-bottom,0px))] px-6 z-20">
         <button
           onClick={() => setSafetySheetOpen(true)}
           className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94]"
@@ -672,7 +1014,7 @@ export default function DiscoverPage() {
         </button>
 
         <button
-          onClick={() => handleAction('pass')}
+          onClick={() => commitSwipe('pass', false)}
           className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white border-2 border-[#1A1A2E]/10 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94]"
           aria-label={`Pass on ${currentProfile.name}`}
         >
@@ -682,7 +1024,17 @@ export default function DiscoverPage() {
         </button>
 
         <button
-          onClick={() => handleAction('like')}
+          onClick={() => commitSwipe('super_like', false)}
+          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#7B68EE] hover:bg-[#6A5AE0] shadow-[0_8px_24px_-6px_rgba(123,104,238,0.5)] transition-transform duration-200 active:scale-90 cursor-pointer"
+          aria-label={`Super Like ${currentProfile.name}`}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-sm">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => commitSwipe('like', false)}
           className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#F43F5E] hover:bg-[#E11D48] shadow-[0_8px_24px_-6px_rgba(244,63,94,0.5)] transition-transform duration-200 active:scale-90 cursor-pointer"
           aria-label={`Like ${currentProfile.name}`}
         >
@@ -692,12 +1044,13 @@ export default function DiscoverPage() {
         </button>
 
         <button
-          onClick={() => router.push('/messages')}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-90 cursor-pointer"
-          aria-label="Go to messages"
+          onClick={handleUndo}
+          disabled={!lastSwipe || undoBusy}
+          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/90 border border-[#1A1A2E]/8 shadow-[0_2px_8px_-4px_rgba(26,26,46,0.06)] transition-transform duration-200 active:scale-[0.94] disabled:opacity-40 disabled:active:scale-100 cursor-pointer disabled:cursor-default"
+          aria-label="Undo last swipe"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
-            <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
           </svg>
         </button>
       </div>
@@ -825,6 +1178,7 @@ function Shell({ children, select = '' }: { children: React.ReactNode; select?: 
 ───────────────────────────────────────────────── */
 function TopBar() {
   const { openNotifications, unreadCount } = useNotifications();
+  const { openFilters, activeFilterCount } = useFilters();
 
   return (
     <header className="flex items-center justify-between rounded-2xl border border-white/75 bg-white/70 px-5 py-2.5 shadow-[0_6px_24px_-8px_rgba(26,26,46,0.08)] backdrop-blur-xl">
@@ -833,18 +1187,39 @@ function TopBar() {
         withWordmark
         wordmarkClassName="text-[17px] font-extrabold tracking-tight text-[#1A1A2E] leading-none"
       />
-      <button
-        onClick={openNotifications}
-        aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
-        className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#1A1A2E]/8 bg-white/80 text-[#1A1A2E]/60 shadow-[0_1px_4px_-2px_rgba(26,26,46,0.04)] transition-transform duration-200 active:scale-[0.94] cursor-pointer"
-      >
-        <Ic.Bell />
-        {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-[8px] font-bold text-white ring-[2.5px] ring-white shadow-sm px-1">
-            {unreadCount}
-          </span>
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        {/* Filters / Discovery Preferences */}
+        <button
+          onClick={openFilters}
+          aria-label={activeFilterCount > 0 ? `Open filters, ${activeFilterCount} active` : 'Open filters'}
+          className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#1A1A2E]/8 bg-white/80 text-[#1A1A2E]/60 shadow-[0_1px_4px_-2px_rgba(26,26,46,0.04)] transition-transform duration-200 active:scale-[0.94] cursor-pointer"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+            <line x1="11" y1="18" x2="13" y2="18" />
+          </svg>
+          {activeFilterCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-[9px] font-bold text-white ring-[2px] ring-white shadow-sm px-1">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        {/* Notifications */}
+        <button
+          onClick={openNotifications}
+          aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
+          className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#1A1A2E]/8 bg-white/80 text-[#1A1A2E]/60 shadow-[0_1px_4px_-2px_rgba(26,26,46,0.04)] transition-transform duration-200 active:scale-[0.94] cursor-pointer"
+        >
+          <Ic.Bell />
+          {unreadCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-[8px] font-bold text-white ring-[2.5px] ring-white shadow-sm px-1">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
     </header>
   );
 }

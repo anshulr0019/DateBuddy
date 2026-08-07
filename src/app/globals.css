@@ -493,6 +493,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: cardSwipeLeft 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
+@keyframes cardSwipeUp {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(-130%) rotate(-3deg) scale(1.03); opacity: 0; }
+}
+
+.animate-card-swipe-up {
+  animation: cardSwipeUp 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 .animate-card-depth-enter {
   animation: cardDepthEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -555,7 +564,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow,
   .nav-indicator-spring, .animate-card-swipe-right, .animate-card-swipe-left,
-  .animate-card-depth-enter, .animate-popover-enter, .animate-bubble-enter {
+  .animate-card-swipe-up, .animate-card-depth-enter, .animate-popover-enter,
+  .animate-bubble-enter {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
