@@ -46,6 +46,10 @@ export default function SettingsPage() {
   const [confirmSheet, setConfirmSheet] = useState<'logout' | 'delete' | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
+  type BlockedUser = { id: number; name: string; photo: string | null };
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[] | null>(null);
+  const [unblockingId, setUnblockingId] = useState<number | null>(null);
+
   const persistSettings = useCallback(async (patch: Record<string, unknown>) => {
     setSaveError('');
     try {
@@ -441,7 +445,16 @@ export default function SettingsPage() {
                   </div>
 
                   <div
-                    onClick={() => setShowBlockedModal(true)}
+                    onClick={() => {
+                      setShowBlockedModal(true);
+                      // Load blocked users when opening the modal
+                      if (blockedUsers === null) {
+                        fetch('/api/blocks')
+                          .then((r) => r.ok ? r.json() : null)
+                          .then((d) => { if (d?.success) setBlockedUsers(d.blocked); })
+                          .catch(() => setBlockedUsers([]));
+                      }
+                    }}
                     className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-[#1A1A2E]/[0.02] transition-all"
                   >
                     <div>
@@ -499,20 +512,72 @@ export default function SettingsPage() {
 
       {/* Blocked Users Sheet */}
       {showBlockedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-hidden">
           <div
             onClick={() => setShowBlockedModal(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)]"
-            style={{ willChange: 'backdrop-filter, opacity' }}
+            className="absolute inset-0 bg-black/40 backdrop-blur-md"
           />
-          <div className="relative z-10 w-full max-w-sm bg-white rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry">
-            <h3 className="text-[18px] font-bold text-[#1A1A2E]">Blocked Users</h3>
-            <p className="text-[13px] text-gray-500">You currently have no blocked users on DateBuddy.</p>
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry max-h-[75dvh] flex flex-col">
+            <div className="flex items-center justify-between flex-shrink-0">
+              <h3 className="text-[18px] font-bold text-[#1A1A2E]">Blocked Users</h3>
+              <button
+                onClick={() => setShowBlockedModal(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-[#1A1A2E]/60 active:scale-90 transition-all cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            {/* Load on open */}
+            {blockedUsers === null && (
+              <div className="flex items-center justify-center py-6">
+                <svg className="animate-spin text-[#FF6B9D]" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                </svg>
+              </div>
+            )}
+
+            {blockedUsers !== null && blockedUsers.length === 0 && (
+              <p className="text-[13px] text-gray-500 text-center py-4">You haven&apos;t blocked anyone.</p>
+            )}
+
+            {blockedUsers !== null && blockedUsers.length > 0 && (
+              <div className="overflow-y-auto flex-1 space-y-2">
+                {blockedUsers.map((u) => (
+                  <div key={u.id} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                    <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden border border-gray-200">
+                      <SafeImage src={u.photo} name={u.name} alt={u.name} className="h-full w-full object-cover" />
+                    </div>
+                    <span className="flex-1 text-[14px] font-semibold text-[#1A1A2E] truncate">{u.name}</span>
+                    <button
+                      disabled={unblockingId === u.id}
+                      onClick={async () => {
+                        setUnblockingId(u.id);
+                        try {
+                          await fetch('/api/blocks', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ blockedUserId: u.id }),
+                          });
+                          setBlockedUsers((prev) => prev?.filter((b) => b.id !== u.id) ?? []);
+                        } finally {
+                          setUnblockingId(null);
+                        }
+                      }}
+                      className="flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-bold border border-[#F43F5E]/30 text-[#F43F5E] bg-rose-50 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {unblockingId === u.id ? '…' : 'Unblock'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
               onClick={() => setShowBlockedModal(false)}
-              className="w-full py-2.5 rounded-xl bg-[#1A1A2E] text-white text-[14px] font-bold"
+              className="w-full flex-shrink-0 py-2.5 rounded-xl bg-[#1A1A2E] text-white text-[14px] font-bold cursor-pointer active:scale-95 transition-all"
             >
-              Close
+              Done
             </button>
           </div>
         </div>
