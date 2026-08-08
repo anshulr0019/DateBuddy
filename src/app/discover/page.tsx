@@ -57,7 +57,7 @@ type Status = 'loading' | 'ready' | 'error';
 
 type SwipeAction = 'like' | 'pass' | 'super_like';
 type ExitDir = 'left' | 'right' | 'up';
-type SwipeResponse = { unauthorized?: boolean; isMatch?: boolean; matchedUser?: MatchedUser | null };
+type SwipeResponse = { unauthorized?: boolean; limitReached?: boolean; isMatch?: boolean; matchedUser?: MatchedUser | null };
 type LastSwipe = { profile: Profile; action: SwipeAction; promise: Promise<SwipeResponse> };
 
 type DragState = {
@@ -102,6 +102,8 @@ export default function DiscoverPage() {
 
   const [safetySheetOpen, setSafetySheetOpen] = useState(false);
   const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallMessage, setPaywallMessage] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const underCardRef = useRef<HTMLDivElement>(null);
@@ -265,13 +267,23 @@ export default function DiscoverPage() {
         router.replace('/welcome');
         return { unauthorized: true };
       }
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 429 && data.limitReached) {
+        return { limitReached: true, message: data.message };
+      }
       if (!res.ok) throw new Error(`Swipe failed (${res.status})`);
-      return res.json();
+      return data;
     });
 
     promise
       .then((data) => {
         if (data.unauthorized) return;
+        if (data.limitReached) {
+          setPaywallMessage((data as { message?: string }).message ?? "You've hit your daily limit.");
+          setPaywallOpen(true);
+          hapticWarning();
+          return;
+        }
         if (data.isMatch && data.matchedUser) {
           // Matches can't be undone — the other person already sees it.
           matchedIdsRef.current.add(target.id);
@@ -689,7 +701,7 @@ export default function DiscoverPage() {
               </div>
               <h2 className="text-[26px] font-extrabold text-[#1A1A2E] mb-2 tracking-tight">You&apos;re all caught up</h2>
               <p className="text-[15px] leading-relaxed text-[#1A1A2E]/55 mb-8 max-w-[280px]">
-                No new people nearby right now. Check back soon — new profiles appear every day.
+                Profiles you passed will reappear after 24 hours. Try widening your filters or check back soon for new faces.
               </p>
               <PrimaryButton
                 onClick={() => {
@@ -1108,6 +1120,61 @@ export default function DiscoverPage() {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* SWIPE LIMIT PAYWALL */}
+      {paywallOpen && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 backdrop-blur-xl p-6 animate-popover-enter"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Upgrade to DateBuddy Gold"
+        >
+          <div className="w-full max-w-[360px] rounded-[32px] bg-white p-8 text-center shadow-2xl flex flex-col items-center overflow-hidden relative">
+            {/* Ambient gradient */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[32px] overflow-hidden">
+              <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-[#FF6B9D]/12 blur-[40px]" />
+              <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-[#7B68EE]/12 blur-[40px]" />
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center w-full">
+              <div className="text-[52px] mb-3">👑</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 px-4 py-1.5 rounded-full">
+                Daily Limit Reached
+              </div>
+              <h2 className="text-[26px] font-extrabold text-[#1A1A2E] mt-3 mb-2 tracking-tight leading-tight">
+                Upgrade to Gold
+              </h2>
+              <p className="text-[14px] text-[#1A1A2E]/60 mb-6 leading-relaxed max-w-[260px]">
+                {paywallMessage || "You've used all your free likes for today. Gold gives you unlimited likes every day."}
+              </p>
+
+              <div className="w-full space-y-2.5 mb-4">
+                {[
+                  { icon: '💛', text: 'Unlimited likes every day' },
+                  { icon: '👀', text: 'See who already liked you' },
+                  { icon: '⭐', text: '5 Super Likes per day' },
+                  { icon: '🚀', text: 'Profile boost once a week' },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-[#FAFAF7] border border-[#1A1A2E]/6 text-left">
+                    <span className="text-[18px]">{icon}</span>
+                    <span className="text-[13px] font-semibold text-[#1A1A2E]/80">{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <PrimaryButton onClick={() => { setPaywallOpen(false); router.push('/premium'); }}>
+                Get DateBuddy Gold ✨
+              </PrimaryButton>
+              <button
+                onClick={() => setPaywallOpen(false)}
+                className="w-full min-h-[44px] py-3 text-[14px] font-semibold text-[#1A1A2E]/50 transition-opacity active:opacity-60 mt-1"
+              >
+                Maybe later
+              </button>
+            </div>
           </div>
         </div>
       )}

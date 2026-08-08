@@ -101,8 +101,9 @@ export default function ReviewPage() {
         return;
       }
       hapticSuccess();
-      // Hard navigate so middleware re-runs with fresh cookie
-      window.location.assign('/discover');
+      // Go to tutorial first so new users know how to use the app,
+      // then tutorial routes to /discover. Hard navigate so the cookie is read fresh.
+      window.location.assign('/onboarding/tutorial');
     } catch {
       hapticWarning();
       setError('Network error. Please check your connection and try again.');

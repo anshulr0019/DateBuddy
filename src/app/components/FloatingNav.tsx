@@ -92,7 +92,7 @@ export default function FloatingNav() {
   }, [router]);
 
   // Hide floating nav on standalone flow pages (onboarding, chat, meetups, etc.)
-  const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium'];
+  const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy'];
   const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/';
 
   if (isHidden) return null;

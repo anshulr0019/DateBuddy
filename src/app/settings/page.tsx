@@ -299,7 +299,11 @@ export default function SettingsPage() {
                   >
                     <div>
                       <p className="text-[14px] font-medium text-[#1E293B]">Identity Verification</p>
-                      <p className="text-[12px] text-emerald-600 font-semibold">✓ Blue Tick Verified</p>
+                      {userInfo.verified ? (
+                        <p className="text-[12px] text-emerald-600 font-semibold">✓ Blue Tick Verified</p>
+                      ) : (
+                        <p className="text-[12px] text-[#F43F5E] font-semibold">Tap to get verified →</p>
+                      )}
                     </div>
                     <span className="text-[14px] text-[#1E293B]/40">›</span>
                   </div>
@@ -578,7 +582,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Edit Phone Modal */}
       {showEditPhoneModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
           <div
@@ -587,30 +590,20 @@ export default function SettingsPage() {
             style={{ willChange: 'backdrop-filter, opacity' }}
           />
           <div className="relative z-10 w-full max-w-sm bg-white rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry">
-            <h3 className="text-[18px] font-bold text-[#1A1A2E]">Update Phone Number</h3>
-            <input
-              type="text"
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-[16px] outline-none focus:border-[#FF6B9D]"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowEditPhoneModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-[14px] font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setUserInfo(prev => ({ ...prev, phoneNumber: newPhone }));
-                  setShowEditPhoneModal(false);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold"
-              >
-                Save
-              </button>
+            <h3 className="text-[18px] font-bold text-[#1A1A2E]">Change Phone Number</h3>
+            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <p className="text-[13px] font-semibold text-amber-800 leading-relaxed">
+                For security, changing your phone number requires re-verification. Please contact us at{' '}
+                <a href="mailto:support@datebuddy.app" className="underline">support@datebuddy.app</a>{' '}
+                and we&apos;ll help you update it.
+              </p>
             </div>
+            <button
+              onClick={() => setShowEditPhoneModal(false)}
+              className="w-full py-2.5 rounded-xl bg-[#1A1A2E] text-white text-[14px] font-bold cursor-pointer active:scale-95 transition-all"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}

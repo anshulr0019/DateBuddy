@@ -17,6 +17,10 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 10;
 
+// Profiles that were passed reappear in the feed after this many hours.
+const PASS_RECYCLE_HOURS = 24;
+const PASS_RECYCLE_MS = PASS_RECYCLE_HOURS * 60 * 60 * 1000;
+
 // "Active now" window — anything older is simply not reported as online.
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
@@ -60,14 +64,32 @@ export async function GET(request: NextRequest) {
     const cursor = cursorParam !== null ? Number(cursorParam) : null;
     const validCursor = cursor !== null && Number.isInteger(cursor) && cursor > 0 ? cursor : null;
 
-    // Exclusions run as subqueries inside the candidates query so the
-    // whole selection is a single database round trip instead of two
-    // sequential stages. All excluded-id columns are NOT NULL, so the
-    // NOT IN subqueries are safe.
-    const swipedByMe = db
+    // Two separate exclusion buckets:
+    //
+    // 1. likedByMe — like/super_like swipes are permanent. The profile was
+    //    already acted on positively; never show it again.
+    //
+    // 2. recentPassByMe — pass swipes only block the profile for
+    //    PASS_RECYCLE_HOURS. After that window the profile can resurface,
+    //    giving both sides another chance.
+    //
+    // All excluded-id columns are NOT NULL, so NOT IN is safe here.
+    const likedByMe = db
       .select({ id: swipes.swipedId })
       .from(swipes)
-      .where(eq(swipes.swiperId, currentUserId));
+      .where(and(eq(swipes.swiperId, currentUserId), ne(swipes.action, 'pass')));
+
+    const recentPassByMe = db
+      .select({ id: swipes.swipedId })
+      .from(swipes)
+      .where(
+        and(
+          eq(swipes.swiperId, currentUserId),
+          eq(swipes.action, 'pass'),
+          gt(swipes.createdAt, new Date(Date.now() - PASS_RECYCLE_MS))
+        )
+      );
+
     const blockedByMe = db
       .select({ id: blocks.blockedId })
       .from(blocks)
@@ -80,7 +102,8 @@ export async function GET(request: NextRequest) {
     const conditions = [
       ne(users.id, currentUserId),
       eq(users.isActive, true),
-      notInArray(users.id, swipedByMe),
+      notInArray(users.id, likedByMe),
+      notInArray(users.id, recentPassByMe),
       notInArray(users.id, blockedByMe),
       notInArray(users.id, blockedMe),
     ];

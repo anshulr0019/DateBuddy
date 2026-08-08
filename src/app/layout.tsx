@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import FloatingNav from "./components/FloatingNav";
+import Heartbeat from "./components/Heartbeat";
 import { NotificationProvider } from "./context/NotificationContext";
 import { FilterProvider } from "./context/FilterContext";
 
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {children}
             </main>
             <FloatingNav />
+            <Heartbeat />
           </FilterProvider>
         </NotificationProvider>
       </body>

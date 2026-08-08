@@ -4,7 +4,7 @@
   "description": "India's coolest dating & connections app for Gen Z. Connect with people nearby and find your vibe.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0D0B18",
+  "background_color": "#FAFAF7",
   "theme_color": "#FF6B9D",
   "orientation": "portrait",
   "icons": [

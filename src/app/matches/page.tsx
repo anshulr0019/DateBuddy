@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, VerifiedBadge, SafeImage } from '../components/shared';
+import { hapticLight } from '../lib/haptics';
 
 type Match = {
   id: number;
@@ -21,6 +22,7 @@ export default function ConnectionsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [likesCount, setLikesCount] = useState<number | null>(null);
 
   useEffect(() => {
     async function loadMatches() {
@@ -45,6 +47,13 @@ export default function ConnectionsPage() {
     loadMatches();
   }, [router]);
 
+  useEffect(() => {
+    fetch('/api/likes')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.success) setLikesCount(d.count); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
@@ -65,6 +74,34 @@ export default function ConnectionsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Who Liked You teaser row */}
+            <button
+              onClick={() => { hapticLight(); router.push('/likes'); }}
+              className="flex-shrink-0 z-10 mx-4 mt-3 flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#FF6B9D]/10 to-[#7B68EE]/10 border border-[#F9C0D0]/60 px-4 py-3 cursor-pointer active:scale-[0.98] transition-all hover:border-[#F43F5E]/40"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] shadow-sm text-lg flex-shrink-0">
+                  💛
+                </div>
+                <div className="text-left">
+                  <p className="text-[13.5px] font-bold text-[#1E293B]">
+                    {likesCount === null ? 'Who Liked You' : likesCount > 0 ? `${likesCount} ${likesCount === 1 ? 'person' : 'people'} liked you` : 'Who Liked You'}
+                  </p>
+                  <p className="text-[11.5px] text-[#1E293B]/55 font-medium">
+                    {likesCount !== null && likesCount > 0 ? 'Tap to see or upgrade to reveal' : 'See people who already liked you'}
+                  </p>
+                </div>
+              </div>
+              {likesCount !== null && likesCount > 0 && (
+                <div className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-[#F43F5E] px-1.5 text-white text-[11px] font-black shadow-sm flex-shrink-0">
+                  {likesCount}
+                </div>
+              )}
+              {(likesCount === null || likesCount === 0) && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1E293B]/35 flex-shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+              )}
+            </button>
 
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
               {loading && (
