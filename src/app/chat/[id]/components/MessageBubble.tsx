@@ -118,8 +118,8 @@ function MessageBubbleInner({
           </div>
         )}
 
-        {/* Photo / GIF */}
-        {isImage && (
+        {/* Photo */}
+        {message.type === 'photo' && (
           <div className="flex flex-col gap-1.5">
             {imageBroken ? (
               <div className="flex w-[210px] aspect-[4/3] items-center justify-center gap-2 rounded-2xl border border-gray-200/60 bg-gray-50 text-gray-400">
@@ -144,6 +144,31 @@ function MessageBubbleInner({
                   <span className="text-[11px] font-bold bg-black/60 px-2.5 py-1 rounded-full backdrop-blur-md">View Photo</span>
                 </div>
               </button>
+            )}
+            <MetaRow message={message} />
+          </div>
+        )}
+
+        {/* GIF / Sticker — loops inline, no lightbox */}
+        {message.type === 'gif' && (
+          <div className="flex flex-col gap-1.5">
+            {imageBroken ? (
+              <div className="flex w-[200px] aspect-square items-center justify-center gap-2 rounded-2xl border border-gray-200/60 bg-gray-50 text-gray-400">
+                <span className="text-[12px] font-medium">GIF unavailable</span>
+              </div>
+            ) : (
+              <div className="relative w-[200px] overflow-hidden rounded-2xl border border-gray-200/40 bg-gray-100 shadow-2xs">
+                <img
+                  src={message.content}
+                  alt={`GIF from ${isMine ? 'you' : partnerName}`}
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setImageBroken(true)}
+                  className="w-full object-cover"
+                />
+                {/* GIF badge */}
+                <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/50 backdrop-blur-sm px-1.5 py-0.5 text-[10px] font-black text-white tracking-wider">GIF</span>
+              </div>
             )}
             <MetaRow message={message} />
           </div>

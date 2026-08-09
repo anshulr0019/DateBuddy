@@ -337,6 +337,25 @@ export function useChat(matchId: number | null, myId: number | null) {
     [doSend, setPendingStatus]
   );
 
+  /* Send a GIF or sticker by URL — no upload needed, the URL is already hosted. */
+  const sendGif = useCallback(
+    (url: string) => {
+      if (!url.trim() || myId === null) return;
+      const online = typeof navigator === 'undefined' || navigator.onLine;
+      const msg: ChatMessage = {
+        id: makeClientId(),
+        senderId: myId,
+        type: 'gif',
+        content: url,
+        createdAt: new Date().toISOString(),
+        status: online ? 'sending' : 'queued',
+      };
+      setPending((prev) => [...prev, msg]);
+      if (online) doSend(msg);
+    },
+    [myId, doSend]
+  );
+
   /* Online/offline tracking + flushing the queue on reconnect. */
   useEffect(() => {
     setIsOnline(navigator.onLine);
@@ -383,6 +402,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     loadOlder,
     sendText,
     sendPhoto,
+    sendGif,
     retry,
     reload: load,
   };

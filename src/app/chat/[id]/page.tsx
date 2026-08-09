@@ -11,6 +11,7 @@ import { useChat } from './useChat';
 import type { ChatMessage } from './chatTypes';
 import { MessageBubble } from './components/MessageBubble';
 import { Composer, EmojiDrawer } from './components/Composer';
+import { GifStickerDrawer } from './components/GifStickerDrawer';
 import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
 
 const ICEBREAKERS = [
@@ -42,6 +43,7 @@ export default function ChatPage() {
 
   const [inputText, setInputText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showGif, setShowGif] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
@@ -317,18 +319,34 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* ── EMOJI DRAWER + COMPOSER ── */}
+            {/* ── EMOJI / GIF DRAWER + COMPOSER ── */}
             {chat.phase === 'ready' && (
               <>
                 {showEmoji && <EmojiDrawer onPick={(emoji) => setInputText((prev) => prev + emoji)} />}
+                {showGif && (
+                  <GifStickerDrawer
+                    onSelect={(url, _kind) => {
+                      chat.sendGif(url);
+                      setShowGif(false);
+                    }}
+                  />
+                )}
                 <Composer
                   value={inputText}
                   onChange={setInputText}
                   onSend={handleSend}
                   onPickFile={chat.sendPhoto}
                   emojiOpen={showEmoji}
-                  onToggleEmoji={() => setShowEmoji((v) => !v)}
-                  onFocusInput={() => setShowEmoji(false)}
+                  onToggleEmoji={() => {
+                    setShowEmoji((v) => !v);
+                    setShowGif(false);
+                  }}
+                  gifOpen={showGif}
+                  onToggleGif={() => {
+                    setShowGif((v) => !v);
+                    setShowEmoji(false);
+                  }}
+                  onFocusInput={() => { setShowEmoji(false); setShowGif(false); }}
                   error={composerError}
                   inputRef={inputRef}
                 />

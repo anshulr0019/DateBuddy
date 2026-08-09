@@ -57,6 +57,8 @@ interface ComposerProps {
   onPickFile: (file: File) => void;
   emojiOpen: boolean;
   onToggleEmoji: () => void;
+  gifOpen: boolean;
+  onToggleGif: () => void;
   onFocusInput: () => void;
   error: string | null;
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -69,6 +71,8 @@ export function Composer({
   onPickFile,
   emojiOpen,
   onToggleEmoji,
+  gifOpen,
+  onToggleGif,
   onFocusInput,
   error,
   inputRef,
@@ -99,16 +103,32 @@ export function Composer({
         </p>
       )}
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
+        {/* Camera */}
         <button
           onClick={() => fileInputRef.current?.click()}
           aria-label="Attach a photo"
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-90 transition-all duration-300 ease-out cursor-pointer"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-90 transition-all duration-200 cursor-pointer"
         >
           <Ic.Camera className="w-5 h-5" />
         </button>
 
-        <div className="relative flex-1 flex items-center bg-gray-100/90 rounded-2xl h-11 px-4 border border-transparent focus-within:border-[#F43F5E]/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#F43F5E]/15 transition-all duration-200">
+        {/* GIF/Sticker button */}
+        <button
+          onClick={onToggleGif}
+          aria-label={gifOpen ? 'Close GIF picker' : 'Open GIF & Stickers'}
+          aria-expanded={gifOpen}
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-black text-[12px] tracking-tight transition-all duration-200 active:scale-90 cursor-pointer ${
+            gifOpen
+              ? 'bg-[#F43F5E] text-white shadow-sm'
+              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+          }`}
+        >
+          GIF
+        </button>
+
+        {/* Text input */}
+        <div className="relative flex-1 flex items-center bg-gray-100/90 rounded-2xl h-10 px-4 border border-transparent focus-within:border-[#F43F5E]/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#F43F5E]/15 transition-all duration-200">
           <input
             ref={inputRef}
             type="text"
@@ -136,11 +156,12 @@ export function Composer({
           </button>
         </div>
 
+        {/* Send */}
         <button
           onClick={onSend}
           disabled={!canSend}
           aria-label="Send message"
-          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl transition-all duration-200 ${
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${
             canSend
               ? 'bg-[#F43F5E] text-white shadow-2xs hover:bg-[#E11D48] active:scale-90 hover:scale-105 cursor-pointer'
               : 'bg-gray-100 text-gray-300 cursor-default'
