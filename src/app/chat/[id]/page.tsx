@@ -10,8 +10,8 @@ import { useKeyboardInset } from '../../lib/useKeyboardInset';
 import { useChat } from './useChat';
 import type { ChatMessage } from './chatTypes';
 import { MessageBubble } from './components/MessageBubble';
-import { Composer, EmojiDrawer } from './components/Composer';
-import { GifStickerDrawer } from './components/GifStickerDrawer';
+import { Composer } from './components/Composer';
+import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
 import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
 
 const ICEBREAKERS = [
@@ -42,8 +42,7 @@ export default function ChatPage() {
   const { partner, messages, composerError, clearComposerError } = chat;
 
   const [inputText, setInputText] = useState('');
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [showGif, setShowGif] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<DrawerTab | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
@@ -114,7 +113,7 @@ export default function ChatPage() {
     if (!inputText.trim()) return;
     chat.sendText(inputText);
     setInputText('');
-    setShowEmoji(false);
+    setDrawerTab(null);
   }, [chat, inputText]);
 
   /* Interleave date dividers into the feed. */
@@ -319,15 +318,16 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* ── EMOJI / GIF DRAWER + COMPOSER ── */}
+            {/* ── UNIFIED WHATSAPP-STYLE MEDIA DRAWER + COMPOSER ── */}
             {chat.phase === 'ready' && (
               <>
-                {showEmoji && <EmojiDrawer onPick={(emoji) => setInputText((prev) => prev + emoji)} />}
-                {showGif && (
-                  <GifStickerDrawer
-                    onSelect={(url, _kind) => {
+                {drawerTab !== null && (
+                  <MediaDrawer
+                    initialTab={drawerTab}
+                    onPickEmoji={(emoji) => setInputText((prev) => prev + emoji)}
+                    onPickGif={(url) => {
                       chat.sendGif(url);
-                      setShowGif(false);
+                      setDrawerTab(null);
                     }}
                   />
                 )}
@@ -336,17 +336,15 @@ export default function ChatPage() {
                   onChange={setInputText}
                   onSend={handleSend}
                   onPickFile={chat.sendPhoto}
-                  emojiOpen={showEmoji}
+                  emojiOpen={drawerTab === 'emoji'}
                   onToggleEmoji={() => {
-                    setShowEmoji((v) => !v);
-                    setShowGif(false);
+                    setDrawerTab((prev) => (prev === 'emoji' ? null : 'emoji'));
                   }}
-                  gifOpen={showGif}
+                  gifOpen={drawerTab === 'gif' || drawerTab === 'sticker'}
                   onToggleGif={() => {
-                    setShowGif((v) => !v);
-                    setShowEmoji(false);
+                    setDrawerTab((prev) => (prev === 'gif' ? null : 'gif'));
                   }}
-                  onFocusInput={() => { setShowEmoji(false); setShowGif(false); }}
+                  onFocusInput={() => setDrawerTab(null)}
                   error={composerError}
                   inputRef={inputRef}
                 />
