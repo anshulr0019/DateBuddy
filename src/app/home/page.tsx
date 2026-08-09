@@ -627,8 +627,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* sticky footer — always visible above safe-area */}
-            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100 bg-white rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
+            {/* sticky footer — elevated above floating nav bar */}
+            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100 bg-white rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
               {hostError && (
                 <p className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[12px] font-semibold text-red-600">
                   {hostError}
@@ -637,7 +637,7 @@ export default function HomePage() {
               <button
                 onClick={publishSquad}
                 disabled={publishing}
-                className="w-full py-3 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[14px] shadow-md hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+                className="w-full py-3.5 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[15px] shadow-lg hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60"
               >
                 {publishing ? 'Publishing…' : 'Publish Squad Session 🚀'}
               </button>
@@ -698,11 +698,11 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <div className="pt-2 border-t border-gray-100">
+              <div className="pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100">
                 <button
                   onClick={() => toggleJoin(selectedDetail)}
                   disabled={busyId === selectedDetail.id}
-                  className={`w-full py-3 rounded-2xl text-[14px] font-extrabold transition-all cursor-pointer shadow-md disabled:opacity-60 ${
+                  className={`w-full py-3.5 rounded-2xl text-[14.5px] font-extrabold transition-all cursor-pointer shadow-lg disabled:opacity-60 ${
                     selectedDetail.joined
                       ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
                       : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
