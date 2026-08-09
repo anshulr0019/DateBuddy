@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">9. Children's Privacy</h2>
+            <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">9. Children&apos;s Privacy</h2>
             <p className="text-[14px] leading-relaxed">
               DateBuddy is not intended for users under 18. We do not knowingly collect information from minors.
               If we discover a minor has created an account, we will immediately delete it.

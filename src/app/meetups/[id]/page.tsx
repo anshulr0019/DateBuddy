@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { AuroraBackground } from '@/app/components/shared';
+import { AuroraBackground, SafeImage } from '@/app/components/shared';
 
 interface MeetupDetail {
   id: number;
@@ -31,13 +31,7 @@ export default function MeetupDetailPage() {
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (params?.id) {
-      fetchMeetup();
-    }
-  }, [params?.id]);
-
-  const fetchMeetup = async () => {
+  const fetchMeetup = useCallback(async () => {
     try {
       const response = await fetch(`/api/meetups/${params.id}`);
       const data = await response.json();
@@ -54,7 +48,13 @@ export default function MeetupDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params?.id]);
+
+  useEffect(() => {
+    if (params?.id) {
+      fetchMeetup();
+    }
+  }, [params?.id, fetchMeetup]);
 
   const handleJoin = async () => {
     try {

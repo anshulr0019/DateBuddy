@@ -84,7 +84,7 @@ export default function LikesPage() {
               {!loading && error && (
                 <div className="text-center py-16 px-6">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 mx-auto shadow-sm text-2xl">⚠️</div>
-                  <h3 className="text-[18px] font-bold text-[#1E293B] mb-2">Couldn't load likes</h3>
+                  <h3 className="text-[18px] font-bold text-[#1E293B] mb-2">Couldn&apos;t load likes</h3>
                   <p className="text-[14px] text-[#1E293B]/55 max-w-[260px] mx-auto leading-relaxed mb-6">
                     Check your connection and try again.
                   </p>

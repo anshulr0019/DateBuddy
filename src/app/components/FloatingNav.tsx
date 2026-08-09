@@ -86,9 +86,6 @@ export default function FloatingNav() {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchend', onTouchEnd);
     };
-    // router is stable; re-registering on pathname would cancel in-flight swipes.
-    // We use pathnameRef instead to always read the current route.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   // Hide floating nav on standalone flow pages (onboarding, chat, meetups, etc.)

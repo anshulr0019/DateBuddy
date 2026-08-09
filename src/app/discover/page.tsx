@@ -343,10 +343,9 @@ export default function DiscoverPage() {
       setEnterAnim(!viaDrag);
       setCardKey((k) => k + 1);
       setProfiles((prev) => prev.filter((p) => p.id !== target.id));
-      setLastSwipe(matchedIdsRef.current.has(target.id) ? null : { profile: target, action, promise });
       exitLockRef.current = false;
     }, reducedMotionRef.current ? REDUCED_EXIT_MS : SWIPE_ANIMATION_MS);
-  }, [profiles, router, resetDragVisuals]);
+  }, [profiles, router, resetDragVisuals, addNotification]);
 
   const togglePromptLike = useCallback((promptKey: string) => {
     if (exitLockRef.current) return;

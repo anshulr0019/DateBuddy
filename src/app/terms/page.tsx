@@ -28,7 +28,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">1. Acceptance of Terms</h2>
             <p className="text-[14px] leading-relaxed">
-              By downloading, installing, or using DateBuddy ("the App"), you agree to be bound by these Terms of Service.
+              By downloading, installing, or using DateBuddy (&quot;the App&quot;), you agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use the App. These terms constitute a legally binding
               agreement between you and DateBuddy.
             </p>
@@ -77,7 +77,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">6. Subscriptions & Payments</h2>
             <p className="text-[14px] leading-relaxed">
-              DateBuddy offers optional paid subscriptions ("DateBuddy Gold"). Subscription fees are billed in advance
+              DateBuddy offers optional paid subscriptions (&quot;DateBuddy Gold&quot;). Subscription fees are billed in advance
               and are non-refundable except as required by law. You may cancel your subscription at any time; your
               subscription benefits will continue until the end of the current billing period.
             </p>
@@ -86,7 +86,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">7. Disclaimer of Warranties</h2>
             <p className="text-[14px] leading-relaxed">
-              DateBuddy is provided "as is" without warranties of any kind. We do not guarantee that the App will be
+              DateBuddy is provided &quot;as is&quot; without warranties of any kind. We do not guarantee that the App will be
               uninterrupted, secure, or error-free. We are not responsible for the conduct of any user, online or offline.
             </p>
           </section>
