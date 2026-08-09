@@ -667,55 +667,61 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* PHOTO LIGHTBOX */}
+          {/* PHOTO LIGHTBOX — Premium Instagram/Hinge style fullscreen viewer */}
           {photoLightboxOpen && profile.photo && (
             <div
-              className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in"
+              className="fixed inset-0 z-[200] flex flex-col justify-between items-center bg-black/92 backdrop-blur-2xl animate-popover-enter select-none p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1.25rem+env(safe-area-inset-top,0px))]"
               role="dialog"
               aria-modal="true"
-              aria-label="Profile photo"
+              aria-label="Profile photo lightbox"
               onClick={() => setPhotoLightboxOpen(false)}
             >
-              {/* Close button */}
-              <button
-                onClick={() => setPhotoLightboxOpen(false)}
-                aria-label="Close photo viewer"
-                className="absolute top-[calc(env(safe-area-inset-top,0px)+12px)] right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all active:scale-90 cursor-pointer"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
+              {/* Header Bar */}
+              <div className="w-full flex items-center justify-between z-20 px-2" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-2 text-white">
+                  <span className="text-[15px] font-bold tracking-tight">{profile.name}</span>
+                  {profile.verified && <VerifiedBadge />}
+                </div>
+                <button
+                  onClick={() => setPhotoLightboxOpen(false)}
+                  aria-label="Close photo viewer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 border border-white/20 text-white hover:bg-white/30 transition-all active:scale-90 cursor-pointer backdrop-blur-md shadow-lg"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
 
-              {/* Photo */}
+              {/* Stage Image */}
               <div
-                className="w-full max-w-[440px] max-h-[80dvh] flex items-center justify-center px-0"
+                className="w-full max-w-[420px] my-auto flex items-center justify-center p-2 animate-scale-pop"
                 onClick={e => e.stopPropagation()}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={profile.photo}
-                  alt="Your profile photo"
-                  className="w-full max-h-[80dvh] object-contain select-none"
+                  alt={profile.name}
+                  className="w-full max-h-[66dvh] object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 select-none"
                   draggable={false}
                 />
               </div>
 
-              {/* Bottom actions */}
+              {/* Bottom Floating Glass Action Bar */}
               <div
-                className="absolute bottom-[calc(env(safe-area-inset-bottom,0px)+24px)] left-0 right-0 flex justify-center gap-3 px-6"
+                className="z-20 flex items-center justify-center gap-3 w-full max-w-[340px] px-2 mb-2"
                 onClick={e => e.stopPropagation()}
               >
                 <button
                   onClick={() => { setPhotoLightboxOpen(false); router.push('/onboarding/photos'); }}
-                  className="flex items-center gap-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 px-5 py-3 text-[14px] font-semibold text-white hover:bg-white/25 transition-all active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-5 py-3.5 text-[14px] font-bold text-white shadow-xl hover:opacity-95 active:scale-95 transition-all cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Edit Photos
                 </button>
                 <button
                   onClick={() => setPhotoLightboxOpen(false)}
-                  className="rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 px-5 py-3 text-[14px] font-semibold text-white hover:bg-white/25 transition-all active:scale-95 cursor-pointer"
+                  className="px-6 py-3.5 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 text-[14px] font-bold text-white hover:bg-white/25 active:scale-95 transition-all cursor-pointer shadow-lg"
                 >
-                  Done
+                  Close
                 </button>
               </div>
             </div>

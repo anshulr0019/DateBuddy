@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Ic } from './icons';
 import { useNotifications } from '../context/NotificationContext';
@@ -88,9 +88,22 @@ export default function FloatingNav() {
     };
   }, [router]);
 
-  // Hide floating nav on standalone flow pages (onboarding, chat, meetups, etc.)
+  const [hasModal, setHasModal] = useState(false);
+
+  useEffect(() => {
+    const checkModal = () => {
+      const modal = document.querySelector('[role="dialog"]');
+      setHasModal(Boolean(modal));
+    };
+    checkModal();
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  // Hide floating nav on standalone flow pages or when any modal/lightbox is open
   const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy'];
-  const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/';
+  const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/' || hasModal;
 
   if (isHidden) return null;
 
