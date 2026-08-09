@@ -14,6 +14,7 @@ export default function LocationPage() {
   const [city, setCity] = useState('');
   const [error, setError] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [detecting, setDetecting] = useState(false);
 
   const filteredCities = city
     ? INDIAN_CITIES.filter(c => c.toLowerCase().includes(city.toLowerCase()))
@@ -31,9 +32,54 @@ export default function LocationPage() {
   };
 
   const handleAutoDetect = () => {
-    // Simulate GPS detection
-    setCity('Mumbai');
-    setShowSuggestions(false);
+    if (!navigator.geolocation) {
+      setError('Location is not supported on this device.');
+      return;
+    }
+    setDetecting(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          // Reverse geocode using OpenStreetMap Nominatim (free, no API key)
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const data = await res.json();
+          const addr = data.address ?? {};
+          // Pick the most specific city-level field available
+          const detected =
+            addr.city ||
+            addr.town ||
+            addr.county ||
+            addr.state_district ||
+            addr.state ||
+            '';
+          if (detected) {
+            setCity(detected);
+            setShowSuggestions(false);
+          } else {
+            setError('Could not determine your city. Please search manually.');
+          }
+        } catch {
+          setError('Could not fetch your location. Please search manually.');
+        } finally {
+          setDetecting(false);
+        }
+      },
+      (err) => {
+        setDetecting(false);
+        if (err.code === 1) {
+          setError('Location permission denied. Please search your city manually.');
+        } else {
+          setError('Could not get your location. Please search manually.');
+        }
+      },
+      { timeout: 10_000, enableHighAccuracy: false }
+    );
   };
 
   return (
@@ -72,10 +118,22 @@ export default function LocationPage() {
             <button
               type="button"
               onClick={handleAutoDetect}
-              className="w-full h-13 rounded-2xl border border-[#FF6B9D]/30 bg-gradient-to-r from-[#FF6B9D]/10 to-[#7B68EE]/10 text-[#FF6B9D] text-[14px] font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B9D]/15 transition-all cursor-pointer shadow-sm"
+              disabled={detecting}
+              className="w-full h-13 rounded-2xl border border-[#FF6B9D]/30 bg-gradient-to-r from-[#FF6B9D]/10 to-[#7B68EE]/10 text-[#FF6B9D] text-[14px] font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B9D]/15 transition-all cursor-pointer shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <span className="text-base">📍</span>
-              <span>Auto-detect my location</span>
+              {detecting ? (
+                <>
+                  <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                  </svg>
+                  <span>Detecting your location…</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">📍</span>
+                  <span>Auto-detect my location</span>
+                </>
+              )}
             </button>
 
             {/* Divider */}

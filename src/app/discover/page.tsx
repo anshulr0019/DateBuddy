@@ -75,6 +75,7 @@ type DragState = {
 
 export default function DiscoverPage() {
   const router = useRouter();
+  const { addNotification } = useNotifications();
 
   // Seed from the navigation-surviving cache so re-entering Discover
   // (or entering after the nav prefetch landed) renders instantly.
@@ -290,6 +291,15 @@ export default function DiscoverPage() {
           setLastSwipe((cur) => (cur && cur.profile.id === target.id ? null : cur));
           setMatchedUser(data.matchedUser);
           hapticSuccess();
+          // Fire an in-app notification so the bell lights up
+          const firstName = data.matchedUser.name?.split(' ')[0] ?? 'Someone';
+          addNotification({
+            type: 'match',
+            title: "It's a Match! 🎉",
+            message: `You and ${firstName} liked each other. Say hi! 💬`,
+            avatar: data.matchedUser.photo ?? undefined,
+            actionUrl: '/messages',
+          });
         }
       })
       .catch(() => {

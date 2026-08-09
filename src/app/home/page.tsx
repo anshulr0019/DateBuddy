@@ -752,6 +752,20 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* FLOATING HOST BUTTON — always visible above the nav bar */}
+      <button
+        onClick={() => { hapticMedium(); setShowHostModal(true); }}
+        aria-label="Host a squad session"
+        className="fixed z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-5 py-3 text-white text-[13.5px] font-bold shadow-[0_8px_25px_-6px_rgba(255,107,157,0.65)] active:scale-95 transition-all cursor-pointer hover:shadow-[0_8px_30px_-6px_rgba(255,107,157,0.8)] select-none"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
+          right: '20px',
+        }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Host
+      </button>
     </div>
   );
 }

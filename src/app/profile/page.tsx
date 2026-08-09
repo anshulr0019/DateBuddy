@@ -114,6 +114,7 @@ export default function ProfilePage() {
   const [editDraft, setEditDraft] = useState({ name: '', bio: '', city: '', interests: [] as string[] });
   const [editError, setEditError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [photoLightboxOpen, setPhotoLightboxOpen] = useState(false);
 
   const openEditor = useCallback(() => {
     setEditDraft({
@@ -300,13 +301,28 @@ export default function ProfilePage() {
             {status === 'ready' && (
               <>
                 {/* Hero — taller, like Hinge/Instagram */}
-                <div className="relative w-full overflow-hidden" style={{ height: 'min(42dvh, 360px)' }}>
+                <div
+                  className="relative w-full overflow-hidden cursor-pointer"
+                  style={{ height: 'min(42dvh, 360px)' }}
+                  onClick={() => profile.photo && setPhotoLightboxOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="View your photo"
+                  onKeyDown={e => { if (e.key === 'Enter') profile.photo && setPhotoLightboxOpen(true); }}
+                >
                   <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/10 to-transparent" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent" />
+                  {/* Tap-to-expand hint */}
+                  {profile.photo && (
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 3h6m0 0v6m0-6-7 7M9 21H3m0 0v-6m0 6 7-7"/></svg>
+                      <span className="text-[10px] font-semibold text-white">View</span>
+                    </div>
+                  )}
                   <div className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
                     <button
-                      onClick={() => router.push('/settings')}
+                      onClick={e => { e.stopPropagation(); router.push('/settings'); }}
                       aria-label="Settings"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer active:scale-95"
                     >
@@ -315,7 +331,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="absolute right-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
                     <button
-                      onClick={openEditor}
+                      onClick={e => { e.stopPropagation(); openEditor(); }}
                       aria-label="Edit profile"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer active:scale-95"
                     >
@@ -334,11 +350,15 @@ export default function ProfilePage() {
 
                   {/* Avatar */}
                   <div className="mb-4 flex items-end justify-between">
-                    <div className="story-ring h-[88px] w-[88px]">
+                    <button
+                      onClick={() => profile.photo && setPhotoLightboxOpen(true)}
+                      aria-label="View your photo"
+                      className="story-ring h-[88px] w-[88px] cursor-pointer active:scale-95 transition-transform"
+                    >
                       <div className="story-ring-inner h-full w-full overflow-hidden rounded-full">
                         <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full rounded-full object-cover" />
                       </div>
-                    </div>
+                    </button>
                     <button
                       onClick={openEditor}
                       className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[#1A1A2E]/15 bg-white/80 px-4 py-2 text-[13px] font-medium text-[#1A1A2E] backdrop-blur-md hover:bg-white transition-all cursor-pointer active:scale-95 shadow-sm"
@@ -554,7 +574,17 @@ export default function ProfilePage() {
                 onClick={e => e.stopPropagation()}
                 className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-sheet-up"
               >
-                <h2 className="mb-5 text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
+                  <button
+                    onClick={() => !isSaving && setIsEditing(false)}
+                    disabled={isSaving}
+                    aria-label="Close editor"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A2E]/8 text-[#1A1A2E]/60 hover:bg-[#1A1A2E]/15 transition-all active:scale-90 cursor-pointer disabled:opacity-40"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
 
                 {editError && (
                   <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600">
@@ -633,6 +663,60 @@ export default function ProfilePage() {
                     {isSaving ? 'Saving…' : 'Save Changes'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* PHOTO LIGHTBOX */}
+          {photoLightboxOpen && profile.photo && (
+            <div
+              className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Profile photo"
+              onClick={() => setPhotoLightboxOpen(false)}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setPhotoLightboxOpen(false)}
+                aria-label="Close photo viewer"
+                className="absolute top-[calc(env(safe-area-inset-top,0px)+12px)] right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all active:scale-90 cursor-pointer"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+
+              {/* Photo */}
+              <div
+                className="w-full max-w-[440px] max-h-[80dvh] flex items-center justify-center px-0"
+                onClick={e => e.stopPropagation()}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={profile.photo}
+                  alt="Your profile photo"
+                  className="w-full max-h-[80dvh] object-contain select-none"
+                  draggable={false}
+                />
+              </div>
+
+              {/* Bottom actions */}
+              <div
+                className="absolute bottom-[calc(env(safe-area-inset-bottom,0px)+24px)] left-0 right-0 flex justify-center gap-3 px-6"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => { setPhotoLightboxOpen(false); router.push('/onboarding/photos'); }}
+                  className="flex items-center gap-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 px-5 py-3 text-[14px] font-semibold text-white hover:bg-white/25 transition-all active:scale-95 cursor-pointer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit Photos
+                </button>
+                <button
+                  onClick={() => setPhotoLightboxOpen(false)}
+                  className="rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 px-5 py-3 text-[14px] font-semibold text-white hover:bg-white/25 transition-all active:scale-95 cursor-pointer"
+                >
+                  Done
+                </button>
               </div>
             </div>
           )}
