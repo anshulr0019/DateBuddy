@@ -49,23 +49,48 @@ export default function LikesPage() {
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 
-            {/* Header */}
+            {/* Header with Back and Close navigation */}
             <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-2xs">
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-[22px] font-extrabold tracking-tight text-[#1E293B]">Who Liked You</h1>
-                    {isGold && (
-                      <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[10px] font-black uppercase tracking-wider">
-                        GOLD
-                      </span>
-                    )}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      if (window.history.length > 1) {
+                        router.back();
+                      } else {
+                        router.push('/discover');
+                      }
+                    }}
+                    aria-label="Go back"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer flex-shrink-0"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-[20px] font-extrabold tracking-tight text-[#1E293B]">Who Liked You</h1>
+                      {isGold && (
+                        <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[10px] font-black uppercase tracking-wider">
+                          GOLD
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[12px] text-[#1E293B]/60 font-medium">
+                      {loading ? 'Loading…' : `${count} ${count === 1 ? 'person' : 'people'} liked your profile`}
+                    </p>
                   </div>
-                  <p className="text-[12.5px] text-[#1E293B]/60 font-medium">
-                    {loading ? 'Loading…' : `${count} ${count === 1 ? 'person' : 'people'} liked your profile`}
-                  </p>
                 </div>
-                <div className="text-[28px]">💛</div>
+
+                <button
+                  onClick={() => router.push('/discover')}
+                  aria-label="Close"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800 active:scale-90 transition-all cursor-pointer flex-shrink-0"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
             </div>
 
