@@ -215,6 +215,8 @@ export const meetups = pgTable('meetups', {
   imageUrl: text('image_url'),
   
   createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at'),
+  pinnedMessage: text('pinned_message'),
   status: varchar('status', { length: 20 }).default('active'), // active, cancelled, completed
 });
 
