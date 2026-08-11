@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { meetupAttendees, meetups } from '@/db/schema';
+import { meetupAttendees, meetups, users, notifications } from '@/db/schema';
 import { eq, and, count } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 
@@ -28,35 +28,55 @@ export async function POST(
       return NextResponse.json({ success: false, message: 'Meetup not found' }, { status: 404 });
     }
 
-    const existing = await db
+    const [existing] = await db
       .select()
       .from(meetupAttendees)
       .where(and(eq(meetupAttendees.meetupId, meetupId), eq(meetupAttendees.userId, userId)));
 
-    if (existing.length > 0) {
+    if (existing) {
+      if (existing.status === 'kicked') {
+        return NextResponse.json({ success: false, message: 'You were removed from this session by the host.' }, { status: 403 });
+      }
+      // Leave / cancel request
       await db
         .delete(meetupAttendees)
         .where(and(eq(meetupAttendees.meetupId, meetupId), eq(meetupAttendees.userId, userId)));
-      return NextResponse.json({ success: true, action: 'left' });
+      return NextResponse.json({ success: true, action: 'left', status: null });
     }
 
     const [{ attendees }] = await db
       .select({ attendees: count() })
       .from(meetupAttendees)
-      .where(eq(meetupAttendees.meetupId, meetupId));
+      .where(and(eq(meetupAttendees.meetupId, meetupId), eq(meetupAttendees.status, 'going')));
 
     if (Number(attendees) >= (meetup.maxAttendees ?? 10)) {
       return NextResponse.json({ success: false, message: 'Event is full' }, { status: 409 });
     }
 
-    // Unique index on (meetupId, userId) makes the concurrent double-join a no-op.
-    const inserted = await db
-      .insert(meetupAttendees)
-      .values({ meetupId, userId, status: 'going' })
-      .onConflictDoNothing()
-      .returning();
+    const targetStatus = meetup.requireApproval ? 'pending' : 'going';
 
-    return NextResponse.json({ success: true, action: inserted.length ? 'joined' : 'already_joined' });
+    await db
+      .insert(meetupAttendees)
+      .values({ meetupId, userId, status: targetStatus })
+      .onConflictDoNothing();
+
+    // If require approval, notify host
+    if (targetStatus === 'pending' && meetup.hostId !== userId) {
+      const [currentUser] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId));
+      await db.insert(notifications).values({
+        userId: meetup.hostId,
+        type: 'event_request',
+        title: 'Join Request ✋',
+        body: `${currentUser?.name ?? 'Someone'} requested to join your squad "${meetup.title}".`,
+        metadata: { meetupId, applicantUserId: userId },
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      action: targetStatus === 'pending' ? 'requested' : 'joined',
+      status: targetStatus,
+    });
   } catch (error) {
     console.error('Error updating RSVP:', error);
     return NextResponse.json({ success: false, message: 'Failed to update RSVP' }, { status: 500 });

@@ -78,6 +78,7 @@ export default function HomePage() {
   const [hostVenue, setHostVenue] = useState('');
   const [hostDate, setHostDate] = useState('');
   const [hostSlots, setHostSlots] = useState(4);
+  const [hostRequireApproval, setHostRequireApproval] = useState(false);
   const [hostError, setHostError] = useState('');
   const [publishing, setPublishing] = useState(false);
 
@@ -203,6 +204,7 @@ export default function HomePage() {
           venueName: hostVenue.trim(),
           date: new Date(hostDate).toISOString(),
           maxAttendees: hostSlots,
+          requireApproval: hostRequireApproval,
         }),
       });
       const data = await res.json();
@@ -625,6 +627,39 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Host Admin Control</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHostRequireApproval(false)}
+                    className={`py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
+                      !hostRequireApproval
+                        ? 'bg-[#F43F5E] text-white border-transparent shadow-2xs'
+                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    ⚡ Instant Join
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHostRequireApproval(true)}
+                    className={`py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
+                      hostRequireApproval
+                        ? 'bg-[#F43F5E] text-white border-transparent shadow-2xs'
+                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    🔒 Require Approval
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  {hostRequireApproval
+                    ? 'Interested users must be approved by you before joining.'
+                    : 'Anyone can join your squad directly until slots fill up.'}
+                </p>
+              </div>
             </div>
 
             {/* sticky footer — elevated above floating nav bar */}
@@ -698,6 +733,18 @@ export default function HomePage() {
                 </span>
               </div>
 
+              <button
+                onClick={() => {
+                  const mId = selectedDetail.id;
+                  setSelectedDetail(null);
+                  router.push(`/meetups/${mId}`);
+                }}
+                className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1E293B] text-[13px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>View Full Squad Page &amp; Members</span>
+                <span>→</span>
+              </button>
+
               <div className="pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100">
                 <button
                   onClick={() => toggleJoin(selectedDetail)}
@@ -752,20 +799,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* FLOATING HOST BUTTON — always visible above the nav bar */}
-      <button
-        onClick={() => { hapticMedium(); setShowHostModal(true); }}
-        aria-label="Host a squad session"
-        className="fixed z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-5 py-3 text-white text-[13.5px] font-bold shadow-[0_8px_25px_-6px_rgba(255,107,157,0.65)] active:scale-95 transition-all cursor-pointer hover:shadow-[0_8px_30px_-6px_rgba(255,107,157,0.8)] select-none"
-        style={{
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
-          right: '20px',
-        }}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Host
-      </button>
     </div>
   );
 }

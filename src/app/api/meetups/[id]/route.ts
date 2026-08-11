@@ -30,7 +30,7 @@ export async function GET(
       .where(eq(users.id, meetup.hostId));
 
     const attendeeRows = await db
-      .select({ id: users.id, name: users.name })
+      .select({ id: users.id, name: users.name, status: meetupAttendees.status })
       .from(meetupAttendees)
       .innerJoin(users, eq(meetupAttendees.userId, users.id))
       .where(eq(meetupAttendees.meetupId, meetupId))
@@ -47,17 +47,32 @@ export async function GET(
       if (!photoByUser.has(p.userId)) photoByUser.set(p.userId, p.url);
     }
 
-    const attendees = attendeeRows.map((a) => ({ ...a, photo: photoByUser.get(a.id) ?? null }));
+    const isHost = session ? session.userId === meetup.hostId : false;
+    const myRecord = session ? attendeeRows.find((a) => a.id === session.userId) : null;
+    const userJoinStatus = myRecord ? myRecord.status ?? 'going' : null;
+
+    const going = attendeeRows
+      .filter((a) => a.status === 'going' || !a.status)
+      .map((a) => ({ id: a.id, name: a.name, photo: photoByUser.get(a.id) ?? null }));
+
+    const pendingRequests = isHost
+      ? attendeeRows
+          .filter((a) => a.status === 'pending')
+          .map((a) => ({ id: a.id, name: a.name, photo: photoByUser.get(a.id) ?? null }))
+      : [];
 
     return NextResponse.json({
       success: true,
       meetup: {
         ...meetup,
         host: host ? { ...host, photo: photoByUser.get(host.id) ?? null } : null,
-        attendees,
-        attendeesCount: attendees.length,
-        isHost: session ? session.userId === meetup.hostId : false,
-        isJoined: session ? attendeeRows.some((a) => a.id === session.userId) : false,
+        attendees: going,
+        attendeesCount: going.length,
+        pendingRequests,
+        isHost,
+        isJoined: userJoinStatus === 'going',
+        userJoinStatus,
+        requireApproval: meetup.requireApproval ?? false,
       },
     });
   } catch (error) {

@@ -211,6 +211,7 @@ export const meetups = pgTable('meetups', {
   
   // Details
   maxAttendees: integer('max_attendees').default(10),
+  requireApproval: boolean('require_approval').default(false),
   isPublic: boolean('is_public').default(true),
   imageUrl: text('image_url'),
   

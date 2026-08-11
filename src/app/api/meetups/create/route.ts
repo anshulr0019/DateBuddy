@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
     const currentUserId = session.userId;
 
-    const { title, description, category, venueName, address, city, date, maxAttendees, imageUrl } =
+    const { title, description, category, venueName, address, city, date, maxAttendees, imageUrl, requireApproval } =
       await request.json();
 
     if (typeof title !== 'string' || !title.trim() || title.length > 200) {
@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         date: parsedDate,
         maxAttendees: safeCapacity,
         imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
+        requireApproval: Boolean(requireApproval),
       })
       .returning();
 

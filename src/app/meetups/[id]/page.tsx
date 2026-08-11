@@ -31,6 +31,9 @@ interface MeetupDetail {
   } | null;
   attendees: Attendee[];
   attendeesCount: number;
+  pendingRequests?: Attendee[];
+  userJoinStatus?: 'going' | 'pending' | 'kicked' | null;
+  requireApproval?: boolean;
   isHost: boolean;
   isJoined: boolean;
 }
@@ -214,6 +217,28 @@ export default function MeetupDetailPage() {
     }
   };
 
+  const handlePendingAction = async (targetUserId: number, action: 'approve' | 'decline') => {
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/meetups/${id}/manage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, targetUserId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        flash(action === 'approve' ? 'Applicant accepted 🎉' : 'Request declined');
+        fetchMeetup();
+      } else {
+        setError(data.message || 'Action failed');
+      }
+    } catch {
+      setError('Action failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const isCancelled = meetup?.status === 'cancelled';
   const isFull = meetup ? meetup.attendeesCount >= meetup.maxAttendees : false;
 
@@ -321,6 +346,52 @@ export default function MeetupDetailPage() {
                           >
                             ⛔ Cancel Squad
                           </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Host Admin: Pending Join Requests */}
+                    {meetup.isHost && !isCancelled && (meetup.pendingRequests || []).length > 0 && (
+                      <div className="rounded-2xl bg-amber-50/80 border border-amber-200/80 p-4 shadow-sm space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                            Pending Join Requests ({(meetup.pendingRequests || []).length})
+                          </span>
+                          <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+                            Approval Required
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {(meetup.pendingRequests || []).map((applicant) => (
+                            <div key={applicant.id} className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-xl border border-amber-200/60 shadow-2xs">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <img
+                                  src={applicant.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                                  className="h-8 w-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                                  alt={applicant.name}
+                                />
+                                <span className="text-[13px] font-bold text-[#1E293B] truncate">{applicant.name}</span>
+                              </div>
+                              <div className="flex gap-1.5 flex-shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handlePendingAction(applicant.id, 'approve')}
+                                  disabled={busy}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold cursor-pointer active:scale-95 transition-all shadow-2xs disabled:opacity-50"
+                                >
+                                  Accept ✓
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePendingAction(applicant.id, 'decline')}
+                                  disabled={busy}
+                                  className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                  Decline ✕
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -435,21 +506,35 @@ export default function MeetupDetailPage() {
                   <div className="flex-shrink-0 p-5 bg-white/90 backdrop-blur-md border-t border-[#1A1A2E]/5 z-20">
                     {meetup.isHost ? (
                       <p className="text-center text-[13px] font-semibold text-[#1A1A2E]/50 py-2">
-                        You&apos;re hosting this squad
+                        You&apos;re hosting this squad 👑
                       </p>
                     ) : (
                       <button
                         onClick={handleJoin}
-                        disabled={busy || (isFull && !meetup.isJoined)}
+                        disabled={busy || (isFull && meetup.userJoinStatus !== 'going' && meetup.userJoinStatus !== 'pending') || meetup.userJoinStatus === 'kicked'}
                         className={`w-full h-13 rounded-2xl font-extrabold text-[15px] shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                          meetup.isJoined
+                          meetup.userJoinStatus === 'going'
                             ? 'bg-white border border-[#1A1A2E]/15 text-[#1A1A2E]'
+                            : meetup.userJoinStatus === 'pending'
+                            ? 'bg-amber-50 border border-amber-200 text-amber-700'
+                            : meetup.userJoinStatus === 'kicked'
+                            ? 'bg-red-50 border border-red-200 text-red-600 cursor-not-allowed shadow-none'
                             : isFull
-                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                              : 'bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white shadow-[#FF6B9D]/30 active:scale-[0.99]'
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                            : 'bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white shadow-[#FF6B9D]/30 active:scale-[0.99]'
                         }`}
                       >
-                        {meetup.isJoined ? '✓ Joined Squad (Tap to Leave)' : isFull ? 'Squad Full' : 'Join Squad 🚀'}
+                        {meetup.userJoinStatus === 'going'
+                          ? 'Joined ✓ (Tap to Leave)'
+                          : meetup.userJoinStatus === 'pending'
+                          ? 'Request Sent ⏳ (Tap to Cancel)'
+                          : meetup.userJoinStatus === 'kicked'
+                          ? 'Removed by Host ⚠️'
+                          : isFull
+                          ? 'Session Full 🔒'
+                          : meetup.requireApproval
+                          ? 'Request to Join ✋'
+                          : 'Join Session 🚀'}
                       </button>
                     )}
                   </div>
