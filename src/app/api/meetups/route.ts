@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
+import { db, pool } from '@/db';
 import { meetups, meetupAttendees, users } from '@/db/schema';
 import { and, eq, gt, asc, inArray, count } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
@@ -11,6 +11,16 @@ export async function GET() {
     const session = await getAuthSession();
     if (!session) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Ensure columns exist on production DB
+    try {
+      await pool.query(`
+        ALTER TABLE meetups ADD COLUMN IF NOT EXISTS require_approval BOOLEAN DEFAULT false;
+        ALTER TABLE meetup_attendees ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'going';
+      `);
+    } catch {
+      /* ignore schema alter warnings */
     }
 
     const allMeetups = await db
@@ -31,10 +41,15 @@ export async function GET() {
       db
         .select({ meetupId: meetupAttendees.meetupId, attendees: count() })
         .from(meetupAttendees)
-        .where(inArray(meetupAttendees.meetupId, meetupIds))
+        .where(
+          and(
+            inArray(meetupAttendees.meetupId, meetupIds),
+            eq(meetupAttendees.status, 'going')
+          )
+        )
         .groupBy(meetupAttendees.meetupId),
       db
-        .select({ meetupId: meetupAttendees.meetupId })
+        .select({ meetupId: meetupAttendees.meetupId, status: meetupAttendees.status })
         .from(meetupAttendees)
         .where(
           and(
@@ -46,15 +61,20 @@ export async function GET() {
     ]);
 
     const countByMeetup = new Map(counts.map((c) => [c.meetupId, Number(c.attendees)]));
-    const joinedIds = new Set(myRsvps.map((r) => r.meetupId));
+    const rsvpStatusByMeetup = new Map(myRsvps.map((r) => [r.meetupId, r.status ?? 'going']));
     const hostById = new Map(hosts.map((h) => [h.id, h.name]));
 
-    const enriched = allMeetups.map((m) => ({
-      ...m,
-      hostName: hostById.get(m.hostId) ?? 'Host',
-      attendeesCount: countByMeetup.get(m.id) ?? 0,
-      joined: joinedIds.has(m.id),
-    }));
+    const enriched = allMeetups.map((m) => {
+      const userJoinStatus = rsvpStatusByMeetup.get(m.id) ?? null;
+      return {
+        ...m,
+        hostName: hostById.get(m.hostId) ?? 'Host',
+        attendeesCount: countByMeetup.get(m.id) ?? 0,
+        joined: userJoinStatus === 'going',
+        userJoinStatus,
+        requireApproval: m.requireApproval ?? false,
+      };
+    });
 
     return NextResponse.json({ success: true, meetups: enriched });
   } catch (error) {

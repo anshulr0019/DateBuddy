@@ -30,6 +30,8 @@ type Meetup = {
   hostName: string;
   attendeesCount: number;
   joined: boolean;
+  userJoinStatus?: 'going' | 'pending' | 'kicked' | null;
+  requireApproval?: boolean;
 };
 
 const CATEGORIES = ['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const;
@@ -124,7 +126,7 @@ export default function HomePage() {
   const filteredMeetups = meetups.filter((m) => squadFilter === 'All' || m.category === squadFilter);
 
   const toggleJoin = async (m: Meetup) => {
-    if (m.joined) {
+    if (m.joined || m.userJoinStatus === 'pending') {
       setConfirmLeaveId(m.id);
       return;
     }
@@ -134,7 +136,7 @@ export default function HomePage() {
       const data = await res.json();
       if (!data.success) {
         addNotification({
-          title: res.status === 409 ? 'Session Full 🔒' : 'Could not join',
+          title: res.status === 409 ? 'Session Full 🔒' : 'Could not update RSVP',
           message: data.message ?? 'Please try again.',
           type: 'system',
           actionUrl: '/home',
@@ -144,8 +146,10 @@ export default function HomePage() {
       await loadMeetups();
       setSelectedDetail(null);
       addNotification({
-        title: 'Session Joined! 🎉',
-        message: `You joined '${m.title}' hosted by ${m.hostName}.`,
+        title: data.action === 'requested' ? 'Request Sent ⏳' : 'Session Joined! 🎉',
+        message: data.action === 'requested'
+          ? `Your request to join '${m.title}' was sent to ${m.hostName} for approval.`
+          : `You joined '${m.title}' hosted by ${m.hostName}.`,
         type: 'event',
         actionUrl: '/home',
       });
@@ -171,8 +175,10 @@ export default function HomePage() {
       setSelectedDetail(null);
       if (m) {
         addNotification({
-          title: 'Left Session 👟',
-          message: `You left '${m.title}'. Your spot has been re-opened.`,
+          title: m.userJoinStatus === 'pending' ? 'Request Cancelled 🚫' : 'Left Session 👟',
+          message: m.userJoinStatus === 'pending'
+            ? `Your join request for '${m.title}' was cancelled.`
+            : `You left '${m.title}'. Your spot has been re-opened.`,
           type: 'system',
           actionUrl: '/home',
         });
@@ -419,16 +425,30 @@ export default function HomePage() {
                               e.stopPropagation();
                               toggleJoin(m);
                             }}
-                            disabled={busyId === m.id || (isFull && !m.joined)}
+                            disabled={busyId === m.id || (isFull && m.userJoinStatus !== 'going' && m.userJoinStatus !== 'pending') || m.userJoinStatus === 'kicked'}
                             className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs disabled:opacity-60 ${
-                              m.joined
+                              m.userJoinStatus === 'going'
                                 ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                                : m.userJoinStatus === 'pending'
+                                ? 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+                                : m.userJoinStatus === 'kicked'
+                                ? 'bg-red-50 border border-red-200 text-red-600'
                                 : isFull
                                 ? 'bg-gray-100 border border-gray-200 text-gray-500'
                                 : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
                             }`}
                           >
-                            {m.joined ? 'Joined ✓' : isFull ? 'Full 🔒' : 'Join'}
+                            {m.userJoinStatus === 'going'
+                              ? 'Joined ✓'
+                              : m.userJoinStatus === 'pending'
+                              ? 'Requested ⏳'
+                              : m.userJoinStatus === 'kicked'
+                              ? 'Removed ⚠️'
+                              : isFull
+                              ? 'Full 🔒'
+                              : m.requireApproval
+                              ? 'Request ✋'
+                              : 'Join 🚀'}
                           </button>
                         </div>
                       </GlassCard>
@@ -748,19 +768,29 @@ export default function HomePage() {
               <div className="pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100">
                 <button
                   onClick={() => toggleJoin(selectedDetail)}
-                  disabled={busyId === selectedDetail.id}
+                  disabled={busyId === selectedDetail.id || (selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10) && selectedDetail.userJoinStatus !== 'going' && selectedDetail.userJoinStatus !== 'pending') || selectedDetail.userJoinStatus === 'kicked'}
                   className={`w-full py-3.5 rounded-2xl text-[14.5px] font-extrabold transition-all cursor-pointer shadow-lg disabled:opacity-60 ${
-                    selectedDetail.joined
+                    selectedDetail.userJoinStatus === 'going'
                       ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                      : selectedDetail.userJoinStatus === 'pending'
+                      ? 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+                      : selectedDetail.userJoinStatus === 'kicked'
+                      ? 'bg-red-50 border border-red-200 text-red-600'
                       : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
                       ? 'bg-gray-100 border border-gray-200 text-gray-500'
                       : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
                   }`}
                 >
-                  {selectedDetail.joined
+                  {selectedDetail.userJoinStatus === 'going'
                     ? 'Joined ✓ (Tap to Leave)'
+                    : selectedDetail.userJoinStatus === 'pending'
+                    ? 'Request Sent ⏳ (Tap to Cancel)'
+                    : selectedDetail.userJoinStatus === 'kicked'
+                    ? 'Removed by Host ⚠️'
                     : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
                     ? 'Session Full 🔒'
+                    : selectedDetail.requireApproval
+                    ? 'Request to Join ✋'
                     : 'Join Session 🚀'}
                 </button>
               </div>
@@ -774,12 +804,18 @@ export default function HomePage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-popover-enter">
           <div className="w-full max-w-[340px] bg-white rounded-[28px] p-5 shadow-2xl space-y-4 text-center">
             <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl font-bold">
-              👟
+              {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending' ? '⏳' : '👟'}
             </div>
             <div>
-              <h3 className="text-[17px] font-extrabold text-[#1E293B]">Leave Session?</h3>
+              <h3 className="text-[17px] font-extrabold text-[#1E293B]">
+                {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending'
+                  ? 'Cancel Join Request?'
+                  : 'Leave Session?'}
+              </h3>
               <p className="text-[12.5px] text-gray-500 mt-1">
-                Your spot will be re-opened for someone else to join.
+                {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending'
+                  ? 'Your request to join this squad will be withdrawn.'
+                  : 'Your spot will be re-opened for someone else to join.'}
               </p>
             </div>
             <div className="flex gap-2 pt-2">
