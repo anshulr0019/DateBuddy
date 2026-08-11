@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { db, pool } from '@/db';
 import { meetups, meetupAttendees } from '@/db/schema';
 import { getAuthSession } from '@/lib/auth';
 
@@ -37,22 +37,49 @@ export async function POST(request: NextRequest) {
     const capacity = Number(maxAttendees);
     const safeCapacity = Number.isInteger(capacity) && capacity >= 2 && capacity <= 100 ? capacity : 10;
 
-    const [newMeetup] = await db
-      .insert(meetups)
-      .values({
-        hostId: currentUserId,
-        title: title.trim(),
-        description: typeof description === 'string' ? description.slice(0, 2000) : '',
-        category: category.trim().slice(0, 50),
-        venueName: typeof venueName === 'string' ? venueName.slice(0, 200) : null,
-        address: typeof address === 'string' ? address : null,
-        city: typeof city === 'string' ? city.slice(0, 100) : null,
-        date: parsedDate,
-        maxAttendees: safeCapacity,
-        imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
-        requireApproval: Boolean(requireApproval),
-      })
-      .returning();
+    // Auto-migrate require_approval column if missing on production database
+    try {
+      await pool.query('ALTER TABLE meetups ADD COLUMN IF NOT EXISTS require_approval BOOLEAN DEFAULT false;');
+    } catch {
+      /* ignore column alter failure */
+    }
+
+    let newMeetup;
+    try {
+      [newMeetup] = await db
+        .insert(meetups)
+        .values({
+          hostId: currentUserId,
+          title: title.trim(),
+          description: typeof description === 'string' ? description.slice(0, 2000) : '',
+          category: category.trim().slice(0, 50),
+          venueName: typeof venueName === 'string' ? venueName.slice(0, 200) : null,
+          address: typeof address === 'string' ? address : null,
+          city: typeof city === 'string' ? city.slice(0, 100) : null,
+          date: parsedDate,
+          maxAttendees: safeCapacity,
+          imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
+          requireApproval: Boolean(requireApproval),
+        })
+        .returning();
+    } catch (insertErr) {
+      console.warn('Insert with requireApproval failed, retrying standard insert:', insertErr);
+      [newMeetup] = await db
+        .insert(meetups)
+        .values({
+          hostId: currentUserId,
+          title: title.trim(),
+          description: typeof description === 'string' ? description.slice(0, 2000) : '',
+          category: category.trim().slice(0, 50),
+          venueName: typeof venueName === 'string' ? venueName.slice(0, 200) : null,
+          address: typeof address === 'string' ? address : null,
+          city: typeof city === 'string' ? city.slice(0, 100) : null,
+          date: parsedDate,
+          maxAttendees: safeCapacity,
+          imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
+        })
+        .returning();
+    }
 
     await db
       .insert(meetupAttendees)
@@ -62,6 +89,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, meetup: newMeetup });
   } catch (error) {
     console.error('Error creating meetup:', error);
-    return NextResponse.json({ success: false, message: 'Failed to create meetup' }, { status: 500 });
+    return NextResponse.json({ success: false, message: (error as Error)?.message || 'Failed to create meetup' }, { status: 500 });
   }
 }
