@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db, pool } from '@/db';
+import { db } from '@/db';
 import { meetups, meetupAttendees, users } from '@/db/schema';
 import { and, eq, gt, asc, inArray, count } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
@@ -11,16 +11,6 @@ export async function GET() {
     const session = await getAuthSession();
     if (!session) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Ensure columns exist on production DB
-    try {
-      await pool.query(`
-        ALTER TABLE meetups ADD COLUMN IF NOT EXISTS require_approval BOOLEAN DEFAULT false;
-        ALTER TABLE meetup_attendees ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'going';
-      `);
-    } catch {
-      /* ignore schema alter warnings */
     }
 
     const allMeetups = await db

@@ -643,8 +643,54 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: pulse-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* ─────────────────────────────────────────────────
+   Anonymous Chat — radar matchmaking animations
+   Transform/opacity only (compositor-friendly).
+───────────────────────────────────────────────── */
+@keyframes rc-ring-pulse {
+  0%   { transform: scale(0.6); opacity: 0; }
+  40%  { opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0; }
+}
+.rc-ring {
+  animation: rc-ring-pulse 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes rc-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.rc-sweep {
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, rgba(244, 63, 94, 0) 0deg, rgba(244, 63, 94, 0.28) 60deg, rgba(123, 104, 238, 0) 130deg);
+  animation: rc-sweep-rotate 3.4s linear infinite;
+  will-change: transform;
+}
+
+@keyframes rc-blip-blink {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.05); }
+}
+.rc-blip {
+  animation: rc-blip-blink 1.8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes rc-pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50%      { transform: scale(1.25); opacity: 0.15; }
+}
+.rc-pulse {
+  animation: rc-pulse-soft 2.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 /* Reduced motion — disable all motion except instant show */
 @media (prefers-reduced-motion: reduce) {
+  .rc-ring, .rc-sweep, .rc-blip, .rc-pulse {
+    animation: none !important;
+  }
   .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow,
   .nav-indicator-spring, .animate-card-swipe-right, .animate-card-swipe-left,
   .animate-card-swipe-up, .animate-card-depth-enter, .animate-popover-enter,

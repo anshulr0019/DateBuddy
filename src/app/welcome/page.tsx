@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import GoogleSignInModal from '@/app/components/GoogleSignInModal';
 import BrandLogo from '@/app/components/BrandLogo';
+import { sendFirebaseOTP } from '@/lib/firebase';
 
 
 /* ------------------------------------------------------------------ */
@@ -107,6 +108,38 @@ export default function WelcomePage() {
         window.localStorage.setItem("phoneNumber", phoneNumber);
       }
 
+      // Try Firebase Phone Auth first (10,000 free SMS / month!)
+      try {
+        await sendFirebaseOTP(phoneNumber);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("authMethod", "firebase");
+        }
+        setIsLoading(false);
+        router.push("/verify-otp");
+        return;
+      } catch (firebaseErr: any) {
+        console.error("Firebase Phone Auth error:", firebaseErr);
+        const code = firebaseErr?.code;
+        if (code === 'auth/operation-not-allowed') {
+          setOtpError("Phone Sign-in is not enabled in Firebase Console yet. Please enable Phone Auth in Firebase Console → Authentication.");
+          setIsLoading(false);
+          return;
+        } else if (code === 'auth/invalid-phone-number') {
+          setOtpError("Invalid phone number. Please enter a valid 10-digit number.");
+          setIsLoading(false);
+          return;
+        } else if (code === 'auth/too-many-requests') {
+          setOtpError("Too many SMS attempts for this number. Please try again later.");
+          setIsLoading(false);
+          return;
+        } else if (code === 'auth/invalid-app-credential' || code === 'auth/captcha-check-failed') {
+          setOtpError("Domain not authorized in Firebase Console. Please add your domain to Firebase → Authentication → Settings.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Fallback to server API send-otp
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -120,6 +153,9 @@ export default function WelcomePage() {
         return;
       }
 
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("authMethod", "server");
+      }
       setIsLoading(false);
       router.push("/verify-otp");
     } catch {
@@ -130,6 +166,8 @@ export default function WelcomePage() {
 
   return (
     <div className="fixed inset-0 h-full w-full overflow-hidden bg-gradient-to-b from-[#FFF0F6] to-[#ECE0FF] text-[#1A1A2E]">
+      <div id="recaptcha-container" />
+
       <GoogleSignInModal isOpen={showGoogleModal} onClose={() => setShowGoogleModal(false)} />
       {/* Inject animated background CSS — self-contained, no external file needed */}
       <style dangerouslySetInnerHTML={{ __html: AURORA_CSS }} />

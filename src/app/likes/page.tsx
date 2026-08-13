@@ -23,6 +23,8 @@ export default function LikesPage() {
   const [isGold, setIsGold] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [likeBackId, setLikeBackId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -42,6 +44,38 @@ export default function LikesPage() {
     }
     load();
   }, [router]);
+
+  const likeBack = async (liker: Liker) => {
+    setLikeBackId(liker.id);
+    setActionError(null);
+    hapticLight();
+    try {
+      const res = await fetch('/api/swipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ swipedUserId: liker.id, action: 'like' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.limitReached) {
+          setActionError(data.message || 'Daily like limit reached.');
+          return;
+        }
+        setActionError(data.message || 'Could not like back. Please try again.');
+        return;
+      }
+      // Remove this liker from the list — they've been responded to.
+      setLikers((prev) => prev.filter((l) => l.id !== liker.id));
+      setCount((prev) => Math.max(0, prev - 1));
+      if (data.isMatch) {
+        router.push('/matches');
+      }
+    } catch {
+      setActionError('Network error. Please try again.');
+    } finally {
+      setLikeBackId(null);
+    }
+  };
 
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
@@ -227,13 +261,22 @@ export default function LikesPage() {
                       </div>
 
                       <button
-                        onClick={() => { hapticLight(); router.push('/discover'); }}
-                        className="mt-3.5 w-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#FB7185] py-1.5 text-[12px] font-bold text-white hover:opacity-90 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                        onClick={() => likeBack(liker)}
+                        disabled={likeBackId !== null}
+                        className="mt-3.5 w-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#FB7185] py-1.5 text-[12px] font-bold text-white hover:opacity-90 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-default shadow-2xs"
                       >
-                        💛 Like Back
+                        {likeBackId === liker.id ? 'Matching…' : '💛 Like Back'}
                       </button>
                     </GlassCard>
                   ))}
+                  {actionError && (
+                    <div
+                      role="alert"
+                      className="col-span-2 rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-rose-600 text-[13px] font-semibold text-center"
+                    >
+                      {actionError}
+                    </div>
+                  )}
                 </div>
               )}
 

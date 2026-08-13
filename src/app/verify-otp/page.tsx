@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import BrandLogo, { BRAND_NAME } from '../components/BrandLogo';
 import { hapticLight, hapticMedium, hapticSuccess, hapticWarning } from '../lib/haptics';
+import { verifyFirebaseOTP, sendFirebaseOTP } from '@/lib/firebase';
 
 const RESEND_SECONDS = 30;
 
@@ -101,10 +102,34 @@ export default function VerifyOtpPage() {
         setLoading(false);
         return;
       }
+
+      let firebaseVerified = false;
+      const authMethod = typeof window !== 'undefined' ? localStorage.getItem('authMethod') : null;
+
+      if (authMethod === 'firebase' || (typeof window !== 'undefined' && (window as any).confirmationResult)) {
+        try {
+          const res = await verifyFirebaseOTP(code);
+          if (res?.user) {
+            firebaseVerified = true;
+          }
+        } catch (fbErr: any) {
+          console.warn("Firebase OTP verification error:", fbErr?.message || fbErr);
+          if (fbErr?.code === 'auth/invalid-verification-code' || fbErr?.code === 'auth/code-expired') {
+            hapticWarning();
+            setError('Invalid or expired verification code. Please check the code sent to your phone.');
+            triggerShake();
+            setOtp(['', '', '', '', '', '']);
+            setTimeout(() => inputRefs.current[0]?.focus(), 50);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, otp: code }),
+        body: JSON.stringify({ phoneNumber, otp: code, firebaseVerified }),
       });
       const data = await res.json();
       if (data.success) {
@@ -142,6 +167,19 @@ export default function VerifyOtpPage() {
     try {
       const phoneNumber = typeof window !== 'undefined' ? localStorage.getItem('phoneNumber') : null;
       if (!phoneNumber) { router.replace('/welcome'); return; }
+
+      // Try Firebase resend first
+      try {
+        await sendFirebaseOTP(phoneNumber);
+        if (typeof window !== 'undefined') localStorage.setItem('authMethod', 'firebase');
+        setCooldown(RESEND_SECONDS);
+        setOtp(['', '', '', '', '', '']);
+        setTimeout(() => inputRefs.current[0]?.focus(), 50);
+        return;
+      } catch (fbErr) {
+        console.warn('Firebase resend failed, falling back to server:', fbErr);
+      }
+
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

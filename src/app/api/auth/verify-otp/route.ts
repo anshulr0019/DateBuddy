@@ -24,7 +24,7 @@ function hashesMatch(a: string, b: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { phoneNumber, otp } = await request.json();
+    const { phoneNumber, otp, firebaseVerified } = await request.json();
     const normalized = normalizePhone(phoneNumber);
 
     if (!normalized || typeof otp !== 'string' || otp.length < 4) {
@@ -34,38 +34,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [record] = await db
-      .select()
-      .from(otpCodes)
-      .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)))
-      .orderBy(desc(otpCodes.createdAt))
-      .limit(1);
+    let isVerified = Boolean(firebaseVerified);
 
-    if (!record) return INVALID_CODE;
+    if (!isVerified) {
+      // Check local DB OTP codes
+      const [record] = await db
+        .select()
+        .from(otpCodes)
+        .where(and(eq(otpCodes.phoneNumber, normalized), isNull(otpCodes.consumedAt)))
+        .orderBy(desc(otpCodes.createdAt))
+        .limit(1);
 
-    if (record.attempts >= MAX_ATTEMPTS) {
-      await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
-      return NextResponse.json(
-        { success: false, message: 'Too many incorrect attempts. Request a new code.' },
-        { status: 429 }
-      );
+      if (record) {
+        if (record.attempts >= MAX_ATTEMPTS) {
+          await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+          return NextResponse.json(
+            { success: false, message: 'Too many incorrect attempts. Request a new code.' },
+            { status: 429 }
+          );
+        }
+
+        if (record.expiresAt.getTime() < Date.now()) {
+          await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+          return INVALID_CODE;
+        }
+
+        if (hashesMatch(record.codeHash, hashOtp(normalized, otp))) {
+          isVerified = true;
+          // Burn OTP code so it cannot be replayed
+          await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+        } else {
+          await db
+            .update(otpCodes)
+            .set({ attempts: sql`${otpCodes.attempts} + 1` })
+            .where(eq(otpCodes.id, record.id));
+        }
+      }
     }
 
-    if (record.expiresAt.getTime() < Date.now()) {
-      await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
+    if (!isVerified) {
       return INVALID_CODE;
     }
 
-    if (!hashesMatch(record.codeHash, hashOtp(normalized, otp))) {
-      await db
-        .update(otpCodes)
-        .set({ attempts: sql`${otpCodes.attempts} + 1` })
-        .where(eq(otpCodes.id, record.id));
-      return INVALID_CODE;
-    }
-
-    // Correct code: burn it so it cannot be replayed.
-    await db.update(otpCodes).set({ consumedAt: new Date() }).where(eq(otpCodes.id, record.id));
 
     const [existing] = await db.select().from(users).where(eq(users.phoneNumber, normalized)).limit(1);
 

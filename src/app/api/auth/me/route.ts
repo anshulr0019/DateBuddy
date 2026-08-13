@@ -31,7 +31,18 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       user: {
-        ...user,
+        id: user.id,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+        city: user.city,
+        bio: user.bio,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        lookingFor: user.lookingFor,
+        isVerified: user.isVerified,
+        onboardingCompletedAt: user.onboardingCompletedAt,
+        createdAt: user.createdAt,
         photos: userPhotos,
       },
     });

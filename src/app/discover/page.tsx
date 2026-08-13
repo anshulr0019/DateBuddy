@@ -8,6 +8,7 @@ import { AuroraBackground, SafeImage, PrimaryButton } from '../components/shared
 import { useNotifications } from '../context/NotificationContext';
 import {
   type FeedProfile,
+  type FeedFilters,
   getCachedFeed,
   setCachedFeed,
   markCacheFresh,
@@ -121,12 +122,22 @@ export default function DiscoverPage() {
 
   const currentProfile = profiles[0];
 
+  const { filters } = useFilters();
+
+  const feedFilters: FeedFilters = {
+    ageMin: filters.ageMin,
+    ageMax: filters.ageMax,
+    verifiedOnly: filters.verifiedOnly,
+  };
+  const feedFiltersRef = useRef(feedFilters);
+  feedFiltersRef.current = feedFilters;
+
   const loadFeed = useCallback(async (cursor: number | null) => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     try {
       // First-page loads are deduped with the nav prefetch inside loadFeedPage.
-      const result = await loadFeedPage(cursor);
+      const result = await loadFeedPage(cursor, feedFiltersRef.current);
 
       if (result.kind === 'unauthorized') {
         router.replace('/welcome');
@@ -136,6 +147,8 @@ export default function DiscoverPage() {
 
       const incoming: Profile[] = result.profiles;
       setProfiles((prev) => {
+        // On first-page refresh (cursor === null) drop the stale deck
+        if (cursor === null) return incoming;
         const existingIds = new Set(prev.map((p) => p.id));
         return [...prev, ...incoming.filter((p) => !existingIds.has(p.id))];
       });
@@ -177,6 +190,19 @@ export default function DiscoverPage() {
       loadFeed(nextCursor);
     }
   }, [status, hasMore, profiles.length, nextCursor, loadFeed]);
+
+  // Reload deck from scratch when discovery filters change.
+  const filtersKey = JSON.stringify(feedFilters);
+  useEffect(() => {
+    // Reset deck and fetch with new filters
+    setProfiles([]);
+    setNextCursor(null);
+    setHasMore(true);
+    setStatus('loading');
+    loadFeed(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersKey]);
+
 
   // Current user's own photo for the match celebration.
   useEffect(() => {

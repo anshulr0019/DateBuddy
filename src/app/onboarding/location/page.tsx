@@ -87,17 +87,30 @@ export default function LocationPage() {
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         {/* Progress Bar Header */}
         <div className="flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3.5">
             <button
               onClick={() => router.back()}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 border border-[#1A1A2E]/10 text-[#1A1A2E] shadow-sm backdrop-blur-md hover:bg-white transition-all cursor-pointer"
+              aria-label="Go back"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 cursor-pointer"
             >
-              ←
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
-            <div className="flex-1 h-2 bg-black/5 rounded-full overflow-hidden p-0.5 border border-white/60">
-              <div className="h-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] rounded-full transition-all duration-500" style={{ width: '28%' }} />
+            <div
+              className="flex-1 h-[6px] rounded-full bg-[#1A1A2E]/[0.06] overflow-hidden"
+              role="progressbar"
+              aria-valuenow={2}
+              aria-valuemin={1}
+              aria-valuemax={7}
+              aria-label="Onboarding progress: step 2 of 7"
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{ width: '28.6%' }}
+              />
             </div>
-            <span className="text-[12px] font-bold text-[#1A1A2E]/50">2/7</span>
+            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">2 of 7</span>
           </div>
         </div>
 

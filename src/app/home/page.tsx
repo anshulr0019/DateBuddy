@@ -34,6 +34,13 @@ type Meetup = {
   requireApproval?: boolean;
 };
 
+type RandomChatCard = {
+  onlineCount: number;
+  chattingNow: number;
+  inQueue: boolean;
+  hasActiveSession: boolean;
+};
+
 const CATEGORIES = ['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const;
 const CATEGORY_EMOJI: Record<string, string> = {
   Gym: '🏋️ ',
@@ -61,6 +68,7 @@ export default function HomePage() {
   const [picks, setPicks] = useState<Pick[]>([]);
   const [meetups, setMeetups] = useState<Meetup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [randomChat, setRandomChat] = useState<RandomChatCard | null>(null);
 
   const [activePersona, setActivePersona] = useState({
     title: DEFAULT_PERSONA.title,
@@ -93,9 +101,17 @@ export default function HomePage() {
   useEffect(() => {
     async function load() {
       try {
-        const [feedRes] = await Promise.all([fetch('/api/feed'), loadMeetups()]);
+        const [feedRes, rcRes] = await Promise.all([
+          fetch('/api/feed'),
+          fetch('/api/random-chat/overview'),
+          loadMeetups(),
+        ]);
         const feed = await feedRes.json();
         if (feed.success) setPicks(feed.profiles.slice(0, 4));
+        if (rcRes.ok) {
+          const rc = await rcRes.json();
+          if (rc.success) setRandomChat(rc);
+        }
       } catch {
         /* sections render their own empty states */
       } finally {
@@ -342,6 +358,54 @@ export default function HomePage() {
                     </GlassCard>
                   ))}
                 </div>
+              </div>
+
+              {/* ANONYMOUS CHAT */}
+              <div>
+                <GlassCard
+                  onClick={() => router.push('/random-chat')}
+                  className="animate-bubble-enter overflow-hidden border border-gray-200/70 hover:border-[#7B68EE]/40 hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative"
+                >
+                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#7B68EE]/15 blur-2xl" />
+                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-[#FF6B9D]/15 blur-2xl" />
+                  <div className="relative flex items-center gap-3.5 p-4">
+                    <div className="relative h-14 w-14 flex-shrink-0">
+                      <div className="rc-pulse absolute inset-0 rounded-full bg-[#7B68EE]/30" />
+                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-2xl shadow-md">
+                        🎲
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-[15px] font-bold text-[#1E293B]">Anonymous Chat</h3>
+                        <span className="rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/30 text-[#7B68EE] text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5">
+                          New
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-[#1E293B]/55 font-medium mt-0.5">
+                        Talk to a stranger about anything — stay anonymous until you&apos;re ready.
+                      </p>
+                      <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-[#1E293B]/60">
+                        {randomChat ? (
+                          <>
+                            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" /> {Math.max(0, randomChat.onlineCount)} online</span>
+                            <span className="text-[#1E293B]/25">·</span>
+                            <span>{Math.max(0, randomChat.chattingNow)} chatting now</span>
+                            <span className="text-[#1E293B]/25">·</span>
+                            <span>Anonymous</span>
+                          </>
+                        ) : (
+                          <span>Check who&apos;s online</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-[#7B68EE]/10 text-[#7B68EE]">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </span>
+                  </div>
+                </GlassCard>
               </div>
 
               {/* ACTIVITY SQUADS */}

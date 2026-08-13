@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   const { pathname, searchParams } = request.nextUrl;
 
-  const protectedRoutes = ['/home', '/discover', '/matches', '/messages', '/profile', '/meetups', '/settings', '/chat'];
+  const protectedRoutes = ['/home', '/discover', '/matches', '/messages', '/profile', '/meetups', '/settings', '/chat', '/likes', '/random-chat'];
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
   const isOnboarding = pathname.startsWith('/onboarding');
@@ -54,5 +54,7 @@ export const config = {
     '/meetups/:path*',
     '/settings/:path*',
     '/chat/:path*',
+    '/likes/:path*',
+    '/random-chat/:path*',
   ],
 };

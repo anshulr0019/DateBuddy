@@ -102,7 +102,7 @@ export default function FloatingNav() {
   }, []);
 
   // Hide floating nav on standalone flow pages or when any modal/lightbox is open
-  const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy'];
+  const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy', '/random-chat'];
   const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/' || hasModal;
 
   if (isHidden) return null;

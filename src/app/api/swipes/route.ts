@@ -209,6 +209,15 @@ export async function POST(request: NextRequest) {
             body:     'Someone liked you back!',
             metadata: { matchId: newMatch.id },
           });
+
+          // Also notify the current user (they see it as a match too)
+          await db.insert(notifications).values({
+            userId:   currentUserId,
+            type:     'match',
+            title:    "It's a Match! 🔥",
+            body:     'Someone liked you back! Say hi.',
+            metadata: { matchId: newMatch.id },
+          });
         }
 
         const [targetUser] = await db

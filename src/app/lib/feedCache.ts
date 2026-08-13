@@ -42,10 +42,22 @@ export const FEED_MAX_AGE_MS = 5 * 60 * 1000;
 
 let cache: CachedFeed | null = null;
 let inflightFirstPage: Promise<FeedResult> | null = null;
+let cachedFilters: string | null = null; // JSON key to detect filter changes
 
-async function fetchPage(cursor: number | null): Promise<FeedResult> {
+export type FeedFilters = {
+  ageMin?: number;
+  ageMax?: number;
+  verifiedOnly?: boolean;
+};
+
+async function fetchPage(cursor: number | null, filters?: FeedFilters): Promise<FeedResult> {
   try {
-    const url = cursor === null ? '/api/feed' : `/api/feed?cursor=${cursor}`;
+    const params = new URLSearchParams();
+    if (cursor !== null) params.set('cursor', String(cursor));
+    if (filters?.ageMin != null) params.set('ageMin', String(filters.ageMin));
+    if (filters?.ageMax != null) params.set('ageMax', String(filters.ageMax));
+    if (filters?.verifiedOnly) params.set('verifiedOnly', 'true');
+    const url = `/api/feed${params.size > 0 ? `?${params}` : ''}`;
     const res = await fetch(url);
     if (res.status === 401) return { kind: 'unauthorized' };
     if (!res.ok) return { kind: 'error' };
@@ -57,11 +69,19 @@ async function fetchPage(cursor: number | null): Promise<FeedResult> {
   }
 }
 
-/* First-page loads are shared: concurrent callers get one request. */
-export function loadFeedPage(cursor: number | null): Promise<FeedResult> {
-  if (cursor !== null) return fetchPage(cursor);
+/* First-page loads are shared: concurrent callers get one request.
+   If filters changed, invalidate the cache and start a fresh request. */
+export function loadFeedPage(cursor: number | null, filters?: FeedFilters): Promise<FeedResult> {
+  const filterKey = JSON.stringify(filters ?? {});
+  // If filters changed, reset cache and inflight so we get a fresh deck.
+  if (cursor === null && filterKey !== cachedFilters) {
+    cache = null;
+    inflightFirstPage = null;
+    cachedFilters = filterKey;
+  }
+  if (cursor !== null) return fetchPage(cursor, filters);
   if (!inflightFirstPage) {
-    inflightFirstPage = fetchPage(null).finally(() => {
+    inflightFirstPage = fetchPage(null, filters).finally(() => {
       inflightFirstPage = null;
     });
   }

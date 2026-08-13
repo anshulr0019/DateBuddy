@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { SafeImage } from '../components/shared';
 
@@ -16,48 +16,27 @@ export interface NotificationItem {
   actionUrl?: string;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: '1',
-    type: 'match',
-    title: 'New Connection! 🔥',
-    message: 'Ananya Gupta liked you back! Say hi before her chai gets cold ☕',
-    timestamp: '5m ago',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=faces',
-    read: false,
-    actionUrl: '/messages',
-  },
-  {
-    id: '2',
-    type: 'like',
-    title: 'New Vibe Like ❤️',
-    message: 'Rohan liked your prompt: "Farmers market, long drive, good book."',
-    timestamp: '32m ago',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces',
-    read: false,
-    actionUrl: '/matches',
-  },
-  {
-    id: '3',
-    type: 'event',
-    title: 'Event Reminder ☕',
-    message: 'Design & Coffee Meetup is happening tomorrow at 10am in Café Zoe.',
-    timestamp: '2h ago',
-    emoji: '☕',
-    read: false,
-    actionUrl: '/home',
-  },
-  {
-    id: '4',
-    type: 'community',
-    title: 'Community Activity 🎨',
-    message: 'New post in Design Minds: "What is your favorite mobile design pattern in 2026?"',
-    timestamp: '5h ago',
-    emoji: '🎨',
-    read: true,
-    actionUrl: '/home',
-  },
-];
+// Maps DB notification type → icon emoji
+function typeEmoji(type: string): string {
+  switch (type) {
+    case 'match': return '🔥';
+    case 'like': return '❤️';
+    case 'event': return '📅';
+    case 'message': return '💬';
+    default: return '🔔';
+  }
+}
+
+// Friendly relative timestamp
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
 
 interface NotificationContextType {
   isOpen: boolean;
@@ -73,19 +52,66 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+const POLL_INTERVAL_MS = 30_000;
+
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread' | 'matches'>('all');
   const router = useRouter();
+  const localOnlyIds = useRef<Set<string>>(new Set());
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch('/api/notifications?limit=40');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !Array.isArray(data.notifications)) return;
+
+      const dbItems: NotificationItem[] = data.notifications.map((n: {
+        id: number; type: string; title: string; body: string | null;
+        isRead: boolean; createdAt: string; metadata?: { meetupId?: number; matchId?: number };
+      }) => ({
+        id: String(n.id),
+        type: (n.type as NotificationItem['type']) || 'system',
+        title: n.title,
+        message: n.body ?? '',
+        timestamp: relativeTime(n.createdAt),
+        emoji: typeEmoji(n.type),
+        read: n.isRead ?? false,
+        actionUrl: n.metadata?.meetupId
+          ? `/meetups/${n.metadata.meetupId}`
+          : n.type === 'match' && n.metadata?.matchId
+          ? `/chat/${n.metadata.matchId}`
+          : '/messages',
+      }));
+
+      setNotifications(prev => {
+        const localItems = prev.filter(n => localOnlyIds.current.has(n.id));
+        const dbIds = new Set(dbItems.map(n => n.id));
+        const freshLocal = localItems.filter(n => !dbIds.has(n.id));
+        return [...freshLocal, ...dbItems];
+      });
+    } catch {
+      /* non-critical */
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    const timer = setInterval(fetchNotifications, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const addNotification = (item: { title: string; message: string; type?: NotificationItem['type']; avatar?: string; emoji?: string; actionUrl?: string }) => {
+  const addNotification = useCallback((item: { title: string; message: string; type?: NotificationItem['type']; avatar?: string; emoji?: string; actionUrl?: string }) => {
+    const id = `local-${Date.now()}`;
+    localOnlyIds.current.add(id);
     const newNotif: NotificationItem = {
-      id: Date.now().toString(),
+      id,
       type: item.type || 'system',
       title: item.title,
       message: item.message,
@@ -96,7 +122,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       actionUrl: item.actionUrl || '/messages',
     };
     setNotifications((prev) => [newNotif, ...prev]);
-  };
+  }, []);
 
   const openNotifications = () => {
     setIsMounted(true);
@@ -116,19 +142,36 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }, 350);
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+    fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    }).catch(() => {});
+  }, []);
 
-  const markAsRead = (id: string) => {
+  const markAsRead = useCallback((id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
-  };
+    if (!localOnlyIds.current.has(id)) {
+      const numId = Number(id);
+      if (Number.isInteger(numId) && numId > 0) {
+        fetch('/api/notifications', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: [numId] }),
+        }).catch(() => {});
+      }
+    }
+  }, []);
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setNotifications([]);
-  };
+    localOnlyIds.current.clear();
+    fetch('/api/notifications', { method: 'DELETE' }).catch(() => {});
+  }, []);
 
   const handleNotificationClick = (item: NotificationItem) => {
     markAsRead(item.id);
@@ -160,10 +203,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     >
       {children}
 
-      {/* ── NOTIFICATION DRAWER OVERLAY ── */}
       {isMounted && (
         <div className="fixed inset-0 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 overflow-hidden pointer-events-auto">
-          {/* Backdrop with 100% Smooth Hardware-Accelerated Blur & Opacity Transition */}
           <div
             onClick={closeNotifications}
             className={`absolute inset-0 bg-black/40 transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)] ${
@@ -172,19 +213,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             style={{ willChange: 'backdrop-filter, opacity' }}
           />
 
-          {/* Sliding Sheet Container */}
           <div
             className={`relative z-10 w-full max-w-[440px] bg-[#FAFAF7] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
               animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-full sm:translate-y-8 sm:scale-95 opacity-0'
             }`}
             style={{ willChange: 'transform, opacity' }}
           >
-            {/* Handle Bar */}
             <div className="pt-3 pb-1 flex justify-center">
               <div className="h-1 w-10 rounded-full bg-[#1A1A2E]/15" />
             </div>
 
-            {/* Header */}
             <div className="px-6 py-3 flex items-center justify-between border-b border-[#1A1A2E]/[0.06]">
               <div className="flex items-center gap-2.5">
                 <h2 className="text-[20px] font-extrabold tracking-tight text-[#1A1A2E]">Notifications</h2>
@@ -198,14 +236,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-[12px] font-semibold text-[#FF6B9D] active:opacity-60 transition-opacity"
+                    className="text-[12px] font-semibold text-[#FF6B9D] active:opacity-60 transition-opacity cursor-pointer"
                   >
                     Mark all read
                   </button>
                 )}
                 <button
                   onClick={closeNotifications}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A2E]/5 text-[#1A1A2E]/60 active:scale-95 transition-transform"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A2E]/5 text-[#1A1A2E]/60 active:scale-95 transition-transform cursor-pointer"
                   aria-label="Close notifications"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -216,13 +254,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               </div>
             </div>
 
-            {/* Filter Tabs */}
             <div className="px-6 py-2.5 flex gap-2 border-b border-[#1A1A2E]/[0.04] bg-white/50 backdrop-blur-sm">
               {(['all', 'unread', 'matches'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setFilter(t)}
-                  className={`rounded-full px-3.5 py-1 text-[12px] font-medium capitalize transition-all ${
+                  className={`rounded-full px-3.5 py-1 text-[12px] font-medium capitalize transition-all cursor-pointer ${
                     filter === t
                       ? 'bg-[#1A1A2E] text-white shadow-sm'
                       : 'bg-[#1A1A2E]/5 text-[#1A1A2E]/50'
@@ -233,7 +270,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               ))}
             </div>
 
-            {/* Notification List */}
             <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-2.5">
               {filteredNotifications.length === 0 ? (
                 <div className="py-12 text-center">
@@ -246,13 +282,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   <div
                     key={n.id}
                     onClick={() => handleNotificationClick(n)}
-                    className={`group relative flex items-start gap-3.5 rounded-[22px] p-3.5 transition-all active:scale-[0.98] ${
+                    className={`group relative flex items-start gap-3.5 rounded-[22px] p-3.5 transition-all active:scale-[0.98] cursor-pointer ${
                       n.read
                         ? 'bg-white/60 border border-[#1A1A2E]/[0.04]'
                         : 'bg-white border border-[#FF6B9D]/20 shadow-[0_4px_16px_-4px_rgba(255,107,157,0.12)]'
                     }`}
                   >
-                    {/* Icon or Avatar */}
                     <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-2xl">
                       {n.avatar ? (
                         <SafeImage src={n.avatar} name={n.title} alt="" className="h-full w-full object-cover" />
@@ -263,7 +298,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                       )}
                     </div>
 
-                    {/* Text content */}
                     <div className="flex-1 min-w-0 pr-2">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
                         <span className="text-[14px] font-bold text-[#1A1A2E] leading-tight truncate">
@@ -278,7 +312,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                       </p>
                     </div>
 
-                    {/* Unread pink dot */}
                     {!n.read && (
                       <div className="absolute top-4 right-3.5 h-2 w-2 rounded-full bg-[#FF6B9D] shadow-[0_0_8px_rgba(255,107,157,0.6)]" />
                     )}
@@ -287,12 +320,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               )}
             </div>
 
-            {/* Clear All Footer */}
             {notifications.length > 0 && (
               <div className="p-3 text-center border-t border-[#1A1A2E]/[0.06] bg-white/40">
                 <button
                   onClick={clearAll}
-                  className="text-[12px] font-medium text-[#1A1A2E]/40 hover:text-[#1A1A2E]/70 active:opacity-60 transition-all"
+                  className="text-[12px] font-medium text-[#1A1A2E]/40 hover:text-[#1A1A2E]/70 active:opacity-60 transition-all cursor-pointer"
                 >
                   Clear all notifications
                 </button>

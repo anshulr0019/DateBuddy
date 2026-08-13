@@ -5,20 +5,24 @@ import { useRouter } from 'next/navigation';
 import { hapticLight, hapticMedium, hapticWarning } from '../../lib/haptics';
 
 /* ─────────────────────────────────────────────────
-   Basic Info — "First Impression" onboarding screen
+   Basic Info — "First Impression" onboarding wizard
 
-   Everything here is presentation: the saved shape of
-   `onboarding_basic` ({ name, dateOfBirth, gender,
-   lookingFor }) and the route flow are unchanged.
+   One question per screen (Hinge-style). The saved
+   shape of `onboarding_basic` ({ name, dateOfBirth,
+   gender, lookingFor }) and the route flow are
+   unchanged — the wizard is purely presentation.
 ───────────────────────────────────────────────── */
 
 const NEXT_ROUTE = '/onboarding/location';
 
+const STEP_COUNT = 4;
+const TOTAL_STEPS = 7;
+
 const GENDER_OPTIONS = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'non-binary', label: 'Non-binary' },
-  { value: 'other', label: 'Other' },
+  { value: 'male', label: 'Male', glyph: 'male' },
+  { value: 'female', label: 'Female', glyph: 'female' },
+  { value: 'non-binary', label: 'Non-binary', glyph: 'non-binary' },
+  { value: 'other', label: 'Other', glyph: 'other' },
 ] as const;
 
 const LOOKING_OPTIONS = [
@@ -50,6 +54,21 @@ const STYLES = `
     opacity: 0;
     animation: bi-rise 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+  @keyframes bi-step-in {
+    0% { opacity: 0; transform: translateX(26px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes bi-step-in-back {
+    0% { opacity: 0; transform: translateX(-26px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes bi-step-out {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-26px); }
+  }
+  .bi-step-enter { animation: bi-step-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .bi-step-enter-back { animation: bi-step-in-back 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .bi-step-leave { animation: bi-step-out 0.2s cubic-bezier(0.5, 0, 0.75, 0) both; }
   @keyframes bi-headline {
     0% { opacity: 0; transform: translateY(18px); filter: blur(8px); }
     100% { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -108,15 +127,23 @@ const STYLES = `
   .bi-leave { animation: bi-leave 0.4s cubic-bezier(0.4, 0, 1, 1) forwards; }
   @keyframes bi-spin { to { transform: rotate(360deg); } }
   .bi-spin { animation: bi-spin 0.7s linear infinite; }
+  @keyframes bi-halo {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.0); }
+    40% { box-shadow: 0 0 0 10px rgba(255, 107, 157, 0.0); }
+    60% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.0); }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .bi-rise, .bi-headline, .bi-pop, .bi-error-in, .bi-shake, .bi-leave {
+    .bi-rise, .bi-headline, .bi-pop, .bi-error-in, .bi-shake, .bi-leave,
+    .bi-step-enter, .bi-step-enter-back, .bi-step-leave {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
       filter: none !important;
     }
     .bi-sheen, .bi-particle { display: none !important; }
+    .bi-halo { animation: none !important; }
     .bi-spin { animation: bi-spin 0.7s linear infinite; } /* spinners stay meaningful */
   }
 `;
@@ -152,6 +179,58 @@ function toISO(date: Date): string {
 
 type Phase = 'idle' | 'saving' | 'done';
 
+/* Gender glyphs — hand-drawn Mars/Venus/non-binary/sparkle */
+function GenderGlyph({ glyph, className = '' }: { glyph: string; className?: string }) {
+  const common = {
+    width: 24,
+    height: 24,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.7,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    className,
+    'aria-hidden': true,
+  };
+  switch (glyph) {
+    case 'male':
+      return (
+        <svg {...common}>
+          <circle cx="10" cy="11" r="6" />
+          <path d="M14.5 6.5 21 0" />
+          <path d="M15 0h6v6" />
+        </svg>
+      );
+    case 'female':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="10" r="5.5" />
+          <path d="M12 15.5v6" />
+          <path d="M8.5 21.5h7" />
+          <path d="M12 4V1.5" />
+          <path d="M9.5 2.5h5" />
+        </svg>
+      );
+    case 'non-binary':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="10" r="5.5" />
+          <path d="M12 4V1.5" />
+          <path d="M9.5 2.5h5" />
+          <path d="M14.5 14.5l6 6" />
+          <path d="M20.5 15.5V20.5H15.5" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <path d="M12 1c.7 4.5 2 6.5 5 8-3 1.5-4.3 3.5-5 8-.7-4.5-2-6.5-5-8 3-1.5 4.3-3.5 5-8z" />
+        </svg>
+      );
+  }
+}
+
 export default function BasicInfoPage() {
   const router = useRouter();
 
@@ -161,6 +240,10 @@ export default function BasicInfoPage() {
     gender: '',
     lookingFor: '',
   });
+  const [step, setStep] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+  const [backDirection, setBackDirection] = useState(false);
+  const [ready, setReady] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [shake, setShake] = useState(false);
@@ -171,6 +254,7 @@ export default function BasicInfoPage() {
   const dobWrapRef = useRef<HTMLDivElement>(null);
   const genderWrapRef = useRef<HTMLDivElement>(null);
   const lookingWrapRef = useRef<HTMLDivElement>(null);
+  const stepWrapRef = useRef<HTMLDivElement>(null);
   const reducedMotionRef = useRef(false);
   const timersRef = useRef<number[]>([]);
 
@@ -179,17 +263,30 @@ export default function BasicInfoPage() {
     try {
       const savedBasic = localStorage.getItem('onboarding_basic');
       const googleUser = localStorage.getItem('google_user');
-      if (savedBasic) {
-        setFormData((prev) => ({ ...prev, ...JSON.parse(savedBasic) }));
+      const parsed = savedBasic ? JSON.parse(savedBasic) : null;
+      if (parsed) {
+        setFormData((prev) => ({
+          ...prev,
+          name: parsed.name ?? prev.name,
+          dateOfBirth: parsed.dateOfBirth ?? prev.dateOfBirth,
+          gender: parsed.gender ?? prev.gender,
+          lookingFor: parsed.lookingFor ?? prev.lookingFor,
+        }));
       } else if (googleUser) {
-        const parsed = JSON.parse(googleUser);
-        if (parsed.name) {
-          setFormData((prev) => ({ ...prev, name: parsed.name }));
-        }
+        const g = JSON.parse(googleUser);
+        if (g.name) setFormData((prev) => ({ ...prev, name: g.name }));
+      }
+      // Jump to the first unanswered question so a refresh resumes mid-wizard.
+      if (parsed) {
+        if (!parsed.name) setStep(0);
+        else if (!parsed.dateOfBirth) setStep(1);
+        else if (!parsed.gender) setStep(2);
+        else setStep(3);
       }
     } catch {
       /* ignore corrupt storage */
     }
+    setReady(true);
   }, []);
 
   useEffect(() => {
@@ -221,7 +318,6 @@ export default function BasicInfoPage() {
     };
   }, [formData, age]);
 
-  const isValid = !errors.name && !errors.dateOfBirth && !errors.gender && !errors.lookingFor;
   const nameValid = formData.name.trim().length >= 2;
   const ageValid = age !== null && age >= 18 && age <= 120;
   // A wrong date deserves feedback immediately, not only after submit.
@@ -248,31 +344,55 @@ export default function BasicInfoPage() {
     timersRef.current.push(t);
   };
 
-  const handleContinue = () => {
-    if (phase !== 'idle') return;
+  const persist = () => {
+    try {
+      localStorage.setItem('onboarding_basic', JSON.stringify(formData));
+    } catch { /* storage quota — non-blocking here */ }
+  };
 
-    if (!isValid) {
-      setShowErrors(true);
-      hapticWarning();
-      setShake(true);
-      const t = window.setTimeout(() => setShake(false), 400);
-      timersRef.current.push(t);
-      const firstInvalid = [
-        [errors.name, nameWrapRef],
-        [errors.dateOfBirth, dobWrapRef],
-        [errors.gender, genderWrapRef],
-        [errors.lookingFor, lookingWrapRef],
-      ].find(([err]) => err) as [string, React.RefObject<HTMLDivElement | null>] | undefined;
-      firstInvalid?.[1].current?.scrollIntoView({
-        behavior: reducedMotionRef.current ? 'auto' : 'smooth',
-        block: 'center',
-      });
+  const goToStep = (next: number, back = false) => {
+    if (leaving || phase !== 'idle') return;
+    setBackDirection(back);
+    setLeaving(true);
+    hapticLight();
+    const t = window.setTimeout(() => {
+      setLeaving(false);
+      setShowErrors(false);
+      setStep(next);
+      stepWrapRef.current?.scrollTo({ top: 0 });
+    }, 200);
+    timersRef.current.push(t);
+  };
+
+  const rejectCurrentStep = () => {
+    setShowErrors(true);
+    hapticWarning();
+    setShake(true);
+    const t = window.setTimeout(() => setShake(false), 400);
+    timersRef.current.push(t);
+    const wrap = step === 0 ? nameWrapRef : step === 1 ? dobWrapRef : step === 2 ? genderWrapRef : lookingWrapRef;
+    wrap.current?.scrollIntoView({
+      behavior: reducedMotionRef.current ? 'auto' : 'smooth',
+      block: 'center',
+    });
+  };
+
+  const handleContinue = () => {
+    if (phase !== 'idle' || leaving) return;
+
+    if (!isStepValid) {
+      rejectCurrentStep();
+      return;
+    }
+
+    persist();
+
+    if (step < STEP_COUNT - 1) {
+      goToStep(step + 1, false);
       return;
     }
 
     hapticMedium();
-    localStorage.setItem('onboarding_basic', JSON.stringify(formData));
-
     if (reducedMotionRef.current) {
       router.push(NEXT_ROUTE);
       return;
@@ -280,6 +400,15 @@ export default function BasicInfoPage() {
     setPhase('saving');
     timersRef.current.push(window.setTimeout(() => setPhase('done'), 240));
     timersRef.current.push(window.setTimeout(() => router.push(NEXT_ROUTE), 700));
+  };
+
+  const handleBack = () => {
+    if (leaving || phase !== 'idle') return;
+    if (step === 0) {
+      router.back();
+      return;
+    }
+    goToStep(step - 1, true);
   };
 
   const selectGender = (value: string) => {
@@ -298,6 +427,15 @@ export default function BasicInfoPage() {
     'shadow-[0_10px_30px_-18px_rgba(26,26,46,0.18)] transition-all duration-300 ' +
     'focus-within:-translate-y-[2px] focus-within:border-[#FF6B9D]/45 focus-within:bg-white/90 ' +
     'focus-within:shadow-[0_0_0_4px_rgba(255,107,157,0.10),0_18px_40px_-16px_rgba(255,107,157,0.35)]';
+
+  const isStepValid =
+    step === 0 ? nameValid : step === 1 ? ageValid : step === 2 ? Boolean(formData.gender) : Boolean(formData.lookingFor);
+
+  const stepAnim = leaving
+    ? 'bi-step-leave'
+    : backDirection
+      ? 'bi-step-enter-back'
+      : 'bi-step-enter';
 
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
@@ -326,11 +464,11 @@ export default function BasicInfoPage() {
           ))}
         </div>
 
-        {/* HEADER — back + luminous progress */}
+        {/* HEADER — back + luminous progress + sub-step segments */}
         <div className="bi-rise flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">
           <div className="flex items-center gap-3.5">
             <button
-              onClick={() => router.back()}
+              onClick={handleBack}
               aria-label="Go back"
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 cursor-pointer"
             >
@@ -343,249 +481,371 @@ export default function BasicInfoPage() {
               role="progressbar"
               aria-valuenow={1}
               aria-valuemin={1}
-              aria-valuemax={7}
-              aria-label="Onboarding progress: step 1 of 7"
+              aria-valuemax={TOTAL_STEPS}
+              aria-label={`Onboarding progress: step 1 of ${TOTAL_STEPS}`}
             >
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ width: progressIn ? '14.3%' : '3%' }}
+                style={{ width: progressIn ? `${(1 / TOTAL_STEPS) * 100}%` : '2%' }}
               />
             </div>
-            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">1 of 7</span>
+            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">1 of {TOTAL_STEPS}</span>
+          </div>
+
+          {/* Sub-step segments — shows where you are inside this question group */}
+          <div className="mt-3 flex gap-1.5 px-1">
+            {Array.from({ length: STEP_COUNT }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-[4px] flex-1 rounded-full transition-all duration-500 ${
+                  i < step
+                    ? 'bg-gradient-to-r from-[#FF6B9D]/70 to-[#7B68EE]/70'
+                    : i === step
+                      ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.35)]'
+                      : 'bg-[#1A1A2E]/[0.07]'
+                }`}
+              />
+            ))}
           </div>
         </div>
 
         {/* CONTENT */}
         <div
-          className={`flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-6 pb-8 ${
+          ref={stepWrapRef}
+          className={`flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-6 pb-4 ${
             phase === 'done' ? 'bi-leave' : ''
-          }`}
+          } ${stepAnim}`}
         >
-          <div className="bi-headline mt-5 mb-8" style={{ animationDelay: '80ms' }}>
-            <h1 className="text-[32px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
-              Let&apos;s get to
-              <br />
-              know{' '}
-              <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
-                you
-              </span>
-            </h1>
-            <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55 max-w-[300px]">
-              A few basics to start your profile. You can change any of this later.
-            </p>
-          </div>
+          {!ready ? null : (
+            <div className="min-h-full flex flex-col justify-center py-6">
+              {step === 0 && (
+                <div key="s-name" className="flex flex-col">
+                  <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
+                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                      What should
+                      <br />
+                      we call{' '}
+                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                        you
+                      </span>
+                      ?
+                    </h1>
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                      Your first name — it’s how people will know you.
+                    </p>
+                  </div>
 
-          <div className="space-y-5">
-            {/* NAME — floating label, glow focus, earned check */}
-            <div className="bi-rise" style={{ animationDelay: '160ms' }}>
-              <div ref={nameWrapRef} className={fieldShell}>
-                <input
-                  id="bi-name"
-                  type="text"
-                  value={formData.name}
-                  maxLength={30}
-                  autoComplete="given-name"
-                  autoCapitalize="words"
-                  enterKeyHint="next"
-                  placeholder=" "
-                  aria-invalid={Boolean(showErrors && errors.name)}
-                  aria-describedby={showErrors && errors.name ? 'bi-name-error' : undefined}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  onFocus={(e) => scrollFieldIntoView(e.currentTarget.closest('div'))}
-                  onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-                  className="peer w-full h-[64px] rounded-2xl bg-transparent px-5 pt-6 pb-2 pr-12 text-[16px] font-semibold text-[#1A1A2E] placeholder-transparent caret-[#FF6B9D] focus:outline-none"
-                />
-                <label
-                  htmlFor="bi-name"
-                  className="pointer-events-none absolute left-5 top-[11px] text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#1A1A2E]/45 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[#1A1A2E]/35 peer-focus:top-[11px] peer-focus:translate-y-0 peer-focus:text-[10.5px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-[0.14em] peer-focus:text-[#FF6B9D]"
-                >
-                  First name
-                </label>
-                {nameValid && (
-                  <span className="bi-pop pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.4)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                )}
-              </div>
-              {showErrors && errors.name && <FieldError id="bi-name-error">{errors.name}</FieldError>}
-            </div>
-
-            {/* BIRTHDAY — native wheel picker under a custom display */}
-            <div className="bi-rise" style={{ animationDelay: '220ms' }}>
-              <div ref={dobWrapRef} className={fieldShell}>
-                <div className="h-[64px] px-5 pt-[26px] pb-2 pr-20 text-[16px] font-semibold text-[#1A1A2E] whitespace-nowrap overflow-hidden text-ellipsis">
-                  {formData.dateOfBirth ? formatBirthday(formData.dateOfBirth) : ''}
+                  <div className="bi-rise flex justify-center" style={{ animationDelay: '120ms' }}>
+                    <div ref={nameWrapRef} className={`w-full max-w-[300px] ${shake ? 'bi-shake' : ''}`}>
+                      <div className={fieldShell}>
+                        <input
+                          id="bi-name"
+                          type="text"
+                          value={formData.name}
+                          maxLength={30}
+                          autoComplete="given-name"
+                          autoCapitalize="words"
+                          enterKeyHint="next"
+                          placeholder="Your name"
+                          aria-invalid={Boolean(showErrors && errors.name)}
+                          aria-describedby={showErrors && errors.name ? 'bi-name-error' : undefined}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onFocus={(e) => scrollFieldIntoView(e.currentTarget.closest('div'))}
+                          onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
+                          autoFocus
+                          className="peer w-full h-[64px] rounded-2xl bg-transparent px-5 pt-6 pb-2 pr-12 text-center text-[16px] font-semibold text-[#1A1A2E] placeholder-transparent caret-[#FF6B9D] focus:outline-none"
+                        />
+                        <label
+                          htmlFor="bi-name"
+                          className="pointer-events-none absolute left-0 right-0 top-[11px] text-center text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#1A1A2E]/45 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[#1A1A2E]/35 peer-focus:top-[11px] peer-focus:translate-y-0 peer-focus:text-[10.5px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-[0.14em] peer-focus:text-[#FF6B9D]"
+                        >
+                          First name
+                        </label>
+                        {nameValid && (
+                          <span className="bi-pop pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.4)]">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                      {showErrors && errors.name && <FieldError id="bi-name-error">{errors.name}</FieldError>}
+                    </div>
+                  </div>
                 </div>
-                <span
-                  className={`pointer-events-none absolute left-5 transition-all duration-200 ${
-                    dobFloated
-                      ? `top-[11px] text-[10.5px] font-bold uppercase tracking-[0.14em] ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/45'}`
-                      : 'top-1/2 -translate-y-1/2 text-[15px] font-medium text-[#1A1A2E]/35'
-                  }`}
-                >
-                  Birthday
-                </span>
-                {ageValid ? (
-                  <span
-                    key={age}
-                    className="bi-pop pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#FF6B9D]/12 to-[#7B68EE]/12 px-2.5 py-1 text-[12px] font-bold text-[#1A1A2E]/70 ring-1 ring-[#FF6B9D]/25"
-                  >
-                    {age} yrs
-                  </span>
-                ) : (
-                  <svg
-                    aria-hidden
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/30'}`}
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="4" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                )}
-                <input
-                  type="date"
-                  aria-label="Birthday"
-                  value={formData.dateOfBirth}
-                  min={dateLimits.min}
-                  max={dateLimits.max}
-                  aria-invalid={Boolean(dobErrorVisible)}
-                  aria-describedby={dobErrorVisible ? 'bi-dob-error' : undefined}
-                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                  onFocus={() => setDobFocused(true)}
-                  onBlur={() => setDobFocused(false)}
-                  onClick={(e) => {
-                    try {
-                      e.currentTarget.showPicker?.();
-                    } catch {
-                      /* older browsers focus the field instead */
-                    }
-                  }}
-                  className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                />
-              </div>
-              {dobErrorVisible ? (
-                <FieldError id="bi-dob-error">{errors.dateOfBirth}</FieldError>
-              ) : (
-                !ageValid && (
-                  <p className="mt-2 ml-1 text-[12px] font-medium text-[#1A1A2E]/40">
-                    You must be at least 18 years old
-                  </p>
-                )
               )}
-            </div>
 
-            {/* GENDER — typography-forward selectable cards */}
-            <div className="bi-rise" style={{ animationDelay: '280ms' }}>
-              <p className="mb-2.5 ml-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#1A1A2E]/40">
-                I am
-              </p>
-              <div
-                ref={genderWrapRef}
-                className="grid grid-cols-2 gap-2.5"
-                role="group"
-                aria-label="I am"
-                aria-describedby={showErrors && errors.gender ? 'bi-gender-error' : undefined}
-              >
-                {GENDER_OPTIONS.map((option) => {
-                  const selected = formData.gender === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => selectGender(option.value)}
-                      className={`relative h-[52px] rounded-2xl border text-[14px] backdrop-blur-md transition-all duration-200 active:scale-[0.96] cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
-                        selected
-                          ? 'border-transparent bg-gradient-to-br from-[#FF6B9D]/12 to-[#7B68EE]/12 font-bold text-[#1A1A2E] ring-1 ring-[#FF6B9D]/45 shadow-[0_8px_24px_-12px_rgba(255,107,157,0.45)]'
-                          : 'border-white/80 bg-white/70 font-semibold text-[#1A1A2E]/55 shadow-[0_4px_16px_-12px_rgba(26,26,46,0.2)] hover:text-[#1A1A2E]/80'
-                      }`}
-                    >
-                      {option.label}
-                      {selected && (
-                        <span className="bi-pop absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.5)] ring-2 ring-[#FAFAF7]">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
+              {step === 1 && (
+                <div key="s-dob" className="flex flex-col">
+                  <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
+                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                      When&apos;s your
+                      <br />
+                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                        birthday
+                      </span>
+                      ?
+                    </h1>
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                      So we can show your age alongside your profile.
+                    </p>
+                  </div>
+
+                  <div className="bi-rise flex justify-center" style={{ animationDelay: '120ms' }}>
+                    <div ref={dobWrapRef} className={`w-full max-w-[300px] ${shake ? 'bi-shake' : ''}`}>
+                      <div className={fieldShell}>
+                        <div className="h-[64px] px-5 pt-[26px] pb-2 pr-20 text-center text-[16px] font-semibold text-[#1A1A2E] whitespace-nowrap overflow-hidden text-ellipsis">
+                          {formData.dateOfBirth ? formatBirthday(formData.dateOfBirth) : ''}
+                        </div>
+                        <span
+                          className={`pointer-events-none absolute left-0 right-0 text-center transition-all duration-200 ${
+                            dobFloated
+                              ? `top-[11px] text-[10.5px] font-bold uppercase tracking-[0.14em] ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/45'}`
+                              : 'top-1/2 -translate-y-1/2 text-[15px] font-medium text-[#1A1A2E]/35'
+                          }`}
+                        >
+                          Birthday
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {showErrors && errors.gender && (
-                <FieldError id="bi-gender-error">{errors.gender}</FieldError>
-              )}
-            </div>
+                        {ageValid ? (
+                          <span
+                            key={age}
+                            className="bi-pop bi-halo pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#FF6B9D]/12 to-[#7B68EE]/12 px-3 py-1 text-[12.5px] font-bold text-[#1A1A2E]/75 ring-1 ring-[#FF6B9D]/30"
+                          >
+                            <svg aria-hidden width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 1c.7 4.5 2 6.5 5 8-3 1.5-4.3 3.5-5 8-.7-4.5-2-6.5-5-8 3-1.5 4.3-3.5 5-8z" />
+                            </svg>
+                            {age}
+                          </span>
+                        ) : (
+                          <svg
+                            aria-hidden
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/30'}`}
+                          >
+                            <rect x="3" y="4" width="18" height="18" rx="4" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                          </svg>
+                        )}
+                        <input
+                          type="date"
+                          aria-label="Birthday"
+                          value={formData.dateOfBirth}
+                          min={dateLimits.min}
+                          max={dateLimits.max}
+                          aria-invalid={Boolean(dobErrorVisible)}
+                          aria-describedby={dobErrorVisible ? 'bi-dob-error' : undefined}
+                          onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                          onFocus={() => setDobFocused(true)}
+                          onBlur={() => setDobFocused(false)}
+                          onClick={(e) => {
+                            try {
+                              e.currentTarget.showPicker?.();
+                            } catch {
+                              /* older browsers focus the field instead */
+                            }
+                          }}
+                          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                        />
+                      </div>
 
-            {/* SHOW ME — segmented control with sliding pill */}
-            <div className="bi-rise" style={{ animationDelay: '340ms' }}>
-              <p className="mb-2.5 ml-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#1A1A2E]/40">
-                Show me
-              </p>
-              <div
-                ref={lookingWrapRef}
-                className="relative grid grid-cols-3 rounded-2xl bg-[#1A1A2E]/[0.05] p-1"
-                role="group"
-                aria-label="Show me"
-                aria-describedby={showErrors && errors.lookingFor ? 'bi-looking-error' : undefined}
-              >
-                {lookingIndex >= 0 && (
-                  <span
-                    aria-hidden
-                    className="bi-fade absolute left-1 top-1 bottom-1 w-[calc((100%-8px)/3)] rounded-xl bg-white shadow-[0_4px_14px_-4px_rgba(26,26,46,0.18)] ring-1 ring-[#FF6B9D]/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                    style={{ transform: `translateX(${lookingIndex * 100}%)` }}
-                  />
-                )}
-                {LOOKING_OPTIONS.map((option) => {
-                  const selected = formData.lookingFor === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => selectLookingFor(option.value)}
-                      className={`relative z-10 h-11 rounded-xl text-[13.5px] transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
-                        selected ? 'font-bold text-[#1A1A2E]' : 'font-semibold text-[#1A1A2E]/45 active:text-[#1A1A2E]/70'
-                      }`}
+                      {/* Privacy trust chip */}
+                      <div
+                        className={`mt-3 flex items-center justify-center gap-1.5 text-[12px] font-medium leading-snug px-2 ${
+                          ageValid ? 'text-[#16A34A] bi-fade' : 'text-[#1A1A2E]/45'
+                        }`}
+                      >
+                        <svg
+                          aria-hidden
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="flex-shrink-0"
+                        >
+                          <rect x="3" y="11" width="18" height="11" rx="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        {ageValid ? (
+                          <span>
+                            Nice — you’ll appear as <b>{age}</b>
+                          </span>
+                        ) : (
+                          <span>Your birthday is never shown — we only display your age.</span>
+                        )}
+                      </div>
+
+                      {dobErrorVisible && <FieldError id="bi-dob-error">{errors.dateOfBirth}</FieldError>}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div key="s-gender" className="flex flex-col">
+                  <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
+                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                      Which describes
+                      <br />
+                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                        you
+                      </span>
+                      ?
+                    </h1>
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                      This shows next to your name — you can change it anytime.
+                    </p>
+                  </div>
+
+                  <div className="bi-rise" style={{ animationDelay: '120ms' }}>
+                    <div
+                      ref={genderWrapRef}
+                      className={`grid grid-cols-2 gap-2.5 max-w-[320px] mx-auto ${shake ? 'bi-shake' : ''}`}
+                      role="group"
+                      aria-label="Which describes you best"
+                      aria-describedby={showErrors && errors.gender ? 'bi-gender-error' : undefined}
                     >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-              {showErrors && errors.lookingFor && (
-                <FieldError id="bi-looking-error">{errors.lookingFor}</FieldError>
+                      {GENDER_OPTIONS.map((option) => {
+                        const selected = formData.gender === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => selectGender(option.value)}
+                            className={`relative flex h-[88px] flex-col items-center justify-center gap-1.5 rounded-2xl border text-[13.5px] backdrop-blur-md transition-all duration-200 active:scale-[0.96] cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
+                              selected
+                                ? 'border-transparent bg-gradient-to-br from-[#FF6B9D]/12 to-[#7B68EE]/12 font-bold text-[#1A1A2E] ring-1 ring-[#FF6B9D]/45 shadow-[0_8px_24px_-12px_rgba(255,107,157,0.45)]'
+                                : 'border-white/80 bg-white/70 font-semibold text-[#1A1A2E]/55 shadow-[0_4px_16px_-12px_rgba(26,26,46,0.2)] hover:text-[#1A1A2E]/80'
+                            }`}
+                          >
+                            <GenderGlyph
+                              glyph={option.glyph}
+                              className={`transition-colors duration-200 ${selected ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/40'}`}
+                            />
+                            {option.label}
+                            {selected && (
+                              <span className="bi-pop absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.5)] ring-2 ring-[#FAFAF7]">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {showErrors && errors.gender && (
+                      <div className="max-w-[320px] mx-auto text-center">
+                        <FieldError id="bi-gender-error">{errors.gender}</FieldError>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div key="s-looking" className="flex flex-col">
+                  <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
+                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                      Who would you
+                      <br />
+                      like to{' '}
+                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                        meet
+                      </span>
+                      ?
+                    </h1>
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                      We’ll use this to shape your discovery feed.
+                    </p>
+                  </div>
+
+                  <div className="bi-rise" style={{ animationDelay: '120ms' }}>
+                    <div className="max-w-[320px] mx-auto">
+                      <div
+                        ref={lookingWrapRef}
+                        className={`relative grid grid-cols-3 rounded-2xl bg-[#1A1A2E]/[0.05] p-1 ${shake ? 'bi-shake' : ''}`}
+                        role="group"
+                        aria-label="Who would you like to meet"
+                        aria-describedby={showErrors && errors.lookingFor ? 'bi-looking-error' : undefined}
+                      >
+                        {lookingIndex >= 0 && (
+                          <span
+                            aria-hidden
+                            className="bi-fade absolute left-1 top-1 bottom-1 w-[calc((100%-8px)/3)] rounded-xl bg-white shadow-[0_4px_14px_-4px_rgba(26,26,46,0.18)] ring-1 ring-[#FF6B9D]/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                            style={{ transform: `translateX(${lookingIndex * 100}%)` }}
+                          />
+                        )}
+                        {LOOKING_OPTIONS.map((option) => {
+                          const selected = formData.lookingFor === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              aria-pressed={selected}
+                              onClick={() => selectLookingFor(option.value)}
+                              className={`relative z-10 h-12 rounded-xl text-[13.5px] transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
+                                selected ? 'font-bold text-[#1A1A2E]' : 'font-semibold text-[#1A1A2E]/45 active:text-[#1A1A2E]/70'
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Recommended hint */}
+                      {!formData.lookingFor && (
+                        <p className="mt-3.5 flex items-start gap-1.5 text-center justify-center text-[12.5px] font-medium text-[#1A1A2E]/45 leading-snug">
+                          <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-[2px] flex-shrink-0">
+                            <path d="M9 18h6" />
+                            <path d="M10 22h4" />
+                            <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z" />
+                          </svg>
+                          <span><b className="text-[#7B68EE]">Everyone</b> is the most popular choice — matches you with more people.</span>
+                        </p>
+                      )}
+                      {showErrors && errors.lookingFor && (
+                        <div className="text-center">
+                          <FieldError id="bi-looking-error">{errors.lookingFor}</FieldError>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* FOOTER — Continue CTA */}
         <div className="bi-rise flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/92 to-transparent" style={{ animationDelay: '420ms' }}>
           <button
             onClick={handleContinue}
-            aria-disabled={!isValid}
+            aria-disabled={!isStepValid}
             aria-busy={phase === 'saving'}
             className={`group relative h-[56px] w-full overflow-hidden rounded-[20px] text-[15.5px] font-bold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/50 focus-visible:ring-offset-2 ${
               shake ? 'bi-shake' : ''
             } ${
-              isValid || phase !== 'idle'
+              isStepValid || phase !== 'idle'
                 ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_16px_40px_-12px_rgba(255,107,157,0.55)] active:scale-[0.97]'
                 : 'border border-[#1A1A2E]/8 bg-[#1A1A2E]/[0.05] text-[#1A1A2E]/35 active:scale-[0.99]'
             }`}
           >
-            {isValid && phase === 'idle' && (
+            {isStepValid && phase === 'idle' && (
               <span
                 aria-hidden
                 className="bi-sheen pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent"
@@ -605,9 +865,27 @@ export default function BasicInfoPage() {
                   </span>
                   All set
                 </>
-              ) : (
+              ) : step < STEP_COUNT - 1 ? (
                 <>
                   Continue
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-transform duration-200 group-active:translate-x-0.5"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  That&apos;s me
                   <svg
                     width="18"
                     height="18"
@@ -627,7 +905,9 @@ export default function BasicInfoPage() {
             </span>
           </button>
           <p className="mt-3 text-center text-[12px] font-medium text-[#1A1A2E]/35">
-            This appears on your profile — you can edit it anytime
+            {step === 1
+              ? 'We never share your birthday — only your age'
+              : 'This appears on your profile — you can edit it anytime'}
           </p>
         </div>
       </div>
@@ -638,7 +918,7 @@ export default function BasicInfoPage() {
 /* Soft inline validation — calm copy, no alert banners. */
 function FieldError({ id, children }: { id: string; children: React.ReactNode }) {
   return (
-    <p id={id} role="status" className="bi-error-in mt-2 ml-1 flex items-start gap-1.5 text-[12.5px] font-medium leading-snug text-rose-500/90">
+    <p id={id} role="status" className="bi-error-in mt-2 ml-1 flex items-start justify-center gap-1.5 text-[12.5px] font-medium leading-snug text-rose-500/90">
       <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-[1.5px] flex-shrink-0">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="8" x2="12" y2="12" />

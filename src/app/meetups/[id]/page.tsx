@@ -201,7 +201,11 @@ export default function MeetupDetailPage() {
   const kickUser = async (userId: number) => {
     setKickingId(userId);
     try {
-      const response = await fetch(`/api/meetups/${id}/attendees/${userId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/meetups/${id}/manage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'kick', targetUserId: userId }),
+      });
       const data = await response.json();
       if (data.success) {
         flash('Participant removed — slot freed');

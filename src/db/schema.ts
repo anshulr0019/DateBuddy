@@ -30,7 +30,9 @@ export const users = pgTable('users', {
   lastActiveAt: timestamp('last_active_at').defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-});
+}, (table) => ({
+  lastActiveIdx: index('users_last_active_idx').on(table.lastActiveAt),
+}));
 
 // Photos table
 export const photos = pgTable('photos', {
@@ -287,4 +289,73 @@ export const otpCodes = pgTable('otp_codes', {
   createdAt: timestamp('created_at').defaultNow(),
 }, (table) => ({
   phoneIdx: index('otp_codes_phone_idx').on(table.phoneNumber),
+}));
+
+// ─────────────────────────────────────────────────
+// Anonymous Random Chat
+// ─────────────────────────────────────────────────
+// The app has no Redis, so the matchmaking queue lives in Postgres. Rows are
+// short-lived: each entry carries a TTL and expired rows are swept inside the
+// matchmaking transaction. A unique index on userId doubles as the guard that
+// stops a user from sitting in the queue twice.
+export const randomChatQueue = pgTable('random_chat_queue', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+  vibe: varchar('vibe', { length: 20 }).notNull().default('random'),
+  ageMin: integer('age_min').notNull().default(18),
+  ageMax: integer('age_max').notNull().default(30),
+  genderPref: varchar('gender_pref', { length: 10 }).notNull().default('everyone'),
+  interests: jsonb('interests').notNull().default([]),
+  joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+}, (table) => ({
+  expiresIdx: index('random_chat_queue_expires_idx').on(table.expiresAt),
+}));
+
+// A matched pair's anonymous conversation. Aliases are assigned server-side at
+// match time and are per-session — never tied to a real account.
+export const randomChatSessions = pgTable('random_chat_sessions', {
+  id: serial('id').primaryKey(),
+  userAId: integer('user_a_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userBId: integer('user_b_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  aliasA: varchar('alias_a', { length: 40 }).notNull(),
+  aliasB: varchar('alias_b', { length: 40 }).notNull(),
+  vibe: varchar('vibe', { length: 20 }),
+  status: varchar('status', { length: 12 }).notNull().default('active'), // active | connected | ended
+  connectionRequestedByA: boolean('connection_requested_by_a').notNull().default(false),
+  connectionRequestedByB: boolean('connection_requested_by_b').notNull().default(false),
+  endedByUserId: integer('ended_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  endedAt: timestamp('ended_at'),
+  // Set only when a mutual connection promotes the pair into a real match.
+  matchId: integer('match_id').references(() => matches.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  userAStatusIdx: index('random_chat_sessions_a_status_idx').on(table.userAId, table.status),
+  userBStatusIdx: index('random_chat_sessions_b_status_idx').on(table.userBId, table.status),
+}));
+
+// Transient messages inside one anonymous session. Once the pair connects, the
+// real `matches`/`messages` tables take over as the persistent layer.
+export const randomChatMessages = pgTable('random_chat_messages', {
+  id: serial('id').primaryKey(),
+  sessionId: integer('session_id').notNull().references(() => randomChatSessions.id, { onDelete: 'cascade' }),
+  senderId: integer('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  sessionIdx: index('random_chat_messages_session_idx').on(table.sessionId, table.id),
+}));
+
+// Reports scoped to an anonymous session, so moderators can review the exact
+// conversation that triggered them.
+export const randomChatReports = pgTable('random_chat_reports', {
+  id: serial('id').primaryKey(),
+  reporterId: integer('reporter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  reportedUserId: integer('reported_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  sessionId: integer('session_id').notNull().references(() => randomChatSessions.id, { onDelete: 'cascade' }),
+  reason: varchar('reason', { length: 40 }).notNull(),
+  details: text('details'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  reportedIdx: index('random_chat_reports_reported_idx').on(table.reportedUserId),
 }));

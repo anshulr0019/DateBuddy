@@ -109,6 +109,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>(EMPTY_PROFILE);
   const [connections, setConnections] = useState<number | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [myMeetups, setMyMeetups] = useState<{ id: number; title: string; category: string; date: string; venueName: string | null; userJoinStatus: string | null }[]>([]);
+  const [meetupsLoading, setMeetupsLoading] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState({ name: '', bio: '', city: '', interests: [] as string[] });
@@ -258,6 +260,22 @@ export default function ProfilePage() {
     loadProfile();
     return () => controller.abort();
   }, [reloadKey, router]);
+
+  // Load user's joined meetups when Events tab is active
+  useEffect(() => {
+    if (activeSection !== 'events') return;
+    setMeetupsLoading(true);
+    fetch('/api/meetups')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.success && Array.isArray(data.meetups)) {
+          // Show meetups where the user has joined or has pending status
+          setMyMeetups(data.meetups.filter((m: { userJoinStatus: string | null }) => m.userJoinStatus !== null));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setMeetupsLoading(false));
+  }, [activeSection, reloadKey]);
 
   const strength = useMemo(() => calcStrength(profile), [profile]);
 
@@ -548,13 +566,49 @@ export default function ProfilePage() {
                   {/* Events */}
                   {activeSection === 'events' && (
                     <div id="profile-panel-events" role="tabpanel" aria-labelledby="profile-tab-events" className="animate-popover-enter">
-                      <EmptyState
-                        emoji="🗓️"
-                        title="No upcoming events"
-                        subtitle="Meet people in real life at meetups near you"
-                        cta="Explore meetups"
-                        onCta={() => router.push('/discover/meetups')}
-                      />
+                      {meetupsLoading ? (
+                        <div className="space-y-3">
+                          {[1, 2].map(i => (
+                            <div key={i} className="h-20 rounded-2xl bg-[#1A1A2E]/[0.04] animate-pulse" />
+                          ))}
+                        </div>
+                      ) : myMeetups.length > 0 ? (
+                        <div className="space-y-3">
+                          {myMeetups.map(m => {
+                            const d = new Date(m.date);
+                            const when = d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+                            const isPending = m.userJoinStatus === 'pending';
+                            return (
+                              <button
+                                key={m.id}
+                                onClick={() => router.push(`/meetups/${m.id}`)}
+                                className="w-full text-left rounded-2xl border border-[#1A1A2E]/10 bg-white/80 backdrop-blur-md p-4 shadow-sm hover:border-[#F43F5E]/30 transition-all active:scale-[0.99] cursor-pointer"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[14px] font-semibold text-[#1A1A2E] truncate">{m.title}</p>
+                                    {m.venueName && <p className="text-[12px] text-[#1A1A2E]/55 truncate mt-0.5">{m.venueName}</p>}
+                                    <p className="text-[11px] text-[#1A1A2E]/45 mt-1">{when}</p>
+                                  </div>
+                                  {isPending ? (
+                                    <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[11px] font-bold text-amber-600">Pending ⏳</span>
+                                  ) : (
+                                    <span className="shrink-0 rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-2.5 py-1 text-[11px] font-bold text-[#F43F5E]">Going ✓</span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <EmptyState
+                          emoji="🗓️"
+                          title="No upcoming events"
+                          subtitle="Meet people in real life at meetups near you"
+                          cta="Explore meetups"
+                          onCta={() => router.push('/home')}
+                        />
+                      )}
                     </div>
                   )}
                 </div>

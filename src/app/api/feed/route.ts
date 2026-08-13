@@ -10,7 +10,7 @@ import {
   prompts,
   userPromptAnswers,
 } from '@/db/schema';
-import { eq, ne, notInArray, inArray, and, gt, asc } from 'drizzle-orm';
+import { eq, ne, notInArray, inArray, and, gt, asc, gte, lte } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -60,9 +60,15 @@ export async function GET(request: NextRequest) {
     }
     const currentUserId = session.userId;
 
-    const cursorParam = request.nextUrl.searchParams.get('cursor');
+    const sp = request.nextUrl.searchParams;
+    const cursorParam = sp.get('cursor');
     const cursor = cursorParam !== null ? Number(cursorParam) : null;
     const validCursor = cursor !== null && Number.isInteger(cursor) && cursor > 0 ? cursor : null;
+
+    // Discovery filter params (sent by the client from FilterContext / Settings)
+    const ageMin = Math.max(18, Math.min(100, Number(sp.get('ageMin') ?? '18')));
+    const ageMax = Math.max(ageMin, Math.min(100, Number(sp.get('ageMax') ?? '60')));
+    const verifiedOnly = sp.get('verifiedOnly') === 'true';
 
     // Two separate exclusion buckets:
     //
@@ -99,6 +105,11 @@ export async function GET(request: NextRequest) {
       .from(blocks)
       .where(eq(blocks.blockedId, currentUserId));
 
+    // Age range filter — compute date-of-birth bounds for ageMin/ageMax
+    const today = new Date();
+    const dobMax = new Date(today.getFullYear() - ageMin, today.getMonth(), today.getDate()); // youngest shown
+    const dobMin = new Date(today.getFullYear() - ageMax - 1, today.getMonth(), today.getDate()); // oldest shown
+
     const conditions = [
       ne(users.id, currentUserId),
       eq(users.isActive, true),
@@ -106,7 +117,11 @@ export async function GET(request: NextRequest) {
       notInArray(users.id, recentPassByMe),
       notInArray(users.id, blockedByMe),
       notInArray(users.id, blockedMe),
+      // Age filter
+      gte(users.dateOfBirth, dobMin),
+      lte(users.dateOfBirth, dobMax),
     ];
+    if (verifiedOnly) conditions.push(eq(users.isVerified, true));
     if (validCursor !== null) {
       conditions.push(gt(users.id, validCursor));
     }

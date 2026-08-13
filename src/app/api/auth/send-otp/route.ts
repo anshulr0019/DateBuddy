@@ -72,42 +72,78 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendSms(phoneNumber: string, code: string): Promise<boolean> {
+  // 1. Try Fast2SMS (popular, instant free credits for India)
+  const fast2smsKey = process.env.FAST2SMS_API_KEY;
+  if (fast2smsKey) {
+    try {
+      const res = await fetch(`https://www.fast2sms.com/dev/bulkV2?authorization=${fast2smsKey}&route=otp&variables_values=${code}&flash=0&numbers=${phoneNumber}`);
+      const data = await res.json();
+      if (data?.return) {
+        console.log(`[AUTH] Fast2SMS real OTP sent successfully to +91${phoneNumber}`);
+        return true;
+      } else {
+        console.error('[AUTH] Fast2SMS send failed:', data?.message || data);
+      }
+    } catch (err) {
+      console.error('[AUTH] Fast2SMS network error:', err);
+    }
+  }
+
+  // 2. Try 2Factor SMS API
+  const twoFactorKey = process.env.TWOFACTOR_API_KEY;
+  if (twoFactorKey) {
+    try {
+      const res = await fetch(`https://2factor.in/API/V1/${twoFactorKey}/SMS/${phoneNumber}/${code}/AUTOGEN`);
+      const data = await res.json();
+      if (data?.Status === 'Success') {
+        console.log(`[AUTH] 2Factor real OTP sent successfully to +91${phoneNumber}`);
+        return true;
+      } else {
+        console.error('[AUTH] 2Factor send failed:', data?.Details);
+      }
+    } catch (err) {
+      console.error('[AUTH] 2Factor network error:', err);
+    }
+  }
+
+  // 3. Try Twilio
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
   const from = process.env.TWILIO_FROM_NUMBER;
 
-  if (!sid || !token || !from) {
-    // Printing a login code to the log is a real credential leak, so it requires an
-    // explicit opt-in that is ignored in production rather than keying off NODE_ENV.
-    if (process.env.NODE_ENV !== 'production' && process.env.OTP_DEV_LOG === 'true') {
-      console.log(`[AUTH][dev] OTP for ${phoneNumber} is ${code}`);
-      return true;
+  if (sid && token && from) {
+    try {
+      const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          To: `+91${phoneNumber}`,
+          From: from,
+          Body: `Your DateBuddy verification code is ${code}. It expires in 5 minutes.`,
+        }),
+      });
+
+      if (res.ok) {
+        console.log(`[AUTH] Twilio real OTP sent successfully to +91${phoneNumber}`);
+        return true;
+      } else {
+        console.error('[AUTH] Twilio send failed:', res.status, await res.text());
+      }
+    } catch (err) {
+      console.error('[AUTH] Twilio network error:', err);
     }
-    console.error(
-      '[AUTH] Twilio is not configured; cannot send OTP.' +
-        (process.env.NODE_ENV === 'production'
-          ? ''
-          : ' Set OTP_DEV_LOG=true in .env.local to print codes to this log instead.')
-    );
-    return false;
   }
 
-  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      To: `+91${phoneNumber}`,
-      From: from,
-      Body: `Your DateBuddy verification code is ${code}. It expires in 5 minutes.`,
-    }),
-  });
-
-  if (!res.ok) {
-    console.error('[AUTH] Twilio send failed:', res.status, await res.text());
-    return false;
+  // 4. Local Development Fallback
+  if (process.env.OTP_DEV_LOG === 'true') {
+    console.log(`[AUTH][dev] Real SMS Gateway keys missing. OTP for ${phoneNumber} is ${code}`);
+    return true;
   }
-  return true;
+
+  console.error('[AUTH] No valid SMS provider key (FAST2SMS_API_KEY, TWOFACTOR_API_KEY, or TWILIO) configured.');
+  return false;
 }
+

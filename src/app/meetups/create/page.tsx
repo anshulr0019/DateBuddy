@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuroraBackground } from '@/app/components/shared';
 
@@ -23,9 +23,21 @@ const PRESET_IMAGES = [
 
 export default function CreateMeetupPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [userCity, setUserCity] = useState('Mumbai');
+
+  // Fetch user's city for meetup location
+  useEffect(() => {
+    fetch('/api/users/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.user?.city) setUserCity(data.user.city); })
+      .catch(() => {});
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -58,7 +70,7 @@ export default function CreateMeetupPage() {
           description: formData.description.trim(),
           venueName: formData.venueName.trim() || 'City Center',
           address: formData.address.trim(),
-          city: 'Mumbai',
+          city: userCity,
           date: dateTimeIso,
           maxAttendees: formData.maxAttendees,
           imageUrl: formData.imageUrl || PRESET_IMAGES[0].url,
@@ -76,6 +88,30 @@ export default function CreateMeetupPage() {
       setErrorMessage('Network error while creating meetup. Please check your connection.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    setErrorMessage('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setUploadedPreview(data.url);
+        setFormData(prev => ({ ...prev, imageUrl: data.url }));
+      } else {
+        setErrorMessage(data.message || 'Upload failed. Please try again.');
+      }
+    } catch {
+      setErrorMessage('Upload failed. Check your connection.');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -253,16 +289,36 @@ export default function CreateMeetupPage() {
 
                   <div>
                     <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#1A1A2E]/60 mb-2">
-                      Choose Cover Image
+                      Cover Image
                     </label>
+
+                    {/* Upload your own photo */}
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingPhoto}
+                      className="w-full mb-3 h-12 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#FF6B9D]/40 bg-[#FF6B9D]/5 text-[13px] font-semibold text-[#FF6B9D] hover:bg-[#FF6B9D]/10 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {isUploadingPhoto ? (
+                        <><div className="h-4 w-4 rounded-full border-2 border-[#FF6B9D] border-t-transparent animate-spin" /><span>Uploading…</span></>
+                      ) : uploadedPreview ? (
+                        <><span>✓</span><span>Custom photo uploaded — tap to change</span></>
+                      ) : (
+                        <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload Custom Photo</span></>
+                      )}
+                    </button>
+
+                    {/* Preset images */}
+                    <p className="text-[11px] font-semibold text-[#1A1A2E]/40 uppercase tracking-wider mb-2">Or choose a preset</p>
                     <div className="grid grid-cols-3 gap-2 mb-3">
                       {PRESET_IMAGES.map((preset, idx) => {
-                        const isSel = formData.imageUrl === preset.url;
+                        const isSel = formData.imageUrl === preset.url && !uploadedPreview;
                         return (
                           <button
                             key={idx}
                             type="button"
-                            onClick={() => setFormData({ ...formData, imageUrl: preset.url })}
+                            onClick={() => { setUploadedPreview(null); setFormData({ ...formData, imageUrl: preset.url }); }}
                             className={`relative h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
                               isSel ? 'border-[#FF6B9D] ring-2 ring-[#FF6B9D]/30 scale-102' : 'border-transparent opacity-80 hover:opacity-100'
                             }`}
