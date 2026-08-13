@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from '../components/shared';
+import { VenuePickerModal } from '../components/VenuePickerModal';
 import { useNotifications } from '../context/NotificationContext';
 import { PERSONAS, DEFAULT_PERSONA } from '@/lib/personaGreeting';
 import { hapticLight, hapticMedium } from '../lib/haptics';
@@ -79,6 +80,7 @@ export default function HomePage() {
 
   const [squadFilter, setSquadFilter] = useState<'All' | (typeof CATEGORIES)[number]>('All');
   const [showHostModal, setShowHostModal] = useState(false);
+  const [showVenuePicker, setShowVenuePicker] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState<Meetup | null>(null);
   const [confirmLeaveId, setConfirmLeaveId] = useState<number | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -674,14 +676,26 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Venue / Location</label>
-                <input
-                  type="text"
-                  value={hostVenue}
-                  onChange={(e) => setHostVenue(e.target.value)}
-                  placeholder="e.g. Cult.fit Gym, Bandra West"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
-                />
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400">Venue / Location</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowVenuePicker(true)}
+                    className="text-[11px] font-bold text-[#F43F5E] hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    📍 Pick {hostCategory} venue →
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={hostVenue}
+                    onFocus={() => setShowVenuePicker(true)}
+                    onChange={(e) => setHostVenue(e.target.value)}
+                    placeholder={`Tap to select ${hostCategory} venue or area...`}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px] cursor-pointer"
+                  />
+                </div>
               </div>
 
               <div>
@@ -899,6 +913,15 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      {/* VENUE AUTO-SUGGEST MODAL */}
+      <VenuePickerModal
+        isOpen={showVenuePicker}
+        category={hostCategory}
+        onSelect={(venueName, address) => {
+          setHostVenue(address ? `${venueName} (${address})` : venueName);
+        }}
+        onClose={() => setShowVenuePicker(false)}
+      />
     </div>
   );
 }

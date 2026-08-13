@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { AuroraBackground } from '@/app/components/shared';
+import { VenuePickerModal } from '@/app/components/VenuePickerModal';
 
 const CATEGORIES = [
   { id: 'sports', icon: '⚽', label: 'Sports & Fitness', desc: 'Workout, football, running & yoga' },
@@ -30,6 +32,7 @@ export default function CreateMeetupPage() {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
   const [userCity, setUserCity] = useState('Mumbai');
+  const [showVenuePicker, setShowVenuePicker] = useState(false);
 
   // Fetch user's city for meetup location
   useEffect(() => {
@@ -203,15 +206,25 @@ export default function CreateMeetupPage() {
               {step === 2 && (
                 <div className="space-y-5 animate-fade-slide-up">
                   <div>
-                    <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#1A1A2E]/60 mb-2">
-                      Venue Name <span className="text-rose-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#1A1A2E]/60">
+                        Venue Name <span className="text-rose-500">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowVenuePicker(true)}
+                        className="text-[12px] font-bold text-[#FF6B9D] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        📍 Select from popular {formData.category} locations →
+                      </button>
+                    </div>
                     <input
                       type="text"
-                      placeholder="e.g. Turf Park Lower Parel, Blue Tokai Bandra"
+                      placeholder={`Tap to select ${formData.category} location...`}
                       value={formData.venueName}
+                      onFocus={() => setShowVenuePicker(true)}
                       onChange={(e) => setFormData({ ...formData, venueName: e.target.value })}
-                      className="w-full h-13 px-4 rounded-2xl bg-white border border-[#1A1A2E]/10 text-[16px] font-medium text-[#1A1A2E] placeholder-[#1A1A2E]/30 focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/40 focus:border-[#FF6B9D] transition-all shadow-sm"
+                      className="w-full h-13 px-4 rounded-2xl bg-white border border-[#1A1A2E]/10 text-[16px] font-medium text-[#1A1A2E] placeholder-[#1A1A2E]/30 focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/40 focus:border-[#FF6B9D] transition-all shadow-sm cursor-pointer"
                     />
                   </div>
 
@@ -408,6 +421,19 @@ export default function CreateMeetupPage() {
           </div>
         </AuroraBackground>
       </div>
+
+      <VenuePickerModal
+        isOpen={showVenuePicker}
+        category={formData.category}
+        onSelect={(venueName, address) => {
+          setFormData(prev => ({
+            ...prev,
+            venueName,
+            address: address || prev.address,
+          }));
+        }}
+        onClose={() => setShowVenuePicker(false)}
+      />
     </div>
   );
 }
