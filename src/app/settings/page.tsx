@@ -444,6 +444,39 @@ export default function SettingsPage() {
                     </label>
                   </div>
 
+                  <div className="flex items-center justify-between p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1A1A2E]">Hide Distance</p>
+                      <p className="text-[11px] text-[#1A1A2E]/45">Don&apos;t show exact distance on your profile</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={privacy.hideDistance}
+                        onChange={() => handleTogglePrivacy('hideDistance')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7B68EE]"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1A1A2E]">Show Online Status</p>
+                      <p className="text-[11px] text-[#1A1A2E]/45">Show green dot when you&apos;re active</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={privacy.showOnlineStatus}
+                        onChange={() => handleTogglePrivacy('showOnlineStatus')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7B68EE]"></div>
+                    </label>
+                  </div>
+
+
                   <div
                     onClick={() => {
                       setShowBlockedModal(true);

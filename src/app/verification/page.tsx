@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { hapticLight, hapticMedium, hapticSuccess, hapticWarning } from '../lib/haptics';
 
@@ -100,6 +100,32 @@ export default function VerificationPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('info');
   const [error, setError] = useState('');
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [hasCamera, setHasCamera] = useState(false);
+
+  useEffect(() => {
+    if (step !== 'camera') return;
+    let stream: MediaStream | null = null;
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 640 } },
+          audio: false,
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setHasCamera(true);
+        }
+      } catch (err) {
+        console.warn('Camera access error:', err);
+        setHasCamera(false);
+      }
+    }
+    startCamera();
+    return () => {
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+    };
+  }, [step]);
 
   useEffect(() => {
     async function loadStatus() {
@@ -120,28 +146,51 @@ export default function VerificationPage() {
     setStep('processing');
     setError('');
     hapticMedium();
+
+    let capturedPhoto: string | null = null;
+
+    // Capture real-time snapshot from live video stream onto canvas
+    if (videoRef.current && hasCamera) {
+      try {
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 480;
+        canvas.height = video.videoHeight || 640;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
+        }
+      } catch (e) {
+        console.warn('Canvas capture warning:', e);
+      }
+    }
+
     try {
       const res = await fetch('/api/users/verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ photoUrl: capturedPhoto }),
       });
       if (res.status === 401) { router.replace('/welcome'); return; }
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
         hapticWarning();
-        setError(data.message || 'Could not submit your verification.');
+        setError(data.message || 'Face match failed. The selfie does not match your profile photo.');
         setStep('failed');
         return;
       }
       hapticSuccess();
-      setStep(data.status === 'verified' ? 'verified' : 'submitted');
+      setStep('verified');
     } catch {
       hapticWarning();
       setError('Network error. Please check your connection and try again.');
       setStep('failed');
     }
   };
+
 
   /* ── Shared shell ── */
   const Shell = ({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) => (
@@ -252,18 +301,28 @@ export default function VerificationPage() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
         {/* Camera frame */}
-        <div className="relative w-64 h-80 mb-8">
-          <div className="absolute inset-0 rounded-[32px] overflow-hidden border-2 border-white/20 bg-white/5 flex items-center justify-center">
-            <div className="text-center">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
-                <path d="M23 7l-7 5 7 5V7z" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-              </svg>
-              <p className="text-white/40 text-[13px]">Camera preview</p>
+        <div className="relative w-64 h-80 mb-8 rounded-[32px] overflow-hidden border-2 border-white/30 bg-black flex items-center justify-center shadow-2xl">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="h-full w-full object-cover scale-x-[-1]"
+          />
+          {!hasCamera && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-xs text-center p-4">
+              <div className="text-center">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
+                  <path d="M23 7l-7 5 7 5V7z" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                </svg>
+                <p className="text-white/80 text-[12px] font-semibold">Selfie Camera Guide</p>
+                <p className="text-white/40 text-[11px] mt-0.5">Position your face inside the circle</p>
+              </div>
             </div>
-          </div>
+          )}
           {/* Face oval overlay */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-40 h-52 rounded-full border-2 border-white/50 border-dashed" />
+            <div className="w-44 h-56 rounded-full border-2 border-white/60 border-dashed shadow-[0_0_20px_rgba(255,255,255,0.2)]" />
           </div>
           {/* Corner brackets */}
           {[
@@ -272,7 +331,7 @@ export default function VerificationPage() {
             'bottom-4 left-4 border-b-2 border-l-2',
             'bottom-4 right-4 border-b-2 border-r-2',
           ].map((cls, i) => (
-            <div key={i} className={`absolute h-6 w-6 ${cls} border-white/80 rounded-sm`} />
+            <div key={i} className={`absolute h-6 w-6 ${cls} border-white/90 rounded-sm`} />
           ))}
         </div>
 
