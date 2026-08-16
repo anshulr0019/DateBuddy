@@ -177,11 +177,18 @@ export async function joinRandomChat(userId: number, prefs: RandomChatPreference
   await db.transaction(async (tx) => {
     const now = new Date();
 
-    // A user already mid-conversation should never be re-queued.
+    // A user already mid-conversation should never be re-queued, unless the previous session was already promoted to connected.
     const existing = await activeSessionFor(userId, tx);
     if (existing) {
-      // Leave as-is — the session poll will surface it.
-      return;
+      if (existing.status === 'connected') {
+        await tx
+          .update(randomChatSessions)
+          .set({ status: 'ended', endedByUserId: userId, endedAt: now })
+          .where(eq(randomChatSessions.id, existing.id));
+      } else {
+        // Active mid-chat session — leave as-is to surface it.
+        return;
+      }
     }
 
     // Sweep expired candidates.
@@ -398,7 +405,7 @@ export async function getSessionState(userId: number): Promise<SessionState> {
     lastSession &&
     lastSession.status === 'ended' &&
     lastSession.endedAt &&
-    Date.now() - new Date(lastSession.endedAt).getTime() < RECENT_SESSION_EXCLUDE_MS
+    Date.now() - new Date(lastSession.endedAt).getTime() < 30_000
   ) {
     return buildSessionState(lastSession, userId);
   }
@@ -512,7 +519,7 @@ async function requireSessionParticipant(sessionId: number, userId: number) {
 
 export async function endSession(sessionId: number, userId: number): Promise<void> {
   const session = await requireSessionParticipant(sessionId, userId);
-  if (!session || session.status !== 'active') return;
+  if (!session || (session.status !== 'active' && session.status !== 'connected')) return;
   await db
     .update(randomChatSessions)
     .set({ status: 'ended', endedByUserId: userId, endedAt: new Date() })

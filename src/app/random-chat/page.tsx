@@ -88,18 +88,20 @@ export default function RandomChatPage() {
     });
   }, [rc, overviewRef]);
 
-  const handleGoToChat = useCallback(() => {
+  const handleGoToChat = useCallback(async () => {
     const matchId = rc.session?.match?.matchId;
+    await rc.end();
     if (matchId) {
       router.push(`/chat/${matchId}`);
     } else {
       router.push('/messages');
     }
-  }, [rc.session, router]);
+  }, [rc, router]);
 
-  const handleGoHome = useCallback(() => {
+  const handleGoHome = useCallback(async () => {
+    await rc.end();
     router.push('/home');
-  }, [router]);
+  }, [rc, router]);
 
   const session = rc.session;
 
@@ -111,7 +113,7 @@ export default function RandomChatPage() {
             {/* Header */}
             <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between shadow-2xs">
               <button
-                onClick={() => router.push('/home')}
+                onClick={() => { void rc.end(); router.push('/home'); }}
                 aria-label="Back to home"
                 className="flex h-9 w-9 items-center justify-center rounded-full text-[#1E293B] hover:bg-gray-100 active:scale-90 transition-all duration-200 cursor-pointer"
               >
@@ -177,7 +179,13 @@ export default function RandomChatPage() {
             )}
 
             {rc.phase === 'connected' && session && (
-              <ConnectedScreen session={session} onGoToChat={handleGoToChat} onGoHome={handleGoHome} />
+              <ConnectedScreen
+                session={session}
+                onGoToChat={handleGoToChat}
+                onFindSomeoneNew={() => void handleFindSomeoneNew()}
+                onGoHome={handleGoHome}
+                busy={rc.busy}
+              />
             )}
 
             {rc.phase === 'ended' && (
