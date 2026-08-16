@@ -1,21 +1,43 @@
 <div align="center">
 
 # 💕 DateBuddy
-### *The Gen-Z Social Discovery & Connection Platform*
-**Dating without the cringe. Meeting without the awkwardness.**
+
+<p align="center">
+  <a href="https://github.com/anshulr0019/DateBuddy">
+    <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=26&duration=2800&pause=1000&color=FF6B9D&center=true&vCenter=true&width=650&lines=Where+Connections+Become+Real+✨;Dating+Without+The+Cringe.+Meeting+Without+Awkwardness.;100%25+Free+P2P+WebRTC+Audio+%26+Video+Calls+📹;AI-Calculated+Dynamic+Vibe+Archetypes+🔮;Anonymous+Radar+Chat+With+Hilarious+Trivia+🎲;IRL+Meetups+%2B+Zero-Cost+Venue+Discovery+📍" alt="DateBuddy Animated Tagline" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>The Next-Generation Gen-Z Social Discovery & Connection Ecosystem</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5" />
+  <img src="https://img.shields.io/badge/TailwindCSS_3-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/WebRTC_P2P-333333?style=for-the-badge&logo=webrtc&logoColor=white" alt="WebRTC" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=flat-square&color=FF6B9D" alt="Stars" />
+  <img src="https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=flat-square&color=7B68EE" alt="Forks" />
+  <img src="https://img.shields.io/github/license/anshulr0019/DateBuddy?style=flat-square&color=4ECDC4" alt="License" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" />
+  <img src="https://img.shields.io/badge/Built_with-💖_&_Passion-rose?style=flat-square" alt="Love" />
+</p>
 
 <br/>
 
-[![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![WebRTC](https://img.shields.io/badge/WebRTC_P2P-333333?style=for-the-badge&logo=webrtc&logoColor=white)](https://webrtc.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
-
-<br/>
-
-[✨ Features](#-the-feature-breakdown) • [🔥 The Technical Flex](#-the-technical-flex) • [🚀 Quick Start](#-quick-start) • [🗄️ Architecture](#️-database-architecture) • [📡 API Reference](#-api-endpoints)
+<p align="center">
+  <a href="#-the-four-pillars-of-engineering-excellence"><strong>🔥 The Technical Flex</strong></a> •
+  <a href="#-feature-suite--experience-breakdown"><strong>✨ Feature Suite</strong></a> •
+  <a href="#-visual-system-architecture"><strong>🏗️ Architecture</strong></a> •
+  <a href="#-interactive-api-matrix"><strong>📡 API Matrix</strong></a> •
+  <a href="#-quick-start--local-development"><strong>⚡ Quick Start</strong></a>
+</p>
 
 ---
 
@@ -23,153 +45,316 @@
 
 <br/>
 
-## 🌟 What is DateBuddy?
+## 🌟 The DateBuddy Philosophy
 
-DateBuddy is a next-generation social discovery platform built from the ground up for modern dating culture. It fuses **spontaneous IRL meetups**, **AI-calculated vibe archetypes**, **initial-based anonymous speed chats**, and **100% free peer-to-peer WebRTC video/audio calling** into an ultra-fluid mobile web experience.
+Traditional dating apps are broken. Endless mindless swiping leads to burnout, awkward dead-end text exchanges, and zero real-world action. 
+
+**DateBuddy flips the script:**
+* 🎯 **Personality & Vibes Over Superficiality**: Dynamic AI-calculated personas that adapt to your lifestyle.
+* 📍 **IRL-First Connection**: 1-Tap Meetup creation for Gyms, Turfs, Cafes, and Rooftops with free venue mapping.
+* 📹 **Zero-Cost Face-to-Face**: 100% Free WebRTC Audio and HD Video Calling with native iOS FaceTime styling.
+* 🎭 **Anonymous Speed Dating Radar**: Low-pressure ephemeral chats with initial badges and hilarious icebreaker facts.
+
+<br/>
 
 ---
 
-## 🔥 The Technical Flex
+## 💎 The Four Pillars of Engineering Excellence
+
+```
+                                    ┌─────────────────────────────────────────────────┐
+                                    │             DATEBUDDY CORE ENGINE               │
+                                    └─────────────────────────────────────────────────┘
+                                           │                   │                   │
+                     ┌─────────────────────┴─────┐             │             ┌─────┴─────────────────────┐
+                     ▼                           ▼             ▼             ▼                           ▼
+        ┌─────────────────────────┐ ┌─────────────────────────┐   ┌─────────────────────────┐ ┌─────────────────────────┐
+        │     UX & MOTION FLEX    │ │   PERFORMANCE & CACHE   │   │   SOCIAL & CALL ENGINE  │ │    AUTH & AI SECURITY   │
+        │ • Velocity Gestures     │ │ • 0ms Optimistic UI     │   │ • Free WebRTC HD Calls  │ │ • Phone OTP Auth (JWT)  │
+        │ • Spring Physics        │ │ • Fault-Tolerant Cache  │   │ • Real-time Typing/Seen │ │ • AI Face Verification  │
+        │ • Native Taptic Haptics │ │ • Zero CLS Shimmers     │   │ • Audio Waveforms       │ │ • Dynamic Vibe Scoring  │
+        │ • Context Glassmorphism │ │ • Image Prefetching     │   │ • Anonymous Radar Chat  │ │ • Free Geo Place Search │
+        └─────────────────────────┘ └─────────────────────────┘   └─────────────────────────┘ └─────────────────────────┘
+```
+
+<br/>
 
 ### 🎨 1. Fluid UI, Motion & Gestures *(The UX Flex)*
-* **Velocity-Based Gesture Engine**: Profile cards with spring physics that calculate touch trajectory and velocity for organic Apple-like card flings without accidental touch slips.
-* **Spring-Physics Transitions**: Custom cubic-bezier spring curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`) replacing rigid linear CSS transitions with natural kinetic bounces.
-* **Native Haptic Feedback Integration**: Multi-tier vibration patterns (`light`, `medium`, `success`, `warning`) tuned to trigger the mobile Taptic Engine on card actions, matches, and sheet drags.
-* **Dynamic Context-Aware Glassmorphism**: High-performance frosted glass overlays (`backdrop-blur-2xl`) that dynamically adapt to moving background Aurora gradients.
-* **Safe-Area Inset Awareness**: Pixel-perfect layout calculations (`env(safe-area-inset-top)` & `visualViewport`) adapting seamlessly around the iPhone Dynamic Island, soft keyboards, and Android navigation bars.
-
----
-
-### ⚡ 2. Architecture & Performance *(The Engineering Flex)*
-* **Optimistic UI State Mutation**: Card swipes and messaging mutations reflect instantly in local state before the server handshake completes, delivering **0ms perceived latency**.
-* **Fault-Tolerant Local Cache**: Persistent offline session caching so users can navigate across tabs or survive flaky mobile connections without losing drafted messages or feed position.
-* **Zero Cumulative Layout Shift (CLS)**: Pre-allocated aspect ratios and animated shimmer skeletons prevent screen jumps during asset downloads.
-* **Background Data Prefetching**: Smart sliding-window cache preloads the next 5 profile images and media assets in memory while the user browses the current card.
-
----
-
-### 💬 3. Advanced Chat, Video & Social *(The Product Flex)*
-* **100% Free WebRTC Audio & HD Video Calling**:
-  * Peer-to-Peer 60fps streaming with public Google STUN servers (`$0/month` overhead).
-  * **FaceTime & iOS WhatsApp UI**: Floating PiP (Picture-in-Picture) selfie preview, pulsating ripple rings, live call timer, and active camera flip controls.
-* **Real-Time Presence & Receipt System**: Live presence dots (`🟢 online`), active typing indicators, and delivery status (`sent` ➔ `seen`).
-* **Dynamic Audio Waveform Visualizer**: Generates real-time visual frequency bars for recorded voice notes instead of a static play button.
-* **Episodic 8-Step Onboarding Wizard**: Frictionless step-by-step setup with auto-saving progress resume if the browser tab is closed.
-
----
-
-### 🔒 4. Modern Auth, AI & Security *(The Backend Flex)*
-* **Passwordless OTP Authentication**: Frictionless SMS/Phone-based verification with brute-force rate-limiting.
-* **Stateless HTTP-Only JWT Sessions**: Secure token cookies protected against XSS and CSRF attacks.
-* **AI Real-Time Dynamic Vibe Scoring**: Algorithmically analyzes user activity times and in-app behavior to assign dynamic personas (*Night Owl 🦉, Early Spark 🌅, Flirt Mode 😏, Smooth Talker 💬*).
-* **AI Live Face-Matching Identity Verification**: Native webcam stream snapshot comparison against primary profile photo with verified badge reward.
-* **100% Free Geo-Search Engine**: OpenStreetMap Nominatim integration for 1-tap discovery of real gyms, cafes, sports turfs, and rooftop venues without paid Google Maps billing.
-* **Initial-Based Anonymous Chat**: Real-time anonymous radar matching displaying the other person's first alphabet (`User A`) and rotating funny facts/dating trivia while searching.
-
----
-
-## ✨ The Feature Breakdown
 
 <table>
 <tr>
-<td width="50%">
-
-### 🎯 Hyper-Personalized Discovery
-* Multi-filter feed (Distance, Age, Intent, Verified only)
-* Prompt card likes & profile photo carousels
-* Undo last pass feature for second chances
-* 0-accidental touch design with dedicated action buttons
-
-</td>
-<td width="50%">
-
-### 📹 P2P Video & Voice Calling
-* 100% Free WebRTC connection
-* Native iOS FaceTime & WhatsApp styling
-* Live camera flip, mic mute, and camera toggle
-* Floating picture-in-picture selfie preview
-
-</td>
+<th width="30%">Engine Capability</th>
+<th width="70%">Technical Implementation & User Experience Impact</th>
 </tr>
 <tr>
-<td width="50%">
-
-### 🎭 Anonymous Speed Chat
-* Real-time radar scan with rotating hilarious trivia
-* Privacy-first initial display (`User A`, `User P`)
-* 1-tap reveal & mutual connection upgrade
-* Instant in-app notifications when someone likes you
-
-</td>
-<td width="50%">
-
-### 📅 Real-World Meetups & Events
-* Host events for Gyms, Cafes, Sports, Bars, and Cinema
-* Free venue search powered by OpenStreetMap
-* Attendee RSVP list with host approval controls
-* Public and private community hangouts
-
-</td>
+<td><b>⚡ Velocity-Based Physics</b></td>
+<td>Calculates horizontal release velocity $(v_x = \frac{\Delta x}{\Delta t})$ and angular trajectory. Cards fling smoothly along their release momentum with zero accidental touch slips while scrolling vertically.</td>
 </tr>
 <tr>
-<td width="50%">
-
-### 🛡️ AI Face Verification
-* Live browser webcam capture
-* AI facial matching against profile photos
-* Instant verified checkmark badge (`✓`)
-* Comprehensive block & report moderation
-
-</td>
-<td width="50%">
-
-### 💎 DateBuddy Gold Tier
-* Unlimited daily likes and rewinds
-* Daily Super Likes with spotlight badges
-* See who liked your profile before matching
-* Razorpay payment gateway integration
-
-</td>
+<td><b>🌀 Spring-Physics Damping</b></td>
+<td>Bypasses rigid linear CSS transitions in favor of custom mass/stiffness/damping curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`) for organic Apple-grade tactile bounces.</td>
+</tr>
+<tr>
+<td><b>📳 Native Haptic Integration</b></td>
+<td>Full Web Vibration API integration simulating the iOS Taptic Engine with distinct pulse signatures: <code>light (12ms)</code> on drag thresholds, <code>medium (25ms)</code> on button taps, and <code>success [40ms, 60ms, 80ms]</code> on mutual matches.</td>
+</tr>
+<tr>
+<td><b>🪞 Dynamic Glassmorphism</b></td>
+<td>Context-aware frosted glass surfaces (`backdrop-blur-2xl`, `rgba(255,255,255,0.7)`) that dynamically reflect and refract moving ambient Aurora background gradients.</td>
+</tr>
+<tr>
+<td><b>📱 Safe-Area Viewport Awareness</b></td>
+<td>Zero-clipping edge-to-edge UI calculating `env(safe-area-inset-top)` and `window.visualViewport` to dynamically tuck above the iPhone Dynamic Island, Android navigation bars, and popping virtual keyboards.</td>
 </tr>
 </table>
 
+<br/>
+
+### ⚡ 2. Architecture & Performance *(The Engineering Flex)*
+
+<table>
+<tr>
+<th width="30%">Architecture Vector</th>
+<th width="70%">Deep Dive & Implementation Details</th>
+</tr>
+<tr>
+<td><b>⚡ 0ms Optimistic Mutations</b></td>
+<td>State mutations (Likes, Passes, Sent Messages, Connection Requests) apply immediately to client state before the server roundtrip resolves, eliminating perceptible network lag.</td>
+</tr>
+<tr>
+<td><b>🛡️ Fault-Tolerant Local Storage</b></td>
+<td>Client-side persistence layer caches swipe queues, feed pagination cursors, and drafted messages to IndexedDB/LocalStorage, gracefully recovering from sudden mobile network drops.</td>
+</tr>
+<tr>
+<td><b>📐 Zero Cumulative Layout Shift (CLS)</b></td>
+<td>Pre-computed aspect ratios (`aspect-[3/4]`, `min-h-[380px]`) paired with animated shimmer skeleton placeholders prevent jarring UI jumps during asset downloads.</td>
+</tr>
+<tr>
+<td><b>🚀 Sliding-Window Prefetching</b></td>
+<td>Background prefetch daemon silently preloads the next 5 profile cards and high-res media streams in memory while the user is actively viewing the current card.</td>
+</tr>
+</table>
+
+<br/>
+
+### 💬 3. Advanced Chat, Video & Social *(The Product Flex)*
+
+<table>
+<tr>
+<th width="30%">Product Feature</th>
+<th width="70%">Real-Time Architecture & Mechanics</th>
+</tr>
+<tr>
+<td><b>📹 100% Free WebRTC Video Calls</b></td>
+<td>Peer-to-Peer real-time media streaming powered by Google's public STUN servers (<code>stun:stun.l.google.com:19302</code>). Zero monthly third-party API fees with FaceTime-style floating Picture-in-Picture (PiP) windows and camera flip.</td>
+</tr>
+<tr>
+<td><b>🟢 Real-Time Presence & Ticks</b></td>
+<td>Live heartbeat polling surfacing active "Online now" pulses, real-time typing indicators, and message delivery statuses (<code>Sent ✓</code> ➔ <code>Seen ✓✓</code>).</td>
+</tr>
+<tr>
+<td><b>🎙️ Dynamic Audio Waveforms</b></td>
+<td>Audio visualizer rendering animated frequency bars for voice notes that pulse in synchronization with playback volume.</td>
+</tr>
+<tr>
+<td><b>🎲 Anonymous Radar Speed Dating</b></td>
+<td>Ephemeral matching radar displaying initial badges (e.g. <code>User A</code>) with auto-rotating funny facts and dating trivia cards cycling every 3.5 seconds during scan.</td>
+</tr>
+</table>
+
+<br/>
+
+### 🔒 4. Modern Auth, AI & Security *(The Backend Flex)*
+
+<table>
+<tr>
+<th width="30%">Security / AI Layer</th>
+<th width="70%">Implementation & Cryptographic Guarantees</th>
+</tr>
+<tr>
+<td><b>🔑 Passwordless OTP Auth</b></td>
+<td>Frictionless SMS/Phone-based verification with cryptographically random OTP generation, brute-force throttling, and 5-minute expiry windows.</td>
+</tr>
+<tr>
+<td><b>🍪 Stateless HTTP-Only JWTs</b></td>
+<td>Token-based authentication with `HttpOnly`, `SameSite=Lax`, and `Secure` cookie attributes, rendering the application impervious to XSS and token-theft vulnerabilities.</td>
+</tr>
+<tr>
+<td><b>🤖 Dynamic AI Persona Engine</b></td>
+<td>Evaluates active session hours and user engagement metrics to dynamically assign real-time personas (<code>🦉 Night Owl</code>, <code>🌅 Early Spark</code>, <code>😏 Flirt Mode</code>, <code>🔥 High Demand</code>).</td>
+</tr>
+<tr>
+<td><b>🤳 AI Live Face Verification</b></td>
+<td>Live camera selfie stream snapshot analyzed against user profile photos to award official verified checkmark badges (<code>✓</code>) and eliminate catfishing.</td>
+</tr>
+<tr>
+<td><b>🗺️ Free OpenStreetMap Venue Engine</b></td>
+<td>Integrated OpenStreetMap Nominatim geo-engine providing instant 1-tap search for Gyms, Cafes, Sports Arenas, and Restaurants without Google Maps billing.</td>
+</tr>
+</table>
+
+<br/>
+
 ---
 
-## 🗄️ Database Architecture
+## ✨ Feature Suite & Experience Breakdown
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    DateBuddy Schema                         │
-└─────────────────────────────────────────────────────────────┘
+<div align="center">
 
-👤 USERS & PROFILES
-├── users ─────────────────── Core accounts, verification, bio, city
-├── photos ────────────────── Multiple high-res profile photos (1:N)
-├── user_interests ────────── Interest tag bindings (N:M)
-├── verifications ─────────── AI Face verification logs
-└── subscriptions ─────────── DateBuddy Gold tier & payment records
+| 🎯 Hyper-Personalized Discovery | 📹 Free WebRTC Video Calling | 🎭 Anonymous Radar Speed Chat |
+| :--- | :--- | :--- |
+| • Distance, Age & Intent Filters<br>• Photo carousels with tap-navigation<br>• Accidental touch gesture prevention<br>• Undo/Rewind last pass feature | • 100% Free peer-to-peer streaming<br>• iOS FaceTime & WhatsApp styling<br>• Floating Picture-in-Picture selfie<br>• Live mic mute & camera flip | • Initial-based privacy (`User A`)<br>• Rotating funny facts & trivia<br>• 1-Tap mutual profile reveal<br>• Instant like push notifications |
 
-💬 SOCIAL & DISCOVERY
-├── swipes ────────────────── Likes, Passes, Super Likes
-├── matches ───────────────── Mutual match pairings
-├── messages ──────────────── Text, photos, voice notes & locations
-├── notifications ─────────── Real-time likes, matches & call alerts
-└── call_signals ──────────── WebRTC peer offer/answer exchange
+| 📅 Real-World Meetups & Events | 🛡️ AI Face Identity Verification | 💎 DateBuddy Gold Tier |
+| :--- | :--- | :--- |
+| • Host Gym, Turf, Cafe & Cinema events<br>• Free OpenStreetMap venue search<br>• RSVP list with host approval<br>• Public & private group hangouts | • Live webcam selfie capture<br>• Facial comparison vs profile photo<br>• Verified trust badge reward<br>• Integrated report & block moderation | • Unlimited daily likes & rewinds<br>• Daily Super Likes with spotlight<br>• See who liked your profile<br>• Razorpay checkout integration |
 
-🎭 ANONYMOUS RADAR
-├── random_chat_queue ────── Active searching users by vibe
-├── random_chat_sessions ─── Matched anonymous pairs with initials
-└── random_chat_messages ─── Ephemeral chat messages
+</div>
 
-📅 IRL MEETUPS & EVENTS
-├── meetups ───────────────── Community events & venue data
-├── meetup_attendees ──────── RSVP lists (Going / Maybe / Cancelled)
-└── groups ────────────────── Interest communities & member hubs
+<br/>
+
+---
+
+## 🏗️ Visual System Architecture
+
+### 🔄 WebRTC P2P Video Call Handshake Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Alice as 👩 Alice (Caller)
+    participant Sig as ⚡ Signaling Server (/api/calls/signal)
+    actor Bob as 👨 Bob (Callee)
+
+    Alice->>Alice: getUserMedia({ audio: true, video: true })
+    Alice->>Alice: createOffer() & setLocalDescription()
+    Alice->>Sig: POST /api/calls/signal (type: "offer", SDP)
+    
+    Note over Sig,Bob: Bob polls /api/calls/signal
+    Sig->>Bob: Incoming Call Alert ("Incoming Video Call from Alice")
+    
+    Bob->>Bob: Accepts Call 💚
+    Bob->>Bob: getUserMedia() & setRemoteDescription(offer)
+    Bob->>Bob: createAnswer() & setLocalDescription()
+    Bob->>Sig: POST /api/calls/signal (type: "answer", SDP)
+    
+    Sig->>Alice: Deliver Answer SDP
+    Alice->>Alice: setRemoteDescription(answer)
+    
+    par ICE Candidate Exchange
+        Alice->>Sig: POST ICE Candidate
+        Sig->>Bob: Deliver ICE Candidate
+        Bob->>Sig: POST ICE Candidate
+        Sig->>Alice: Deliver ICE Candidate
+    end
+    
+    Note over Alice,Bob: 🔒 Direct Encrypted Peer-to-Peer 60fps HD Stream Active ($0 Cost)
 ```
 
+<br/>
+
+### 🗄️ Database Entity-Relationship Architecture (18 Tables)
+
+<details>
+<summary><b>📊 Click to expand full Database Schema Hierarchy</b></summary>
+
+<br/>
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                DATEBUDDY POSTGRESQL SCHEMA                             │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  👤 USER DOMAIN
+  ├── users ──────────────────────── Core profiles (phone, name, dob, gender, bio, isVerified)
+  ├── photos ─────────────────────── High-res profile photos (userId, url, orderIndex)
+  ├── user_interests ─────────────── Multi-interest bindings (userId, interestId)
+  ├── interests ──────────────────── Master taxonomy of hobby & interest tags
+  ├── daily_limits ───────────────── Rate limiting (likesUsed, superLikesUsed, rewindsUsed)
+  ├── subscriptions ──────────────── DateBuddy Gold tier, dates, Razorpay transaction ID
+  └── verifications ──────────────── Webcam capture records, face match confidence, status
+
+  💬 SOCIAL & REAL-TIME DOMAIN
+  ├── swipes ─────────────────────── Swiper, swiped, action (like, pass, super_like), timestamp
+  ├── matches ────────────────────── Bidirectional matched pairs (user1Id, user2Id, isActive)
+  ├── messages ───────────────────── Chat messages (matchId, senderId, type, content, isRead)
+  ├── conversations ──────────────── Conversation metadata & last active timestamps
+  ├── notifications ──────────────── Real-time in-app alerts (type: match, like, call, meetup)
+  └── call_signals ───────────────── WebRTC ephemeral signal exchange buffer (offer, answer, ICE)
+
+  🎭 ANONYMOUS RADAR DOMAIN
+  ├── random_chat_queue ──────────── Active searching pool indexed by vibe, age range, gender
+  ├── random_chat_sessions ───────── Matched anonymous pairs with initial aliases (User A, User B)
+  └── random_chat_messages ───────── Ephemeral speed chat transcript
+
+  📅 COMMUNITY & EVENTS DOMAIN
+  ├── meetups ────────────────────── Event listings (hostId, title, venue, address, date, lat/lng)
+  ├── meetup_attendees ───────────── RSVP state tracking (going, maybe, cancelled)
+  ├── groups ─────────────────────── Community hubs (name, category, description, isPrivate)
+  └── group_members ──────────────── Member memberships, permissions, and join dates
+```
+
+</details>
+
+<br/>
+
 ---
 
-## 🚀 Quick Start
+## 📡 Interactive API Matrix
+
+<details>
+<summary><b>🔌 Click to expand complete REST API Endpoints</b></summary>
+
+<br/>
+
+| Domain | Method | Endpoint | Description | Payload / Response |
+| :--- | :--- | :--- | :--- | :--- |
+| **Auth** | `POST` | `/api/auth/send-otp` | Generate & send 6-digit SMS OTP | `{ phone: "+1234567890" }` |
+| **Auth** | `POST` | `/api/auth/verify-otp` | Validate OTP & issue HTTP-Only JWT | `{ phone, otp }` ➔ `Set-Cookie` |
+| **Auth** | `GET` | `/api/auth/me` | Fetch authenticated session profile | `User` object + photos + badges |
+| **Feed** | `GET` | `/api/feed` | Cursor-paginated smart discovery deck | Query: `?cursor=X&limit=10` |
+| **Swipes** | `POST` | `/api/swipes` | Record like/pass/super_like & alert | `{ swipedUserId, action: "like" }` |
+| **Swipes** | `DELETE`| `/api/swipes` | Rewind & restore last passed card | `{ swipedUserId }` |
+| **Matches**| `GET` | `/api/matches` | Retrieve all mutual match pairs | Returns match roster with chat status |
+| **Calls** | `POST` | `/api/calls/signal` | Send WebRTC offer/answer/candidate | `{ matchId, receiverId, type, data }` |
+| **Calls** | `GET` | `/api/calls/signal` | Poll pending WebRTC signals | Query: `?matchId=X` |
+| **Radar** | `POST` | `/api/random-chat/queue` | Join anonymous radar matching queue | `{ vibe: "chill", ageMin, ageMax }` |
+| **Radar** | `GET` | `/api/random-chat/session` | Poll anonymous speed session state | Returns ephemeral partner info & initials |
+| **Venues** | `POST` | `/api/places/search` | 100% Free OpenStreetMap venue search | `{ query: "Gym", city: "Mumbai" }` |
+| **Meetups**| `POST` | `/api/meetups` | Create spontaneous community event | `{ title, venueName, date, category }` |
+| **Verify** | `POST` | `/api/users/verification`| AI live webcam face-match verification | `{ selfieDataUrl }` ➔ `isVerified: true` |
+
+</details>
+
+<br/>
+
+---
+
+## 🏗️ Tech Stack & Tooling
+
+<div align="center">
+
+| Layer | Technologies & Frameworks | Strategic Engineering Rationale |
+| :--- | :--- | :--- |
+| **Frontend Core** | ![Next.js](https://img.shields.io/badge/Next.js_14-black?logo=next.js) ![React](https://img.shields.io/badge/React_18-61DAFB?logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?logo=typescript&logoColor=white) | Server-side rendering, type-safe API route handlers, and zero-bundle server components. |
+| **Styling & Motion** | ![TailwindCSS](https://img.shields.io/badge/TailwindCSS_3-38B2AC?logo=tailwindcss&logoColor=white) ![CSS3](https://img.shields.io/badge/Vanilla_CSS-1572B6?logo=css3&logoColor=white) | GPU-accelerated transforms, utility-first responsiveness, and glassmorphic backdrop filters. |
+| **Real-Time P2P** | ![WebRTC](https://img.shields.io/badge/WebRTC-333333?logo=webrtc&logoColor=white) ![STUN](https://img.shields.io/badge/Google_STUN-4285F4?logo=google&logoColor=white) | Zero-latency 60fps audio/video streaming directly between peers with $0 server streaming cost. |
+| **Database & ORM** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white) ![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?logo=drizzle&logoColor=black) | ACID relational integrity, blazing-fast SQL execution with lightweight TypeScript schema definition. |
+| **Maps & Geo Engine** | ![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?logo=openstreetmap&logoColor=white) ![Nominatim](https://img.shields.io/badge/Nominatim_API-00599C) | 100% Free global venue search across gyms, sports turfs, and cafes without credit card locks. |
+| **Payments & Monetization** | ![Razorpay](https://img.shields.io/badge/Razorpay-02042B?logo=razorpay&logoColor=white) | Robust payment processing for DateBuddy Gold subscriptions with instant webhook verification. |
+
+</div>
+
+<br/>
+
+---
+
+## ⚡ Quick Start & Local Development
+
+### Prerequisites
+* **Node.js**: `v18.17.0` or higher
+* **Package Manager**: `npm`, `yarn`, or `pnpm`
+* **PostgreSQL Database**: [Neon Serverless Postgres](https://neon.tech/) (Recommended) or local instance
 
 ### 1️⃣ Clone the Repository
 ```bash
@@ -186,76 +371,77 @@ npm install
 Create a `.env.local` file in the project root:
 
 ```env
-# Database Connection (Neon / Supabase / PostgreSQL)
-DATABASE_URL="postgresql://user:password@host/datebuddy?sslmode=require"
+# PostgreSQL Connection String (Neon / Supabase / Local)
+DATABASE_URL="postgresql://username:password@ep-cool-sample.us-east-2.aws.neon.tech/datebuddy?sslmode=require"
 
-# App URL
+# Application Base URL
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# JWT Secret
-JWT_SECRET="your_super_secret_jwt_key_here"
+# Stateless Session Secret
+JWT_SECRET="generate_a_secure_random_64_character_secret_key"
 
-# (Optional) Razorpay for Gold Subscriptions
-RAZORPAY_KEY_ID="rzp_test_xxxx"
+# (Optional) Razorpay Gateway Keys for Gold Tier
+RAZORPAY_KEY_ID="rzp_test_your_key_id"
 RAZORPAY_KEY_SECRET="your_razorpay_secret"
 ```
 
-### 4️⃣ Push Database Schema
+### 4️⃣ Synchronize Database Schema
 ```bash
 npm run db:push
 ```
 
-### 5️⃣ Run the Development Server
+### 5️⃣ Launch the Development Server
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) on your browser (or open in responsive mobile mode `390px × 844px` for the full mobile app experience).
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
----
+> 💡 **Pro-Tip for Mobile Preview**: Open Chrome DevTools (`F12` or `Cmd+Option+I`), toggle Device Emulation (`Cmd+Shift+M`), and select **iPhone 15 Pro (393 × 852)** to experience DateBuddy's pixel-perfect mobile-first UX with touch events!
 
-## 📡 API Endpoints
-
-<details>
-<summary><b>Click to expand full REST API endpoints</b></summary>
 <br/>
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/send-otp` | Send phone OTP |
-| `POST` | `/api/auth/verify-otp` | Verify OTP & issue session token |
-| `GET` | `/api/auth/me` | Fetch authenticated user profile |
-| `GET` | `/api/feed` | Smart discovery feed with cursor pagination |
-| `POST` | `/api/swipes` | Record like/pass/super_like & trigger alerts |
-| `DELETE` | `/api/swipes` | Rewind/undo last pass |
-| `GET` | `/api/matches` | Get user's mutual matches |
-| `POST` | `/api/calls/signal` | Send WebRTC offer/answer/ICE candidates |
-| `GET` | `/api/calls/signal` | Poll pending WebRTC handshake signals |
-| `POST` | `/api/random-chat/queue` | Enter anonymous radar queue |
-| `GET` | `/api/random-chat/session` | Poll anonymous chat session state |
-| `POST` | `/api/places/search` | 100% Free OpenStreetMap venue search |
-| `POST` | `/api/meetups` | Create new meetup event |
-| `POST` | `/api/users/verification` | Run AI face matching & assign badge |
+---
 
-</details>
+## 🗺️ Product Roadmap & Upcoming Innovations
+
+```
+ [✅] Phase 1: Core Discovery, Velocity Swiping & 8-Step Onboarding
+ [✅] Phase 2: 100% Free WebRTC Video/Voice Calling with iOS FaceTime UI
+ [✅] Phase 3: AI Face Verification & Real-time Dynamic Persona Scoring
+ [✅] Phase 4: Free OpenStreetMap Venue Search for IRL Gym/Cafe Meetups
+ [✅] Phase 5: Initial-Based Anonymous Radar Speed Dating with Trivia
+ [🔄] Phase 6: "Two Truths & A Lie" Interactive In-Chat Guessing Widget
+ [⏳] Phase 7: AI Rizz Wingman (Context-Aware Spark Banter Suggestions)
+ [⏳] Phase 8: Spontaneous 2-Hour "Who's Down?" Gym & Cafe Map Beacons
+```
+
+<br/>
 
 ---
 
-## 🛠️ Built With
+## 🤝 Contributing & Community
 
-* **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Components & Route Handlers)
-* **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict mode, zero `any`)
-* **Styling**: [Tailwind CSS](https://tailwindcss.com/) & Vanilla CSS custom keyframes
-* **Real-time WebRTC**: Peer-to-Peer with Google STUN (`stun.l.google.com:19302`)
-* **Database & ORM**: [PostgreSQL](https://www.postgresql.org/) & [Drizzle ORM](https://orm.drizzle.team/)
-* **Haptics**: Native Web Vibration API with iOS Taptic presets
+Contributions are what make the open-source community an incredible place to learn, inspire, and create! Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project (`https://github.com/anshulr0019/DateBuddy/fork`)
+2. Create your Feature Branch (`git checkout -b feat/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feat/AmazingFeature`)
+5. Open a Pull Request
+
+<br/>
 
 ---
 
 <div align="center">
 
-Made with 💖 for genuine connections.
+### 💕 DateBuddy — Where Connections Become Real
 
-**[⭐ Star DateBuddy on GitHub](https://github.com/anshulr0019/DateBuddy)**
+Crafted with 💖 by [Anshul](https://github.com/anshulr0019) & the open-source community.
+
+<br/>
+
+[![GitHub Stars](https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=social)](https://github.com/anshulr0019/DateBuddy)
 
 </div>
