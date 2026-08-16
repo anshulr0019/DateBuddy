@@ -220,19 +220,28 @@ export default function ChatPage() {
 
               {partner && (
                 <div className="flex items-center gap-1.5">
+                  {/* Audio Call */}
                   <button
                     onClick={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#7B68EE] hover:bg-[#7B68EE]/10 active:scale-90 transition-all cursor-pointer shadow-2xs"
-                    title="Start Audio Call"
+                    title="Audio Call"
+                    aria-label="Start audio call"
                   >
-                    📞
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
+                    </svg>
                   </button>
+                  {/* Video Call */}
                   <button
                     onClick={() => setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' })}
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-sm active:scale-90 transition-all cursor-pointer"
-                    title="Start Video Call"
+                    title="Video Call"
+                    aria-label="Start video call"
                   >
-                    📹
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <polygon points="23 7 16 12 23 17 23 7" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                    </svg>
                   </button>
                   <button
                     onClick={() => setSafetyOpen(true)}

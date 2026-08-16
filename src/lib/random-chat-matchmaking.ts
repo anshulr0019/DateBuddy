@@ -37,7 +37,7 @@ import {
   INTEREST_ICEBREAKERS,
   type RandomChatReportReason,
 } from './random-chat-config';
-import { assignAliases, type AnonymousAlias } from './random-chat-aliases';
+import { assignAliases, getInitialAlias, type AnonymousAlias } from './random-chat-aliases';
 
 /* ─────────────────────────────────────────────────
    Public types (shared with the API layer)
@@ -160,7 +160,7 @@ async function activeSessionFor(userId: number, tx: typeof db | DbTx = db) {
  *    matched with two different partners at once.
  */
 export async function joinRandomChat(userId: number, prefs: RandomChatPreferences): Promise<'searching' | 'matched'> {
-  const [user] = await db.select({ gender: users.gender, dateOfBirth: users.dateOfBirth }).from(users).where(eq(users.id, userId));
+  const [user] = await db.select({ name: users.name, gender: users.gender, dateOfBirth: users.dateOfBirth }).from(users).where(eq(users.id, userId));
   if (!user) throw new Error('account-not-found');
 
   const vibe = RANDOM_CHAT_VIBES.includes(prefs.vibe as never) ? prefs.vibe : 'random';
@@ -244,6 +244,7 @@ export async function joinRandomChat(userId: number, prefs: RandomChatPreference
           ageMax: randomChatQueue.ageMax,
           genderPref: randomChatQueue.genderPref,
           joinedAt: randomChatQueue.joinedAt,
+          name: users.name,
           gender: users.gender,
           dateOfBirth: users.dateOfBirth,
         })
@@ -327,9 +328,9 @@ export async function joinRandomChat(userId: number, prefs: RandomChatPreference
 
       if (!pick) continue;
 
-      const { aliasA, aliasB } = assignAliases();
-      const aliasAStr = `${aliasA.emoji} ${aliasA.name}`;
-      const aliasBStr = `${aliasB.emoji} ${aliasB.name}`;
+      const { aliasA, aliasB } = assignAliases(user.name, pick.name);
+      const aliasAStr = aliasA.name;
+      const aliasBStr = aliasB.name;
 
       const [session] = await tx
         .insert(randomChatSessions)
@@ -465,7 +466,7 @@ async function buildSessionState(session: InferSelectModel<typeof randomChatSess
       status: session.status as SessionStatus,
       vibe: session.vibe,
       partner: {
-        alias: partnerAlias,
+        alias: partner?.name ? getInitialAlias(partner.name).name : partnerAlias,
         age: partner ? calculateAge(partner.dateOfBirth) : null,
         interests: partnerInterests,
         sharedInterests,

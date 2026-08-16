@@ -4,14 +4,16 @@ import { GlassCard, PrimaryButton } from '@/app/components/shared';
 import { hapticLight, hapticSuccess } from '@/app/lib/haptics';
 import type { RandomChatSession } from '../types';
 
-function aliasEmoji(alias: string): string {
-  const first = alias.trim().split(' ')[0];
-  return first ?? '🎲';
+function getInitialLetter(alias?: string | null): string {
+  if (!alias) return '?';
+  const clean = alias.replace(/^User\s+/i, '').replace(/^Partner\s+/i, '').trim();
+  return (clean[0] || 'A').toUpperCase();
 }
 
-function aliasName(alias: string): string {
-  const parts = alias.trim().split(' ');
-  return parts.slice(1).join(' ') || alias;
+function getDisplayName(alias?: string | null): string {
+  if (!alias) return 'Anonymous';
+  const initial = getInitialLetter(alias);
+  return `User ${initial}`;
 }
 
 export function PreviewScreen({
@@ -30,8 +32,8 @@ export function PreviewScreen({
   connected: boolean;
 }) {
   const partner = session.partner;
-  const emoji = partner ? aliasEmoji(partner.alias) : '🎲';
-  const name = partner ? aliasName(partner.alias) : 'Someone';
+  const initial = getInitialLetter(partner?.alias);
+  const name = getDisplayName(partner?.alias);
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-6 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col items-center text-center">
@@ -40,8 +42,8 @@ export function PreviewScreen({
 
         <div className="relative mx-auto h-24 w-24 mb-5">
           <div className="rc-pulse absolute inset-0 rounded-full bg-[#7B68EE]/30" />
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white shadow-[0_12px_40px_-10px_rgba(123,104,238,0.6)] text-4xl">
-            {emoji}
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white shadow-[0_12px_40px_-10px_rgba(123,104,238,0.6)] text-4xl font-black">
+            {initial}
           </div>
         </div>
 
@@ -49,6 +51,7 @@ export function PreviewScreen({
         <p className="mt-1 text-[13px] text-[#1E293B]/55 font-medium">
           {partner?.age ? `${partner.age} · ` : ''}here to talk right now
         </p>
+
 
         {partner && partner.interests.length > 0 && (
           <div className="mt-6 text-left">

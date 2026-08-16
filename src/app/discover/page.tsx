@@ -808,23 +808,17 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* TOP CARD — scrollable profile, horizontally draggable */}
+      {/* TOP CARD — scrollable profile (accidental swipe gesture disabled; action buttons used for like/pass) */}
       <div
         key={cardKey}
         ref={scrollRef}
         onScroll={handleScroll}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
         onDragStart={(e) => e.preventDefault()}
         className={`absolute inset-0 overflow-y-auto overflow-x-hidden rounded-[28px] scrollbar-none touch-pan-y ${
           exit
-            ? exit.viaDrag
-              ? '' // drag exits fly on inline styles that keep the release trajectory
-              : exit.dir === 'right' ? 'animate-card-swipe-right'
-                : exit.dir === 'left' ? 'animate-card-swipe-left'
-                : 'animate-card-swipe-up'
+            ? exit.dir === 'right' ? 'animate-card-swipe-right'
+              : exit.dir === 'left' ? 'animate-card-swipe-left'
+              : 'animate-card-swipe-up'
             : enterAnim ? 'animate-card-depth-enter' : ''
         }`}
       >

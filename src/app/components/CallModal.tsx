@@ -198,10 +198,13 @@ export function CallModal({
 
   const startOutgoingCall = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const constraints: MediaStreamConstraints = {
         audio: true,
-        video: callType === 'video' ? { facingMode: 'user', width: 640, height: 480 } : false,
-      });
+        video: callType === 'video'
+          ? { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+          : false,
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       localStreamRef.current = stream;
       if (localVideoRef.current && callType === 'video') localVideoRef.current.srcObject = stream;
       const pc = createPeerConnection();
@@ -214,10 +217,13 @@ export function CallModal({
 
   const handleAcceptCall = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const constraints: MediaStreamConstraints = {
         audio: true,
-        video: callType === 'video' ? { facingMode: 'user', width: 640, height: 480 } : false,
-      });
+        video: callType === 'video'
+          ? { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+          : false,
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       localStreamRef.current = stream;
       if (localVideoRef.current && callType === 'video') localVideoRef.current.srcObject = stream;
       const pc = createPeerConnection();

@@ -29,8 +29,8 @@ export function ConnectedScreen({
             {match?.partnerPhoto ? (
               <SafeImage src={match.partnerPhoto} name={match.partnerName} alt="" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-4xl">
-                {partner?.alias.trim().split(' ')[0] ?? '✨'}
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-4xl font-black">
+                {partner?.alias.replace(/^User\s+/i, '').replace(/^Partner\s+/i, '').trim()[0]?.toUpperCase() ?? 'A'}
               </div>
             )}
           </div>

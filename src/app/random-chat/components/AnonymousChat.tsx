@@ -46,8 +46,9 @@ export function AnonymousChat({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const partner = session.partner;
-
-  const partnerName = partner ? partner.alias : 'Your partner';
+  const rawAlias = partner?.alias ?? '';
+  const initialLetter = rawAlias.replace(/^User\s+/i, '').replace(/^Partner\s+/i, '').trim()[0]?.toUpperCase() || 'A';
+  const partnerName = partner ? `User ${initialLetter}` : 'Your partner';
 
   const feedItems = useMemo(() => {
     let prevSenderIsMe: boolean | null = null;
@@ -95,8 +96,8 @@ export function AnonymousChat({
       <div className="flex-shrink-0 px-4 py-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-10 w-10 flex-shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-[18px] shadow-2xs">
-              {partner?.alias.trim().split(' ')[0] ?? '🎲'}
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-[16px] font-black shadow-2xs">
+              {initialLetter}
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#22C55E] border-2 border-white" />
           </div>

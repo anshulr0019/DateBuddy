@@ -235,6 +235,15 @@ export async function POST(request: NextRequest) {
             photo: targetPhotos[0]?.url ?? null,
           };
         }
+      } else {
+        // Send a like/super_like notification to the target user
+        await db.insert(notifications).values({
+          userId:   targetId,
+          type:     action === 'super_like' ? 'super_like' : 'like',
+          title:    action === 'super_like' ? 'You got a Super Like! ⭐' : 'Someone liked your profile! ✨',
+          body:     action === 'super_like' ? 'Someone super liked you! Check them out in your Likes tab.' : 'You have a new admirer! See who liked you in the Likes tab.',
+          metadata: { swiperId: currentUserId },
+        }).catch((err) => console.warn('Could not insert like notification:', err));
       }
     }
 
