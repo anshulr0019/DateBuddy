@@ -92,14 +92,15 @@ export default function FloatingNav() {
 
   useEffect(() => {
     const checkModal = () => {
-      const modal = document.querySelector('[role="dialog"]');
+      const modal = document.querySelector('[role="dialog"], [data-modal="true"], [aria-modal="true"], .animate-sheet-up');
       setHasModal(Boolean(modal));
     };
     checkModal();
     const observer = new MutationObserver(checkModal);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
     return () => observer.disconnect();
   }, []);
+
 
   // Hide floating nav on standalone flow pages or when any modal/lightbox is open
   const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy', '/random-chat'];

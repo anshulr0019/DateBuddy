@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
+
 
 export interface VenueItem {
   id: string;
@@ -83,15 +85,62 @@ interface VenuePickerModalProps {
 
 export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenuePickerModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [livePlaces, setLivePlaces] = useState<VenueItem[]>([]);
+  const [isSearchingLive, setIsSearchingLive] = useState(false);
+
+  // Track dynamic visual viewport height on mobile devices when soft keyboard opens
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const handleResize = () => {
+      setViewportHeight(vv.height);
+    };
+    vv.addEventListener('resize', handleResize);
+    vv.addEventListener('scroll', handleResize);
+    handleResize();
+    return () => {
+      vv.removeEventListener('resize', handleResize);
+      vv.removeEventListener('scroll', handleResize);
+    };
+  }, [isOpen]);
 
   const categoryNormalized = (category || 'gym').toLowerCase();
+
+  // Fetch live places from Google Maps / OpenStreetMap API when host types in search
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setLivePlaces([]);
+      setIsSearchingLive(false);
+      return;
+    }
+
+    setIsSearchingLive(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/places/search?query=${encodeURIComponent(searchQuery.trim())}&category=${encodeURIComponent(categoryNormalized)}`
+        );
+        const data = await res.json();
+        if (res.ok && data?.success && Array.isArray(data.places)) {
+          setLivePlaces(data.places);
+        }
+      } catch {
+        /* fallback to local */
+      } finally {
+        setIsSearchingLive(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, categoryNormalized]);
 
   // Get curated list for this category, or combine all if category unknown
   const defaultList = useMemo(() => {
     return CATEGORY_VENUES[categoryNormalized] || CATEGORY_VENUES.gym;
   }, [categoryNormalized]);
 
-  const filteredVenues = useMemo(() => {
+  const localFilteredVenues = useMemo(() => {
     if (!searchQuery.trim()) return defaultList;
     const q = searchQuery.toLowerCase().trim();
     return defaultList.filter(
@@ -101,6 +150,17 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
         v.address.toLowerCase().includes(q)
     );
   }, [defaultList, searchQuery]);
+
+  // Combine live API places with local fallback curated list
+  const displayVenues = useMemo(() => {
+    if (livePlaces.length > 0) {
+      // Merge live places first, followed by any matching local entries
+      const liveIds = new Set(livePlaces.map(p => p.name.toLowerCase()));
+      const remainingLocal = localFilteredVenues.filter(l => !liveIds.has(l.name.toLowerCase()));
+      return [...livePlaces, ...remainingLocal];
+    }
+    return localFilteredVenues;
+  }, [livePlaces, localFilteredVenues]);
 
   if (!isOpen) return null;
 
@@ -114,17 +174,28 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
     'Outdoor Locations & Spots';
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
-      {/* Backdrop */}
+    <div
+      role="dialog"
+      aria-modal="true"
+      data-modal="true"
+      className="fixed inset-0 z-[99999] flex items-start sm:items-center justify-center p-2 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] sm:p-4 overflow-hidden"
+    >
+      {/* Backdrop — covers bottom navigation bar */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-md transition-opacity animate-fade-in"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-fade-in z-0"
       />
 
-      {/* Sheet Modal */}
-      <div className="relative z-10 w-full max-w-[440px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[85dvh] flex flex-col shadow-2xl animate-sheet-up overflow-hidden">
+      {/* Sheet Modal — aligns smoothly to top when soft keyboard opens */}
+      <div
+        style={{
+          maxHeight: viewportHeight ? `${viewportHeight - 24}px` : '85dvh',
+        }}
+        className="relative z-10 w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[28px] flex flex-col shadow-2xl animate-sheet-up overflow-hidden my-auto"
+      >
+
         {/* Handle */}
-        <div className="pt-3 pb-1 flex-shrink-0 flex justify-center">
+        <div className="pt-2.5 pb-1 flex-shrink-0 flex justify-center">
           <div className="h-1.5 w-10 bg-gray-300 rounded-full" />
         </div>
 
@@ -149,11 +220,14 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search ${categoryNormalized}s or area (e.g. Bandra, Cult...)...`}
+              placeholder={`Search ${categoryNormalized}s, area or city (e.g. Janakpuri, Bandra...)...`}
               autoFocus
-              className="w-full h-11 pl-10 pr-4 rounded-2xl bg-gray-100/80 border border-gray-200 text-[14.5px] font-medium text-[#1E293B] placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#FF6B9D] transition-all"
+              className="w-full h-11 pl-10 pr-9 rounded-2xl bg-gray-100/80 border border-gray-200 text-[14.5px] font-medium text-[#1E293B] placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#FF6B9D] transition-all"
             />
             <span className="absolute left-3.5 top-3 text-gray-400 text-base">🔍</span>
+            {isSearchingLive && (
+              <span className="absolute right-3 top-3.5 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#FF6B9D]" />
+            )}
           </div>
         </div>
 
@@ -167,7 +241,7 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
                 onSelect(searchQuery.trim(), 'Custom Location');
                 onClose();
               }}
-              className="w-full p-3.5 rounded-2xl border border-dashed border-[#FF6B9D] bg-[#FFF0F4] hover:bg-[#FFE4ED] transition-all flex items-center gap-3 cursor-pointer text-left shadow-2xs active:scale-[0.98]"
+              className="w-full p-3 rounded-2xl border border-dashed border-[#FF6B9D] bg-[#FFF0F4] hover:bg-[#FFE4ED] transition-all flex items-center gap-3 cursor-pointer text-left shadow-2xs active:scale-[0.98]"
             >
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white text-lg">
                 📍
@@ -181,8 +255,15 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
             </button>
           )}
 
-          {/* Filtered Curated List */}
-          {filteredVenues.map((v) => (
+          {/* Live Search Indicator */}
+          {isSearchingLive && (
+            <div className="py-2 text-center text-xs font-semibold text-[#FF6B9D] animate-pulse">
+              🔍 Searching live Google Maps & OpenStreetMap locations...
+            </div>
+          )}
+
+          {/* Filtered Curated & Live List */}
+          {displayVenues.map((v) => (
             <button
               key={v.id}
               type="button"
@@ -199,7 +280,7 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="text-[14.5px] font-bold text-[#1E293B] truncate">{v.name}</h4>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF6B9D] bg-[#FFF0F4] px-2 py-0.5 rounded-md flex-shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF6B9D] bg-[#FFF0F4] px-2 py-0.5 rounded-md flex-shrink-0 truncate max-w-[120px]">
                       {v.area}
                     </span>
                   </div>
@@ -211,11 +292,13 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
             </button>
           ))}
 
-          {filteredVenues.length === 0 && searchQuery.trim().length === 0 && (
+
+          {displayVenues.length === 0 && searchQuery.trim().length === 0 && (
             <div className="p-8 text-center text-gray-400">
               <p className="text-[14px] font-bold">No venues found for this category</p>
             </div>
           )}
+
         </div>
       </div>
     </div>

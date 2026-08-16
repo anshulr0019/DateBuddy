@@ -13,6 +13,7 @@ import { MessageBubble } from './components/MessageBubble';
 import { Composer } from './components/Composer';
 import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
 import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
+import { CallModal } from '../../components/CallModal';
 
 const ICEBREAKERS = [
   'Hey! Great to match with you ✨',
@@ -47,6 +48,16 @@ export default function ChatPage() {
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [showNewChip, setShowNewChip] = useState(false);
+  const [callState, setCallState] = useState<{
+    isOpen: boolean;
+    callType: 'audio' | 'video';
+    mode: 'outgoing' | 'incoming';
+    incomingOfferData?: any;
+  }>({
+    isOpen: false,
+    callType: 'video',
+    mode: 'outgoing',
+  });
 
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +71,35 @@ export default function ChatPage() {
     const t = setTimeout(clearComposerError, 4000);
     return () => clearTimeout(t);
   }, [composerError, clearComposerError]);
+
+  /* Listen for incoming WebRTC video/audio call signals */
+  useEffect(() => {
+    if (!validMatchId || callState.isOpen) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/calls/signal?matchId=${validMatchId}`);
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.signals)) {
+          for (const sig of data.signals) {
+            if (sig.type === 'offer') {
+              setCallState({
+                isOpen: true,
+                callType: sig.callType || 'video',
+                mode: 'incoming',
+                incomingOfferData: sig.data,
+              });
+              break;
+            }
+          }
+        }
+      } catch {
+        /* silent polling */
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [validMatchId, callState.isOpen]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const feed = feedRef.current;
@@ -179,13 +219,29 @@ export default function ChatPage() {
               </div>
 
               {partner && (
-                <button
-                  onClick={() => setSafetyOpen(true)}
-                  aria-label="Conversation options: report or block"
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all duration-200 cursor-pointer shadow-2xs"
-                >
-                  <Ic.Dots />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#7B68EE] hover:bg-[#7B68EE]/10 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    title="Start Audio Call"
+                  >
+                    📞
+                  </button>
+                  <button
+                    onClick={() => setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' })}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-sm active:scale-90 transition-all cursor-pointer"
+                    title="Start Video Call"
+                  >
+                    📹
+                  </button>
+                  <button
+                    onClick={() => setSafetyOpen(true)}
+                    aria-label="Conversation options: report or block"
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <Ic.Dots />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -365,6 +421,21 @@ export default function ChatPage() {
         />
       )}
       {safetyOpen && partner && <SafetySheet partner={partner} onClose={() => setSafetyOpen(false)} />}
+      {validMatchId && partner && myId && (
+        <CallModal
+          isOpen={callState.isOpen}
+          matchId={validMatchId}
+          partnerId={partner.partnerId}
+          partnerName={partner.name}
+          partnerPhoto={partner.photo}
+          myId={myId}
+          initialCallType={callState.callType}
+          initialMode={callState.mode}
+          incomingOfferData={callState.incomingOfferData}
+          onClose={() => setCallState((prev) => ({ ...prev, isOpen: false }))}
+        />
+      )}
+
     </div>
   );
 }

@@ -196,3 +196,75 @@ export function computePersona(data: UserBehaviorData): { title: string; subline
     subline: randomSubline,
   };
 }
+
+export function calculateDynamicVibe(userStats?: Partial<UserBehaviorData>): {
+  personaId: string;
+  title: string;
+  subline: string;
+  reason: string;
+} {
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  // 1. Time-of-day dynamic triggers
+  if (currentHour >= 22 || currentHour < 4) {
+    return {
+      personaId: 'night_owl',
+      title: 'Night Owl 🦉',
+      subline: 'The night suits you.',
+      reason: 'Active late at night (10 PM - 4 AM)',
+    };
+  }
+
+  if (currentHour >= 5 && currentHour < 9) {
+    return {
+      personaId: 'early_spark',
+      title: 'Early Spark 🌅',
+      subline: 'First move energy.',
+      reason: 'Active early morning (5 AM - 9 AM)',
+    };
+  }
+
+  // 2. Behavioral dynamic triggers if stats present
+  if (userStats) {
+    const computed = computePersona({
+      daysInactive: 0,
+      matchesReceivedSpike: false,
+      profileViewsSpike: false,
+      emojiCount: 0,
+      avgReplyTimeMinutes: 5,
+      outgoingMessageRate: 5,
+      avgMessageLength: 50,
+      replyRate: 0.5,
+      longChatDuration: false,
+      swipeLikeRatio: 0.5,
+      matchSuccessRate: 0.5,
+      sessionTimeBuckets: { earlyMorning: 0, day: 1, evening: 1, lateNight: 0 },
+      profileViewsCount: 10,
+      likesSentCount: 10,
+      messagesSentCount: 10,
+      ...userStats,
+    });
+    return {
+      ...computed,
+      reason: 'Calculated from your app activity',
+    };
+  }
+
+  if (currentHour >= 17 && currentHour < 22) {
+    return {
+      personaId: 'flirt_mode',
+      title: 'Flirt Mode 😏',
+      subline: 'Causing trouble?',
+      reason: 'Active during prime evening hours',
+    };
+  }
+
+  return {
+    personaId: 'new_energy',
+    title: 'New Energy ✨',
+    subline: 'Let’s get started.',
+    reason: 'Fresh activity on DateBuddy',
+  };
+}
+

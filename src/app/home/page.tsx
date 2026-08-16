@@ -6,7 +6,7 @@ import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from '../components/shared';
 import { VenuePickerModal } from '../components/VenuePickerModal';
 import { useNotifications } from '../context/NotificationContext';
-import { PERSONAS, DEFAULT_PERSONA } from '@/lib/personaGreeting';
+import { PERSONAS, DEFAULT_PERSONA, calculateDynamicVibe } from '@/lib/personaGreeting';
 import { hapticLight, hapticMedium } from '../lib/haptics';
 
 type Pick = {
@@ -124,14 +124,13 @@ export default function HomePage() {
   }, [loadMeetups]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('user_active_persona');
-    if (saved) {
-      try {
-        setActivePersona(JSON.parse(saved));
-      } catch {
-        /* keep default */
-      }
-    }
+    // Automatically calculate dynamic AI Vibe based on current time & user activity
+    const computed = calculateDynamicVibe();
+    setActivePersona({
+      title: computed.title,
+      subline: computed.subline,
+      personaId: computed.personaId,
+    });
   }, []);
 
   const selectPersona = (id: string, title: string, subline: string) => {
@@ -366,7 +365,7 @@ export default function HomePage() {
               <div>
                 <GlassCard
                   onClick={() => router.push('/random-chat')}
-                  className="animate-bubble-enter overflow-hidden border border-gray-200/70 hover:border-[#7B68EE]/40 hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative"
+                  className="animate-bubble-enter overflow-hidden border border-[#7B68EE]/25 bg-gradient-to-r from-[#7B68EE]/[0.06] via-[#FF6B9D]/[0.05] to-[#7B68EE]/[0.06] hover:border-[#7B68EE]/50 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99] relative"
                 >
                   <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#7B68EE]/15 blur-2xl" />
                   <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-[#FF6B9D]/15 blur-2xl" />
@@ -379,25 +378,31 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-[15px] font-bold text-[#1E293B]">Anonymous Chat</h3>
-                        <span className="rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/30 text-[#7B68EE] text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5">
+                        <h3 className="text-[15px] font-extrabold text-[#1E293B]">Anonymous Chat</h3>
+                        <span className="rounded-full bg-[#7B68EE] text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 shadow-2xs">
                           New
                         </span>
                       </div>
-                      <p className="text-[12px] text-[#1E293B]/55 font-medium mt-0.5">
+                      <p className="text-[12px] text-[#1E293B]/60 font-medium mt-0.5 leading-snug">
                         Talk to a stranger about anything — stay anonymous until you&apos;re ready.
                       </p>
-                      <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-[#1E293B]/60">
+                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                         {randomChat ? (
                           <>
-                            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" /> {Math.max(0, randomChat.onlineCount)} online</span>
-                            <span className="text-[#1E293B]/25">·</span>
-                            <span>{Math.max(0, randomChat.chattingNow)} chatting now</span>
-                            <span className="text-[#1E293B]/25">·</span>
-                            <span>Anonymous</span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#16A34A]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] animate-pulse" /> {Math.max(0, randomChat.onlineCount)} online
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#7B68EE]">
+                              💬 {Math.max(0, randomChat.chattingNow)} chatting
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-[10.5px] font-bold text-gray-500">
+                              🎭 Anonymous
+                            </span>
                           </>
                         ) : (
-                          <span>Check who&apos;s online</span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#7B68EE]">
+                            ✨ Tap to join queue
+                          </span>
                         )}
                       </div>
                     </div>
@@ -571,17 +576,22 @@ export default function HomePage() {
 
       {/* PERSONA PICKER */}
       {showPersonaPicker && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div role="dialog" aria-modal="true" data-modal="true" className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
             onClick={() => setShowPersonaPicker(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
+            className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
           />
           <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-sheet-up">
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
-                <h3 className="text-[17px] font-extrabold text-[#1E293B]">Your Vibe</h3>
-                <p className="text-[12px] text-[#1E293B]/50">Pick how you&apos;re showing up today</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[17px] font-extrabold text-[#1E293B]">Your Vibe</h3>
+                  <span className="rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5">
+                    🤖 AI Calculated
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#1E293B]/60 font-medium">Auto-updated based on your activity &amp; time of day</p>
               </div>
               <button
                 onClick={() => setShowPersonaPicker(false)}
@@ -618,10 +628,10 @@ export default function HomePage() {
 
       {/* HOST MODAL */}
       {showHostModal && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div role="dialog" aria-modal="true" data-modal="true" className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
           <div
             onClick={() => setShowHostModal(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300"
+            className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
           />
           <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-sheet-up">
             {/* handle */}
