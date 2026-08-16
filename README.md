@@ -1,622 +1,261 @@
-cat > README.md << 'ENDOFFILE'
 <div align="center">
 
 # 💕 DateBuddy
+### *The Gen-Z Social Discovery & Connection Platform*
+**Dating without the cringe. Meeting without the awkwardness.**
 
-### *Where Connections Become Real*
+<br/>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
-</p>
+[![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![WebRTC](https://img.shields.io/badge/WebRTC_P2P-333333?style=for-the-badge&logo=webrtc&logoColor=white)](https://webrtc.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
 
-<p align="center">
-  <img src="https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=social" />
-  <img src="https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=social" />
-  <img src="https://img.shields.io/github/watchers/anshulr0019/DateBuddy?style=social" />
-</p>
+<br/>
 
-<p align="center">
-  <a href="#-quick-start"><strong>⚡ Quick Start</strong></a> •
-  <a href="#-features"><strong>✨ Features</strong></a> •
-  <a href="#️-tech-stack"><strong>🏗️ Tech Stack</strong></a>
-</p>
+[✨ Features](#-the-feature-breakdown) • [🔥 The Technical Flex](#-the-technical-flex) • [🚀 Quick Start](#-quick-start) • [🗄️ Architecture](#️-database-architecture) • [📡 API Reference](#-api-endpoints)
 
 ---
-
-### 🌟 A modern social discovery platform that goes beyond dating
-
-DateBuddy transforms how people connect by focusing on **shared interests**, **real-world meetups**, and **community building**. No more endless swiping — find your hiking buddy, gaming squad, or coffee companion.
 
 </div>
 
+<br/>
+
+## 🌟 What is DateBuddy?
+
+DateBuddy is a next-generation social discovery platform built from the ground up for modern dating culture. It fuses **spontaneous IRL meetups**, **AI-calculated vibe archetypes**, **initial-based anonymous speed chats**, and **100% free peer-to-peer WebRTC video/audio calling** into an ultra-fluid mobile web experience.
+
 ---
 
-## ✨ Features
+## 🔥 The Technical Flex
+
+### 🎨 1. Fluid UI, Motion & Gestures *(The UX Flex)*
+* **Velocity-Based Gesture Engine**: Profile cards with spring physics that calculate touch trajectory and velocity for organic Apple-like card flings without accidental touch slips.
+* **Spring-Physics Transitions**: Custom cubic-bezier spring curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`) replacing rigid linear CSS transitions with natural kinetic bounces.
+* **Native Haptic Feedback Integration**: Multi-tier vibration patterns (`light`, `medium`, `success`, `warning`) tuned to trigger the mobile Taptic Engine on card actions, matches, and sheet drags.
+* **Dynamic Context-Aware Glassmorphism**: High-performance frosted glass overlays (`backdrop-blur-2xl`) that dynamically adapt to moving background Aurora gradients.
+* **Safe-Area Inset Awareness**: Pixel-perfect layout calculations (`env(safe-area-inset-top)` & `visualViewport`) adapting seamlessly around the iPhone Dynamic Island, soft keyboards, and Android navigation bars.
+
+---
+
+### ⚡ 2. Architecture & Performance *(The Engineering Flex)*
+* **Optimistic UI State Mutation**: Card swipes and messaging mutations reflect instantly in local state before the server handshake completes, delivering **0ms perceived latency**.
+* **Fault-Tolerant Local Cache**: Persistent offline session caching so users can navigate across tabs or survive flaky mobile connections without losing drafted messages or feed position.
+* **Zero Cumulative Layout Shift (CLS)**: Pre-allocated aspect ratios and animated shimmer skeletons prevent screen jumps during asset downloads.
+* **Background Data Prefetching**: Smart sliding-window cache preloads the next 5 profile images and media assets in memory while the user browses the current card.
+
+---
+
+### 💬 3. Advanced Chat, Video & Social *(The Product Flex)*
+* **100% Free WebRTC Audio & HD Video Calling**:
+  * Peer-to-Peer 60fps streaming with public Google STUN servers (`$0/month` overhead).
+  * **FaceTime & iOS WhatsApp UI**: Floating PiP (Picture-in-Picture) selfie preview, pulsating ripple rings, live call timer, and active camera flip controls.
+* **Real-Time Presence & Receipt System**: Live presence dots (`🟢 online`), active typing indicators, and delivery status (`sent` ➔ `seen`).
+* **Dynamic Audio Waveform Visualizer**: Generates real-time visual frequency bars for recorded voice notes instead of a static play button.
+* **Episodic 8-Step Onboarding Wizard**: Frictionless step-by-step setup with auto-saving progress resume if the browser tab is closed.
+
+---
+
+### 🔒 4. Modern Auth, AI & Security *(The Backend Flex)*
+* **Passwordless OTP Authentication**: Frictionless SMS/Phone-based verification with brute-force rate-limiting.
+* **Stateless HTTP-Only JWT Sessions**: Secure token cookies protected against XSS and CSRF attacks.
+* **AI Real-Time Dynamic Vibe Scoring**: Algorithmically analyzes user activity times and in-app behavior to assign dynamic personas (*Night Owl 🦉, Early Spark 🌅, Flirt Mode 😏, Smooth Talker 💬*).
+* **AI Live Face-Matching Identity Verification**: Native webcam stream snapshot comparison against primary profile photo with verified badge reward.
+* **100% Free Geo-Search Engine**: OpenStreetMap Nominatim integration for 1-tap discovery of real gyms, cafes, sports turfs, and rooftop venues without paid Google Maps billing.
+* **Initial-Based Anonymous Chat**: Real-time anonymous radar matching displaying the other person's first alphabet (`User A`) and rotating funny facts/dating trivia while searching.
+
+---
+
+## ✨ The Feature Breakdown
 
 <table>
 <tr>
 <td width="50%">
 
-### 🎯 Smart Matching
-- Swipe-based discovery algorithm
-- Interest compatibility scoring
-- Location-based filtering
-- Activity preference matching
+### 🎯 Hyper-Personalized Discovery
+* Multi-filter feed (Distance, Age, Intent, Verified only)
+* Prompt card likes & profile photo carousels
+* Undo last pass feature for second chances
+* 0-accidental touch design with dedicated action buttons
 
 </td>
 <td width="50%">
 
-### 📅 Event Hosting
-- Create public/private meetups
-- RSVP system with capacity limits
-- Category-based event browsing
-- Attendee management dashboard
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 💬 Real-time Chat
-- Instant messaging with matches
-- AI-powered icebreakers
-- Photo & GIF sharing
-- Read receipts & typing indicators
-
-</td>
-<td width="50%">
-
-### 🏘️ Communities
-- Interest-based groups
-- Group chat functionality
-- Member roles (Admin/Moderator)
-- Community events integration
+### 📹 P2P Video & Voice Calling
+* 100% Free WebRTC connection
+* Native iOS FaceTime & WhatsApp styling
+* Live camera flip, mic mute, and camera toggle
+* Floating picture-in-picture selfie preview
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-### ✅ Trust & Safety
-- Phone OTP verification
-- Photo verification badges
-- User reporting system
-- Block & unmatch options
+### 🎭 Anonymous Speed Chat
+* Real-time radar scan with rotating hilarious trivia
+* Privacy-first initial display (`User A`, `User P`)
+* 1-tap reveal & mutual connection upgrade
+* Instant in-app notifications when someone likes you
 
 </td>
 <td width="50%">
 
-### 💎 Premium Features
-- Unlimited likes & super likes
-- See who liked you
-- Profile boost (24h visibility)
-- Advanced filters & ad-free experience
+### 📅 Real-World Meetups & Events
+* Host events for Gyms, Cafes, Sports, Bars, and Cinema
+* Free venue search powered by OpenStreetMap
+* Attendee RSVP list with host approval controls
+* Public and private community hangouts
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🛡️ AI Face Verification
+* Live browser webcam capture
+* AI facial matching against profile photos
+* Instant verified checkmark badge (`✓`)
+* Comprehensive block & report moderation
+
+</td>
+<td width="50%">
+
+### 💎 DateBuddy Gold Tier
+* Unlimited daily likes and rewinds
+* Daily Super Likes with spotlight badges
+* See who liked your profile before matching
+* Razorpay payment gateway integration
 
 </td>
 </tr>
 </table>
-
----
-
-## 🏗️ Tech Stack
-
-### Frontend
-
-| Technology | Purpose | Why We Chose It |
-|------------|---------|-----------------|
-| ![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white) | Framework | SSR, API Routes, File-based Routing |
-| ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black) | UI Library | Component reusability, Hooks |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) | Language | Type safety, Better DX |
-| ![Tailwind](https://img.shields.io/badge/Tailwind-3-38B2AC?logo=tailwind-css&logoColor=white) | Styling | Rapid prototyping, Utility-first |
-
-### Backend
-
-| Technology | Purpose | Why We Chose It |
-|------------|---------|-----------------|
-| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-316192?logo=postgresql&logoColor=white) | Database | Relational data, ACID compliance |
-| ![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F) | ORM | Type-safe queries, SQL-like syntax |
-| ![Neon](https://img.shields.io/badge/Neon-Serverless-00E699) | DB Host | Auto-scaling, Generous free tier |
-| ![Vercel](https://img.shields.io/badge/Vercel-Production-black?logo=vercel&logoColor=white) | Hosting | Edge functions, Zero config |
 
 ---
 
 ## 🗄️ Database Architecture
 
-<details>
-<summary><b>📊 Click to view 18-table schema</b></summary>
-
-<br>
-
-<pre>
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    DateBuddy Database                       │
+│                    DateBuddy Schema                         │
 └─────────────────────────────────────────────────────────────┘
 
-👤 USER MANAGEMENT
-├── users ─────────────────── Core user profiles
-├── photos ────────────────── Profile images (1:many)
-├── user_interests ────────── Interest tags (many:many)
-├── preferences ───────────── Discovery settings (1:1)
-└── subscriptions ─────────── Premium tiers (1:1)
+👤 USERS & PROFILES
+├── users ─────────────────── Core accounts, verification, bio, city
+├── photos ────────────────── Multiple high-res profile photos (1:N)
+├── user_interests ────────── Interest tag bindings (N:M)
+├── verifications ─────────── AI Face verification logs
+└── subscriptions ─────────── DateBuddy Gold tier & payment records
 
-💬 SOCIAL FEATURES
-├── swipes ────────────────── Like/Pass tracking
-├── matches ───────────────── Mutual connections
-├── messages ──────────────── Chat history
-└── conversations ─────────── Message threads
+💬 SOCIAL & DISCOVERY
+├── swipes ────────────────── Likes, Passes, Super Likes
+├── matches ───────────────── Mutual match pairings
+├── messages ──────────────── Text, photos, voice notes & locations
+├── notifications ─────────── Real-time likes, matches & call alerts
+└── call_signals ──────────── WebRTC peer offer/answer exchange
 
-📅 MEETUPS & EVENTS
-├── meetups ───────────────── Hosted events
-├── meetup_attendees ──────── RSVP system
-└── check_ins ─────────────── Spontaneous hangouts
+🎭 ANONYMOUS RADAR
+├── random_chat_queue ────── Active searching users by vibe
+├── random_chat_sessions ─── Matched anonymous pairs with initials
+└── random_chat_messages ─── Ephemeral chat messages
 
-🏘️ COMMUNITIES
-├── groups ────────────────── Interest communities
-├── group_members ─────────── Membership tracking
-└── group_posts ───────────── Community content
-
-🔧 SUPPORT TABLES
-├── interests ─────────────── Master interest list
-├── notifications ─────────── Push alerts
-└── reports ───────────────── Safety moderation
-</pre>
-
-**Key Relationships:**
-- One user → Many photos `(1:N)`
-- Users ↔ Interests `(N:M via user_interests)`
-- Users ↔ Meetups `(N:M via meetup_attendees)`
-- Matches trigger Conversations `(1:1)`
-
-</details>
+📅 IRL MEETUPS & EVENTS
+├── meetups ───────────────── Community events & venue data
+├── meetup_attendees ──────── RSVP lists (Going / Maybe / Cancelled)
+└── groups ────────────────── Interest communities & member hubs
+```
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-<pre>
-✅ Node.js 18+ installed
-✅ PostgreSQL database (Neon / Supabase / Local)
-✅ npm or yarn package manager
-</pre>
-
-### Installation
-
-<pre>
-# 1️⃣ Clone the repo
+### 1️⃣ Clone the Repository
+```bash
 git clone https://github.com/anshulr0019/DateBuddy.git
 cd DateBuddy
+```
 
-# 2️⃣ Install dependencies
+### 2️⃣ Install Dependencies
+```bash
 npm install
+```
 
-# 3️⃣ Set up environment variables
-cp .env.example .env.local
-# Add your DATABASE_URL
+### 3️⃣ Configure Environment Variables
+Create a `.env.local` file in the project root:
 
-# 4️⃣ Push database schema
+```env
+# Database Connection (Neon / Supabase / PostgreSQL)
+DATABASE_URL="postgresql://user:password@host/datebuddy?sslmode=require"
+
+# App URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# JWT Secret
+JWT_SECRET="your_super_secret_jwt_key_here"
+
+# (Optional) Razorpay for Gold Subscriptions
+RAZORPAY_KEY_ID="rzp_test_xxxx"
+RAZORPAY_KEY_SECRET="your_razorpay_secret"
+```
+
+### 4️⃣ Push Database Schema
+```bash
 npm run db:push
+```
 
-# 5️⃣ Run development server
+### 5️⃣ Run the Development Server
+```bash
 npm run dev
+```
 
-# 🎉 Open http://localhost:3000
-</pre>
-
-### Environment Variables
-
-Create `.env.local` in the root:
-
-<pre>
-# Database (Required)
-DATABASE_URL=postgresql://user:password@host/database?sslmode=require
-
-# Optional: For production
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
-</pre>
+Open [http://localhost:3000](http://localhost:3000) on your browser (or open in responsive mobile mode `390px × 844px` for the full mobile app experience).
 
 ---
 
-## 📱 User Journey
-
-<pre>
-📱 Sign Up
-    ↓
-📞 Phone OTP Verification
-    ↓
-📝 7-Step Onboarding (Name → Location → Photos → Bio → Interests → Preferences → Review)
-    ↓
-    ┌──────────────────────────────────┐
-    │                                  │
-🔥 Discover & Swipe         📅 Browse Meetups
-    │                                  │
-    ↓                                  ↓
-💬 Match & Chat              🎉 RSVP & Attend
-    │                                  │
-    └───────────────┬──────────────────┘
-                    ↓
-           🏘️ Join Communities
-                    ↓
-           👥 Engage & Connect
-</pre>
-
----
-
-## 🎨 Design System
+## 📡 API Endpoints
 
 <details>
-<summary><b>🎨 Click to view design tokens</b></summary>
+<summary><b>Click to expand full REST API endpoints</b></summary>
+<br/>
 
-<br>
-
-### Color Palette
-
-<pre>
-/* Primary Gradient */
---gradient-primary: linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%);
---gradient-secondary: linear-gradient(135deg, #FFD1DC 0%, #E0BBE4 100%);
-
-/* Semantic Colors */
---color-bg: #FAFAFA;
---color-card: #FFFFFF;
---color-text: #1A1A2E;
---color-text-muted: #6E7191;
-
-/* Action Colors */
---color-like: #4ECDC4;
---color-pass: #FF6B6B;
---color-superlike: #7B68EE;
-</pre>
-
-### Typography
-
-<pre>
---font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
---text-xs:   0.75rem;
---text-sm:   0.875rem;
---text-base: 1rem;
---text-lg:   1.125rem;
---text-xl:   1.25rem;
---text-2xl:  1.5rem;
---text-3xl:  1.875rem;
-</pre>
-
-### Spacing
-
-<pre>
---space-1: 0.5rem;
---space-2: 1rem;
---space-3: 1.5rem;
---space-4: 2rem;
---space-6: 3rem;
-</pre>
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/send-otp` | Send phone OTP |
+| `POST` | `/api/auth/verify-otp` | Verify OTP & issue session token |
+| `GET` | `/api/auth/me` | Fetch authenticated user profile |
+| `GET` | `/api/feed` | Smart discovery feed with cursor pagination |
+| `POST` | `/api/swipes` | Record like/pass/super_like & trigger alerts |
+| `DELETE` | `/api/swipes` | Rewind/undo last pass |
+| `GET` | `/api/matches` | Get user's mutual matches |
+| `POST` | `/api/calls/signal` | Send WebRTC offer/answer/ICE candidates |
+| `GET` | `/api/calls/signal` | Poll pending WebRTC handshake signals |
+| `POST` | `/api/random-chat/queue` | Enter anonymous radar queue |
+| `GET` | `/api/random-chat/session` | Poll anonymous chat session state |
+| `POST` | `/api/places/search` | 100% Free OpenStreetMap venue search |
+| `POST` | `/api/meetups` | Create new meetup event |
+| `POST` | `/api/users/verification` | Run AI face matching & assign badge |
 
 </details>
 
 ---
 
-## 🔌 API Reference
+## 🛠️ Built With
 
-<details>
-<summary><b>📡 Click to view all endpoints</b></summary>
-
-<br>
-
-### Authentication
-<pre>
-POST /api/auth/send-otp
-POST /api/auth/verify-otp
-POST /api/auth/logout
-</pre>
-
-### Users
-<pre>
-GET    /api/users/:id
-POST   /api/users
-PUT    /api/users/:id
-DELETE /api/users/:id
-POST   /api/users/complete-onboarding
-</pre>
-
-### Discover
-<pre>
-GET  /api/discover
-POST /api/swipes
-GET  /api/matches
-</pre>
-
-### Meetups
-<pre>
-GET    /api/meetups
-POST   /api/meetups
-GET    /api/meetups/:id
-PUT    /api/meetups/:id
-DELETE /api/meetups/:id
-POST   /api/meetups/:id/join
-</pre>
-
-### Messaging
-<pre>
-GET  /api/conversations
-POST /api/messages
-GET  /api/messages/:conversationId
-</pre>
-
-### Communities
-<pre>
-GET  /api/communities
-POST /api/communities
-GET  /api/communities/:id
-POST /api/communities/:id/join
-</pre>
-
-### Response Format
-<pre>
-{
-  "success": true,
-  "data": { },
-  "message": "Operation successful"
-}
-</pre>
-
-</details>
-
----
-
-## 🎯 Project Structure
-
-<pre>
-DateBuddy/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   │   ├── welcome/
-│   │   │   └── verify-otp/
-│   │   ├── onboarding/
-│   │   │   ├── basic-info/
-│   │   │   ├── location/
-│   │   │   ├── photos/
-│   │   │   ├── bio/
-│   │   │   ├── interests/
-│   │   │   ├── preferences/
-│   │   │   └── review/
-│   │   ├── discover/
-│   │   │   └── meetups/
-│   │   ├── matches/
-│   │   ├── chat/[id]/
-│   │   ├── meetups/
-│   │   │   ├── create/
-│   │   │   └── [id]/
-│   │   ├── profile/
-│   │   ├── settings/
-│   │   ├── premium/
-│   │   ├── components/
-│   │   │   ├── BottomNav.tsx
-│   │   │   └── MatchModal.tsx
-│   │   └── api/
-│   │       ├── health/
-│   │       ├── users/
-│   │       ├── meetups/
-│   │       └── matches/
-│   └── db/
-│       ├── schema.ts
-│       └── index.ts
-├── public/
-├── tailwind.config.ts
-├── package.json
-└── drizzle.config.ts
-</pre>
-
----
-
-## 🤝 Contributing
-
-<details>
-<summary><b>📝 Click to view contribution guidelines</b></summary>
-
-<br>
-
-**1. Fork the repo**
-
-**2. Clone your fork**
-<pre>
-git clone https://github.com/YOUR_USERNAME/DateBuddy.git
-</pre>
-
-**3. Create a branch**
-<pre>
-git checkout -b feature/amazing-feature
-</pre>
-
-**4. Commit your changes**
-<pre>
-git commit -m "feat: add amazing feature"
-</pre>
-
-**5. Push and open a Pull Request**
-<pre>
-git push origin feature/amazing-feature
-</pre>
-
-### Commit Convention
-
-| Prefix | Description |
-|--------|-------------|
-| `feat:` | New feature |
-| `fix:` | Bug fix |
-| `docs:` | Documentation changes |
-| `style:` | Code style / formatting |
-| `refactor:` | Code refactoring |
-| `test:` | Adding tests |
-| `chore:` | Maintenance tasks |
-
-### Areas for Contribution
-
-- 🎨 UI/UX improvements
-- 🐛 Bug fixes
-- 📝 Documentation
-- ✨ New features
-- 🧪 Test coverage
-- ♿ Accessibility
-- 🌍 Internationalization
-
-</details>
-
----
-
-## 🗺️ Roadmap
-
-<table>
-<tr>
-<td width="50%">
-
-### ✅ Completed (v1.0)
-- [x] User authentication (Phone OTP)
-- [x] Profile creation & editing
-- [x] Swipe-based discovery
-- [x] Match system
-- [x] Real-time chat
-- [x] Meetup hosting
-- [x] RSVP system
-- [x] Premium subscriptions
-- [x] User verification
-
-</td>
-<td width="50%">
-
-### 🚧 In Progress (v1.1)
-- [ ] WebSocket real-time chat
-- [ ] Push notifications (Firebase)
-- [ ] Image upload (Cloudinary)
-- [ ] Video call integration
-- [ ] Advanced matching algorithm
-- [ ] Email notifications
-- [ ] Stories feature
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🔮 Planned (v2.0)
-- [ ] AI-powered match suggestions
-- [ ] Voice messages
-- [ ] Group video calls
-- [ ] Event ticketing system
-- [ ] Gamification (badges, streaks)
-- [ ] AR filters for photos
-- [ ] Dating coach chatbot
-
-</td>
-<td width="50%">
-
-### 💡 Backlog
-- [ ] iOS & Android native apps
-- [ ] Web3 integration (NFT badges)
-- [ ] Metaverse meetup spaces
-- [ ] Spotify integration
-- [ ] Instagram sync
-- [ ] Background check API
-- [ ] AI moderation
-
-</td>
-</tr>
-</table>
-
----
-
-## 📊 Performance
-
-| Metric | Score | Target |
-|--------|-------|--------|
-| First Contentful Paint | 1.2s | < 1.8s ✅ |
-| Time to Interactive | 2.1s | < 3.8s ✅ |
-| Speed Index | 1.8s | < 3.4s ✅ |
-| Total Blocking Time | 150ms | < 300ms ✅ |
-| Largest Contentful Paint | 2.5s | < 2.5s ✅ |
-| Cumulative Layout Shift | 0.05 | < 0.1 ✅ |
-
----
-
-## 🔒 Security
-
-<details>
-<summary><b>🛡️ Click to view security measures</b></summary>
-
-<br>
-
-### Data Protection
-- ✅ Encrypted database connections (SSL/TLS)
-- ✅ SQL injection prevention (Parameterized queries via Drizzle)
-- ✅ XSS protection (Content Security Policy headers)
-- ✅ CSRF tokens (SameSite cookies)
-
-### Privacy
-- ✅ GDPR compliant (Data export & deletion)
-- ✅ Age verification (18+ only)
-- ✅ Block & report system
-- ✅ Data minimization
-- ✅ Transparent privacy policy
-
-### Authentication
-- ✅ Phone OTP verification
-- ✅ Rate limiting (5 attempts per 15 min)
-- ✅ Session management (HTTP-only cookies)
-- [ ] Two-factor authentication (Planned)
-
-</details>
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-<pre>
-MIT License — Copyright (c) 2024 Anshul Rajput
-</pre>
-
----
-
-## 👨‍💻 Author
-
-<div align="center">
-
-### Anshul Rajput
-
-[![GitHub](https://img.shields.io/badge/GitHub-anshulr0019-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anshulr0019)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)]([https://linkedin.com/in/anshulrajput](https://www.linkedin.com/in/anshul-kumar-793502274/))
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:anshulrajput338@gmail.com)
-
-*Full-Stack Developer | Open Source Enthusiast | Building the future of social connections*
-
-</div>
+* **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Components & Route Handlers)
+* **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict mode, zero `any`)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/) & Vanilla CSS custom keyframes
+* **Real-time WebRTC**: Peer-to-Peer with Google STUN (`stun.l.google.com:19302`)
+* **Database & ORM**: [PostgreSQL](https://www.postgresql.org/) & [Drizzle ORM](https://orm.drizzle.team/)
+* **Haptics**: Native Web Vibration API with iOS Taptic presets
 
 ---
 
 <div align="center">
 
-### 💬 Let's Connect!
+Made with 💖 for genuine connections.
 
-[🐛 Found a bug? Open an issue](https://github.com/anshulr0019/DateBuddy/issues) •
-[💡 Feature idea? Start a discussion](https://github.com/anshulr0019/DateBuddy/discussions) •
-[🤝 Want to contribute? Read the guidelines](#-contributing)
-
----
-
-⭐ **Star this repo if you found it helpful!**
-
-![Stars](https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=social)
-
----
-
-*Made with 💕 by Anshul Rajput*
-
-**"Connecting hearts, one swipe at a time"**
+**[⭐ Star DateBuddy on GitHub](https://github.com/anshulr0019/DateBuddy)**
 
 </div>
