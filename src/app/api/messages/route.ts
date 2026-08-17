@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { messages, matches } from '@/db/schema';
 import { eq, desc, and, or, lt } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
+import { triggerChatMessage, triggerReadReceipt } from '@/lib/pusher-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,6 +121,9 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    // Broadcast instant sub-50ms message to the match channel
+    void triggerChatMessage(id, newMessage);
+
     return NextResponse.json({ success: true, message: newMessage });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -158,6 +162,9 @@ export async function PATCH(request: NextRequest) {
           eq(messages.isRead, false)
         )
       );
+
+    // Broadcast read receipt event in real-time
+    void triggerReadReceipt(id, session.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

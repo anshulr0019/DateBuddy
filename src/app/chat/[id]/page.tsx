@@ -14,6 +14,7 @@ import { Composer } from './components/Composer';
 import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
 import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
 import { CallModal } from '../../components/CallModal';
+import { PartnerProfileSheet } from '../../components/PartnerProfileSheet';
 
 const ICEBREAKERS = [
   'Hey! Great to match with you ✨',
@@ -48,6 +49,7 @@ export default function ChatPage() {
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [showNewChip, setShowNewChip] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [callState, setCallState] = useState<{
     isOpen: boolean;
     callType: 'audio' | 'video';
@@ -196,20 +198,27 @@ export default function ChatPage() {
                 </button>
 
                 {partner ? (
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border border-gray-200/80 shadow-2xs">
+                  <button
+                    onClick={() => setProfileSheetOpen(true)}
+                    className="flex items-center gap-3 min-w-0 cursor-pointer active:opacity-70 transition-opacity"
+                    aria-label={`View ${partner.name}'s profile`}
+                  >
+                    <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#FF6B9D]/40 shadow-2xs ring-2 ring-[#FF6B9D]/10">
                       <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" className="h-full w-full object-cover" />
                     </div>
-                    <h1 className="flex items-center gap-1 text-[15px] font-bold text-[#1E293B] leading-tight truncate">
-                      {partner.name}
-                      {partner.verified && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#F43F5E" aria-label="Verified profile" className="flex-shrink-0">
-                          <path d="M12 2l2.4 2.4 3.3-.5.6 3.3 3 1.5-1.5 3 1.5 3-3 1.5-.6 3.3-3.3-.5L12 22l-2.4-2.4-3.3.5-.6-3.3-3-1.5 1.5-3-1.5-3 3-1.5.6-3.3 3.3.5z" />
-                          <path d="M9.5 12.2l1.8 1.8 3.6-3.8" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </svg>
-                      )}
-                    </h1>
-                  </div>
+                    <div className="min-w-0">
+                      <h1 className="flex items-center gap-1 text-[15px] font-bold text-[#1E293B] leading-tight truncate">
+                        {partner.name}
+                        {partner.verified && (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F43F5E" aria-label="Verified profile" className="flex-shrink-0">
+                            <path d="M12 2l2.4 2.4 3.3-.5.6 3.3 3 1.5-1.5 3 1.5 3-3 1.5-.6 3.3-3.3-.5L12 22l-2.4-2.4-3.3.5-.6-3.3-3-1.5 1.5-3-1.5-3 3-1.5.6-3.3 3.3.5z" />
+                            <path d="M9.5 12.2l1.8 1.8 3.6-3.8" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          </svg>
+                        )}
+                      </h1>
+                      <p className="text-[11px] text-[#FF6B9D] font-semibold -mt-0.5">Tap to view profile</p>
+                    </div>
+                  </button>
                 ) : (
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-gray-100 animate-pulse" />
@@ -430,8 +439,9 @@ export default function ChatPage() {
         />
       )}
       {safetyOpen && partner && <SafetySheet partner={partner} onClose={() => setSafetyOpen(false)} />}
-      {validMatchId && partner && myId && (
+      {validMatchId && partner && myId && callState.isOpen && (
         <CallModal
+          key={`call-${callState.callType}-${callState.mode}-${Date.now()}`}
           isOpen={callState.isOpen}
           matchId={validMatchId}
           partnerId={partner.partnerId}
@@ -442,6 +452,18 @@ export default function ChatPage() {
           initialMode={callState.mode}
           incomingOfferData={callState.incomingOfferData}
           onClose={() => setCallState((prev) => ({ ...prev, isOpen: false }))}
+        />
+      )}
+      {/* Partner Profile Sheet — opens when tapping the partner avatar in the header */}
+      {partner && (
+        <PartnerProfileSheet
+          isOpen={profileSheetOpen}
+          partnerId={partner.partnerId}
+          matchId={validMatchId}
+          initialData={{ name: partner.name, photo: partner.photo, verified: partner.verified }}
+          onClose={() => setProfileSheetOpen(false)}
+          onAudioCall={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
+          onVideoCall={() => setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' })}
         />
       )}
 

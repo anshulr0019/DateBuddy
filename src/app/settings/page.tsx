@@ -50,6 +50,12 @@ export default function SettingsPage() {
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[] | null>(null);
   const [unblockingId, setUnblockingId] = useState<number | null>(null);
 
+  // Social links
+  const [instagramHandle, setInstagramHandle] = useState('');
+  const [snapchatHandle, setSnapchatHandle] = useState('');
+  const [socialSaving, setSocialSaving] = useState(false);
+  const [socialSaved, setSocialSaved] = useState(false);
+
   const persistSettings = useCallback(async (patch: Record<string, unknown>) => {
     setSaveError('');
     try {
@@ -111,6 +117,15 @@ export default function SettingsPage() {
             verified: u.isVerified ?? prev.verified,
             photo: Array.isArray(u.photos) && u.photos.length > 0 ? u.photos[0] : prev.photo,
           }));
+          // Load social handles from /api/users/me
+          try {
+            const meRes = await fetch('/api/users/me');
+            const meData = await meRes.json();
+            if (meData.success && meData.user) {
+              setInstagramHandle(meData.user.instagramHandle ?? '');
+              setSnapchatHandle(meData.user.snapchatHandle ?? '');
+            }
+          } catch { /* ignore */ }
           return;
         }
       } catch {
@@ -267,6 +282,93 @@ export default function SettingsPage() {
                   Edit Profile
                 </button>
               </GlassCard>
+
+              {/* Social Links Section */}
+              <div className="space-y-1">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1E293B]/45 px-2 mb-1.5">
+                  Social Links
+                </p>
+                <GlassCard className="p-4 space-y-3 border border-gray-200/60 shadow-2xs">
+                  <p className="text-[12px] text-[#1E293B]/50 leading-snug">
+                    Connect your social accounts so your matches can find you.
+                  </p>
+                  {/* Instagram */}
+                  <div>
+                    <label className="text-[12px] font-bold text-[#1E293B]/60 mb-1.5 flex items-center gap-1.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <defs>
+                          <linearGradient id="set-ig" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#f09433" />
+                            <stop offset="50%" stopColor="#dc2743" />
+                            <stop offset="100%" stopColor="#bc1888" />
+                          </linearGradient>
+                        </defs>
+                        <rect x="2" y="2" width="20" height="20" rx="5.5" stroke="url(#set-ig)" strokeWidth="2" />
+                        <circle cx="12" cy="12" r="4" stroke="url(#set-ig)" strokeWidth="2" />
+                        <circle cx="17.5" cy="6.5" r="1.2" fill="url(#set-ig)" />
+                      </svg>
+                      Instagram
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] font-medium text-[#1E293B]/35 select-none">@</span>
+                      <input
+                        id="settings-instagram-handle"
+                        type="text"
+                        value={instagramHandle}
+                        onChange={(e) => setInstagramHandle(e.target.value.replace(/^@/, '').slice(0, 60))}
+                        placeholder="your.handle"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        className="w-full h-10 rounded-xl border border-gray-200/80 bg-white/60 pl-7 pr-3 text-[14px] text-[#1E293B] placeholder-gray-300 outline-none focus:ring-2 focus:ring-[#dc2743]/20 focus:bg-white/90 transition-all"
+                      />
+                    </div>
+                  </div>
+                  {/* Snapchat */}
+                  <div>
+                    <label className="text-[12px] font-bold text-[#1E293B]/60 mb-1.5 flex items-center gap-1.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#F7B731">
+                        <path d="M12 2C9.5 2 8 4.5 8 6v.5C6.5 7 5 7.5 5 7.5s-.5 1.5 1 2c-.5.5-1 1.5-3 1.5 0 0 .5 1.5 4 2 .5 1 1 2.5 4 2.5s3.5-1.5 4-2.5c3.5-.5 4-2 4-2-2 0-2.5-1-3-1.5 1.5-.5 1-2 1-2s-1.5-.5-3-.5V6c0-1.5-1.5-4-4-4z" stroke="#ccc" strokeWidth="0.3" />
+                      </svg>
+                      Snapchat
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] font-medium text-[#1E293B]/35 select-none">@</span>
+                      <input
+                        id="settings-snapchat-handle"
+                        type="text"
+                        value={snapchatHandle}
+                        onChange={(e) => setSnapchatHandle(e.target.value.replace(/^@/, '').slice(0, 60))}
+                        placeholder="your-handle"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        className="w-full h-10 rounded-xl border border-gray-200/80 bg-white/60 pl-7 pr-3 text-[14px] text-[#1E293B] placeholder-gray-300 outline-none focus:ring-2 focus:ring-[#F7B731]/30 focus:bg-white/90 transition-all"
+                      />
+                    </div>
+                  </div>
+                  {/* Save button */}
+                  <button
+                    id="settings-social-save"
+                    onClick={async () => {
+                      setSocialSaving(true);
+                      setSocialSaved(false);
+                      try {
+                        const res = await fetch('/api/users/me', {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ instagramHandle, snapchatHandle }),
+                        });
+                        if (res.ok) setSocialSaved(true);
+                      } catch { /* ignore */ } finally {
+                        setSocialSaving(false);
+                      }
+                    }}
+                    disabled={socialSaving}
+                    className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[13px] font-bold shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {socialSaving ? 'Saving…' : socialSaved ? '✓ Saved!' : 'Save Social Links'}
+                  </button>
+                </GlassCard>
+              </div>
 
               {/* Account Settings Section */}
               <div className="space-y-1">

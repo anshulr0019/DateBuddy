@@ -134,11 +134,19 @@ export function CallModal({
   const [callStatus, setCallStatus] = useState<'calling' | 'incoming' | 'connected' | 'ended'>(
     initialMode === 'incoming' ? 'incoming' : 'calling'
   );
-  const [callType] = useState<'audio' | 'video'>(initialCallType);
+  const [callType, setCallType] = useState<'audio' | 'video'>(initialCallType);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
+
+  useEffect(() => {
+    setCallType(initialCallType);
+  }, [initialCallType]);
+
+  useEffect(() => {
+    setCallStatus(initialMode === 'incoming' ? 'incoming' : 'calling');
+  }, [initialMode]);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -417,29 +425,29 @@ export function CallModal({
 
           {/* ── AUDIO ACTIVE: WhatsApp/iOS style 2-row grid ── */}
           {isAudioActive && (
-            <>
-              {/* Row 1: Mute, Keypad, Speaker */}
-              <div className="flex w-full justify-around">
-                <CtrlBtn label="Mute" active={isMuted} onClick={toggleMute}>
+            <div className="flex flex-col items-center gap-7 w-full">
+              {/* Row 1: Mute, Speaker */}
+              <div className="flex w-full justify-center gap-14">
+                <CtrlBtn label={isMuted ? 'Unmute' : 'Mute'} active={isMuted} onClick={toggleMute}>
                   <MicIcon slashed={isMuted} />
                 </CtrlBtn>
                 <CtrlBtn label="Speaker" active={isSpeaker} onClick={() => setIsSpeaker((p) => !p)}>
                   <SpeakerIcon />
                 </CtrlBtn>
-                <CtrlBtn label="Camera Off" active={isVideoOff} onClick={toggleVideo}>
-                  <VideoIcon slashed={isVideoOff} />
-                </CtrlBtn>
               </div>
-              {/* Row 2: End Call centred */}
-              <button
-                type="button"
-                onClick={handleEndCall}
-                className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-red-500 text-white shadow-xl active:scale-90 transition-transform cursor-pointer"
-                aria-label="End Call"
-              >
-                <PhoneEndIcon />
-              </button>
-            </>
+              {/* Row 2: End Call */}
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleEndCall}
+                  className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-red-500 text-white shadow-xl active:scale-90 transition-transform cursor-pointer"
+                  aria-label="End Call"
+                >
+                  <PhoneEndIcon />
+                </button>
+                <span className="text-[12px] text-white/70 font-medium">End Call</span>
+              </div>
+            </div>
           )}
 
           {/* ── VIDEO ACTIVE: FaceTime-style 1-row bar ── */}

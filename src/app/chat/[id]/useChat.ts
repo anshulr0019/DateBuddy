@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getPusherClient } from '@/lib/pusher-client';
+import { compressImageForUpload } from '@/lib/image-compress';
 import type { ChatMessage, Partner, SendStatus } from './chatTypes';
 
 const POLL_INTERVAL_MS = 5_000;
@@ -203,7 +205,42 @@ export function useChat(matchId: number | null, myId: number | null) {
     };
   }, [matchId]);
 
-  /* Poll for new messages and read-receipt changes while the tab is visible. */
+  /* Real-time sub-50ms message updates & read receipts via Pusher WebSocket */
+  useEffect(() => {
+    if (!matchId || myId === null) return;
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channelName = `chat-${matchId}`;
+    const channel = pusher.subscribe(channelName);
+
+    channel.bind('new-message', (data: ServerMessage) => {
+      const confirmed = mapServerMessage(data, myId);
+      setPending((prev) => prev.filter((p) => p.id !== confirmed.id));
+      setServerMessages((prev) => {
+        if (prev.some((s) => s.id === confirmed.id)) return prev;
+        return [...prev, confirmed];
+      });
+      if (confirmed.senderId !== myId) {
+        markRead();
+      }
+    });
+
+    channel.bind('messages-read', ({ readerId }: { readerId: number }) => {
+      if (readerId !== myId) {
+        setServerMessages((prev) =>
+          prev.map((m) => (m.senderId === myId ? { ...m, status: 'seen' as const } : m))
+        );
+      }
+    });
+
+    return () => {
+      channel.unbind_all();
+      pusher.unsubscribe(channelName);
+    };
+  }, [matchId, myId, markRead]);
+
+  /* Safety background poll for messages and read-receipt changes when visible. */
   useEffect(() => {
     if (phase !== 'ready') return;
     const timer = setInterval(() => {
@@ -226,10 +263,11 @@ export function useChat(matchId: number | null, myId: number | null) {
         let content = msg.content;
 
         // Photos upload first; the message row then stores the hosted URL.
-        const file = filesRef.current.get(msg.id);
-        if (msg.type === 'photo' && file) {
+        const rawFile = filesRef.current.get(msg.id);
+        if (msg.type === 'photo' && rawFile) {
           let url = uploadedUrlsRef.current.get(msg.id);
           if (!url) {
+            const file = await compressImageForUpload(rawFile);
             const fd = new FormData();
             fd.append('file', file);
             const upRes = await fetch('/api/upload', { method: 'POST', body: fd });

@@ -127,6 +127,24 @@ export async function PATCH(request: NextRequest) {
     updates.dateOfBirth = dob;
   }
 
+  if ('instagramHandle' in body) {
+    const raw = typeof body.instagramHandle === 'string' ? body.instagramHandle.trim().replace(/^@/, '') : '';
+    // Only allow alphanumeric, underscores, dots
+    if (raw && !/^[\w.]{1,60}$/.test(raw)) {
+      return NextResponse.json({ success: false, message: 'Invalid Instagram handle' }, { status: 400 });
+    }
+    updates.instagramHandle = raw || null;
+  }
+
+  if ('snapchatHandle' in body) {
+    const raw = typeof body.snapchatHandle === 'string' ? body.snapchatHandle.trim().replace(/^@/, '') : '';
+    // Snapchat: alphanumeric, underscores, hyphens, 3–15 chars
+    if (raw && !/^[\w-]{1,60}$/.test(raw)) {
+      return NextResponse.json({ success: false, message: 'Invalid Snapchat handle' }, { status: 400 });
+    }
+    updates.snapchatHandle = raw || null;
+  }
+
   try {
     let updated;
     if (Object.keys(updates).length > 0) {

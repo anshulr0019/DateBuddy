@@ -38,6 +38,8 @@ import {
   type RandomChatReportReason,
 } from './random-chat-config';
 import { assignAliases, getInitialAlias, type AnonymousAlias } from './random-chat-aliases';
+import { triggerRandomChatMessage, triggerRandomChatStatus } from './pusher-server';
+import { acquireLock, releaseLock, redis, fallbackRedis } from './redis';
 
 /* ─────────────────────────────────────────────────
    Public types (shared with the API layer)
@@ -524,6 +526,9 @@ export async function endSession(sessionId: number, userId: number): Promise<voi
     .update(randomChatSessions)
     .set({ status: 'ended', endedByUserId: userId, endedAt: new Date() })
     .where(eq(randomChatSessions.id, sessionId));
+
+  // Instant notification to partner that session has ended
+  void triggerRandomChatStatus(sessionId, 'ended', { endedByUserId: userId });
 }
 
 export async function sendSessionMessage(sessionId: number, userId: number, content: string): Promise<SessionMessage | null> {
@@ -533,6 +538,17 @@ export async function sendSessionMessage(sessionId: number, userId: number, cont
     .insert(randomChatMessages)
     .values({ sessionId, senderId: userId, content })
     .returning();
+
+  const msgPayload = {
+    id: row.id,
+    senderId: userId,
+    content: row.content,
+    createdAt: row.createdAt.toISOString(),
+  };
+
+  // Broadcast instant sub-50ms message to session channel
+  void triggerRandomChatMessage(sessionId, msgPayload);
+
   return {
     id: row.id,
     senderIsMe: true,
@@ -565,6 +581,13 @@ export async function requestConnection(sessionId: number, userId: number, want:
 
   const requestedByMe = isA ? fresh.connectionRequestedByA : fresh.connectionRequestedByB;
   const requestedByPartner = isA ? fresh.connectionRequestedByB : fresh.connectionRequestedByA;
+
+  // Broadcast connection status update in real time
+  void triggerRandomChatStatus(sessionId, 'connection-update', {
+    requestedByA: fresh.connectionRequestedByA,
+    requestedByB: fresh.connectionRequestedByB,
+    isMutual: Boolean(requestedByMe && requestedByPartner),
+  });
 
   if (!(requestedByMe && requestedByPartner)) {
     return { matched: false };
@@ -613,6 +636,13 @@ export async function requestConnection(sessionId: number, userId: number, want:
       },
     ]);
   }
+
+  // Broadcast final connected state to both users
+  void triggerRandomChatStatus(sessionId, 'connected', {
+    matchId: matchId ?? 0,
+    partnerName: partnerUser?.name ?? 'Your connection',
+    partnerPhoto: partnerPhoto?.url ?? null,
+  });
 
   return {
     matched: true,

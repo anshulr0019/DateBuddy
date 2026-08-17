@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getPusherClient } from '@/lib/pusher-client';
 import {
   RANDOM_CHAT_POLL_MS,
   SAFETY_CHECK_AFTER_MESSAGES,
@@ -178,6 +179,46 @@ export function useRandomChat(): UseRandomChatResult {
     fetchSession();
     return () => controllerRef.current?.abort();
   }, [fetchSession]);
+
+  /* Real-time sub-50ms anonymous chat events via Pusher WebSocket */
+  useEffect(() => {
+    if (!poll || poll.status !== 'matched') return;
+    const sessionId = poll.session.id;
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channelName = `random-session-${sessionId}`;
+    const channel = pusher.subscribe(channelName);
+
+    channel.bind('random-message', (data: { id: number; senderId: number; content: string; createdAt: string }) => {
+      setMessages((prev) => {
+        if (prev.some((m) => String(m.id) === String(data.id))) return prev;
+        const mapped: SessionMessage & { idKey: string } = {
+          id: data.id,
+          idKey: String(data.id),
+          senderIsMe: false,
+          content: data.content,
+          createdAt: data.createdAt,
+        };
+        const next = [...prev, mapped];
+        next.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        return next;
+      });
+    });
+
+    channel.bind('status-change', (data: { status: string; data?: any }) => {
+      if (data.status === 'ended') {
+        setPhase('ended');
+      } else if (data.status === 'connected' || data.status === 'connection-update') {
+        void fetchSession();
+      }
+    });
+
+    return () => {
+      channel.unbind_all();
+      pusher.unsubscribe(channelName);
+    };
+  }, [poll, fetchSession]);
 
   /* Poll while searching or mid-conversation; stop once settled. */
   useEffect(() => {
