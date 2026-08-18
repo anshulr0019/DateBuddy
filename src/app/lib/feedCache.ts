@@ -11,6 +11,8 @@
    the cache would be cold anyway.
 ───────────────────────────────────────────────── */
 
+import { optimizeImageUrl } from '../components/shared';
+
 export type FeedProfile = {
   id: number;
   name: string;
@@ -110,8 +112,9 @@ export function preloadDeckImages(profiles: FeedProfile[], count = 2): void {
   for (const profile of profiles.slice(0, count)) {
     const src = profile.photos?.[0];
     if (src) {
+      const optimized = optimizeImageUrl(src, { width: 800 }) || src;
       const img = new Image();
-      img.src = src;
+      img.src = optimized;
     }
   }
 }

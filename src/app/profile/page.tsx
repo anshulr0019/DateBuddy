@@ -17,6 +17,7 @@ interface Profile {
   bio: string;
   location: string;
   interests: string[];
+  prompts: { question: string; answer: string }[];
   profession: string;
   education: string;
   verified: boolean;
@@ -30,6 +31,7 @@ const EMPTY_PROFILE: Profile = {
   bio: '',
   location: '',
   interests: [],
+  prompts: [],
   profession: '',
   education: '',
   verified: false,
@@ -214,6 +216,7 @@ export default function ProfilePage() {
           interests: Array.isArray(u.interests)
             ? Array.from(new Set(u.interests.filter((i: unknown) => typeof i === 'string')))
             : [],
+          prompts: Array.isArray(u.prompts) ? u.prompts : [],
           profession: u.profession || '',
           education: u.education || '',
           verified: u.isVerified ?? false,
@@ -245,6 +248,9 @@ export default function ProfilePage() {
             bio: bioData.bio || bioData.promptAnswer || '',
             location: localStorage.getItem('onboarding_location') || '',
             interests: Array.from(new Set(interests)),
+            prompts: Array.isArray(bioData.selectedPrompts)
+              ? bioData.selectedPrompts.map((p: any) => ({ question: p.prompt || p.question, answer: p.answer }))
+              : [],
           });
           setIsCached(true);
           setStatus('ready');
@@ -455,6 +461,18 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   </GlassCard>
+
+                  {/* Profile Prompts */}
+                  {profile.prompts.length > 0 && (
+                    <div className="mb-4 space-y-3">
+                      {profile.prompts.map((p, i) => (
+                        <GlassCard key={i} className="p-4 border border-[#FF6B9D]/15 bg-gradient-to-br from-white/90 to-[#FFF0F4]/40">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B9D] mb-1.5">{p.question}</p>
+                          <p className="text-[14px] font-medium text-[#1A1A2E] leading-snug">{p.answer}</p>
+                        </GlassCard>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Profile completion — computed from real profile data */}
                   <button

@@ -12,6 +12,8 @@ import {
   groupMembers,
   activityRequests,
   checkIns,
+  prompts,
+  userPromptAnswers,
 } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { getAuthSession, clearAuthSession } from '@/lib/auth';
@@ -36,7 +38,7 @@ export async function GET() {
       return NextResponse.json({ success: false, message: 'Account no longer exists' }, { status: 401 });
     }
 
-    const [userPhotos, userPrefs, tags] = await Promise.all([
+    const [userPhotos, userPrefs, tags, userPrompts] = await Promise.all([
       db.select().from(photos).where(eq(photos.userId, user.id)).orderBy(photos.orderIndex),
       db.select().from(preferences).where(eq(preferences.userId, user.id)).limit(1),
       db
@@ -44,6 +46,12 @@ export async function GET() {
         .from(userInterests)
         .innerJoin(interests, eq(userInterests.interestId, interests.id))
         .where(eq(userInterests.userId, user.id)),
+      db
+        .select({ question: prompts.text, answer: userPromptAnswers.answer })
+        .from(userPromptAnswers)
+        .innerJoin(prompts, eq(userPromptAnswers.promptId, prompts.id))
+        .where(eq(userPromptAnswers.userId, user.id))
+        .limit(6),
     ]);
 
     return NextResponse.json({
@@ -53,6 +61,7 @@ export async function GET() {
         photos: userPhotos.map((p) => p.url),
         interests: tags.map((t) => t.name),
         preferences: userPrefs[0] ?? null,
+        prompts: userPrompts,
       },
     });
   } catch (error) {

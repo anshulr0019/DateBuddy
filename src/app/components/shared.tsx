@@ -7,6 +7,24 @@ import { Ic } from './icons';
    Shared UI Components — Phase 2 & 3 Refined
 ───────────────────────────────────────────────── */
 
+export function optimizeImageUrl(
+  src?: string | null,
+  options: { width?: number; quality?: string } = {}
+): string | null {
+  if (!src) return null;
+  if (!src.includes('res.cloudinary.com') || !src.includes('/image/upload/')) {
+    return src;
+  }
+  // Skip if transformation is already present
+  if (src.includes('/image/upload/f_') || src.includes('/image/upload/q_') || src.includes('/image/upload/w_')) {
+    return src;
+  }
+  const width = options.width || 800;
+  const quality = options.quality || 'auto';
+  const transform = `f_auto,q_${quality},w_${width},c_limit`;
+  return src.replace('/image/upload/', `/image/upload/${transform}/`);
+}
+
 export function SafeImage({
   src,
   alt = '',
@@ -15,6 +33,7 @@ export function SafeImage({
   style,
   onClick,
   eager = false,
+  width = 800,
 }: {
   src?: string | null;
   alt?: string;
@@ -24,6 +43,7 @@ export function SafeImage({
   onClick?: (e: React.MouseEvent<HTMLDivElement | HTMLImageElement>) => void;
   /* Set for above-the-fold/LCP images so they are not lazy-loaded */
   eager?: boolean;
+  width?: number;
 }) {
   const [error, setError] = useState(false);
 
@@ -48,9 +68,11 @@ export function SafeImage({
     );
   }
 
+  const finalSrc = optimizeImageUrl(src, { width }) || src;
+
   return (
     <img
-      src={src}
+      src={finalSrc}
       alt={alt || name}
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : undefined}

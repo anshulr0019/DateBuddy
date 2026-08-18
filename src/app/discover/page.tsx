@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import BrandLogo from '../components/BrandLogo';
 import { AuroraBackground, SafeImage, PrimaryButton } from '../components/shared';
+import { MatchScreen } from '../components/MatchScreen';
 import { useNotifications } from '../context/NotificationContext';
 import {
   type FeedProfile,
@@ -1209,66 +1210,19 @@ export default function DiscoverPage() {
       )}
 
       {/* MATCH CELEBRATION */}
-      {matchedUser && (
-        <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 backdrop-blur-xl p-6 animate-popover-enter"
-          role="dialog"
-          aria-modal="true"
-          aria-label="It's a match"
-        >
-          <div className="w-full max-w-[360px] rounded-[32px] bg-white p-8 text-center shadow-2xl flex flex-col items-center overflow-hidden">
-            {/* Ambient gradient behind the card */}
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[32px] overflow-hidden">
-              <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-[#FF6B9D]/12 blur-[40px]" />
-              <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-[#7B68EE]/12 blur-[40px]" />
-            </div>
-
-            <div className="relative mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#F43F5E] bg-[#FFF0F4] border border-[#F9C0D0]/60 px-4 py-1.5 rounded-full animate-scale-pop">
-              ✨ New Connection
-            </div>
-            <h2 className="text-[32px] font-extrabold text-[#1A1A2E] mb-1 tracking-tight leading-tight">
-              It&apos;s a Match!
-            </h2>
-            <p className="text-[14px] text-[#1A1A2E]/60 mb-8">
-              You and {matchedUser.name ? matchedUser.name.split(' ')[0] : 'your match'} liked each other 💕
-            </p>
-
-            {/* Avatar pair with animated heart */}
-            <div className="relative mb-8 flex items-center justify-center">
-              {/* Pulse rings behind heart */}
-              <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 h-14 w-14 rounded-full bg-[#F43F5E]/20 animate-pulse-ring" />
-              <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 h-14 w-14 rounded-full bg-[#F43F5E]/15 animate-pulse-ring" style={{ animationDelay: '0.22s' }} />
-
-              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-lg z-20 -mr-5 ring-2 ring-[#F43F5E]/20">
-                <SafeImage src={myPhoto ?? undefined} name={myName} alt="Your profile photo" className="h-full w-full object-cover" />
-              </div>
-              <div className="relative h-28 w-28 overflow-hidden rounded-full border-[3px] border-white shadow-lg z-20 ring-2 ring-[#7B68EE]/20">
-                <SafeImage src={matchedUser.photo ?? undefined} name={matchedUser.name} alt={`${matchedUser.name}'s profile photo`} className="h-full w-full object-cover" />
-              </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#F43F5E] to-[#FF7B8F] text-white shadow-[0_4px_16px_-4px_rgba(244,63,94,0.5)] animate-scale-pop">
-                <Ic.Heart filled />
-              </div>
-            </div>
-
-            <div className="relative w-full space-y-3 z-10">
-              <PrimaryButton onClick={() => {
-                pushedOverlayRef.current = false;
-                closingFromPopRef.current = true;
-                setMatchedUser(null);
-                router.push('/messages');
-              }}>
-                Send a Message
-              </PrimaryButton>
-              <button
-                onClick={() => setMatchedUser(null)}
-                className="w-full min-h-[44px] py-3 text-[14px] font-semibold text-[#1A1A2E]/50 transition-opacity active:opacity-60"
-              >
-                Keep Discovering
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MatchScreen
+        isOpen={Boolean(matchedUser)}
+        matchedUser={matchedUser}
+        myPhoto={myPhoto}
+        myName={myName}
+        onClose={() => setMatchedUser(null)}
+        onSendMessage={() => {
+          pushedOverlayRef.current = false;
+          closingFromPopRef.current = true;
+          setMatchedUser(null);
+          router.push('/messages');
+        }}
+      />
     </Shell>
   );
 }

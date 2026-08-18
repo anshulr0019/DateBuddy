@@ -43,7 +43,9 @@ export const photos = pgTable('photos', {
   url: text('url').notNull(),
   orderIndex: integer('order_index').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  userOrderIdx: index('photos_user_order_idx').on(table.userId, table.orderIndex),
+}));
 
 // Interests table
 export const interests = pgTable('interests', {
@@ -59,7 +61,9 @@ export const userInterests = pgTable('user_interests', {
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   interestId: integer('interest_id').notNull().references(() => interests.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  userIdx: index('user_interests_user_idx').on(table.userId),
+}));
 
 // Prompts table
 export const prompts = pgTable('prompts', {
@@ -75,7 +79,9 @@ export const userPromptAnswers = pgTable('user_prompt_answers', {
   promptId: integer('prompt_id').notNull().references(() => prompts.id),
   answer: text('answer').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  userIdx: index('user_prompt_answers_user_idx').on(table.userId),
+}));
 
 // Preferences table
 export const preferences = pgTable('preferences', {
@@ -97,6 +103,8 @@ export const swipes = pgTable('swipes', {
   createdAt: timestamp('created_at').defaultNow(),
 }, (table) => ({
   swiperSwipedUnique: uniqueIndex('swipes_swiper_swiped_unique').on(table.swiperId, table.swipedId),
+  swiperIdx: index('swipes_swiper_idx').on(table.swiperId),
+  swipedIdx: index('swipes_swiped_idx').on(table.swipedId),
 }));
 
 // Matches table
@@ -108,6 +116,8 @@ export const matches = pgTable('matches', {
   isActive: boolean('is_active').default(true),
 }, (table) => ({
   matchPairUnique: uniqueIndex('matches_pair_unique').on(table.user1Id, table.user2Id),
+  user1ActiveIdx: index('matches_user1_active_idx').on(table.user1Id, table.isActive),
+  user2ActiveIdx: index('matches_user2_active_idx').on(table.user2Id, table.isActive),
 }));
 
 // Messages table
@@ -121,7 +131,10 @@ export const messages = pgTable('messages', {
   metadata: jsonb('metadata'), // For voice duration, photo URL, gif URL, etc.
   isRead: boolean('is_read').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  matchCreatedIdx: index('messages_match_created_idx').on(table.matchId, table.createdAt),
+  receiverReadIdx: index('messages_receiver_read_idx').on(table.receiverId, table.isRead),
+}));
 
 // Subscriptions table
 export const subscriptions = pgTable('subscriptions', {
@@ -166,7 +179,9 @@ export const notifications = pgTable('notifications', {
   metadata: jsonb('metadata'),
   isRead: boolean('is_read').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  userReadIdx: index('notifications_user_read_idx').on(table.userId, table.isRead),
+}));
 
 // Reports table
 export const reports = pgTable('reports', {
@@ -184,7 +199,9 @@ export const blocks = pgTable('blocks', {
   blockerId: integer('blocker_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   blockedId: integer('blocked_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+  blockerBlockedIdx: index('blocks_blocker_blocked_idx').on(table.blockerId, table.blockedId),
+}));
 
 // Profile views (for insights)
 export const profileViews = pgTable('profile_views', {

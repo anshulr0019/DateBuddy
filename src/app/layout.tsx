@@ -1,10 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import FloatingNav from "./components/FloatingNav";
 import Heartbeat from "./components/Heartbeat";
 import { NotificationProvider } from "./context/NotificationContext";
 import { FilterProvider } from "./context/FilterContext";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "DateBuddy - Find Your Vibe",
@@ -21,18 +29,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
-  viewportFit: 'cover',
+  viewportFit: "cover",
 };
 
 const GLOBAL_ANIMATIONS_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-  :root {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
   /* Disable mobile tap highlight color */
   * {
     -webkit-tap-highlight-color: transparent;
@@ -89,13 +91,11 @@ const GLOBAL_ANIMATIONS_CSS = `
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="bg-[#FAFAF7]">
+    <html lang="en" className={`bg-[#FAFAF7] ${jakarta.variable} ${jakarta.className}`}>
       <head>
         <meta name="theme-color" content="#FF6B9D" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <style dangerouslySetInnerHTML={{ __html: GLOBAL_ANIMATIONS_CSS }} />
       </head>
       <body className="bg-[#FAFAF7] text-[#1A1A2E] min-h-screen overflow-x-hidden antialiased font-sans selection:bg-[#FF6B9D]/25 selection:text-[#1A1A2E]">

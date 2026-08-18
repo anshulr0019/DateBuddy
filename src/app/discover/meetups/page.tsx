@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuroraBackground } from '@/app/components/shared';
+import { AuroraBackground, SafeImage } from '@/app/components/shared';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Squads', icon: '✨' },
@@ -163,7 +163,7 @@ export default function DiscoverMeetupsPage() {
                     >
                       {/* Event Banner */}
                       <div className="relative h-36 w-full overflow-hidden bg-gray-100">
-                        <img
+                        <SafeImage
                           src={coverImg}
                           alt={meetup.title}
                           className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { AuroraBackground } from '@/app/components/shared';
+import { AuroraBackground, SafeImage } from '@/app/components/shared';
 
 interface Attendee {
   id: number;
@@ -273,7 +273,7 @@ export default function MeetupDetailPage() {
                 <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none pb-24">
                   {/* Hero Banner */}
                   <div className="relative h-64 w-full bg-gray-900">
-                    <img
+                    <SafeImage
                       src={meetup.imageUrl || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80'}
                       alt={meetup.title}
                       className="h-full w-full object-cover"
@@ -369,9 +369,10 @@ export default function MeetupDetailPage() {
                           {(meetup.pendingRequests || []).map((applicant) => (
                             <div key={applicant.id} className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-xl border border-amber-200/60 shadow-2xs">
                               <div className="flex items-center gap-2.5 min-w-0">
-                                <img
+                                <SafeImage
                                   src={applicant.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
                                   className="h-8 w-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                                  name={applicant.name}
                                   alt={applicant.name}
                                 />
                                 <span className="text-[13px] font-bold text-[#1E293B] truncate">{applicant.name}</span>
@@ -426,9 +427,10 @@ export default function MeetupDetailPage() {
                       <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#1A1A2E]/40 mb-2 block">Squad Host</span>
                         <div className="flex items-center gap-3">
-                          <img
+                          <SafeImage
                             src={meetup.host.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
                             className="h-12 w-12 rounded-full object-cover border border-[#1A1A2E]/10"
+                            name={meetup.host.name}
                             alt={meetup.host.name}
                           />
                           <div className="flex-1">
@@ -460,9 +462,10 @@ export default function MeetupDetailPage() {
 
                       <div className="flex items-center -space-x-2">
                         {(meetup.attendees || []).slice(0, 8).map((att: Attendee, idx: number) => (
-                          <img
+                          <SafeImage
                             key={idx}
                             src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                            name={att.name || 'Member'}
                             alt={att.name || 'Member'}
                             className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-xs"
                           />
@@ -481,9 +484,10 @@ export default function MeetupDetailPage() {
                         <div className="space-y-1.5 border-t border-[#1A1A2E]/5 pt-3">
                           {(meetup.attendees || []).map((att: Attendee) => (
                             <div key={att.id} className="flex items-center gap-3">
-                              <img
+                              <SafeImage
                                 src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
                                 className="h-8 w-8 rounded-full object-cover border border-[#1A1A2E]/10"
+                                name={att.name}
                                 alt={att.name}
                               />
                               <span className="flex-1 text-[13px] font-semibold text-[#1A1A2E]">{att.name}</span>

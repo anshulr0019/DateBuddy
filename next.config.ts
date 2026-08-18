@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   devIndicators: false,
   allowedDevOrigins: [
     '127.0.0.1',
@@ -20,6 +23,12 @@ const nextConfig: NextConfig = {
     'http://192.168.1.43:3000',
     'capacitor://localhost'
   ],
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  experimental: {
+    optimizePackageImports: ['@upstash/redis', 'drizzle-orm', 'pusher', 'pusher-js'],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },

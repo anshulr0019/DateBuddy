@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, photos, preferences, subscriptions } from '@/db/schema';
+import { users, photos, preferences, subscriptions, prompts, userPromptAnswers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthSession, setAuthSession } from '@/lib/auth';
 import { syncUserInterests } from '@/lib/interests';
@@ -83,6 +83,32 @@ export async function POST(request: NextRequest) {
     }
 
     await syncUserInterests(userId, interestNames);
+
+    // Save prompt answers (from multi-prompt onboarding step)
+    const rawPrompts = Array.isArray(bio?.selectedPrompts) ? bio.selectedPrompts : [];
+    const validAnswers = rawPrompts.filter(
+      (p: unknown): p is { prompt: string; answer: string } =>
+        typeof p === 'object' && p !== null &&
+        typeof (p as Record<string, unknown>).prompt === 'string' &&
+        typeof (p as Record<string, unknown>).answer === 'string' &&
+        ((p as Record<string, unknown>).answer as string).trim().length > 0
+    ).slice(0, 6);
+
+    if (validAnswers.length > 0) {
+      // Clear old answers
+      await db.delete(userPromptAnswers).where(eq(userPromptAnswers.userId, userId));
+      // Upsert each prompt text then insert answer
+      for (const item of validAnswers) {
+        const text = item.prompt.trim().slice(0, 200);
+        const answer = item.answer.trim().slice(0, 300);
+        // Find or create the prompt row
+        const existing = await db.select().from(prompts).where(eq(prompts.text, text)).limit(1);
+        const promptId = existing.length > 0
+          ? existing[0].id
+          : (await db.insert(prompts).values({ text, isActive: true }).returning())[0].id;
+        await db.insert(userPromptAnswers).values({ userId, promptId, answer });
+      }
+    }
 
     const prefValues = {
       ageMin: Number(userPrefs?.ageRange?.[0]) || 18,

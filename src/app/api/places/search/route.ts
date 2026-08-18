@@ -128,7 +128,14 @@ export async function GET(request: NextRequest) {
       console.warn('OpenStreetMap live search warning:', err);
     }
 
-    return NextResponse.json({ success: true, places, source: 'free_engine' });
+    return NextResponse.json(
+      { success: true, places, source: 'free_engine' },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error searching live places:', error);
     return NextResponse.json({ success: false, places: [] }, { status: 500 });

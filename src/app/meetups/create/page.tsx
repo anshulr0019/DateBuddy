@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
-import { AuroraBackground } from '@/app/components/shared';
+import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { VenuePickerModal } from '@/app/components/VenuePickerModal';
 
 const CATEGORIES = [
@@ -336,7 +336,7 @@ export default function CreateMeetupPage() {
                               isSel ? 'border-[#FF6B9D] ring-2 ring-[#FF6B9D]/30 scale-102' : 'border-transparent opacity-80 hover:opacity-100'
                             }`}
                           >
-                            <img src={preset.url} alt={preset.label} className="h-full w-full object-cover" />
+                            <SafeImage src={preset.url} alt={preset.label} className="h-full w-full object-cover" />
                             <div className="absolute inset-0 bg-black/20 flex items-end p-1">
                               <span className="text-[10px] text-white font-semibold truncate">{preset.label}</span>
                             </div>

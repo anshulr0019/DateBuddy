@@ -1,31 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
+import { redis, fallbackRedis } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 
-// In-memory signaling store for 0ms ultra-fast WebRTC handshake (cleared after delivery)
-interface SignalPayload {
-  id: string;
-  matchId: number;
-  senderId: number;
-  receiverId: number;
-  type: 'offer' | 'answer' | 'candidate' | 'end' | 'decline' | 'calling';
-  callType: 'audio' | 'video';
-  data: any;
-  timestamp: number;
+const SIGNAL_TTL = 90; // seconds — signals expire if not consumed
+
+function signalKey(matchId: number, receiverId: number) {
+  return `call:signals:${matchId}:${receiverId}`;
 }
 
-const activeSignals: SignalPayload[] = [];
-
-// Cleanup expired signals after 60 seconds
-setInterval(() => {
-  const cutoff = Date.now() - 60000;
-  for (let i = activeSignals.length - 1; i >= 0; i--) {
-    if (activeSignals[i].timestamp < cutoff) {
-      activeSignals.splice(i, 1);
-    }
+async function getAndClear(key: string): Promise<string | null> {
+  if (redis) {
+    try {
+      const raw = await redis.get<string>(key);
+      if (raw !== null) await redis.del(key);
+      return raw;
+    } catch { /* fall through */ }
   }
-}, 30000);
+  const raw = await fallbackRedis.get<string>(key);
+  if (raw !== null) await fallbackRedis.del(key);
+  return raw;
+}
+
+async function appendSignal(key: string, signal: object): Promise<void> {
+  if (redis) {
+    try {
+      const existing = await redis.get<string>(key);
+      const list = existing ? JSON.parse(existing) : [];
+      list.push(signal);
+      await redis.set(key, JSON.stringify(list), { ex: SIGNAL_TTL });
+      return;
+    } catch { /* fall through */ }
+  }
+  const existing = await fallbackRedis.get<string>(key);
+  const list = existing ? JSON.parse(existing) : [];
+  list.push(signal);
+  await fallbackRedis.set(key, JSON.stringify(list), { ex: SIGNAL_TTL });
+}
 
 export async function GET(request: NextRequest) {
   const session = await getAuthSession();
@@ -35,33 +47,15 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const matchId = Number(searchParams.get('matchId'));
-  const myId = session.userId;
-
   if (!matchId) {
     return NextResponse.json({ success: false, message: 'Missing matchId' }, { status: 400 });
   }
 
-  // Retrieve all pending signals intended for me in this match
-  const pending = activeSignals.filter(
-    (s) => s.matchId === matchId && s.receiverId === myId
-  );
+  const key = signalKey(matchId, session.userId);
+  const raw = await getAndClear(key);
+  const signals = raw ? JSON.parse(raw) : [];
 
-  // Remove retrieved signals
-  for (const p of pending) {
-    const idx = activeSignals.findIndex((s) => s.id === p.id);
-    if (idx !== -1) activeSignals.splice(idx, 1);
-  }
-
-  return NextResponse.json({
-    success: true,
-    signals: pending.map((p) => ({
-      id: p.id,
-      senderId: p.senderId,
-      type: p.type,
-      callType: p.callType,
-      data: p.data,
-    })),
-  });
+  return NextResponse.json({ success: true, signals });
 }
 
 export async function POST(request: NextRequest) {
@@ -78,18 +72,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid payload' }, { status: 400 });
     }
 
-    const signal: SignalPayload = {
+    const signal = {
       id: `sig-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      matchId: Number(matchId),
       senderId: session.userId,
-      receiverId: Number(receiverId),
       type,
       callType,
       data,
-      timestamp: Date.now(),
     };
 
-    activeSignals.push(signal);
+    const key = signalKey(Number(matchId), Number(receiverId));
+    await appendSignal(key, signal);
 
     return NextResponse.json({ success: true, signalId: signal.id });
   } catch (error) {

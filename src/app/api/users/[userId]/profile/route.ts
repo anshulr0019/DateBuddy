@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, photos, interests, userInterests, matches, blocks } from '@/db/schema';
+import { users, photos, interests, userInterests, matches, blocks, prompts, userPromptAnswers } from '@/db/schema';
 import { eq, and, or } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 
@@ -64,13 +64,19 @@ export async function GET(
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
     }
 
-    const [userPhotos, tags] = await Promise.all([
+    const [userPhotos, tags, userPrompts] = await Promise.all([
       db.select({ url: photos.url }).from(photos).where(eq(photos.userId, targetId)).orderBy(photos.orderIndex),
       db
         .select({ name: interests.name })
         .from(userInterests)
         .innerJoin(interests, eq(userInterests.interestId, interests.id))
         .where(eq(userInterests.userId, targetId)),
+      db
+        .select({ question: prompts.text, answer: userPromptAnswers.answer })
+        .from(userPromptAnswers)
+        .innerJoin(prompts, eq(userPromptAnswers.promptId, prompts.id))
+        .where(eq(userPromptAnswers.userId, targetId))
+        .limit(6),
     ]);
 
     // Calculate age
@@ -91,6 +97,7 @@ export async function GET(
         lastActiveAt: user.lastActiveAt,
         photos: userPhotos.map((p) => p.url),
         interests: tags.map((t) => t.name),
+        prompts: userPrompts,
       },
     });
   } catch (error) {

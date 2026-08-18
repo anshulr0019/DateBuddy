@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '../../components/shared';
 import { Ic } from '../../components/icons';
 import { dayLabel, isSameDay } from '../../lib/time';
@@ -49,6 +49,14 @@ export default function ChatPage() {
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [showNewChip, setShowNewChip] = useState(false);
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const action = searchParams?.get('action');
+    if (action === 'block' || action === 'report') {
+      setSafetyOpen(true);
+    }
+  }, [searchParams]);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [callState, setCallState] = useState<{
     isOpen: boolean;
