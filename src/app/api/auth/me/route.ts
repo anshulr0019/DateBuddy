@@ -27,6 +27,11 @@ export async function GET() {
     }
 
     const userPhotos = await db.select().from(photos).where(eq(photos.userId, user.id));
+    // Sort by order field and return URL strings
+    const photoUrls = userPhotos
+      .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+      .map(p => p.url)
+      .filter((url): url is string => typeof url === 'string' && url.length > 0);
 
     return NextResponse.json({
       success: true,
@@ -43,7 +48,7 @@ export async function GET() {
         isVerified: user.isVerified,
         onboardingCompletedAt: user.onboardingCompletedAt,
         createdAt: user.createdAt,
-        photos: userPhotos,
+        photos: photoUrls,
       },
     });
   } catch (error) {

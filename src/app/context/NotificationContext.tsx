@@ -340,7 +340,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
+    // Return safe defaults instead of throwing — prevents crash if used outside provider
+    return {
+      isOpen: false,
+      notifications: [] as NotificationItem[],
+      unreadCount: 0,
+      openNotifications: () => {},
+      closeNotifications: () => {},
+      markAllAsRead: () => {},
+      markAsRead: (_id: string) => {},
+      clearAll: () => {},
+      addNotification: (_item: Parameters<NotificationContextType['addNotification']>[0]) => {},
+    };
   }
   return context;
 }
