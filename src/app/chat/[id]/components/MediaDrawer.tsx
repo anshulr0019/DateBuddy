@@ -1,124 +1,33 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 
-// Verified GIPHY GIF IDs by Category
-const GIF_CATEGORIES: Record<string, { label: string; emoji: string; ids: string[] }> = {
-  trending: {
-    label: 'Trending',
-    emoji: '🔥',
-    ids: [
-      'g9582DNuQppxC',
-      '3o6ZtS562gG3b2Kz7y',
-      '10C8dIIp4tW7x6',
-      'l3fQf1OJPq0ypvL20',
-      '5OqX4yV4fM5V',
-      '3o7TKsjLu68u1l9xPq',
-      'l0HlCqV35hdEG2GUo',
-      '26FLdmIp6wJr9155u',
-      'xT9IgG50Fb7Mi0',
-      'l0HlHFRbuf6gqK55M',
-      '3o6Zt62pekonUXp6jC',
-      'l2JIdnN857v930m3K',
-    ],
-  },
-  love: {
-    label: 'Love',
-    emoji: '❤️',
-    ids: [
-      '3o7TKsjLu68u1l9xPq',
-      'l0HlCqV35hdEG2GUo',
-      '26FLdmIp6wJr9155u',
-      'l41YkxvU2bOiK7fUI',
-      '26hpKMT7hPmdvBHtC',
-      'l0K4mE8D7x57Z0N3y',
-      '3o7TKoWXm3okO1kgHC',
-      'l4FGlmp89HEXqvPf2',
-    ],
-  },
-  funny: {
-    label: 'Funny',
-    emoji: '😂',
-    ids: [
-      '10C8dIIp4tW7x6',
-      'l3fQf1OJPq0ypvL20',
-      'xT9IgG50Fb7Mi0',
-      '3o6Zt62pekonUXp6jC',
-      'l0HlHFRbuf6gqK55M',
-      '3o7TKSjRrfIPjeiVyM',
-      'dE8GYg3G30rR',
-      '3o7abKhOpu0NwenH3y',
-    ],
-  },
-  party: {
-    label: 'Party',
-    emoji: '🎉',
-    ids: [
-      'g9582DNuQppxC',
-      'l2JIdnN857v930m3K',
-      '3o6ZtS562gG3b2Kz7y',
-      'xT0xezQOW49vQD645y',
-      'l0AMOCIun4d97Q1p6',
-      '26u4b45b8K8',
-    ],
-  },
-  cute: {
-    label: 'Cute',
-    emoji: '😍',
-    ids: [
-      '5OqX4yV4fM5V',
-      '3o7TKoWXm3okO1kgHC',
-      'l4FGpPxl9vL3',
-      '26FLdmIp6wJr9155u',
-      '3o7TKsjLu68u1l9xPq',
-    ],
-  },
-};
+export type DrawerTab = 'emoji' | 'gif' | 'sticker';
 
-// Verified Animated Sticker URLs
-const STICKER_PACKS: { id: string; label: string; emoji: string; urls: string[] }[] = [
-  {
-    id: 'love',
-    label: 'Love & Hearts',
-    emoji: '❤️',
-    urls: [
-      'https://i.giphy.com/3o7TKsjLu68u1l9xPq.gif',
-      'https://i.giphy.com/l0HlCqV35hdEG2GUo.gif',
-      'https://i.giphy.com/26FLdmIp6wJr9155u.gif',
-      'https://i.giphy.com/l41YkxvU2bOiK7fUI.gif',
-      'https://i.giphy.com/26hpKMT7hPmdvBHtC.gif',
-      'https://i.giphy.com/l0K4mE8D7x57Z0N3y.gif',
-    ],
-  },
-  {
-    id: 'cute',
-    label: 'Cute & Vibe',
-    emoji: '✨',
-    urls: [
-      'https://i.giphy.com/5OqX4yV4fM5V.gif',
-      'https://i.giphy.com/3o7TKoWXm3okO1kgHC.gif',
-      'https://i.giphy.com/g9582DNuQppxC.gif',
-      'https://i.giphy.com/3o6ZtS562gG3b2Kz7y.gif',
-      'https://i.giphy.com/l2JIdnN857v930m3K.gif',
-    ],
-  },
-  {
-    id: 'reactions',
-    label: 'Reactions',
-    emoji: '😂',
-    urls: [
-      'https://i.giphy.com/10C8dIIp4tW7x6.gif',
-      'https://i.giphy.com/l3fQf1OJPq0ypvL20.gif',
-      'https://i.giphy.com/xT9IgG50Fb7Mi0.gif',
-      'https://i.giphy.com/3o6Zt62pekonUXp6jC.gif',
-      'https://i.giphy.com/l0HlHFRbuf6gqK55M.gif',
-    ],
-  },
+const GIPHY_KEY = 'sXpGFDGZs0Dv1mmNFvYaGUvYwKX0PWIh';
+const GIPHY_BASE = 'https://api.giphy.com/v1';
+
+const GIF_CATEGORIES = [
+  { id: 'trending', label: 'Trending', emoji: '🔥' },
+  { id: 'love', label: 'Love', emoji: '❤️' },
+  { id: 'funny', label: 'Funny', emoji: '😂' },
+  { id: 'cute', label: 'Cute', emoji: '😍' },
+  { id: 'party', label: 'Party', emoji: '🎉' },
+  { id: 'reaction', label: 'Reactions', emoji: '👀' },
+];
+
+const STICKER_CATEGORIES = [
+  { id: 'trending', label: 'Trending', emoji: '✨' },
+  { id: 'love', label: 'Love & Hearts', emoji: '❤️' },
+  { id: 'cute', label: 'Cute & Kawaii', emoji: '🎀' },
+  { id: 'vibes', label: 'Gen Z Vibes', emoji: '🔥' },
+  { id: 'reactions', label: 'Reactions', emoji: '😂' },
+  { id: 'mood', label: 'Mood', emoji: '🥺' },
 ];
 
 const EMOJI_CATEGORIES = [
   {
-    name: 'Recent',
+    name: 'Recent & Favorites',
     items: ['❤️', '🥰', '😂', '🤗', '😅', '🔥', '✨', '☕', '💕', '😍', '🎉', '👍', '🙌', '💯', '😊', '🍕'],
   },
   {
@@ -132,13 +41,44 @@ const EMOJI_CATEGORIES = [
   {
     name: 'Hearts & Gestures',
     items: [
-      '❤️', '💖', '💗', '💓', '💕', '💘', '💝', '💜', '💙', '💚', '💛', '🧡', '🤍', '<ctrl42>', '🖤', '💔',
+      '❤️', '💖', '💗', '💓', '💕', '💘', '💝', '💜', '💙', '💚', '💛', '🧡', '🤍', '🤎', '🖤', '💔',
       '👍', '👎', '👏', '🙌', '🤝', '🙏', '🤞', '✌️', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '👌',
     ],
   },
 ];
 
-export type DrawerTab = 'emoji' | 'gif' | 'sticker';
+type MediaItem = { id: string; url: string; preview: string };
+
+async function fetchGiphyMedia(type: 'gifs' | 'stickers', query: string, limit = 20): Promise<MediaItem[]> {
+  try {
+    const isSearch = Boolean(query && query !== 'trending');
+    const endpoint = isSearch ? `${GIPHY_BASE}/${type}/search` : `${GIPHY_BASE}/${type}/trending`;
+    const params = new URLSearchParams({
+      api_key: GIPHY_KEY,
+      limit: String(limit),
+      rating: 'g',
+      ...(isSearch ? { q: query.trim() } : {}),
+    });
+
+    const res = await fetch(`${endpoint}?${params}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+
+    return (data.data ?? [])
+      .map((item: any) => {
+        const fixed = item.images?.fixed_height || item.images?.downsized || item.images?.original;
+        const preview = item.images?.fixed_height_small?.url || fixed?.url || '';
+        return {
+          id: String(item.id),
+          url: fixed?.url || item.images?.original?.url || '',
+          preview,
+        };
+      })
+      .filter((item: MediaItem) => Boolean(item.url && item.preview));
+  } catch {
+    return [];
+  }
+}
 
 interface MediaDrawerProps {
   initialTab?: DrawerTab;
@@ -149,43 +89,59 @@ interface MediaDrawerProps {
 export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: MediaDrawerProps) {
   const [activeTab, setActiveTab] = useState<DrawerTab>(initialTab);
   const [selectedGifCategory, setSelectedGifCategory] = useState<string>('trending');
-  const [gifQuery, setGifQuery] = useState('');
-  const [stickerPack, setStickerPack] = useState<number>(0);
+  const [selectedStickerCategory, setSelectedStickerCategory] = useState<string>('trending');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Filter GIFs based on category or query
-  const getDisplayGifs = useCallback(() => {
-    let ids: string[] = [];
-    if (gifQuery.trim()) {
-      const q = gifQuery.toLowerCase().trim();
-      const matchedCat = Object.values(GIF_CATEGORIES).find(
-        (c) => c.label.toLowerCase().includes(q) || c.emoji.includes(q)
-      );
-      if (matchedCat) {
-        ids = matchedCat.ids;
-      } else {
-        // combine all ids
-        const allIds = Object.values(GIF_CATEGORIES).flatMap((c) => c.ids);
-        ids = Array.from(new Set(allIds));
-      }
-    } else {
-      ids = GIF_CATEGORIES[selectedGifCategory]?.ids ?? GIF_CATEGORIES.trending.ids;
-    }
-    return ids.map((id) => ({ id, url: `https://i.giphy.com/${id}.gif` }));
-  }, [gifQuery, selectedGifCategory]);
+  const loadMedia = useCallback(async (tab: DrawerTab, query: string, cat: string) => {
+    if (tab === 'emoji') return;
+    setLoading(true);
+    const effectiveQuery = query.trim() ? query.trim() : cat === 'trending' ? '' : cat;
+    const items = await fetchGiphyMedia(tab === 'gif' ? 'gifs' : 'stickers', effectiveQuery);
+    setMediaItems(items);
+    setLoading(false);
+  }, []);
 
-  const displayGifs = getDisplayGifs();
+  useEffect(() => {
+    setSearchQuery('');
+    const cat = activeTab === 'gif' ? selectedGifCategory : selectedStickerCategory;
+    loadMedia(activeTab, '', cat);
+  }, [activeTab, loadMedia]);
+
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      const cat = activeTab === 'gif' ? selectedGifCategory : selectedStickerCategory;
+      loadMedia(activeTab, q, cat);
+    }, 350);
+  };
+
+  const handleGifCategoryClick = (catId: string) => {
+    setSelectedGifCategory(catId);
+    setSearchQuery('');
+    loadMedia('gif', '', catId);
+  };
+
+  const handleStickerCategoryClick = (catId: string) => {
+    setSelectedStickerCategory(catId);
+    setSearchQuery('');
+    loadMedia('sticker', '', catId);
+  };
 
   return (
-    <div className="z-30 bg-white/98 backdrop-blur-2xl border-t border-gray-200/80 shadow-2xl animate-popover-enter flex flex-col h-[285px] select-none">
-      {/* ── WHATSAPP STYLE TOP TAB NAV BAR ── */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 pt-2.5 pb-2 border-b border-gray-100 bg-gray-50/60">
+    <div className="z-30 bg-white/95 backdrop-blur-2xl border-t border-gray-200/80 shadow-[0_-12px_36px_rgba(0,0,0,0.08)] animate-popover-enter flex flex-col h-[290px] select-none">
+      {/* ── TOP TAB NAV BAR ── */}
+      <div className="flex-shrink-0 flex items-center justify-between px-3.5 pt-2.5 pb-2 border-b border-gray-100 bg-gray-50/70">
         <div className="flex items-center gap-1 bg-gray-200/70 p-1 rounded-2xl">
           <button
             type="button"
             onClick={() => setActiveTab('emoji')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12.5px] font-extrabold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
               activeTab === 'emoji'
-                ? 'bg-white text-[#F43F5E] shadow-sm scale-102'
+                ? 'bg-white text-[#F43F5E] shadow-xs scale-102'
                 : 'text-gray-500 hover:text-gray-800'
             }`}
           >
@@ -195,44 +151,48 @@ export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: Me
           <button
             type="button"
             onClick={() => setActiveTab('gif')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12.5px] font-extrabold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
               activeTab === 'gif'
-                ? 'bg-white text-[#F43F5E] shadow-sm scale-102'
+                ? 'bg-white text-[#F43F5E] shadow-xs scale-102'
                 : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            <span>👾</span>
+            <span>🎬</span>
             <span>GIF</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('sticker')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12.5px] font-extrabold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
               activeTab === 'sticker'
-                ? 'bg-white text-[#F43F5E] shadow-sm scale-102'
+                ? 'bg-white text-[#F43F5E] shadow-xs scale-102'
                 : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            <span>🏷️</span>
+            <span>✨</span>
             <span>Stickers</span>
           </button>
         </div>
 
-        {/* Quick search input when GIF tab is active */}
-        {activeTab === 'gif' && (
-          <div className="relative max-w-[150px] w-full">
+        {/* Live Search Input (for GIF & Sticker tabs) */}
+        {activeTab !== 'emoji' && (
+          <div className="relative max-w-[160px] w-full">
             <input
-              type="text"
-              value={gifQuery}
-              onChange={(e) => setGifQuery(e.target.value)}
-              placeholder="Search..."
-              className="w-full h-8 pl-3 pr-6 rounded-xl bg-white border border-gray-200 text-[12px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#F43F5E]"
+              type="search"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder={activeTab === 'gif' ? 'Search GIFs…' : 'Search stickers…'}
+              className="w-full h-7.5 pl-7 pr-6 rounded-xl bg-white border border-gray-200 text-[11.5px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#F43F5E] font-medium"
             />
-            {gifQuery && (
+            <svg className="absolute left-2.5 top-2 text-gray-400 pointer-events-none" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            {searchQuery && (
               <button
                 type="button"
-                onClick={() => setGifQuery('')}
-                className="absolute right-2 top-2 text-gray-400 text-[10px] font-bold"
+                onClick={() => handleSearchChange('')}
+                className="absolute right-2 top-1.5 text-gray-400 text-[11px] font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -268,19 +228,16 @@ export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: Me
       {activeTab === 'gif' && (
         <div className="flex flex-col flex-1 min-h-0">
           {/* Category Chips */}
-          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-100 overflow-x-auto scrollbar-none">
-            {Object.entries(GIF_CATEGORIES).map(([key, cat]) => (
+          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-100 overflow-x-auto scrollbar-none bg-gray-50/40">
+            {GIF_CATEGORIES.map((cat) => (
               <button
-                key={key}
+                key={cat.id}
                 type="button"
-                onClick={() => {
-                  setGifQuery('');
-                  setSelectedGifCategory(key);
-                }}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11.5px] font-bold flex-shrink-0 transition-all cursor-pointer ${
-                  selectedGifCategory === key && !gifQuery
+                onClick={() => handleGifCategoryClick(cat.id)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-bold flex-shrink-0 transition-all cursor-pointer ${
+                  selectedGifCategory === cat.id && !searchQuery
                     ? 'bg-[#F43F5E] text-white shadow-2xs'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <span>{cat.emoji}</span>
@@ -291,27 +248,41 @@ export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: Me
 
           {/* GIF Grid */}
           <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-2 py-2">
-            <div className="grid grid-cols-3 gap-2">
-              {displayGifs.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onPickGif(item.url)}
-                  className="aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 border border-gray-200/60 cursor-pointer hover:scale-[1.04] active:scale-95 transition-transform shadow-2xs relative group"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.url}
-                    alt="GIF"
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[10px] font-black text-white bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md">Send</span>
-                  </div>
-                </button>
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex flex-col h-full items-center justify-center gap-2 text-gray-400">
+                <svg className="animate-spin text-[#F43F5E]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                </svg>
+                <span className="text-[11.5px] font-medium">Loading GIFs…</span>
+              </div>
+            ) : mediaItems.length === 0 ? (
+              <div className="flex flex-col h-full items-center justify-center text-center p-4 text-gray-400">
+                <span className="text-2xl mb-1">🔍</span>
+                <p className="text-[12.5px] font-bold text-gray-700">No GIFs found</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Try a different search term</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {mediaItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onPickGif(item.url)}
+                    className="aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 border border-gray-200/60 cursor-pointer hover:scale-[1.03] active:scale-95 transition-transform shadow-2xs relative group"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.preview}
+                      alt="GIF"
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -319,45 +290,61 @@ export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: Me
       {/* ── TAB 3: STICKERS ── */}
       {activeTab === 'sticker' && (
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Sticker Pack Tabs */}
-          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-100 overflow-x-auto scrollbar-none">
-            {STICKER_PACKS.map((pack, idx) => (
+          {/* Category Chips */}
+          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-100 overflow-x-auto scrollbar-none bg-gray-50/40">
+            {STICKER_CATEGORIES.map((cat) => (
               <button
-                key={pack.id}
+                key={cat.id}
                 type="button"
-                onClick={() => setStickerPack(idx)}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11.5px] font-bold flex-shrink-0 transition-all cursor-pointer ${
-                  stickerPack === idx
-                    ? 'bg-[#F43F5E] text-white shadow-2xs'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                onClick={() => handleStickerCategoryClick(cat.id)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-bold flex-shrink-0 transition-all cursor-pointer ${
+                  selectedStickerCategory === cat.id && !searchQuery
+                    ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-2xs'
+                    : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span>{pack.emoji}</span>
-                <span>{pack.label}</span>
+                <span>{cat.emoji}</span>
+                <span>{cat.label}</span>
               </button>
             ))}
           </div>
 
-          {/* Sticker Grid */}
+          {/* Stickers Grid */}
           <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-2 py-2">
-            <div className="grid grid-cols-3 gap-2">
-              {STICKER_PACKS[stickerPack]?.urls.map((url, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => onPickGif(url)}
-                  className="aspect-square overflow-hidden rounded-2xl bg-gray-50 border border-gray-200/60 p-2 cursor-pointer hover:scale-[1.06] active:scale-95 transition-transform shadow-2xs flex items-center justify-center"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt="Sticker"
-                    loading="lazy"
-                    className="h-full w-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex flex-col h-full items-center justify-center gap-2 text-gray-400">
+                <svg className="animate-spin text-[#F43F5E]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                </svg>
+                <span className="text-[11.5px] font-medium">Loading stickers…</span>
+              </div>
+            ) : mediaItems.length === 0 ? (
+              <div className="flex flex-col h-full items-center justify-center text-center p-4 text-gray-400">
+                <span className="text-2xl mb-1">🏷️</span>
+                <p className="text-[12.5px] font-bold text-gray-700">No stickers found</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Try a different search term</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {mediaItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onPickGif(item.url)}
+                    className="aspect-square overflow-hidden rounded-2xl bg-gray-50/80 hover:bg-gray-100 border border-gray-100 cursor-pointer hover:scale-108 active:scale-95 transition-transform shadow-2xs p-1 flex items-center justify-center"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.preview}
+                      alt="Sticker"
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
