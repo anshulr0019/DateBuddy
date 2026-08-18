@@ -88,7 +88,7 @@ export default function ReviewPage() {
       const photos = JSON.parse(localStorage.getItem('onboarding_photos') || '[]');
       const bio = JSON.parse(localStorage.getItem('onboarding_bio') || '{}');
       const interests = JSON.parse(localStorage.getItem('onboarding_interests') || '[]');
-      const preferences = JSON.parse(localStorage.getItem('onboarding_preferences') || '');
+      const preferences = JSON.parse(localStorage.getItem('onboarding_preferences') || '{}');
 
       const res = await fetch('/api/users/complete-onboarding', {
         method: 'POST',

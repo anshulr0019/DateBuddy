@@ -7,55 +7,11 @@ export default function PreferencesPage() {
   const router = useRouter();
   const [ageRange, setAgeRange] = useState([18, 30]);
   const [distance, setDistance] = useState(50);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorDetails, setErrorDetails] = useState('');
 
-  const handleNext = async () => {
+  const handleNext = () => {
     const preferences = { ageRange, distance };
     localStorage.setItem('onboarding_preferences', JSON.stringify(preferences));
-
-    setIsLoading(true);
-    setErrorDetails('');
-
-    try {
-      const basicInfoStr = localStorage.getItem('onboarding_basic');
-      if (!basicInfoStr) {
-        setErrorDetails('Your profile details are missing. Please start again from the beginning.');
-        return;
-      }
-
-      const payload = {
-        basicInfo: JSON.parse(basicInfoStr),
-        location: localStorage.getItem('onboarding_location') || '',
-        photos: JSON.parse(localStorage.getItem('onboarding_photos') || '[]'),
-        bio: JSON.parse(localStorage.getItem('onboarding_bio') || '{}'),
-        interests: JSON.parse(localStorage.getItem('onboarding_interests') || '[]'),
-        preferences,
-      };
-
-      const response = await fetch('/api/users/complete-onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.status === 401) {
-        router.push('/welcome');
-        return;
-      }
-
-      const data = await response.json().catch(() => ({}));
-
-      if (response.ok && data.success) {
-        router.push('/onboarding/review');
-      } else {
-        setErrorDetails(data.message || 'Could not save your profile. Please try again.');
-      }
-    } catch {
-      setErrorDetails('Network error. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    router.push('/onboarding/review');
   };
 
   return (
@@ -96,12 +52,6 @@ export default function PreferencesPage() {
             <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Who would you like to meet?</h1>
             <p className="text-[14px] text-[#1A1A2E]/60 mt-1">Set your discovery preferences for age and distance</p>
           </div>
-
-          {errorDetails && (
-            <div className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-2xl">
-              <p className="text-rose-600 text-xs font-semibold">{errorDetails}</p>
-            </div>
-          )}
 
           <div className="space-y-4">
             {/* Age Range Card */}
@@ -183,10 +133,9 @@ export default function PreferencesPage() {
         <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/5">
           <button 
             onClick={handleNext} 
-            disabled={isLoading}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer"
           >
-            {isLoading ? 'Saving Profile...' : 'Save & Continue →'}
+            Save & Continue →
           </button>
         </div>
       </div>
