@@ -409,7 +409,7 @@ export default function ProfilePage() {
                       {isGold && (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-purple-500/15 border border-amber-400/30 text-amber-700 text-[11px] font-extrabold uppercase tracking-wider mb-2 shadow-2xs">
                           <span>👑</span>
-                          <span>VIP Founder Gold</span>
+                          <span>Early VIP Gold</span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 mb-1">

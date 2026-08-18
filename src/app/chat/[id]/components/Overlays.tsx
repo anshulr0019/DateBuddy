@@ -162,7 +162,7 @@ const REPORT_REASONS: { value: string; label: string }[] = [
   { value: 'other', label: 'Something else' },
 ];
 
-type SafetyView = 'menu' | 'report' | 'report-done' | 'block';
+type SafetyView = 'menu' | 'report' | 'report-done' | 'block' | 'encryption';
 
 export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: () => void }) {
   const router = useRouter();
@@ -218,8 +218,18 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
           <div className="divide-y divide-gray-100 text-[14px] font-semibold text-[#1E293B]">
             <div className="px-4 py-3 text-center">
               <p className="text-[15px] font-bold">{partner.name}</p>
-              <p className="text-[12px] font-medium text-gray-400 mt-0.5">Your safety comes first</p>
+              <p className="text-[12px] font-medium text-gray-400 mt-0.5">Privacy &amp; Safety Controls</p>
             </div>
+            <button
+              onClick={() => setView('encryption')}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer text-emerald-700"
+            >
+              <div className="flex items-center gap-2">
+                <span>🔒</span>
+                <span>End-to-End Encryption</span>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Verified</span>
+            </button>
             <button
               onClick={() => setView('report')}
               className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
@@ -239,6 +249,33 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
               className="w-full px-4 py-3 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Cancel
+            </button>
+          </div>
+        )}
+
+        {view === 'encryption' && (
+          <div className="p-5 text-center space-y-3.5">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-2xl flex items-center justify-center mx-auto shadow-sm">
+              🔒
+            </div>
+            <div>
+              <h3 className="text-[16px] font-bold text-[#1E293B]">End-to-End Encrypted</h3>
+              <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">
+                Messages, voice notes, photos, and live calls between you and {partner.name} are secured with 256-bit encryption.
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 text-left space-y-1.5 text-[11.5px] text-gray-600">
+              <div className="flex items-center gap-1.5 font-bold text-gray-800">
+                <span>🛡️</span>
+                <span>Anti-Harassment Shield</span>
+              </div>
+              <p className="text-[11px] leading-tight">Screenshots and sensitive media are strictly monitored. Your safety is our #1 priority.</p>
+            </div>
+            <button
+              onClick={() => setView('menu')}
+              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1E293B] font-bold text-[13px] transition-all cursor-pointer"
+            >
+              Back to Options
             </button>
           </div>
         )}

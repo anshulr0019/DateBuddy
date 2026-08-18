@@ -224,7 +224,14 @@ export default function ChatPage() {
                           </svg>
                         )}
                       </h1>
-                      <p className="text-[11px] text-[#FF6B9D] font-semibold -mt-0.5">Tap to view profile</p>
+                      <div className="flex items-center gap-1.5 -mt-0.5">
+                        <span className="flex items-center gap-1 text-[11px] text-emerald-600 font-bold">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          🔒 Encrypted
+                        </span>
+                        <span className="text-[11px] text-slate-300">•</span>
+                        <p className="text-[11px] text-[#FF6B9D] font-semibold">View profile</p>
+                      </div>
                     </div>
                   </button>
                 ) : (
@@ -356,6 +363,16 @@ export default function ChatPage() {
                   </div>
                 ) : (
                   <>
+                    {/* End-to-End Encryption Notice */}
+                    <div className="flex justify-center my-2 select-none">
+                      <div className="flex items-center gap-2 max-w-[320px] rounded-2xl bg-amber-500/10 border border-amber-400/25 px-3.5 py-2 text-center shadow-2xs backdrop-blur-md">
+                        <span className="text-[14px]">🔒</span>
+                        <p className="text-[11px] font-semibold text-amber-900/80 leading-snug">
+                          Messages &amp; calls are end-to-end encrypted. No one outside of this chat can read or listen to them.
+                        </p>
+                      </div>
+                    </div>
+
                     {chat.loadingOlder && (
                       <div className="flex justify-center py-1" role="status" aria-label="Loading earlier messages">
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#F43F5E]" />

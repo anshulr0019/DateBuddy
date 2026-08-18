@@ -3,20 +3,22 @@
 import React from 'react';
 import { hapticMedium, hapticSuccess } from '../lib/haptics';
 
-interface FounderVIPModalProps {
+interface EarlyVIPModalProps {
   isOpen: boolean;
+  memberNumber?: number;
   founderNumber?: number;
   onClose: () => void;
 }
 
-export function FounderVIPModal({ isOpen, founderNumber = 1, onClose }: FounderVIPModalProps) {
+export function FounderVIPModal({ isOpen, memberNumber, founderNumber, onClose }: EarlyVIPModalProps) {
+  const num = memberNumber ?? founderNumber ?? 1;
   if (!isOpen) return null;
 
   const handleShare = async () => {
     hapticMedium();
     const shareData = {
-      title: 'Infyn VIP Founder Gold',
-      text: `I just unlocked Free Lifetime VIP Gold on @app.infyn as Founder Member #${founderNumber}! First 500 members get it free ✨`,
+      title: 'Infyn VIP Member',
+      text: `I just unlocked Free Lifetime VIP Gold on @app.infyn as Early Member #${num}! First 500 members get it free ✨`,
       url: window.location.origin,
     };
 
@@ -51,32 +53,32 @@ export function FounderVIPModal({ isOpen, founderNumber = 1, onClose }: FounderV
         <div className="relative mb-3.5 mt-2">
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400 to-[#FF6B9D] blur-xl opacity-60 animate-pulse" />
           <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500/30 via-rose-500/30 to-purple-500/30 border border-amber-300/50 shadow-2xl text-[42px]">
-            👑
+            ✨
           </div>
         </div>
 
-        {/* Founder Pill Badge */}
+        {/* Early VIP Member Pill Badge */}
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-purple-500/20 border border-amber-400/40 text-amber-300 text-[11.5px] font-black uppercase tracking-wider mb-2.5 shadow-sm">
-          <span>✦ VIP Founder #{founderNumber} of 500 ✦</span>
+          <span>✦ Early VIP Member #{num} of 500 ✦</span>
         </div>
 
         {/* Title */}
         <h2 className="text-[26px] font-black text-white leading-tight tracking-tight mb-2">
-          Lifetime Gold Unlocked! ✨
+          Lifetime VIP Gold Unlocked! ✨
         </h2>
 
         {/* Subtitle */}
         <p className="text-[13.5px] text-white/70 leading-relaxed mb-5 max-w-[280px]">
-          Because you joined early, you get <strong className="text-white">Free Lifetime Infyn Gold</strong> with zero limits forever.
+          Because you joined early, you get <strong className="text-white">Free Lifetime Infyn Gold</strong> with unlimited connections forever.
         </p>
 
         {/* Perks Grid */}
         <div className="w-full space-y-2 mb-6 text-left">
           {[
-            { icon: '♾️', title: 'Unlimited Swipes', desc: 'No daily like limits ever' },
-            { icon: '👀', title: 'See Who Liked You', desc: 'Instant match with anyone' },
-            { icon: '⭐', title: '5 Daily Super Likes', desc: 'Stand out from the crowd' },
-            { icon: '👑', title: 'Founder VIP Badge', desc: 'Permanent gold badge on profile' },
+            { icon: '♾️', title: 'Unlimited Connections', desc: 'No daily limits or restrictions' },
+            { icon: '👀', title: 'See Who Vibe Checked You', desc: 'Connect with anyone instantly' },
+            { icon: '⭐', title: '5 Daily Super Likes', desc: 'Stand out in the community' },
+            { icon: '👑', title: 'Early VIP Status', desc: 'Gold VIP badge on your profile' },
           ].map((perk) => (
             <div
               key={perk.title}
@@ -108,7 +110,7 @@ export function FounderVIPModal({ isOpen, founderNumber = 1, onClose }: FounderV
             className="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white/80 font-bold text-[12.5px] active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <span>📲</span>
-            <span>Share Founder Status</span>
+            <span>Share VIP Status</span>
           </button>
         </div>
       </div>

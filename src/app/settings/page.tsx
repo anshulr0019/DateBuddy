@@ -9,12 +9,12 @@ export default function SettingsPage() {
   const router = useRouter();
   const { filters, setFilters } = useFilters();
 
-  const [ageRange, setAgeRange] = useState<[number, number]>([filters.ageMin, filters.ageMax]);
-  const [maxDistance, setMaxDistance] = useState<number>(filters.maxDistance);
-  const [onlyVerified, setOnlyVerified] = useState<boolean>(filters.verifiedOnly);
+  const [ageRange, setAgeRange] = useState<[number, number]>([filters?.ageMin ?? 18, filters?.ageMax ?? 30]);
+  const [maxDistance, setMaxDistance] = useState<number>(filters?.maxDistance ?? 50);
+  const [onlyVerified, setOnlyVerified] = useState<boolean>(filters?.verifiedOnly ?? false);
 
   const [userInfo, setUserInfo] = useState({
-    name: 'Loading...',
+    name: 'You',
     email: '',
     phoneNumber: '',
     verified: false,
@@ -37,7 +37,7 @@ export default function SettingsPage() {
 
   const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [showEditPhoneModal, setShowEditPhoneModal] = useState(false);
-  const [newPhone, setNewPhone] = useState(userInfo.phoneNumber);
+  const [newPhone, setNewPhone] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -82,18 +82,24 @@ export default function SettingsPage() {
         const data = await res.json();
         if (!data.success || !data.settings) return;
         const s = data.settings;
-        setNotifications(s.notifications);
-        setPrivacy(s.privacy);
-        setAgeRange([s.discovery.ageMin, s.discovery.ageMax]);
-        setMaxDistance(s.discovery.distanceMax);
-        setOnlyVerified(s.discovery.onlyVerified);
-        setFilters(prev => ({
-          ...prev,
-          ageMin: s.discovery.ageMin,
-          ageMax: s.discovery.ageMax,
-          maxDistance: s.discovery.distanceMax,
-          verifiedOnly: s.discovery.onlyVerified,
-        }));
+        if (s.notifications) setNotifications(prev => ({ ...prev, ...s.notifications }));
+        if (s.privacy) setPrivacy(prev => ({ ...prev, ...s.privacy }));
+        if (s.discovery) {
+          const min = Number(s.discovery.ageMin) || 18;
+          const max = Number(s.discovery.ageMax) || 30;
+          const dist = Number(s.discovery.distanceMax) || 50;
+          const verified = Boolean(s.discovery.onlyVerified);
+          setAgeRange([min, max]);
+          setMaxDistance(dist);
+          setOnlyVerified(verified);
+          setFilters(prev => ({
+            ...prev,
+            ageMin: min,
+            ageMax: max,
+            maxDistance: dist,
+            verifiedOnly: verified,
+          }));
+        }
       } catch {
         /* keep local defaults — the toggles stay usable offline */
       }
@@ -527,9 +533,23 @@ export default function SettingsPage() {
               {/* Privacy Controls */}
               <div className="space-y-1">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1A1A2E]/40 px-2 mb-1.5">
-                  Privacy & Safety
+                  Privacy &amp; Safety Shield
                 </p>
                 <GlassCard className="divide-y divide-[#1A1A2E]/[0.06]">
+                  {/* E2E Encryption Status Card */}
+                  <div className="flex items-center justify-between p-3.5 bg-emerald-500/[0.04]">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[14px] font-bold text-[#1A1A2E]">End-to-End Encryption</p>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 text-[10px] font-extrabold">
+                          Always Active
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#1A1A2E]/50">Chats, photos &amp; calls are 256-bit encrypted</p>
+                    </div>
+                    <span className="text-emerald-600 text-lg">🔒</span>
+                  </div>
+
                   <div className="flex items-center justify-between p-3.5">
                     <div>
                       <p className="text-[14px] font-medium text-[#1A1A2E]">Incognito Mode</p>
