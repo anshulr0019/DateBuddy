@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { hapticMedium, hapticSuccess, hapticWarning } from '../../lib/haptics';
 import { SafeImage } from '../../components/shared';
+import { FounderVIPModal } from '../../components/FounderVIPModal';
 
 const BackChevron = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -50,6 +51,7 @@ export default function ReviewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [strengthPct, setStrengthPct] = useState(0);
+  const [founderData, setFounderData] = useState<{ isFounder: boolean; founderNumber: number } | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -101,10 +103,13 @@ export default function ReviewPage() {
         setError(data.message || 'Could not save your profile. Please try again.');
         return;
       }
-      hapticSuccess();
-      // Go to tutorial first so new users know how to use the app,
-      // then tutorial routes to /discover. Hard navigate so the cookie is read fresh.
-      window.location.assign('/onboarding/tutorial');
+      if (data.isFounder) {
+        hapticSuccess();
+        setFounderData({ isFounder: true, founderNumber: data.founderNumber || 1 });
+      } else {
+        hapticSuccess();
+        window.location.assign('/onboarding/tutorial');
+      }
     } catch {
       hapticWarning();
       setError('Network error. Please check your connection and try again.');
@@ -268,6 +273,13 @@ export default function ReviewPage() {
           </button>
         </div>
       </div>
+
+      {/* VIP Founder Celebration Modal */}
+      <FounderVIPModal
+        isOpen={Boolean(founderData)}
+        founderNumber={founderData?.founderNumber}
+        onClose={() => window.location.assign('/onboarding/tutorial')}
+      />
     </div>
   );
 }

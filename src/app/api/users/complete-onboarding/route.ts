@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users, photos, preferences, subscriptions, prompts, userPromptAnswers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 import { getAuthSession, setAuthSession } from '@/lib/auth';
 import { syncUserInterests } from '@/lib/interests';
 
@@ -128,12 +128,41 @@ export async function POST(request: NextRequest) {
       await db.insert(preferences).values({ userId, ...prefValues });
     }
 
-    await db.insert(subscriptions).values({ userId, tier: 'free' }).onConflictDoNothing();
+    // ── FIRST 500 VIP FOUNDER LIFETIME GOLD GRANT ──
+    const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(users);
+    const userNumber = Number(totalUsers) || 1;
+    const isFounder = userNumber <= 500;
+
+    const assignedTier = isFounder ? 'monthly' : 'free';
+    const assignedEndDate = isFounder ? new Date('2099-12-31') : null;
+
+    const existingSub = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    if (existingSub.length > 0) {
+      await db
+        .update(subscriptions)
+        .set({ tier: assignedTier, endDate: assignedEndDate })
+        .where(eq(subscriptions.userId, userId));
+    } else {
+      await db
+        .insert(subscriptions)
+        .values({ userId, tier: assignedTier, endDate: assignedEndDate });
+    }
 
     // Re-mint the cookie so middleware stops gating this user at onboarding.
     await setAuthSession(userId, updated.phoneNumber ?? session.phoneNumber, true);
 
-    return NextResponse.json({ success: true, userId, message: 'Onboarding completed' });
+    return NextResponse.json({
+      success: true,
+      userId,
+      isFounder,
+      founderNumber: userNumber,
+      message: 'Onboarding completed',
+    });
   } catch (error) {
     console.error('Onboarding failed:', error);
     return NextResponse.json(

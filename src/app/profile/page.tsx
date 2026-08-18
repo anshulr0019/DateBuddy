@@ -119,6 +119,7 @@ export default function ProfilePage() {
   const [editError, setEditError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [photoLightboxOpen, setPhotoLightboxOpen] = useState(false);
+  const [isGold, setIsGold] = useState(false);
 
   const openEditor = useCallback(() => {
     setEditDraft({
@@ -179,7 +180,18 @@ export default function ProfilePage() {
     fetch('/api/matches', { signal })
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
-        if (data?.success && Array.isArray(data.matches)) setConnections(data.matches.length);
+        if (data?.matches && Array.isArray(data.matches)) {
+          setConnections(data.matches.length);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/premium/status', { signal })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (d?.success && d.subscription?.isActive) {
+          setIsGold(true);
+        }
       })
       .catch(() => {});
 
@@ -393,26 +405,32 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Name & info */}
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A2E]">
-                        {profile.name}
-                        {profile.age !== null && `, ${profile.age}`}
-                      </h1>
-                      {profile.verified && (
-                        <span role="img" aria-label="Verified profile">
-                          <VerifiedBadge />
-                        </span>
+                    <div className="mb-4">
+                      {isGold && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-purple-500/15 border border-amber-400/30 text-amber-700 text-[11px] font-extrabold uppercase tracking-wider mb-2 shadow-2xs">
+                          <span>👑</span>
+                          <span>VIP Founder Gold</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 mb-1">
+                        <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A2E]">
+                          {profile.name}
+                          {profile.age !== null && `, ${profile.age}`}
+                        </h1>
+                        {profile.verified && (
+                          <span role="img" aria-label="Verified profile">
+                            <VerifiedBadge />
+                          </span>
+                        )}
+                      </div>
+                      {subtitle && <p className="text-[14px] text-[#1A1A2E]/60 mb-1">{subtitle}</p>}
+                      {profile.location && (
+                        <div className="flex items-center gap-1 text-[#1A1A2E]/60">
+                          <Ic.MapPin />
+                          <span className="text-[13px]">{profile.location}</span>
+                        </div>
                       )}
                     </div>
-                    {subtitle && <p className="text-[14px] text-[#1A1A2E]/60 mb-1">{subtitle}</p>}
-                    {profile.location && (
-                      <div className="flex items-center gap-1 text-[#1A1A2E]/60">
-                        <Ic.MapPin />
-                        <span className="text-[13px]">{profile.location}</span>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Stats — real data only */}
                   <GlassCard className="mb-4 p-4">
