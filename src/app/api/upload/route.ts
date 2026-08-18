@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       const base64Uri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
       const uploadResult = await cloudinary.uploader.upload(base64Uri, {
-        folder: `datebuddy/users/${session.userId}`,
+        folder: `infyn/users/${session.userId}`,
         transformation: [
           { quality: 'auto:good', fetch_format: 'auto' },
           { width: 1200, crop: 'limit' },

@@ -1160,7 +1160,7 @@ export default function DiscoverPage() {
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 backdrop-blur-xl p-6 animate-popover-enter"
           role="dialog"
           aria-modal="true"
-          aria-label="Upgrade to DateBuddy Gold"
+          aria-label="Upgrade to Infyn Gold"
         >
           <div className="w-full max-w-[360px] rounded-[32px] bg-white p-8 text-center shadow-2xl flex flex-col items-center overflow-hidden relative">
             {/* Ambient gradient */}
@@ -1196,7 +1196,7 @@ export default function DiscoverPage() {
               </div>
 
               <PrimaryButton onClick={() => { setPaywallOpen(false); router.push('/premium'); }}>
-                Get DateBuddy Gold ✨
+                Get Infyn Gold ✨
               </PrimaryButton>
               <button
                 onClick={() => setPaywallOpen(false)}

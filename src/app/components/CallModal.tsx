@@ -375,7 +375,7 @@ export function CallModal({
           </h1>
           <p className={`mt-1 font-medium ${isVideoActive ? 'text-[13px] text-white/70' : 'text-[15px] text-white/60'}`}>
             {callStatus === 'calling' && 'Ringing\u2026'}
-            {callStatus === 'incoming' && (callType === 'video' ? 'DateBuddy Video\u2026' : 'DateBuddy Audio\u2026')}
+            {callStatus === 'incoming' && (callType === 'video' ? 'Infyn Video\u2026' : 'Infyn Audio\u2026')}
             {callStatus === 'connected' && formatTimer(callDuration)}
             {callStatus === 'ended' && 'Call Ended'}
           </p>

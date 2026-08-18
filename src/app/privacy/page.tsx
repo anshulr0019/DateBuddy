@@ -107,7 +107,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">9. Children&apos;s Privacy</h2>
             <p className="text-[14px] leading-relaxed">
-              DateBuddy is not intended for users under 18. We do not knowingly collect information from minors.
+              Infyn is not intended for users under 18. We do not knowingly collect information from minors.
               If we discover a minor has created an account, we will immediately delete it.
             </p>
           </section>
@@ -124,8 +124,8 @@ export default function PrivacyPage() {
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">11. Contact Us</h2>
             <p className="text-[14px] leading-relaxed">
               For privacy-related questions or data requests, contact us at{' '}
-              <a href="mailto:privacy@datebuddy.app" className="text-[#F43F5E] underline">
-                privacy@datebuddy.app
+              <a href="mailto:privacy@infyn.app" className="text-[#F43F5E] underline">
+                privacy@infyn.app
               </a>
               .
             </p>

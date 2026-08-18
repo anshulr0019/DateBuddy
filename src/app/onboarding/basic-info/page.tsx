@@ -306,7 +306,7 @@ export default function BasicInfoPage() {
     const dobError = !formData.dateOfBirth
       ? 'Add your birthday so we can show your age.'
       : age !== null && age < 18
-        ? 'You need to be at least 18 to join DateBuddy.'
+        ? 'You need to be at least 18 to join Infyn.'
         : age === null || age > 120
           ? 'That date doesn’t look right — double-check the year.'
           : null;

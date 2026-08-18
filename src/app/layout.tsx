@@ -15,14 +15,14 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "DateBuddy - Find Your Vibe",
+  title: "Infyn - Find Your Vibe",
   description: "India's coolest dating & connections app for Gen Z. Connect with people nearby and find your perfect match.",
   manifest: "/manifest.json",
   openGraph: {
-    title: "DateBuddy - Find Your Vibe",
+    title: "Infyn - Find Your Vibe",
     description: "Connect with people nearby and find your vibe.",
-    url: "https://datebuddy.app",
-    siteName: "DateBuddy",
+    url: "https://infyn.app",
+    siteName: "Infyn",
     locale: "en_US",
     type: "website",
   },

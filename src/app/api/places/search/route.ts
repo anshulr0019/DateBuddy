@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 
       const osmRes = await fetch(osmUrl, {
         headers: {
-          'User-Agent': 'DateBuddy-App/1.0 (contact@datebuddy.app)',
+          'User-Agent': 'Infyn-App/1.0 (contact@infyn.app)',
         },
       });
 

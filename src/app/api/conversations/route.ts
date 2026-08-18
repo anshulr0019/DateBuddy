@@ -97,6 +97,13 @@ export async function GET() {
       };
     });
 
+    // Ensure conversations are always sorted with most recent message / activity at the top
+    conversations.sort((a, b) => {
+      const timeA = a.time ? new Date(a.time).getTime() : 0;
+      const timeB = b.time ? new Date(b.time).getTime() : 0;
+      return timeB - timeA;
+    });
+
     return NextResponse.json({ success: true, conversations });
   } catch (error) {
     console.error('Error fetching conversations:', error);

@@ -28,16 +28,16 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">1. Acceptance of Terms</h2>
             <p className="text-[14px] leading-relaxed">
-              By downloading, installing, or using DateBuddy (&quot;the App&quot;), you agree to be bound by these Terms of Service.
+              By downloading, installing, or using Infyn (&quot;the App&quot;), you agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use the App. These terms constitute a legally binding
-              agreement between you and DateBuddy.
+              agreement between you and Infyn.
             </p>
           </section>
 
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">2. Eligibility</h2>
             <p className="text-[14px] leading-relaxed">
-              You must be at least 18 years of age to use DateBuddy. By using the App, you represent and warrant that
+              You must be at least 18 years of age to use Infyn. By using the App, you represent and warrant that
               you are 18 years of age or older. Accounts found to belong to minors will be immediately terminated.
             </p>
           </section>
@@ -47,7 +47,7 @@ export default function TermsPage() {
             <p className="text-[14px] leading-relaxed">
               You must provide accurate and complete information when creating your account. You are responsible for
               maintaining the security of your account and for all activities that occur under your account.
-              DateBuddy reserves the right to suspend or terminate accounts that violate these terms.
+              Infyn reserves the right to suspend or terminate accounts that violate these terms.
             </p>
           </section>
 
@@ -68,7 +68,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">5. Photos and Content</h2>
             <p className="text-[14px] leading-relaxed">
-              You retain ownership of content you upload. By uploading content, you grant DateBuddy a non-exclusive,
+              You retain ownership of content you upload. By uploading content, you grant Infyn a non-exclusive,
               worldwide, royalty-free license to use, store, and display your content to operate the App. You must only
               upload photos of yourself and content you have the right to share.
             </p>
@@ -77,7 +77,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">6. Subscriptions & Payments</h2>
             <p className="text-[14px] leading-relaxed">
-              DateBuddy offers optional paid subscriptions (&quot;DateBuddy Gold&quot;). Subscription fees are billed in advance
+              Infyn offers optional paid subscriptions (&quot;Infyn Gold&quot;). Subscription fees are billed in advance
               and are non-refundable except as required by law. You may cancel your subscription at any time; your
               subscription benefits will continue until the end of the current billing period.
             </p>
@@ -86,7 +86,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">7. Disclaimer of Warranties</h2>
             <p className="text-[14px] leading-relaxed">
-              DateBuddy is provided &quot;as is&quot; without warranties of any kind. We do not guarantee that the App will be
+              Infyn is provided &quot;as is&quot; without warranties of any kind. We do not guarantee that the App will be
               uninterrupted, secure, or error-free. We are not responsible for the conduct of any user, online or offline.
             </p>
           </section>
@@ -94,7 +94,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">8. Limitation of Liability</h2>
             <p className="text-[14px] leading-relaxed">
-              To the maximum extent permitted by law, DateBuddy shall not be liable for any indirect, incidental,
+              To the maximum extent permitted by law, Infyn shall not be liable for any indirect, incidental,
               special, or consequential damages arising from your use of the App.
             </p>
           </section>
@@ -119,8 +119,8 @@ export default function TermsPage() {
             <h2 className="text-[16px] font-bold text-[#1A1A2E] mb-2">11. Contact Us</h2>
             <p className="text-[14px] leading-relaxed">
               If you have questions about these Terms, please contact us at{' '}
-              <a href="mailto:support@datebuddy.app" className="text-[#F43F5E] underline">
-                support@datebuddy.app
+              <a href="mailto:support@infyn.app" className="text-[#F43F5E] underline">
+                support@infyn.app
               </a>
               .
             </p>

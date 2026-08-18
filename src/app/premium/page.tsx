@@ -167,7 +167,7 @@ export default function PremiumPage() {
         key:         orderData.keyId,
         amount:      orderData.amount,
         currency:    'INR',
-        name:        'DateBuddy',
+        name:        'Infyn',
         description: `Gold ${activePlan.label} Plan`,
         order_id:    orderData.orderId,
         prefill:     { name: '', email: '', contact: '' },
@@ -253,7 +253,7 @@ export default function PremiumPage() {
           <div className="text-center">
             <div className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 mb-4"
               style={{ background: 'linear-gradient(135deg, #FF6B9D 0%, #E86AC7 50%, #7B68EE 100%)' }}>
-              <span className="text-[13px] font-black uppercase tracking-[0.1em] text-white">✦ DateBuddy Gold</span>
+              <span className="text-[13px] font-black uppercase tracking-[0.1em] text-white">✦ Infyn Gold</span>
             </div>
             <h1 className="text-[30px] font-black tracking-tight text-white leading-[1.15] mb-2">
               {isGold ? 'You\'re a Gold Member ✨' : 'Unlock Unlimited\nConnections'}

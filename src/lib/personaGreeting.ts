@@ -264,7 +264,7 @@ export function calculateDynamicVibe(userStats?: Partial<UserBehaviorData>): {
     personaId: 'new_energy',
     title: 'New Energy ✨',
     subline: 'Let’s get started.',
-    reason: 'Fresh activity on DateBuddy',
+    reason: 'Fresh activity on Infyn',
   };
 }
 

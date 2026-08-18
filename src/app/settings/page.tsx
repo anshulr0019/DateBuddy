@@ -609,7 +609,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[10px] font-black uppercase tracking-wider mb-1 shadow-sm">
-                      ✨ DateBuddy Gold
+                      ✨ Infyn Gold
                     </div>
                     <h3 className="text-[15px] font-bold text-[#1A1A2E]">Unlimited Swipes & See Who Liked You</h3>
                   </div>
@@ -794,7 +794,7 @@ export default function SettingsPage() {
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <p className="text-[13px] font-semibold text-amber-800 leading-relaxed">
                 For security, changing your phone number requires re-verification. Please contact us at{' '}
-                <a href="mailto:support@datebuddy.app" className="underline">support@datebuddy.app</a>{' '}
+                <a href="mailto:support@infyn.app" className="underline">support@infyn.app</a>{' '}
                 and we&apos;ll help you update it.
               </p>
             </div>

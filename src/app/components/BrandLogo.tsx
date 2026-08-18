@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import logoMark from '../../../public/brand/logo-mark.png';
 
-export const BRAND_NAME = 'DateBuddy';
+export const BRAND_NAME = 'Infyn';
 
 /** Mark aspect ratio from the source asset (1024 x 784). */
 const MARK_RATIO = 784 / 1024;

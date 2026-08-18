@@ -122,7 +122,7 @@ async function sendSms(phoneNumber: string, code: string): Promise<boolean> {
         body: new URLSearchParams({
           To: `+91${phoneNumber}`,
           From: from,
-          Body: `Your DateBuddy verification code is ${code}. It expires in 5 minutes.`,
+          Body: `Your Infyn verification code is ${code}. It expires in 5 minutes.`,
         }),
       });
 

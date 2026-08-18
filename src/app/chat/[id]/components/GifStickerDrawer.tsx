@@ -2,92 +2,44 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 
-// Tenor public API key (free, no rate limit for basic use)
-const TENOR_KEY = 'AIzaSyAyimkuYQYF_FXVALexPzpAkvXPDV2docc';
-const TENOR_BASE = 'https://tenor.googleapis.com/v2';
+// Reliable Giphy API key for infinite real-time trending & search
+const GIPHY_KEY = 'sXpGFDGZs0Dv1mmNFvYaGUvYwKX0PWIh';
+const GIPHY_BASE = 'https://api.giphy.com/v1';
 
-// Curated sticker packs using well-known stable GIF sources
-const STICKER_PACKS: { label: string; emoji: string; urls: string[] }[] = [
-  {
-    label: 'Love',
-    emoji: '❤️',
-    urls: [
-      'https://media.tenor.com/ek4oEGNtqQUAAAAC/love-heart.gif',
-      'https://media.tenor.com/wNZIeJXGdO8AAAAC/kiss-love.gif',
-      'https://media.tenor.com/L2iCFRBSKYMAAAAC/valentines-day-hearts.gif',
-      'https://media.tenor.com/0S2EXrRTcHcAAAAC/heart-eyes-heart.gif',
-    ],
-  },
-  {
-    label: 'Vibes',
-    emoji: '✨',
-    urls: [
-      'https://media.tenor.com/bIVMqVkJHVoAAAAC/hello-kitty-cute.gif',
-      'https://media.tenor.com/a-BJtHMEVzwAAAAC/hiii-hello.gif',
-      'https://media.tenor.com/3v3LsCO9LDYAAAAC/cute-anime.gif',
-      'https://media.tenor.com/vHJGhbG4OL4AAAAC/cute-kawaii.gif',
-    ],
-  },
-  {
-    label: 'Reactions',
-    emoji: '😂',
-    urls: [
-      'https://media.tenor.com/lIBKHRHlvvEAAAAC/lol-lmao.gif',
-      'https://media.tenor.com/BISMr_UvbVoAAAAC/bored-ok.gif',
-      'https://media.tenor.com/kbvmPvexHe4AAAAC/okay-fine.gif',
-      'https://media.tenor.com/T2o8VPeONZsAAAAC/what-confused.gif',
-    ],
-  },
+const STICKER_CATEGORIES = [
+  { id: 'love', label: 'Love', emoji: '❤️' },
+  { id: 'cute', label: 'Cute', emoji: '✨' },
+  { id: 'funny', label: 'Funny', emoji: '😂' },
+  { id: 'party', label: 'Party', emoji: '🎉' },
+  { id: 'vibe', label: 'Vibes', emoji: '🔥' },
+  { id: 'sad', label: 'Mood', emoji: '🥺' },
 ];
 
-type GifResult = { id: string; url: string; preview: string };
+type GifResult = { id: string; url: string; preview: string; width?: number; height?: number };
 
-async function searchTenor(query: string, limit = 16): Promise<GifResult[]> {
+async function searchGiphy(type: 'gifs' | 'stickers', query: string, limit = 24): Promise<GifResult[]> {
   try {
+    const endpoint = query.trim() ? `${GIPHY_BASE}/${type}/search` : `${GIPHY_BASE}/${type}/trending`;
     const params = new URLSearchParams({
-      q: query,
-      key: TENOR_KEY,
+      api_key: GIPHY_KEY,
       limit: String(limit),
-      contentfilter: 'medium',
-      media_filter: 'gif,tinygif',
-      client_key: 'datebuddy_chat',
+      rating: 'g',
+      ...(query.trim() ? { q: query.trim() } : {}),
     });
-    const res = await fetch(`${TENOR_BASE}/search?${params}`);
+
+    const res = await fetch(`${endpoint}?${params}`);
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.results ?? []).map((r: Record<string, unknown>) => {
-      const media = r.media_formats as Record<string, { url: string }>;
-      return {
-        id: r.id as string,
-        url: media?.gif?.url ?? '',
-        preview: media?.tinygif?.url ?? media?.gif?.url ?? '',
-      };
-    }).filter((r: GifResult) => r.url);
-  } catch {
-    return [];
-  }
-}
 
-async function fetchTrending(limit = 16): Promise<GifResult[]> {
-  try {
-    const params = new URLSearchParams({
-      key: TENOR_KEY,
-      limit: String(limit),
-      contentfilter: 'medium',
-      media_filter: 'gif,tinygif',
-      client_key: 'datebuddy_chat',
-    });
-    const res = await fetch(`${TENOR_BASE}/featured?${params}`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results ?? []).map((r: Record<string, unknown>) => {
-      const media = r.media_formats as Record<string, { url: string }>;
+    return (data.data ?? []).map((item: any) => {
+      const fixedHeight = item.images?.fixed_height;
+      const downsized = item.images?.fixed_height_small || item.images?.downsized || fixedHeight;
       return {
-        id: r.id as string,
-        url: media?.gif?.url ?? '',
-        preview: media?.tinygif?.url ?? media?.gif?.url ?? '',
+        id: String(item.id),
+        url: fixedHeight?.url || item.images?.original?.url || '',
+        preview: downsized?.url || fixedHeight?.url || '',
       };
-    }).filter((r: GifResult) => r.url);
+    }).filter((r: GifResult) => Boolean(r.url && r.preview));
   } catch {
     return [];
   }
@@ -102,149 +54,164 @@ interface GifStickerDrawerProps {
 export function GifStickerDrawer({ onSelect }: GifStickerDrawerProps) {
   const [tab, setTab] = useState<TabId>('gifs');
   const [query, setQuery] = useState('');
-  const [gifs, setGifs] = useState<GifResult[]>([]);
+  const [items, setItems] = useState<GifResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [stickerPack, setStickerPack] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load trending on mount / when switching to GIF tab
-  useEffect(() => {
-    if (tab !== 'gifs') return;
+  const loadData = useCallback(async (currentTab: TabId, searchQuery: string) => {
     setLoading(true);
-    fetchTrending().then((results) => {
-      setGifs(results);
-      setLoading(false);
-    });
-  }, [tab]);
+    const results = await searchGiphy(currentTab, searchQuery);
+    setItems(results);
+    setLoading(false);
+  }, []);
+
+  // Load initial trending items on tab switch
+  useEffect(() => {
+    setQuery('');
+    setActiveCategory(null);
+    loadData(tab, '');
+  }, [tab, loadData]);
 
   const handleQueryChange = useCallback((q: string) => {
     setQuery(q);
+    setActiveCategory(null);
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    if (!q.trim()) {
-      // Revert to trending
-      setLoading(true);
-      fetchTrending().then((r) => { setGifs(r); setLoading(false); });
-      return;
+
+    searchTimerRef.current = setTimeout(() => {
+      loadData(tab, q);
+    }, 350);
+  }, [tab, loadData]);
+
+  const handleCategoryClick = useCallback((catId: string) => {
+    if (activeCategory === catId) {
+      setActiveCategory(null);
+      setQuery('');
+      loadData('stickers', '');
+    } else {
+      setActiveCategory(catId);
+      setQuery('');
+      loadData('stickers', catId);
     }
-    searchTimerRef.current = setTimeout(async () => {
-      setLoading(true);
-      const results = await searchTenor(q.trim());
-      setGifs(results);
-      setLoading(false);
-    }, 400);
-  }, []);
+  }, [activeCategory, loadData]);
 
   return (
-    <div className="z-30 bg-white/98 backdrop-blur-xl border-t border-gray-200/80 shadow-2xl animate-popover-enter flex flex-col" style={{ height: '260px' }}>
-      {/* Tabs */}
-      <div className="flex-shrink-0 flex items-center gap-0 border-b border-gray-100 px-3 pt-2">
-        {(['gifs', 'stickers'] as TabId[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-1.5 text-[13px] font-bold rounded-full transition-all cursor-pointer ${
-              tab === t
-                ? 'bg-[#F43F5E] text-white shadow-sm'
-                : 'text-gray-400 hover:text-[#F43F5E]'
-            }`}
-          >
-            {t === 'gifs' ? 'GIF' : 'Stickers'}
-          </button>
-        ))}
-        {tab === 'gifs' && (
-          <div className="ml-auto flex-1 max-w-[200px] relative mx-2">
-            <input
-              type="search"
-              value={query}
-              onChange={e => handleQueryChange(e.target.value)}
-              placeholder="Search GIFs…"
-              autoComplete="off"
-              className="w-full h-7 pl-3 pr-6 rounded-xl bg-gray-100 text-[12px] text-gray-700 placeholder-gray-400 outline-none focus:bg-white focus:ring-2 focus:ring-[#F43F5E]/20 transition-all border border-transparent focus:border-[#F43F5E]/30"
-            />
-            <svg className="absolute right-2 top-1.5 text-gray-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <div
+      className="z-30 bg-white/95 backdrop-blur-2xl border-t border-gray-200/80 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] animate-popover-enter flex flex-col select-none"
+      style={{ height: '280px' }}
+    >
+      {/* Top Header Controls */}
+      <div className="flex-shrink-0 flex items-center justify-between gap-2 border-b border-gray-100 px-3.5 py-2.5">
+        {/* Tab Switcher Pills */}
+        <div className="flex items-center gap-1 bg-gray-100/90 p-1 rounded-full border border-gray-200/50">
+          {(['gifs', 'stickers'] as TabId[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-3.5 py-1 text-[12px] font-extrabold rounded-full transition-all cursor-pointer ${
+                tab === t
+                  ? 'bg-white text-[#F43F5E] shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {t === 'gifs' ? '🎬 GIFs' : '✨ Stickers'}
+            </button>
+          ))}
+        </div>
+
+        {/* Live Search Input */}
+        <div className="flex-1 max-w-[220px] relative">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            placeholder={tab === 'gifs' ? 'Search GIFs…' : 'Search stickers…'}
+            autoComplete="off"
+            className="w-full h-8 pl-8 pr-7 rounded-xl bg-gray-100/80 text-[12px] text-gray-800 placeholder-gray-400 outline-none focus:bg-white focus:ring-2 focus:ring-[#F43F5E]/20 transition-all border border-transparent focus:border-[#F43F5E]/30 font-medium"
+          />
+          <svg className="absolute left-2.5 top-2 text-gray-400 pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          {query && (
+            <button
+              onClick={() => handleQueryChange('')}
+              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stickers Category Bar (Only on Stickers Tab) */}
+      {tab === 'stickers' && (
+        <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto scrollbar-none border-b border-gray-100">
+          {STICKER_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryClick(cat.id)}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                activeCategory === cat.id
+                  ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-xs'
+                  : 'bg-gray-100/90 text-gray-600 hover:bg-gray-200/80'
+              }`}
+            >
+              <span>{cat.emoji}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Grid Content Container */}
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none p-2.5">
+        {loading ? (
+          <div className="flex flex-col h-full items-center justify-center gap-2 text-gray-400">
+            <svg className="animate-spin text-[#F43F5E]" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+            </svg>
+            <span className="text-[12px] font-medium">Loading {tab === 'gifs' ? 'GIFs' : 'stickers'}…</span>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex flex-col h-full items-center justify-center text-center p-4 text-gray-400">
+            <span className="text-2xl mb-1">🔍</span>
+            <p className="text-[13px] font-bold text-gray-700">No {tab} found</p>
+            <p className="text-[11.5px] text-gray-400 mt-0.5">Try searching with a different term</p>
+          </div>
+        ) : (
+          <div className={`grid gap-2 ${tab === 'stickers' ? 'grid-cols-4 sm:grid-cols-5' : 'grid-cols-3 sm:grid-cols-4'}`}>
+            {items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onSelect(item.url, tab === 'stickers' ? 'sticker' : 'gif')}
+                className={`group relative overflow-hidden transition-all duration-200 active:scale-95 cursor-pointer ${
+                  tab === 'stickers'
+                    ? 'aspect-square rounded-2xl bg-gray-50/80 hover:bg-gray-100 border border-gray-100 p-1 flex items-center justify-center'
+                    : 'aspect-square rounded-2xl bg-gray-100 border border-gray-200/50 shadow-2xs hover:scale-[1.03]'
+                }`}
+                aria-label={`Send this ${tab === 'stickers' ? 'sticker' : 'GIF'}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.preview}
+                  alt={tab}
+                  loading="lazy"
+                  decoding="async"
+                  className={`h-full w-full ${tab === 'stickers' ? 'object-contain' : 'object-cover'}`}
+                />
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* GIF tab */}
-      {tab === 'gifs' && (
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-2 py-2">
-          {loading ? (
-            <div className="flex h-full items-center justify-center">
-              <svg className="animate-spin text-[#F43F5E]" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"/></svg>
-            </div>
-          ) : gifs.length === 0 ? (
-            <p className="text-center text-[13px] text-gray-400 mt-8">No GIFs found</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-1.5">
-              {gifs.map((gif) => (
-                <button
-                  key={gif.id}
-                  onClick={() => onSelect(gif.url, 'gif')}
-                  className="aspect-square overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:scale-[1.04] active:scale-95 transition-transform shadow-2xs"
-                  aria-label="Send this GIF"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={gif.preview}
-                    alt="GIF"
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-          {/* Tenor attribution */}
-          <p className="text-center text-[10px] text-gray-300 mt-2 pb-1">Powered by Tenor</p>
-        </div>
-      )}
-
-      {/* Stickers tab */}
-      {tab === 'stickers' && (
-        <div className="flex flex-col flex-1 min-h-0">
-          {/* Pack selector */}
-          <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-100">
-            {STICKER_PACKS.map((pack, i) => (
-              <button
-                key={pack.label}
-                onClick={() => setStickerPack(i)}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
-                  stickerPack === i
-                    ? 'bg-[#F43F5E] text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-              >
-                <span>{pack.emoji}</span>
-                <span>{pack.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Sticker grid */}
-          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-2 py-2">
-            <div className="grid grid-cols-4 gap-2">
-              {STICKER_PACKS[stickerPack]?.urls.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => onSelect(url, 'sticker')}
-                  className="aspect-square overflow-hidden rounded-2xl bg-gray-50 border border-gray-100 cursor-pointer hover:scale-[1.06] active:scale-95 transition-transform shadow-2xs"
-                  aria-label="Send this sticker"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt="Sticker"
-                    loading="lazy"
-                    className="h-full w-full object-contain p-1"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Powered by GIPHY footer */}
+      <div className="flex-shrink-0 flex items-center justify-center py-1 bg-gray-50/80 border-t border-gray-100" aria-hidden>
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          Powered by GIPHY
+        </span>
+      </div>
     </div>
   );
 }
