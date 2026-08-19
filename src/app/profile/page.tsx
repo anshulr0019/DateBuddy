@@ -407,10 +407,55 @@ export default function ProfilePage() {
                   {/* Name & info */}
                     <div className="mb-4">
                       {isGold && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-purple-500/15 border border-amber-400/30 text-amber-700 text-[11px] font-extrabold uppercase tracking-wider mb-2 shadow-2xs">
-                          <span>👑</span>
-                          <span>Early VIP Gold</span>
-                        </div>
+                        <>
+                          <style>{`
+                            @keyframes goldShimmerBadge {
+                              0% { background-position: -200% center; }
+                              100% { background-position: 200% center; }
+                            }
+                            .vip-gold-text {
+                              background: linear-gradient(105deg, #b45309 0%, #d97706 20%, #fbbf24 40%, #fef3c7 55%, #f59e0b 70%, #d97706 100%);
+                              background-size: 200% auto;
+                              animation: goldShimmerBadge 2.8s linear infinite;
+                              -webkit-background-clip: text;
+                              -webkit-text-fill-color: transparent;
+                              background-clip: text;
+                            }
+                          `}</style>
+                          <div
+                            className="inline-flex items-center gap-2 mb-2.5"
+                            style={{
+                              background: 'linear-gradient(105deg, #1a1208 0%, #211507 50%, #1a1208 100%)',
+                              border: '1px solid rgba(251,191,36,0.35)',
+                              borderRadius: '100px',
+                              padding: '5px 14px 5px 10px',
+                              boxShadow: '0 2px 12px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(245,158,11,0.08)',
+                              position: 'relative',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {/* Inner shimmer sweep */}
+                            <div style={{
+                              position: 'absolute', inset: 0,
+                              background: 'linear-gradient(105deg, transparent 30%, rgba(251,191,36,0.08) 50%, transparent 70%)',
+                              backgroundSize: '200% auto',
+                              animation: 'goldShimmerBadge 3s linear infinite',
+                            }} aria-hidden />
+                            {/* Crown icon */}
+                            <div style={{
+                              width: 22, height: 22, borderRadius: 8,
+                              background: 'linear-gradient(135deg, rgba(245,158,11,0.3) 0%, rgba(217,119,6,0.2) 100%)',
+                              border: '1px solid rgba(251,191,36,0.4)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 12, flexShrink: 0, position: 'relative',
+                            }}>
+                              👑
+                            </div>
+                            <span className="vip-gold-text text-[11.5px] font-black tracking-[0.08em] uppercase" style={{ letterSpacing: '0.08em' }}>
+                              Early VIP Gold
+                            </span>
+                          </div>
+                        </>
                       )}
                       <div className="flex items-center gap-2 mb-1">
                         <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A2E]">
