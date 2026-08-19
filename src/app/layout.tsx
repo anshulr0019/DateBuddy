@@ -93,9 +93,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`bg-[#FAFAF7] ${jakarta.variable} ${jakarta.className}`}>
       <head>
-        <meta name="theme-color" content="#FF6B9D" />
+        {/* Match system chrome to app background — avoids jarring pink Android status bar */}
+        <meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1A1A2E" media="(prefers-color-scheme: dark)" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <style dangerouslySetInnerHTML={{ __html: GLOBAL_ANIMATIONS_CSS }} />
       </head>
       <body className="bg-[#FAFAF7] text-[#1A1A2E] min-h-screen overflow-x-hidden antialiased font-sans selection:bg-[#FF6B9D]/25 selection:text-[#1A1A2E]">

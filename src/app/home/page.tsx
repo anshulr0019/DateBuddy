@@ -268,7 +268,7 @@ export default function HomePage() {
                   </h1>
                   <button
                     onClick={() => setShowPersonaPicker(true)}
-                    className="px-2.5 py-0.5 rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F43F5E] hover:text-white transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs"
+                    className="px-2.5 py-0.5 rounded-full bg-[#1E293B]/08 border border-[#1E293B]/12 text-[#1E293B]/55 text-[10px] font-semibold uppercase tracking-wider hover:bg-[#1E293B]/12 transition-all duration-200 active:scale-95 cursor-pointer"
                   >
                     Vibe
                   </button>
