@@ -50,7 +50,7 @@ export default function InterestsPage() {
   const ready = selected.length >= MIN_INTERESTS;
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
 
         {/* Ambient */}

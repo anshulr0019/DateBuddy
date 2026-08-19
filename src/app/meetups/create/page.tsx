@@ -119,8 +119,8 @@ export default function CreateMeetupPage() {
   };
 
   return (
-    <div className="h-dvh w-full bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
             {/* Header with notch clearance */}

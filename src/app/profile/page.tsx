@@ -312,8 +312,8 @@ export default function ProfilePage() {
   const subtitle = [profile.profession, profile.education].filter(Boolean).join(' · ');
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             {status === 'loading' && <ProfileSkeleton />}

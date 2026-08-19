@@ -214,7 +214,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           />
 
           <div
-            className={`relative z-10 w-full max-w-[440px] bg-[#FAFAF7] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
+            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[#FAFAF7] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
               animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-full sm:translate-y-8 sm:scale-95 opacity-0'
             }`}
             style={{ willChange: 'transform, opacity' }}

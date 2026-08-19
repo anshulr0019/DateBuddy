@@ -206,7 +206,7 @@ export default function VerifyOtpPage() {
 
   return (
     <main
-      className="h-dvh max-h-dvh relative flex flex-col items-center justify-between overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px]"
+      className="h-[100svh] h-dvh relative flex flex-col items-center justify-between overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px]"
       style={{
         paddingTop: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-top, 0px)))',
         paddingBottom: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-bottom, 0px)))',

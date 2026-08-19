@@ -19,7 +19,7 @@ export default function ChatError({
 
   return (
     <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-1 items-center justify-center px-6">
             <GlassCard className="w-full p-8 text-center">

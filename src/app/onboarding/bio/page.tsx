@@ -111,7 +111,7 @@ export default function BioPage() {
   // ─── Prompt Picker Screen ──────────────────────────────────────────────────
   if (screen === 'picker') {
     return (
-      <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+      <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
         <div className="relative h-full w-full max-w-[440px] sm:max-w-lg flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5">
           {/* Ambient */}
           <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
@@ -181,7 +181,7 @@ export default function BioPage() {
 
   // ─── Main Bio + Prompts Screen ─────────────────────────────────────────────
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
 
         {/* Ambient */}

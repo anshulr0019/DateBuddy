@@ -1234,7 +1234,7 @@ function Shell({ children, select = '' }: { children: React.ReactNode; select?: 
   return (
     <div className={`h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans ${select}`}>
       <style>{DISCOVER_STYLES}</style>
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         {children}
       </div>
     </div>

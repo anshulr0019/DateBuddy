@@ -16,7 +16,7 @@ export default function MessagesError({
 
   return (
     <div className="h-dvh w-full bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-1 items-center justify-center px-6 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             <GlassCard className="w-full p-8 text-center">

@@ -122,7 +122,7 @@ export default function FloatingNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
-      <div className="pointer-events-auto relative flex w-full max-w-[390px] items-center justify-between rounded-[24px] border border-white/80 bg-white/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl overflow-hidden">
+      <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-white/80 bg-white/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl overflow-hidden">
 
         {/* Sliding indicator with spring animation */}
         <div
@@ -140,10 +140,11 @@ export default function FloatingNav() {
             <button
               key={tab.id}
               onClick={() => router.push(tab.path)}
-              className="relative z-10 flex min-h-[44px] flex-1 flex-col items-center justify-center py-1 transition-all duration-300 active:scale-90 cursor-pointer select-none"
+              className="relative z-10 flex min-h-[48px] flex-1 flex-col items-center justify-center py-1.5 transition-all duration-300 active:scale-90 cursor-pointer select-none"
+              aria-label={tab.label}
             >
               <span className={`transition-all duration-300 ${
-                isActive ? 'scale-110 text-[#F43F5E]' : 'scale-100 text-[#1A1A2E]/40 hover:text-[#1A1A2E]/70'
+                isActive ? 'scale-110 text-[#F43F5E]' : 'scale-100 text-[#1A1A2E]/40'
               }`}>
                 {tab.icon(isActive)}
               </span>

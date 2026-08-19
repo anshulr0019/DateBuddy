@@ -30,7 +30,11 @@ html, body {
   overflow: hidden;
   overscroll-behavior: none;
   overscroll-behavior-y: none;
+  /* manipulation: disables double-tap-zoom without killing scroll */
   touch-action: manipulation;
+  /* Prevent iOS/Android font inflation */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -39,7 +43,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Momentum scrolling on iOS (legacy but still useful for older webviews) */
   -webkit-overflow-scrolling: touch;
+  /* Prevent FOUC of scrollbar on desktop */
+  scrollbar-gutter: stable both-edges;
 }
 
 /* iOS Safari auto-zooms any focused input with font-size < 16px.
@@ -48,18 +55,94 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
 textarea,
 select {
   font-size: max(16px, 1em);
+  /* Prevent iOS bounce on inputs */
+  -webkit-user-select: text;
+  user-select: text;
 }
 
+/* ─── App shell — mobile-first, scales up on tablet/desktop ─── */
 .mobile-container {
   width: 100%;
   max-width: 440px;
+  /* dvh fallback chain: older browsers use svh, then vh */
+  height: 100vh;
+  height: 100svh;
   height: 100dvh;
+  max-height: 100vh;
   max-height: 100dvh;
   margin: 0 auto;
   background: var(--bg-main);
   position: relative;
   overflow: hidden;
 }
+
+/* Tablet (≥640px): widen shell, show side shadow */
+@media (min-width: 640px) {
+  .mobile-container {
+    max-width: 480px;
+    box-shadow: 0 0 0 1px rgba(26,26,46,0.05), 0 24px 64px rgba(26,26,46,0.10);
+  }
+}
+
+/* Desktop (≥1024px): two-column-ready, wider shell */
+@media (min-width: 1024px) {
+  .mobile-container {
+    max-width: 520px;
+  }
+}
+
+/* Page-level outer wrapper — centres shell on tablet/desktop */
+.page-outer {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+/* Responsive inner shell — used by all pages */
+.page-shell {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  /* dvh fallback */
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  background: var(--bg-main);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .page-shell {
+    max-width: 480px;
+    box-shadow: 0 0 0 1px rgba(26,26,46,0.05), 0 24px 80px rgba(26,26,46,0.12);
+    border-left: 1px solid rgba(26,26,46,0.05);
+    border-right: 1px solid rgba(26,26,46,0.05);
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    max-width: 520px;
+  }
+}
+
+/* Scrollable inner area — always smooth */
+.scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
 
 .gradient-bg {
   background: linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%);
@@ -149,12 +232,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    Phase 2 Restrained Aurora & Glassmorphism System
 ───────────────────────────────────────────────── */
 
-/* Aurora blobs — Optimized GPU compositing */
+/* Aurora blobs — GPU-composited, contain: paint isolates layer */
 .aurora-blob {
   position: absolute;
   border-radius: 9999px;
   filter: blur(36px);
+  will-change: transform;
   transform: translateZ(0);
+  /* contain: style isolates paint so blobs don't trigger full repaints */
+  contain: style;
+  pointer-events: none;
 }
 
 .aurora-blob-1 {
@@ -178,7 +265,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: aurora-drift-4 11s ease-in-out infinite alternate;
 }
 
-.aurora-subtle .aurora-blob { opacity: 0.08 !important; }
+.aurora-subtle .aurora-blob { opacity: 0.06 !important; }
+
+/* On low-power / reduced-motion devices — kill aurora entirely */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
+}
+/* Low-end Android: data-saver mode or slow connection — disable aurora */
+@media (prefers-reduced-data: reduce) {
+  .aurora-blob { display: none !important; }
+}
 
 /* Dot pattern removed per Phase 2 rules */
 .dot-pattern {

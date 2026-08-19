@@ -15,7 +15,7 @@ export default function PreferencesPage() {
   };
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
         {/* Progress Bar Header */}
         <div className="flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">

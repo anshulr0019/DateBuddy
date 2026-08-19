@@ -55,8 +55,8 @@ export default function ConnectionsPage() {
   }, []);
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 

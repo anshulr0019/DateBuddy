@@ -31,7 +31,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
+  // Android: keyboard pushes content up instead of overlaying
+  interactiveWidget: "resizes-content",
 };
 
 const GLOBAL_ANIMATIONS_CSS = `
