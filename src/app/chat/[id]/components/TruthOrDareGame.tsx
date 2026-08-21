@@ -50,84 +50,88 @@ export function TruthOrDareGame({ onSendGameMessage, onClose }: TruthOrDareGameP
   };
 
   return (
-    <div className="w-full rounded-[24px] bg-[#16141F] border border-rose-500/25 p-4 text-white shadow-2xl space-y-4 animate-scale-pop select-none">
+    <div className="w-full space-y-4 text-white select-none animate-page-entry">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 text-lg">
-            🎭
-          </span>
+      <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Back to menu"
+            className="h-8 w-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-sm"
+          >
+            &larr;
+          </button>
           <div>
-            <h3 className="text-[15px] font-bold text-white leading-tight">Truth or Dare</h3>
-            <p className="text-[11px] text-white/50">Pick a card and challenge your match</p>
+            <span className="text-[10px] font-mono font-bold tracking-[0.16em] uppercase text-white/40">
+              02 • Game
+            </span>
+            <h3 className="text-[16px] font-extrabold text-white leading-tight">Truth or Dare</h3>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white cursor-pointer"
-        >
-          ✕
-        </button>
+
+        <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] font-mono text-white/60">
+          Prompts
+        </span>
       </div>
 
-      {/* Choose Truth vs Dare */}
-      <div className="grid grid-cols-2 gap-2.5">
+      {/* Choose Truth vs Dare — Minimalist Cards */}
+      <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={pickTruth}
-          className={`p-3.5 rounded-2xl border text-center transition-all cursor-pointer ${
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             selectedType === 'truth'
-              ? 'bg-gradient-to-br from-purple-600 to-indigo-700 border-purple-400 shadow-md scale-102'
-              : 'bg-white/5 border-white/10 hover:bg-white/10'
+              ? 'bg-white/[0.1] border-white/40 shadow-sm scale-[1.01]'
+              : 'bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/20'
           }`}
         >
-          <p className="text-2xl mb-1">🧠</p>
-          <p className="text-[14px] font-extrabold text-white">Truth</p>
-          <p className="text-[10.5px] text-white/60">Spill the tea</p>
+          <span className="text-[10px] font-mono font-bold tracking-wider text-white/40 uppercase">01</span>
+          <p className="text-[16px] font-bold text-white mt-1">Truth</p>
+          <p className="text-[11.5px] text-white/50 mt-0.5">Spill the honest tea</p>
         </button>
 
         <button
           type="button"
           onClick={pickDare}
-          className={`p-3.5 rounded-2xl border text-center transition-all cursor-pointer ${
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             selectedType === 'dare'
-              ? 'bg-gradient-to-br from-rose-600 to-pink-700 border-rose-400 shadow-md scale-102'
-              : 'bg-white/5 border-white/10 hover:bg-white/10'
+              ? 'bg-white/[0.1] border-white/40 shadow-sm scale-[1.01]'
+              : 'bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/20'
           }`}
         >
-          <p className="text-2xl mb-1">🔥</p>
-          <p className="text-[14px] font-extrabold text-white">Dare</p>
-          <p className="text-[10.5px] text-white/60">No backing out</p>
+          <span className="text-[10px] font-mono font-bold tracking-wider text-white/40 uppercase">02</span>
+          <p className="text-[16px] font-bold text-white mt-1">Dare</p>
+          <p className="text-[11.5px] text-white/50 mt-0.5">Voice & camera task</p>
         </button>
       </div>
 
       {/* Generated Card */}
       {currentPrompt && (
-        <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 space-y-3 animate-page-entry">
+        <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] space-y-3.5 animate-page-entry">
           <div>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-[#FF6B9D]">
-              {selectedType === 'truth' ? 'Selected Truth Question' : 'Selected Dare Task'}:
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40">
+              {selectedType === 'truth' ? 'Selected Truth Prompt' : 'Selected Dare Task'}
             </span>
-            <p className="text-[14px] font-semibold text-white mt-1 leading-snug">
+            <p className="text-[14.5px] font-semibold text-white mt-1 leading-snug">
               &ldquo;{currentPrompt}&rdquo;
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pt-1">
             <button
               type="button"
               onClick={selectedType === 'truth' ? pickTruth : pickDare}
-              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-[12px] font-semibold text-white/70 cursor-pointer"
+              className="px-3.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-[12px] font-medium text-white/70 border border-white/5 cursor-pointer transition-colors"
             >
-              🔄 Re-roll
+              Re-roll
             </button>
             <button
               type="button"
               onClick={handleSendPrompt}
-              className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[13px] font-bold shadow-md cursor-pointer active:scale-95"
+              className="flex-1 py-2.5 rounded-xl bg-white text-black text-[13px] font-bold shadow-sm cursor-pointer active:scale-95 transition-all"
             >
-              Send Challenge to Chat →
+              Send to Chat &rarr;
             </button>
           </div>
         </div>

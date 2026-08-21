@@ -244,15 +244,20 @@ export default function ChatPage() {
 
               {partner && (
                 <div className="flex items-center gap-1.5">
-                  {/* Games Button */}
+                  {/* Minimalist Games Button */}
                   <button
                     onClick={() => setGamesOpen(true)}
-                    className="flex h-9 px-2.5 items-center justify-center gap-1 rounded-full bg-purple-50 text-[#7B68EE] border border-purple-200/60 font-bold text-[12px] active:scale-90 transition-all cursor-pointer shadow-2xs"
-                    title="Play Mini Games"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    title="Mini Games"
                     aria-label="Play mini games"
                   >
-                    <span>🎮</span>
-                    <span className="hidden sm:inline">Games</span>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="6" width="20" height="12" rx="3" />
+                      <line x1="6" y1="12" x2="10" y2="12" />
+                      <line x1="8" y1="10" x2="8" y2="14" />
+                      <circle cx="15" cy="12" r="1" fill="currentColor" />
+                      <circle cx="18" cy="10" r="1" fill="currentColor" />
+                    </svg>
                   </button>
 
                   {/* Audio Call */}
