@@ -113,20 +113,6 @@ export function Composer({
           <Ic.Camera className="w-5 h-5" />
         </button>
 
-        {/* GIF/Sticker button */}
-        <button
-          onClick={onToggleGif}
-          aria-label={gifOpen ? 'Close GIF picker' : 'Open GIF & Stickers'}
-          aria-expanded={gifOpen}
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-black text-[12px] tracking-tight transition-all duration-200 active:scale-90 cursor-pointer ${
-            gifOpen
-              ? 'bg-[#F43F5E] text-white shadow-sm'
-              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-          }`}
-        >
-          GIF
-        </button>
-
         {/* Text input */}
         <div className="relative flex-1 flex items-center bg-gray-100/90 rounded-2xl h-10 px-4 border border-transparent focus-within:border-[#F43F5E]/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#F43F5E]/15 transition-all duration-200">
           <input

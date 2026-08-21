@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import FloatingNav from "./components/FloatingNav";
 import Heartbeat from "./components/Heartbeat";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 import { NotificationProvider } from "./context/NotificationContext";
 import { FilterProvider } from "./context/FilterContext";
 
@@ -111,6 +112,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {children}
             </main>
             <FloatingNav />
+            <PWAInstallBanner />
             <Heartbeat />
           </FilterProvider>
         </NotificationProvider>

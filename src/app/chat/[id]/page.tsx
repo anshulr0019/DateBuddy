@@ -15,6 +15,8 @@ import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
 import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
 import { CallModal } from '../../components/CallModal';
 import { PartnerProfileSheet } from '../../components/PartnerProfileSheet';
+import { MiniGamesDrawer } from './components/MiniGamesDrawer';
+import AIWingman from '../../components/AIWingman';
 
 const ICEBREAKERS = [
   'Hey! Great to match with you ✨',
@@ -46,9 +48,12 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [drawerTab, setDrawerTab] = useState<DrawerTab | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
+  const [showNewChip, setShowNewChip] = useState(false);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
-  const [showNewChip, setShowNewChip] = useState(false);
 
   const searchParams = useSearchParams();
   useEffect(() => {
@@ -224,14 +229,10 @@ export default function ChatPage() {
                           </svg>
                         )}
                       </h1>
-                      <div className="flex items-center gap-1.5 -mt-0.5">
-                        <span className="flex items-center gap-1 text-[11px] text-emerald-600 font-bold">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          🔒 Encrypted
-                        </span>
-                        <span className="text-[11px] text-slate-300">•</span>
-                        <p className="text-[11px] text-[#FF6B9D] font-semibold">View profile</p>
-                      </div>
+                      <p className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold mt-0.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        Online
+                      </p>
                     </div>
                   </button>
                 ) : (
@@ -244,6 +245,17 @@ export default function ChatPage() {
 
               {partner && (
                 <div className="flex items-center gap-1.5">
+                  {/* Games Button */}
+                  <button
+                    onClick={() => setGamesOpen(true)}
+                    className="flex h-9 px-2.5 items-center justify-center gap-1 rounded-full bg-purple-50 text-[#7B68EE] border border-purple-200/60 font-bold text-[12px] active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    title="Play Mini Games"
+                    aria-label="Play mini games"
+                  >
+                    <span>🎮</span>
+                    <span className="hidden sm:inline">Games</span>
+                  </button>
+
                   {/* Audio Call */}
                   <button
                     onClick={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
@@ -430,6 +442,15 @@ export default function ChatPage() {
                     }}
                   />
                 )}
+                <div className="px-3.5 pt-1 bg-white/95 backdrop-blur-xl border-t border-gray-100">
+                  <AIWingman
+                    partnerName={partner?.name || 'Match'}
+                    onSelectOpener={(opener) => {
+                      setInputText(opener);
+                      setTimeout(() => inputRef.current?.focus(), 50);
+                    }}
+                  />
+                </div>
                 <Composer
                   value={inputText}
                   onChange={setInputText}
@@ -464,6 +485,16 @@ export default function ChatPage() {
         />
       )}
       {safetyOpen && partner && <SafetySheet partner={partner} onClose={() => setSafetyOpen(false)} />}
+      {gamesOpen && partner && (
+        <MiniGamesDrawer
+          isOpen={gamesOpen}
+          partnerName={partner.name}
+          onSendGameMessage={(gameMsg) => {
+            chat.sendText(gameMsg);
+          }}
+          onClose={() => setGamesOpen(false)}
+        />
+      )}
       {validMatchId && partner && myId && callState.isOpen && (
         <CallModal
           key={`call-${callState.callType}-${callState.mode}-${Date.now()}`}
