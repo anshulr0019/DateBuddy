@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { swipes, matches, users, notifications } from '@/db/schema';
+import { swipes, matches, users, photos, notifications } from '@/db/schema';
 import { getAuthSession } from '@/lib/auth';
 import { and, eq, or } from 'drizzle-orm';
 import { triggerPusherEvent, triggerUserNotification } from '@/lib/pusher-server';
@@ -12,10 +12,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { targetUserId, action } = await request.json();
-    const swipedId = Number(targetUserId);
+    const body = await request.json().catch(() => ({}));
+    const rawId = body.swipedUserId ?? body.targetUserId ?? body.targetId;
+    const swipedId = Number(rawId);
+    const action = body.action;
 
-    if (!swipedId || !['like', 'pass', 'super_like'].includes(action)) {
+    if (!swipedId || isNaN(swipedId) || !['like', 'pass', 'super_like'].includes(action)) {
       return NextResponse.json({ success: false, message: 'Invalid payload' }, { status: 400 });
     }
 
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Cannot swipe on yourself' }, { status: 400 });
     }
 
-    // 1. Record the swipe
+    // 1. Record or update the swipe
     await db
       .insert(swipes)
       .values({
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
         set: { action, createdAt: new Date() },
       });
 
-    // If passed, return immediately
+    // If passed, return immediately with success
     if (action === 'pass') {
       return NextResponse.json({ success: true, isMatch: false });
     }
@@ -57,13 +59,33 @@ export async function POST(request: NextRequest) {
     const isMatch = existingReciprocalLike.length > 0;
 
     // Fetch current user details for the notification
-    const currentUser = await db
+    const currentUserRows = await db
       .select({ id: users.id, name: users.name, isVerified: users.isVerified })
       .from(users)
       .where(eq(users.id, session.userId))
       .limit(1);
 
-    const senderName = currentUser[0]?.name || 'Someone';
+    const senderName = currentUserRows[0]?.name || 'Someone';
+
+    // Fetch target user photo and name for the return payload
+    const targetUserRows = await db
+      .select({ id: users.id, name: users.name })
+      .from(users)
+      .where(eq(users.id, swipedId))
+      .limit(1);
+
+    const targetPhotos = await db
+      .select({ url: photos.url })
+      .from(photos)
+      .where(eq(photos.userId, swipedId))
+      .orderBy(photos.orderIndex)
+      .limit(1);
+
+    const matchedUserPayload = {
+      id: swipedId,
+      name: targetUserRows[0]?.name || 'Your Match',
+      photo: targetPhotos[0]?.url || null,
+    };
 
     if (isMatch) {
       // ── MUTUAL MATCH ──
@@ -93,7 +115,7 @@ export async function POST(request: NextRequest) {
         matchId = newMatch.id;
       }
 
-      // Send MATCH notification to the other user -> routes to /chat so they can chat!
+      // Send MATCH notification to the other user -> routes to /chat
       await db.insert(notifications).values({
         userId: swipedId,
         type: 'match',
@@ -102,7 +124,7 @@ export async function POST(request: NextRequest) {
         metadata: { actionUrl: `/chat/${matchId}` },
       });
 
-      // Also notify via Pusher if available
+      // Realtime notification ping
       try {
         await triggerPusherEvent(`user-${swipedId}`, 'new-match', {
           matchId,
@@ -117,14 +139,11 @@ export async function POST(request: NextRequest) {
         success: true,
         isMatch: true,
         matchId,
-        matchedUser: {
-          id: swipedId,
-          name: senderName,
-        },
+        matchedUser: matchedUserPayload,
       });
     } else {
       // ── ONE-WAY LIKE (NOT A MATCH YET) ──
-      // Send LIKE notification -> routes to /likes (Who Liked You) so user can view & like back!
+      // Send LIKE notification -> routes to /likes (Who Liked You)
       await db.insert(notifications).values({
         userId: swipedId,
         type: 'like',
@@ -146,7 +165,10 @@ export async function POST(request: NextRequest) {
         /* Non-critical */
       }
 
-      return NextResponse.json({ success: true, isMatch: false });
+      return NextResponse.json({
+        success: true,
+        isMatch: false,
+      });
     }
   } catch (error) {
     console.error('Error handling swipe:', error);
