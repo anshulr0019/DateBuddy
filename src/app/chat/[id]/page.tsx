@@ -62,7 +62,6 @@ export default function ChatPage() {
       setSafetyOpen(true);
     }
   }, [searchParams]);
-  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [callState, setCallState] = useState<{
     isOpen: boolean;
     callType: 'audio' | 'video';

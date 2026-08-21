@@ -3,7 +3,7 @@ import { db } from '@/db';
 import { swipes, matches, users, notifications } from '@/db/schema';
 import { getAuthSession } from '@/lib/auth';
 import { and, eq, or } from 'drizzle-orm';
-import { getPusherServer } from '@/lib/pusher-server';
+import { triggerPusherEvent, triggerUserNotification } from '@/lib/pusher-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,25 +93,22 @@ export async function POST(request: NextRequest) {
         matchId = newMatch.id;
       }
 
-      // Send MATCH notification to the other user -> routes to /messages / chat so they can chat!
+      // Send MATCH notification to the other user -> routes to /chat so they can chat!
       await db.insert(notifications).values({
         userId: swipedId,
         type: 'match',
         title: "It's a Match! 💕",
         body: `You and ${senderName} matched! Start the conversation now.`,
-        actionUrl: `/chat/${matchId}`,
+        metadata: { actionUrl: `/chat/${matchId}` },
       });
 
       // Also notify via Pusher if available
       try {
-        const pusher = getPusherServer();
-        if (pusher) {
-          await pusher.trigger(`user-${swipedId}`, 'new-match', {
-            matchId,
-            partnerId: session.userId,
-            partnerName: senderName,
-          });
-        }
+        await triggerPusherEvent(`user-${swipedId}`, 'new-match', {
+          matchId,
+          partnerId: session.userId,
+          partnerName: senderName,
+        });
       } catch {
         /* Non-critical */
       }
@@ -135,19 +132,16 @@ export async function POST(request: NextRequest) {
         body: action === 'super_like'
           ? `${senderName} super liked you! See who liked you and connect.`
           : 'Someone liked you! See who liked you and vibe check back.',
-        actionUrl: '/likes', // Direct to Who Liked You section!
+        metadata: { actionUrl: '/likes' },
       });
 
       // Realtime notification ping
       try {
-        const pusher = getPusherServer();
-        if (pusher) {
-          await pusher.trigger(`user-${swipedId}`, 'new-notification', {
-            type: 'like',
-            title: 'Someone liked your profile! ✨',
-            actionUrl: '/likes',
-          });
-        }
+        await triggerUserNotification(swipedId, {
+          type: 'like',
+          title: 'Someone liked your profile! ✨',
+          actionUrl: '/likes',
+        });
       } catch {
         /* Non-critical */
       }

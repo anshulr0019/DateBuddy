@@ -7,10 +7,11 @@ import { hapticLight, hapticSuccess } from '../lib/haptics';
 export interface AppNotification {
   id: number;
   userId?: number;
-  type: 'like' | 'match' | 'message' | 'call' | 'system';
+  type: 'like' | 'match' | 'message' | 'call' | 'system' | 'event' | string;
   title: string;
   message?: string;
   body?: string;
+  avatar?: string;
   actionUrl?: string;
   read?: boolean;
   isRead?: boolean;
