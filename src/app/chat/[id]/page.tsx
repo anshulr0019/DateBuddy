@@ -434,6 +434,9 @@ export default function ChatPage() {
                           onOpenActions={setActionMessage}
                           onOpenPhoto={setLightboxUrl}
                           onRetry={chat.retry}
+                          onStartCall={(type) =>
+                            setCallState({ isOpen: true, callType: type, mode: 'outgoing' })
+                          }
                         />
                       )
                     )}

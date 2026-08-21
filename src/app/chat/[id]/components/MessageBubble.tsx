@@ -7,6 +7,30 @@ import type { ChatMessage } from '../chatTypes';
 
 const LONG_PRESS_MS = 450;
 
+function formatCallDuration(secs: number): string {
+  if (secs <= 0) return '';
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
+}
+
+interface CallEventData {
+  callType: 'audio' | 'video';
+  status: 'completed' | 'missed' | 'declined' | 'cancelled';
+  duration?: number;
+}
+
+function parseCallEvent(content: string): CallEventData | null {
+  if (!content.startsWith('CALL_EVENT:')) return null;
+  try {
+    return JSON.parse(content.replace('CALL_EVENT:', ''));
+  } catch {
+    return null;
+  }
+}
+
 /* Honest status indicator: clock while sending/queued, single tick once the
    server accepted it, rose double tick only when the recipient has read it. */
 function StatusIndicator({ status }: { status: ChatMessage['status'] }) {
@@ -43,6 +67,7 @@ interface MessageBubbleProps {
   onOpenActions: (message: ChatMessage) => void;
   onOpenPhoto: (url: string) => void;
   onRetry: (id: string) => void;
+  onStartCall?: (callType: 'audio' | 'video') => void;
 }
 
 function MessageBubbleInner({
@@ -52,12 +77,14 @@ function MessageBubbleInner({
   onOpenActions,
   onOpenPhoto,
   onRetry,
+  onStartCall,
 }: MessageBubbleProps) {
   const [imageBroken, setImageBroken] = useState(false);
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFiredRef = useRef(false);
 
-  const canHaveActions = message.type === 'text';
+  const callEvent = parseCallEvent(message.content);
+  const canHaveActions = message.type === 'text' && !callEvent;
 
   const startPress = () => {
     if (!canHaveActions) return;
@@ -75,7 +102,94 @@ function MessageBubbleInner({
     }
   };
 
-  const isImage = message.type === 'photo' || message.type === 'gif';
+  // ── Render Minimalist Call Log Bubble ──
+  if (callEvent) {
+    const isVideo = callEvent.callType === 'video';
+    const isMissed =
+      callEvent.status === 'missed' ||
+      callEvent.status === 'declined' ||
+      callEvent.status === 'cancelled';
+    const hasDuration = (callEvent.duration ?? 0) > 0;
+
+    let title = '';
+    if (isMine) {
+      if (isMissed) title = isVideo ? 'Outgoing Video (No answer)' : 'Outgoing Audio (No answer)';
+      else title = isVideo ? 'Outgoing Video Call' : 'Outgoing Audio Call';
+    } else {
+      if (isMissed) title = isVideo ? 'Missed Video Call' : 'Missed Audio Call';
+      else title = isVideo ? 'Incoming Video Call' : 'Incoming Audio Call';
+    }
+
+    let subtitle = '';
+    if (hasDuration) {
+      subtitle = formatCallDuration(callEvent.duration!);
+    } else if (!isMine && isMissed) {
+      subtitle = 'Tap to call back';
+    } else {
+      subtitle = isMine ? 'No answer' : 'Missed';
+    }
+
+    return (
+      <div className={`flex flex-col my-1 ${isMine ? 'items-end' : 'items-start'}`}>
+        <div
+          onClick={() => onStartCall?.(callEvent.callType)}
+          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border transition-all select-none cursor-pointer active:scale-[0.98] ${
+            isMine
+              ? 'bg-[#FFF2F5] border-[#F9C0D0]/70 text-[#2D1B28] rounded-tr-[4px]'
+              : 'bg-white border-gray-200/80 text-[#1E293B] rounded-tl-[4px]'
+          } shadow-2xs hover:shadow-xs min-w-[210px] max-w-[84%] sm:max-w-[78%]`}
+        >
+          {/* Call Type Icon */}
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+              isMissed
+                ? 'bg-rose-500/10 text-rose-500'
+                : 'bg-neutral-100 text-neutral-600'
+            }`}
+          >
+            {isVideo ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                {isMissed && <line x1="1" y1="1" x2="23" y2="23" strokeWidth="2.5" stroke="#EF4444" />}
+              </svg>
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
+              </svg>
+            )}
+          </div>
+
+          {/* Call Description */}
+          <div className="flex-1 min-w-0">
+            <h4 className={`text-[13px] font-bold leading-tight truncate ${isMissed && !isMine ? 'text-rose-600' : 'text-[#1E293B]'}`}>
+              {title}
+            </h4>
+            <p className="text-[11px] text-neutral-400 font-medium mt-0.5">
+              {subtitle}
+            </p>
+          </div>
+
+          {/* Call Back Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStartCall?.(callEvent.callType);
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#1E293B] text-[11px] font-semibold transition-colors flex-shrink-0 cursor-pointer active:scale-95"
+          >
+            <span>Call</span>
+          </button>
+        </div>
+
+        {/* Time Stamp */}
+        <div className="px-1 text-[10px] text-neutral-400 mt-0.5">
+          {formatClock(message.createdAt)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'}`}>
@@ -149,7 +263,7 @@ function MessageBubbleInner({
           </div>
         )}
 
-        {/* GIF / Sticker — loops inline, no lightbox */}
+        {/* GIF / Sticker */}
         {message.type === 'gif' && (
           <div className="flex flex-col gap-1.5">
             {imageBroken ? (
@@ -166,7 +280,6 @@ function MessageBubbleInner({
                   onError={() => setImageBroken(true)}
                   className="w-full object-cover"
                 />
-                {/* GIF badge */}
                 <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/50 backdrop-blur-sm px-1.5 py-0.5 text-[10px] font-black text-white tracking-wider">GIF</span>
               </div>
             )}
@@ -174,7 +287,7 @@ function MessageBubbleInner({
           </div>
         )}
 
-        {/* Location (legacy rows from the DB) */}
+        {/* Location */}
         {message.type === 'location' && (
           <div className="flex flex-col gap-2 min-w-[210px]">
             <div className="flex items-start gap-2.5">
@@ -202,7 +315,7 @@ function MessageBubbleInner({
           </div>
         )}
 
-        {/* Voice (legacy rows from the DB — playback not yet supported) */}
+        {/* Voice */}
         {message.type === 'voice' && (
           <div className="flex flex-col gap-1.5 min-w-[190px]">
             <div className="flex items-center gap-2.5 py-1">
@@ -219,7 +332,7 @@ function MessageBubbleInner({
         )}
       </div>
 
-      {/* Failed send — explicit, actionable */}
+      {/* Failed send */}
       {message.status === 'failed' && (
         <button
           onClick={() => onRetry(message.id)}

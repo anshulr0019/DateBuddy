@@ -60,6 +60,24 @@ export async function GET() {
       const partner = partnerById.get(partnerId);
       const lastMsg = lastMsgByMatch.get(m.id);
 
+      let lastMsgText: string | null = null;
+      if (lastMsg) {
+        if (lastMsg.content.startsWith('CALL_EVENT:')) {
+          try {
+            const data = JSON.parse(lastMsg.content.replace('CALL_EVENT:', ''));
+            const isVideo = data.callType === 'video';
+            const isMissed = data.status === 'missed' || data.status === 'declined' || data.status === 'cancelled';
+            lastMsgText = isMissed
+              ? isVideo ? '📹 Missed video call' : '📞 Missed audio call'
+              : isVideo ? '📹 Video call' : '📞 Audio call';
+          } catch {
+            lastMsgText = '📞 Call';
+          }
+        } else {
+          lastMsgText = lastMsg.content;
+        }
+      }
+
       return {
         id: m.id,
         partnerId,
@@ -73,7 +91,7 @@ export async function GET() {
           ? now - new Date(partner.lastActiveAt).getTime() < ONLINE_WINDOW_MS
           : false,
         verified: partner?.isVerified ?? false,
-        lastMessage: lastMsg?.content ?? null,
+        lastMessage: lastMsgText,
         lastMessageTime: lastMsg?.createdAt ?? m.matchedAt,
         isRead: lastMsg?.isRead ?? true,
       };

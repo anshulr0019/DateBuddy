@@ -74,13 +74,28 @@ export async function GET() {
 
       let displayMsg = 'Matched! Say hello 👋';
       if (lastMsg) {
-        const byType: Record<string, string> = {
-          photo: '📷 Photo',
-          voice: '🎙️ Voice Note',
-          location: '📍 Location',
-          gif: '🎬 GIF',
-        };
-        displayMsg = byType[lastMsg.type as string] ?? lastMsg.content;
+        if (lastMsg.content.startsWith('CALL_EVENT:')) {
+          try {
+            const data = JSON.parse(lastMsg.content.replace('CALL_EVENT:', ''));
+            const isVideo = data.callType === 'video';
+            const isMissed = data.status === 'missed' || data.status === 'declined' || data.status === 'cancelled';
+            if (isMissed) {
+              displayMsg = isVideo ? '📹 Missed video call' : '📞 Missed audio call';
+            } else {
+              displayMsg = isVideo ? '📹 Video call' : '📞 Audio call';
+            }
+          } catch {
+            displayMsg = '📞 Call';
+          }
+        } else {
+          const byType: Record<string, string> = {
+            photo: '📷 Photo',
+            voice: '🎙️ Voice Note',
+            location: '📍 Location',
+            gif: '🎬 GIF',
+          };
+          displayMsg = byType[lastMsg.type as string] ?? lastMsg.content;
+        }
       }
 
       return {

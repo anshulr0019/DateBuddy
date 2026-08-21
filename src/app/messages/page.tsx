@@ -95,13 +95,27 @@ export default function MessagesPage() {
           if (foundIdx === -1) return prev;
 
           const target = prev[foundIdx];
-          const byType: Record<string, string> = {
-            photo: '📷 Photo',
-            voice: '🎙️ Voice Note',
-            location: '📍 Location',
-            gif: '🎬 GIF',
-          };
-          const displayMsg = byType[data.type] ?? data.content;
+          let displayMsg = data.content;
+          if (typeof data.content === 'string' && data.content.startsWith('CALL_EVENT:')) {
+            try {
+              const parsed = JSON.parse(data.content.replace('CALL_EVENT:', ''));
+              const isVideo = parsed.callType === 'video';
+              const isMissed = parsed.status === 'missed' || parsed.status === 'declined' || parsed.status === 'cancelled';
+              displayMsg = isMissed
+                ? isVideo ? '📹 Missed video call' : '📞 Missed audio call'
+                : isVideo ? '📹 Video call' : '📞 Audio call';
+            } catch {
+              displayMsg = '📞 Call';
+            }
+          } else {
+            const byType: Record<string, string> = {
+              photo: '📷 Photo',
+              voice: '🎙️ Voice Note',
+              location: '📍 Location',
+              gif: '🎬 GIF',
+            };
+            displayMsg = byType[data.type] ?? data.content;
+          }
 
           const isIncoming = data.senderId !== myId;
           const updated: Conversation = {
