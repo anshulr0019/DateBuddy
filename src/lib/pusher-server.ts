@@ -67,6 +67,11 @@ export async function triggerCallSignal(matchId: number, receiverId: number, sig
   return triggerPusherEvent(`call-signal-${matchId}-${receiverId}`, 'signal', signal);
 }
 
+/** Triggers a call signal on the user-level global channel — for global incoming call detection */
+export async function triggerGlobalCallSignal(receiverId: number, signal: any) {
+  return triggerPusherEvent(`call-signal-global-${receiverId}`, 'signal', signal);
+}
+
 export async function triggerUserNotification(userId: number, notification: any) {
   return triggerPusherEvent(`user-${userId}`, 'notification', notification);
 }

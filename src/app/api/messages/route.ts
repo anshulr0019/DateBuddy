@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { messages, matches } from '@/db/schema';
+import { messages, matches, users } from '@/db/schema';
 import { eq, desc, and, or, lt } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 import { triggerChatMessage, triggerReadReceipt } from '@/lib/pusher-server';
+import { pushNotifyUser } from '@/lib/push-notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -123,6 +124,39 @@ export async function POST(request: NextRequest) {
 
     // Broadcast instant sub-50ms message to the match channel
     void triggerChatMessage(id, newMessage);
+
+    // Web Push — notify the receiver's device even if the app is closed/backgrounded.
+    // We fire-and-forget so this never slows down the response.
+    void (async () => {
+      try {
+        // Fetch sender's name for the notification title
+        const [sender] = await db
+          .select({ name: users.name })
+          .from(users)
+          .where(eq(users.id, session.userId))
+          .limit(1);
+
+        const senderName = sender?.name ?? 'Someone';
+        const preview =
+          type === 'text'
+            ? content.trim().slice(0, 100)
+            : type === 'photo'
+            ? '📷 Sent a photo'
+            : type === 'voice'
+            ? '🎤 Sent a voice message'
+            : type === 'gif'
+            ? '🎞️ Sent a GIF'
+            : 'Sent you a message';
+
+        await pushNotifyUser(receiverId, {
+          title: senderName,
+          body: preview,
+          url: `/chat/${id}`,
+          tag: `chat-${id}`,
+          matchId: id,
+        });
+      } catch { /* non-critical */ }
+    })();
 
     return NextResponse.json({ success: true, message: newMessage });
   } catch (error) {

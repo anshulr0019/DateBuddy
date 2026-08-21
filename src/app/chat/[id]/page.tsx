@@ -17,6 +17,7 @@ import { CallModal } from '../../components/CallModal';
 import { PartnerProfileSheet } from '../../components/PartnerProfileSheet';
 import { MiniGamesDrawer } from './components/MiniGamesDrawer';
 import AIWingman from '../../components/AIWingman';
+import { getPusherClient } from '@/lib/pusher-client';
 
 const ICEBREAKERS = [
   'Hey! Great to match with you ✨',
@@ -88,8 +89,27 @@ export default function ChatPage() {
 
   /* Listen for incoming WebRTC video/audio call signals */
   useEffect(() => {
-    if (!validMatchId || callState.isOpen) return;
+    if (!validMatchId || callState.isOpen || !myId) return;
 
+    // 1. Instant realtime Pusher notification for incoming call
+    const pusher = getPusherClient();
+    const channelName = `call-signal-${validMatchId}-${myId}`;
+    const channel = pusher?.subscribe(channelName);
+
+    const onPusherSignal = (sig: any) => {
+      if (sig?.type === 'offer') {
+        setCallState({
+          isOpen: true,
+          callType: sig.callType || 'video',
+          mode: 'incoming',
+          incomingOfferData: sig.data,
+        });
+      }
+    };
+
+    channel?.bind('signal', onPusherSignal);
+
+    // 2. Polling fallback
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/calls/signal?matchId=${validMatchId}`);
@@ -110,10 +130,14 @@ export default function ChatPage() {
       } catch {
         /* silent polling */
       }
-    }, 2500);
+    }, 2000);
 
-    return () => clearInterval(interval);
-  }, [validMatchId, callState.isOpen]);
+    return () => {
+      channel?.unbind('signal', onPusherSignal);
+      pusher?.unsubscribe(channelName);
+      clearInterval(interval);
+    };
+  }, [validMatchId, callState.isOpen, myId]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const feed = feedRef.current;
@@ -501,7 +525,7 @@ export default function ChatPage() {
       )}
       {validMatchId && partner && myId && callState.isOpen && (
         <CallModal
-          key={`call-${callState.callType}-${callState.mode}-${Date.now()}`}
+          key={`call-${validMatchId}-${callState.callType}-${callState.mode}`}
           isOpen={callState.isOpen}
           matchId={validMatchId}
           partnerId={partner.partnerId}

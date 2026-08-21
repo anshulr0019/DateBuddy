@@ -7,6 +7,7 @@ import Heartbeat from "./components/Heartbeat";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import { NotificationProvider } from "./context/NotificationContext";
 import { FilterProvider } from "./context/FilterContext";
+import { GlobalCallListener } from "./components/GlobalCallListener";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -114,6 +115,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <FloatingNav />
             <PWAInstallBanner />
             <Heartbeat />
+            <GlobalCallListener />
           </FilterProvider>
         </NotificationProvider>
       </body>

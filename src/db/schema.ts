@@ -378,3 +378,16 @@ export const randomChatReports = pgTable('random_chat_reports', {
 }, (table) => ({
   reportedIdx: index('random_chat_reports_reported_idx').on(table.reportedUserId),
 }));
+
+// Web Push Subscriptions — one row per browser/device that opted in
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index('push_subs_user_idx').on(table.userId),
+  endpointIdx: index('push_subs_endpoint_idx').on(table.endpoint),
+}));

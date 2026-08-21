@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SafeImage } from './shared';
 import { hapticLight, hapticMedium, hapticSuccess } from '../lib/haptics';
+import { getPusherClient } from '@/lib/pusher-client';
 
 const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
@@ -169,6 +170,16 @@ export function CallModal({
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingCandidatesRef = useRef<any[]>([]);
+  const processedSignalIdsRef = useRef<Set<string>>(new Set());
+  const offerDataRef = useRef<any>(incomingOfferData);
+  const outgoingStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (incomingOfferData) {
+      offerDataRef.current = incomingOfferData;
+    }
+  }, [incomingOfferData]);
 
   const sendSignal = useCallback(
     async (type: string, data?: any) => {
@@ -178,19 +189,26 @@ export function CallModal({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ matchId, receiverId: partnerId, type, callType, data }),
         });
-      } catch {}
+      } catch (err) {
+        console.warn('Failed to send signal:', err);
+      }
     },
     [matchId, partnerId, callType]
   );
 
   const endCallCleanup = useCallback(() => {
-    if (durationTimerRef.current) clearInterval(durationTimerRef.current);
+    if (durationTimerRef.current) {
+      clearInterval(durationTimerRef.current);
+      durationTimerRef.current = null;
+    }
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
-    pcRef.current?.close();
-    pcRef.current = null;
+    if (pcRef.current) {
+      pcRef.current.close();
+      pcRef.current = null;
+    }
     setCallStatus('ended');
-    setTimeout(onClose, 1000);
+    setTimeout(onClose, 1200);
   }, [onClose]);
 
   const handleEndCall = useCallback(() => {
@@ -206,32 +224,159 @@ export function CallModal({
   }, [sendSignal, endCallCleanup]);
 
   const createPeerConnection = useCallback(() => {
+    if (pcRef.current) {
+      return pcRef.current;
+    }
+
     const pc = new RTCPeerConnection(RTC_CONFIG);
+
     pc.onicecandidate = (e) => {
-      if (e.candidate) sendSignal('candidate', e.candidate);
-    };
-    pc.ontrack = (e) => {
-      const stream = e.streams?.[0];
-      if (stream) {
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = stream;
-        if (remoteAudioRef.current) remoteAudioRef.current.srcObject = stream;
+      if (e.candidate) {
+        sendSignal('candidate', e.candidate.toJSON ? e.candidate.toJSON() : e.candidate);
       }
     };
+
+    pc.ontrack = (e) => {
+      const stream = e.streams?.[0] || new MediaStream([e.track]);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+      }
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = stream;
+      }
+    };
+
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'connected') {
         hapticSuccess();
         setCallStatus('connected');
-        setCallDuration(0);
-        durationTimerRef.current = setInterval(() => setCallDuration((p) => p + 1), 1000);
+        if (!durationTimerRef.current) {
+          setCallDuration(0);
+          durationTimerRef.current = setInterval(() => setCallDuration((p) => p + 1), 1000);
+        }
       } else if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
         endCallCleanup();
       }
     };
+
     pcRef.current = pc;
     return pc;
   }, [sendSignal, endCallCleanup]);
 
+  const handleIncomingSignal = useCallback(
+    async (sig: any) => {
+      if (!sig || !sig.type) return;
+      if (sig.id) {
+        if (processedSignalIdsRef.current.has(sig.id)) return;
+        processedSignalIdsRef.current.add(sig.id);
+      }
+
+      switch (sig.type) {
+        case 'offer': {
+          offerDataRef.current = sig.data;
+          break;
+        }
+
+        case 'answer': {
+          const pc = pcRef.current;
+          if (pc && pc.signalingState === 'have-local-offer') {
+            try {
+              await pc.setRemoteDescription(new RTCSessionDescription(sig.data));
+              setCallStatus('connected');
+              if (!durationTimerRef.current) {
+                setCallDuration(0);
+                durationTimerRef.current = setInterval(() => setCallDuration((p) => p + 1), 1000);
+              }
+              // Drain any queued ICE candidates
+              for (const cand of pendingCandidatesRef.current) {
+                try {
+                  await pc.addIceCandidate(new RTCIceCandidate(cand));
+                } catch (candErr) {
+                  console.warn('Error adding queued candidate on caller:', candErr);
+                }
+              }
+              pendingCandidatesRef.current = [];
+            } catch (err) {
+              console.error('Error applying remote answer:', err);
+            }
+          }
+          break;
+        }
+
+        case 'candidate': {
+          if (!sig.data) break;
+          const pc = pcRef.current;
+          if (pc && pc.remoteDescription && pc.remoteDescription.type) {
+            try {
+              await pc.addIceCandidate(new RTCIceCandidate(sig.data));
+            } catch (candErr) {
+              console.warn('Error adding immediate ICE candidate:', candErr);
+            }
+          } else {
+            pendingCandidatesRef.current.push(sig.data);
+          }
+          break;
+        }
+
+        case 'decline': {
+          hapticMedium();
+          endCallCleanup();
+          break;
+        }
+
+        case 'end': {
+          endCallCleanup();
+          break;
+        }
+
+        default:
+          break;
+      }
+    },
+    [endCallCleanup]
+  );
+
+  // ── Bidirectional Realtime Signal Listener (Pusher + Fast Polling Fallback) ──
+  useEffect(() => {
+    if (!isOpen || !matchId || !myId) return;
+
+    // 1. Pusher instant subscription
+    const pusher = getPusherClient();
+    const channelName = `call-signal-${matchId}-${myId}`;
+    const channel = pusher?.subscribe(channelName);
+
+    const onPusherSignal = (signal: any) => {
+      handleIncomingSignal(signal);
+    };
+
+    channel?.bind('signal', onPusherSignal);
+
+    // 2. Fast Polling fallback (1000ms)
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/calls/signal?matchId=${matchId}`);
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.signals)) {
+          for (const s of data.signals) {
+            handleIncomingSignal(s);
+          }
+        }
+      } catch {
+        /* silent polling */
+      }
+    }, 1000);
+
+    return () => {
+      channel?.unbind('signal', onPusherSignal);
+      pusher?.unsubscribe(channelName);
+      clearInterval(pollInterval);
+    };
+  }, [isOpen, matchId, myId, handleIncomingSignal]);
+
   const startOutgoingCall = useCallback(async () => {
+    if (outgoingStartedRef.current) return;
+    outgoingStartedRef.current = true;
+
     try {
       const constraints: MediaStreamConstraints = {
         audio: true,
@@ -242,13 +387,16 @@ export function CallModal({
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       localStreamRef.current = stream;
-      if (localVideoRef.current && callType === 'video') localVideoRef.current.srcObject = stream;
+      if (localVideoRef.current && callType === 'video') {
+        localVideoRef.current.srcObject = stream;
+      }
       const pc = createPeerConnection();
       stream.getTracks().forEach((t) => pc.addTrack(t, stream));
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       await sendSignal('offer', offer);
-    } catch {
+    } catch (err) {
+      console.error('Error starting outgoing call:', err);
       endCallCleanup();
     }
   }, [callType, createPeerConnection, sendSignal, endCallCleanup]);
@@ -265,17 +413,34 @@ export function CallModal({
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       localStreamRef.current = stream;
-      if (localVideoRef.current && callType === 'video') localVideoRef.current.srcObject = stream;
+      if (localVideoRef.current && callType === 'video') {
+        localVideoRef.current.srcObject = stream;
+      }
       const pc = createPeerConnection();
       stream.getTracks().forEach((t) => pc.addTrack(t, stream));
-      if (incomingOfferData) {
-        await pc.setRemoteDescription(new RTCSessionDescription(incomingOfferData));
+
+      const offerToUse = offerDataRef.current || incomingOfferData;
+      if (offerToUse) {
+        await pc.setRemoteDescription(new RTCSessionDescription(offerToUse));
+        // Drain any ICE candidates received before accept
+        for (const cand of pendingCandidatesRef.current) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          } catch (candErr) {
+            console.warn('Error adding queued candidate on receiver:', candErr);
+          }
+        }
+        pendingCandidatesRef.current = [];
+
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         await sendSignal('answer', answer);
       }
+      // Show 'connected' state optimistically so the UI looks responsive.
+      // The duration timer will start in onconnectionstatechange when ICE actually connects.
       setCallStatus('connected');
-    } catch {
+    } catch (err) {
+      console.error('Error accepting call:', err);
       endCallCleanup();
     }
   }, [callType, createPeerConnection, incomingOfferData, sendSignal, endCallCleanup]);

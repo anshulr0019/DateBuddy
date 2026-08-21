@@ -26,17 +26,39 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Record or update the swipe
-    await db
-      .insert(swipes)
-      .values({
-        swiperId: session.userId,
-        swipedId,
-        action,
-      })
-      .onConflictDoUpdate({
-        target: [swipes.swiperId, swipes.swipedId],
-        set: { action, createdAt: new Date() },
-      });
+    try {
+      await db
+        .insert(swipes)
+        .values({
+          swiperId: session.userId,
+          swipedId,
+          action,
+        })
+        .onConflictDoUpdate({
+          target: [swipes.swiperId, swipes.swipedId],
+          set: { action, createdAt: new Date() },
+        });
+    } catch {
+      // Robust fallback if unique constraint is ever bypassed or transitioning
+      const existing = await db
+        .select({ id: swipes.id })
+        .from(swipes)
+        .where(and(eq(swipes.swiperId, session.userId), eq(swipes.swipedId, swipedId)))
+        .limit(1);
+
+      if (existing.length > 0) {
+        await db
+          .update(swipes)
+          .set({ action, createdAt: new Date() })
+          .where(eq(swipes.id, existing[0].id));
+      } else {
+        await db.insert(swipes).values({
+          swiperId: session.userId,
+          swipedId,
+          action,
+        });
+      }
+    }
 
     // If passed, return immediately with success
     if (action === 'pass') {
@@ -104,25 +126,44 @@ export async function POST(request: NextRequest) {
       let matchId = existingMatch?.id;
 
       if (!matchId) {
-        const [newMatch] = await db
-          .insert(matches)
-          .values({
-            user1Id: session.userId,
-            user2Id: swipedId,
-            isActive: true,
-          })
-          .returning({ id: matches.id });
-        matchId = newMatch.id;
+        try {
+          const [newMatch] = await db
+            .insert(matches)
+            .values({
+              user1Id: session.userId,
+              user2Id: swipedId,
+              isActive: true,
+            })
+            .returning({ id: matches.id });
+          matchId = newMatch?.id;
+        } catch {
+          // In case of race condition creating duplicate match
+          const [fallbackMatch] = await db
+            .select()
+            .from(matches)
+            .where(
+              or(
+                and(eq(matches.user1Id, session.userId), eq(matches.user2Id, swipedId)),
+                and(eq(matches.user1Id, swipedId), eq(matches.user2Id, session.userId))
+              )
+            )
+            .limit(1);
+          matchId = fallbackMatch?.id;
+        }
       }
 
       // Send MATCH notification to the other user -> routes to /chat
-      await db.insert(notifications).values({
-        userId: swipedId,
-        type: 'match',
-        title: "It's a Match! 💕",
-        body: `You and ${senderName} matched! Start the conversation now.`,
-        metadata: { actionUrl: `/chat/${matchId}` },
-      });
+      try {
+        await db.insert(notifications).values({
+          userId: swipedId,
+          type: 'match',
+          title: "It's a Match! 💕",
+          body: `You and ${senderName} matched! Start the conversation now.`,
+          metadata: { actionUrl: `/chat/${matchId}` },
+        });
+      } catch (err) {
+        console.warn('Failed to insert match notification:', err);
+      }
 
       // Realtime notification ping
       try {
@@ -144,15 +185,19 @@ export async function POST(request: NextRequest) {
     } else {
       // ── ONE-WAY LIKE (NOT A MATCH YET) ──
       // Send LIKE notification -> routes to /likes (Who Liked You)
-      await db.insert(notifications).values({
-        userId: swipedId,
-        type: 'like',
-        title: action === 'super_like' ? 'New Super Like! ⭐' : 'Someone liked your profile! ✨',
-        body: action === 'super_like'
-          ? `${senderName} super liked you! See who liked you and connect.`
-          : 'Someone liked you! See who liked you and vibe check back.',
-        metadata: { actionUrl: '/likes' },
-      });
+      try {
+        await db.insert(notifications).values({
+          userId: swipedId,
+          type: 'like',
+          title: action === 'super_like' ? 'New Super Like! ⭐' : 'Someone liked your profile! ✨',
+          body: action === 'super_like'
+            ? `${senderName} super liked you! See who liked you and connect.`
+            : 'Someone liked you! See who liked you and vibe check back.',
+          metadata: { actionUrl: '/likes' },
+        });
+      } catch (err) {
+        console.warn('Failed to insert like notification:', err);
+      }
 
       // Realtime notification ping
       try {
