@@ -80,6 +80,7 @@ export async function GET() {
 
       return {
         id: m.id,
+        matchId: m.id,
         partnerId,
         name: partner?.name ?? 'Match',
         age: partner?.dateOfBirth

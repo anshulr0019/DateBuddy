@@ -100,6 +100,7 @@ export async function GET() {
 
       return {
         id: m.id,
+        matchId: m.id,
         partnerId,
         name: partner?.name ?? 'Match',
         photo: photoByUser.get(partnerId) ?? null,

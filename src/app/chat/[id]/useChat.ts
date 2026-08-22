@@ -161,9 +161,20 @@ export function useChat(matchId: number | null, myId: number | null) {
         return;
       }
 
-      const found = partnerData.matches.find(
-        (m: { matchId: number }) => Number(m.matchId) === Number(matchId)
+      let found = partnerData.matches.find(
+        (m: any) => Number(m.matchId ?? m.id) === Number(matchId)
       );
+      if (!found) {
+        try {
+          const convRes = await fetch('/api/conversations', { signal });
+          const convData = await convRes.json().catch(() => null);
+          if (convData?.success && Array.isArray(convData.conversations)) {
+            found = convData.conversations.find(
+              (c: any) => Number(c.matchId ?? c.id) === Number(matchId)
+            );
+          }
+        } catch { /* ignore */ }
+      }
       if (!found) {
         setPhase('notfound');
         return;
@@ -181,7 +192,7 @@ export function useChat(matchId: number | null, myId: number | null) {
       }
 
       setPartner({
-        matchId: Number(found.matchId),
+        matchId: Number(found.matchId ?? found.id),
         partnerId: Number(found.partnerId),
         name: String(found.name || 'Your Match'),
         photo: found.photo ? String(found.photo) : null,
