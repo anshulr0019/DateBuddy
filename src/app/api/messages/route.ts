@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       .returning();
 
     // Broadcast instant sub-50ms message to the match channel
-    void triggerChatMessage(id, newMessage);
+    await triggerChatMessage(id, newMessage);
 
     // Web Push
     void (async () => {
@@ -213,7 +213,7 @@ export async function PATCH(request: NextRequest) {
           .returning();
 
         // Broadcast real-time reaction via Pusher
-        void triggerMessageReaction(id, numMsgId, currentReactions);
+        await triggerMessageReaction(id, numMsgId, currentReactions);
 
         return NextResponse.json({ success: true, message: updatedMsg, reactions: currentReactions });
       }
@@ -232,7 +232,7 @@ export async function PATCH(request: NextRequest) {
       );
 
     // Broadcast read receipt event in real-time
-    void triggerReadReceipt(id, session.userId);
+    await triggerReadReceipt(id, session.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

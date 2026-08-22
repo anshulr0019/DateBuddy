@@ -5,7 +5,7 @@ import { getPusherClient } from '@/lib/pusher-client';
 import { compressImageForUpload } from '@/lib/image-compress';
 import type { ChatMessage, Partner, SendStatus, ReplyTarget } from './chatTypes';
 
-const POLL_INTERVAL_MS = 5_000;
+const POLL_INTERVAL_MS = 1_500;
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 
@@ -225,7 +225,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     const channelName = `chat-${matchId}`;
     const channel = pusher.subscribe(channelName);
 
-    channel.bind('new-message', (data: ServerMessage) => {
+    const handleNewMessage = (data: ServerMessage) => {
       const confirmed = mapServerMessage(data, myId);
       setPending((prev) => prev.filter((p) => p.id !== confirmed.id));
       setServerMessages((prev) => {
@@ -235,17 +235,17 @@ export function useChat(matchId: number | null, myId: number | null) {
       if (confirmed.senderId !== myId) {
         markRead();
       }
-    });
+    };
 
-    channel.bind('messages-read', ({ readerId }: { readerId: number }) => {
+    const handleMessagesRead = ({ readerId }: { readerId: number }) => {
       if (readerId !== myId) {
         setServerMessages((prev) =>
           prev.map((m) => (m.senderId === myId ? { ...m, status: 'seen' as const } : m))
         );
       }
-    });
+    };
 
-    channel.bind('message-reaction', (data: { messageId: number; reactions: Record<string, string> }) => {
+    const handleReaction = (data: { messageId: number; reactions: Record<string, string> }) => {
       setServerMessages((prev) =>
         prev.map((m) =>
           Number(m.id) === Number(data.messageId)
@@ -259,13 +259,35 @@ export function useChat(matchId: number | null, myId: number | null) {
             : m
         )
       );
-    });
+    };
+
+    channel.bind('new-message', handleNewMessage);
+    channel.bind('messages-read', handleMessagesRead);
+    channel.bind('message-reaction', handleReaction);
 
     return () => {
-      channel.unbind_all();
-      pusher.unsubscribe(channelName);
+      channel.unbind('new-message', handleNewMessage);
+      channel.unbind('messages-read', handleMessagesRead);
+      channel.unbind('message-reaction', handleReaction);
     };
   }, [matchId, myId, markRead]);
+
+  /* Immediate sync on window focus / tab visibility */
+  useEffect(() => {
+    if (phase !== 'ready') return;
+    const handleFocus = () => {
+      if (!document.hidden && navigator.onLine) {
+        fetchMessages().catch(() => {});
+        markRead();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, [phase, fetchMessages, markRead]);
 
   /* Background poll */
   useEffect(() => {

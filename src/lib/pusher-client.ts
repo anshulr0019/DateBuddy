@@ -1,6 +1,6 @@
 'use client';
 
-import PusherClient from 'pusher-js';
+import PusherClient from "pusher-js";
 
 /* ─────────────────────────────────────────────────
    Pusher Client Singleton
@@ -8,20 +8,19 @@ import PusherClient from 'pusher-js';
    sub-50ms chat updates, typing indicators, and presence.
 ───────────────────────────────────────────────── */
 
-const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY;
-const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap2';
+const PUSHER_KEY = process.env.NEXT_PUBLIC_PUSHER_KEY || "40ad308486e4c124933f";
+const PUSHER_CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "ap2";
 
-export const isPusherClientConfigured = Boolean(pusherKey);
+export const isPusherClientConfigured = Boolean(PUSHER_KEY);
 
 let clientInstance: PusherClient | null = null;
 
 export function getPusherClient(): PusherClient | null {
-  if (typeof window === 'undefined') return null;
-  if (!isPusherClientConfigured) return null;
+  if (typeof window === "undefined") return null;
 
   if (!clientInstance) {
-    clientInstance = new PusherClient(pusherKey!, {
-      cluster: pusherCluster,
+    clientInstance = new PusherClient(PUSHER_KEY, {
+      cluster: PUSHER_CLUSTER,
       forceTLS: true,
     });
   }

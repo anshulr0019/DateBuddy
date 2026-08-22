@@ -1,4 +1,4 @@
-import Pusher from 'pusher';
+import Pusher from "pusher";
 
 /* ─────────────────────────────────────────────────
    Pusher Server Singleton & Real-Time Event Layer
@@ -10,10 +10,10 @@ import Pusher from 'pusher';
    • WebRTC incoming call notifications
 ───────────────────────────────────────────────── */
 
-const appId = process.env.PUSHER_APP_ID;
-const key = process.env.PUSHER_KEY || process.env.NEXT_PUBLIC_PUSHER_KEY;
-const secret = process.env.PUSHER_SECRET;
-const cluster = process.env.PUSHER_CLUSTER || process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap2';
+const appId = process.env.PUSHER_APP_ID || "2186751";
+const key = process.env.PUSHER_KEY || process.env.NEXT_PUBLIC_PUSHER_KEY || "40ad308486e4c124933f";
+const secret = process.env.PUSHER_SECRET || "e900331b0d5cda6b5d8a";
+const cluster = process.env.PUSHER_CLUSTER || process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "ap2";
 
 export const isPusherServerConfigured = Boolean(appId && key && secret);
 
@@ -44,38 +44,37 @@ export async function triggerPusherEvent(channel: string, event: string, data: a
 /* ── Typed Domain Event Helpers ── */
 
 export async function triggerChatMessage(matchId: number, message: any) {
-  return triggerPusherEvent(`chat-${matchId}`, 'new-message', message);
+  return triggerPusherEvent(`chat-${matchId}`, "new-message", message);
 }
 
 export async function triggerTypingIndicator(matchId: number, senderId: number, isTyping: boolean) {
-  return triggerPusherEvent(`chat-${matchId}`, 'typing', { senderId, isTyping });
+  return triggerPusherEvent(`chat-${matchId}`, "typing", { senderId, isTyping });
 }
 
 export async function triggerReadReceipt(matchId: number, readerId: number) {
-  return triggerPusherEvent(`chat-${matchId}`, 'messages-read', { readerId });
-}
-
-export async function triggerRandomChatMessage(sessionId: number, message: any) {
-  return triggerPusherEvent(`random-session-${sessionId}`, 'random-message', message);
-}
-
-export async function triggerRandomChatStatus(sessionId: number, status: string, data?: any) {
-  return triggerPusherEvent(`random-session-${sessionId}`, 'status-change', { status, data });
-}
-
-export async function triggerCallSignal(matchId: number, receiverId: number, signal: any) {
-  return triggerPusherEvent(`call-signal-${matchId}-${receiverId}`, 'signal', signal);
-}
-
-/** Triggers a call signal on the user-level global channel — for global incoming call detection */
-export async function triggerGlobalCallSignal(receiverId: number, signal: any) {
-  return triggerPusherEvent(`call-signal-global-${receiverId}`, 'signal', signal);
-}
-
-export async function triggerUserNotification(userId: number, notification: any) {
-  return triggerPusherEvent(`user-${userId}`, 'notification', notification);
+  return triggerPusherEvent(`chat-${matchId}`, "messages-read", { readerId });
 }
 
 export async function triggerMessageReaction(matchId: number, messageId: number, reactions: any) {
-  return triggerPusherEvent(`chat-${matchId}`, 'message-reaction', { messageId, reactions });
+  return triggerPusherEvent(`chat-${matchId}`, "message-reaction", { messageId, reactions });
+}
+
+export async function triggerRandomChatMessage(sessionId: number, message: any) {
+  return triggerPusherEvent(`random-session-${sessionId}`, "random-message", message);
+}
+
+export async function triggerRandomChatStatus(sessionId: number, status: string, data?: any) {
+  return triggerPusherEvent(`random-session-${sessionId}`, "status-change", { status, data });
+}
+
+export async function triggerCallSignal(matchId: number, receiverId: number, signal: any) {
+  return triggerPusherEvent(`call-signal-${matchId}-${receiverId}`, "signal", signal);
+}
+
+export async function triggerGlobalCallSignal(receiverId: number, signal: any) {
+  return triggerPusherEvent(`call-signal-global-${receiverId}`, "signal", signal);
+}
+
+export async function triggerUserNotification(userId: number, notification: any) {
+  return triggerPusherEvent(`user-${userId}`, "notification", notification);
 }
