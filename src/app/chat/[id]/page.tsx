@@ -8,11 +8,12 @@ import { dayLabel, isSameDay } from '../../lib/time';
 import { useCurrentUser } from '../../lib/useCurrentUser';
 import { useKeyboardInset } from '../../lib/useKeyboardInset';
 import { useChat } from './useChat';
-import type { ChatMessage } from './chatTypes';
+import type { ChatMessage, ReplyTarget } from './chatTypes';
 import { MessageBubble } from './components/MessageBubble';
 import { Composer } from './components/Composer';
 import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
-import { Lightbox, MessageActionSheet, SafetySheet } from './components/Overlays';
+import { Lightbox, SafetySheet } from './components/Overlays';
+import { MessageReactionsOverlay } from './components/MessageReactionsOverlay';
 import { CallModal } from '../../components/CallModal';
 import { PartnerProfileSheet } from '../../components/PartnerProfileSheet';
 import { MiniGamesDrawer } from './components/MiniGamesDrawer';
@@ -54,6 +55,7 @@ export default function ChatPage() {
   const [gamesOpen, setGamesOpen] = useState(false);
   const [showNewChip, setShowNewChip] = useState(false);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
+  const [replyingTo, setReplyingTo] = useState<ReplyTarget | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
 
   const searchParams = useSearchParams();
@@ -189,10 +191,16 @@ export default function ChatPage() {
 
   const handleSend = useCallback(() => {
     if (!inputText.trim()) return;
-    chat.sendText(inputText);
+    chat.sendText(inputText, replyingTo);
     setInputText('');
+    setReplyingTo(null);
     setDrawerTab(null);
-  }, [chat, inputText]);
+  }, [chat, inputText, replyingTo]);
+
+  const handlePickFile = useCallback((file: File) => {
+    chat.sendPhoto(file, replyingTo);
+    setReplyingTo(null);
+  }, [chat, replyingTo]);
 
   /* Interleave date dividers into the feed. */
   const feedItems = useMemo(() => {
@@ -486,7 +494,9 @@ export default function ChatPage() {
                   value={inputText}
                   onChange={setInputText}
                   onSend={handleSend}
-                  onPickFile={chat.sendPhoto}
+                  onPickFile={handlePickFile}
+                  replyingTo={replyingTo}
+                  onCancelReply={() => setReplyingTo(null)}
                   emojiOpen={drawerTab === 'emoji'}
                   onToggleEmoji={() => {
                     setDrawerTab((prev) => (prev === 'emoji' ? null : 'emoji'));
@@ -509,9 +519,26 @@ export default function ChatPage() {
       {/* ── OVERLAYS ── */}
       {lightboxUrl && <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />}
       {actionMessage && (
-        <MessageActionSheet
-          message={actionMessage}
+        <MessageReactionsOverlay
+          isOpen={Boolean(actionMessage)}
+          messageId={actionMessage.id}
           isMine={actionMessage.senderId === myId}
+          messageContent={actionMessage.content}
+          onReact={(msgId, emoji) => {
+            chat.reactToMessage(msgId, emoji);
+          }}
+          onReply={(msgId) => {
+            const target = chat.messages.find((m) => m.id === msgId);
+            if (target) {
+              setReplyingTo({
+                id: target.id,
+                senderName: target.senderId === myId ? 'You' : (partner?.name || 'Match'),
+                content: target.content,
+                type: target.type,
+              });
+              setTimeout(() => inputRef.current?.focus(), 80);
+            }
+          }}
           onClose={() => setActionMessage(null)}
         />
       )}

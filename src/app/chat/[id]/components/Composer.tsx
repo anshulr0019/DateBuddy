@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { Ic } from '../../../components/icons';
+import type { ReplyTarget } from '../chatTypes';
 
 const EMOJI_RECENT = ['❤️', '🥰', '😂', '🤗', '😅', '🔥', '✨', '☕'];
 const EMOJI_SMILEYS = [
@@ -62,6 +63,8 @@ interface ComposerProps {
   onFocusInput: () => void;
   error: string | null;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  replyingTo?: ReplyTarget | null;
+  onCancelReply?: () => void;
 }
 
 export function Composer({
@@ -76,12 +79,14 @@ export function Composer({
   onFocusInput,
   error,
   inputRef,
+  replyingTo,
+  onCancelReply,
 }: ComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSend = value.trim().length > 0;
 
   return (
-    <div className="flex-shrink-0 z-30 px-3.5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] bg-white/95 backdrop-blur-xl border-t border-gray-200/60 shadow-lg">
+    <div className="flex-shrink-0 z-30 px-3.5 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] bg-white/95 backdrop-blur-xl border-t border-gray-200/60 shadow-lg">
       <input
         type="file"
         ref={fileInputRef}
@@ -95,6 +100,45 @@ export function Composer({
           e.target.value = '';
         }}
       />
+
+      {/* WhatsApp-Style Quoted Reply Preview */}
+      {replyingTo && (
+        <div className="mb-2.5 flex items-center justify-between gap-2.5 rounded-2xl bg-neutral-100/90 border border-neutral-200/80 px-3.5 py-2 shadow-2xs animate-slide-down">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-1 self-stretch rounded-full bg-gradient-to-b from-[#F43F5E] to-[#7B68EE]" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#F43F5E]">
+                  <polyline points="9 17 4 12 9 7" />
+                  <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                </svg>
+                <p className="text-[11.5px] font-bold text-[#F43F5E] truncate">
+                  Replying to {replyingTo.senderName}
+                </p>
+              </div>
+              <p className="text-[12px] text-gray-600 truncate font-normal mt-0.5">
+                {replyingTo.type === 'photo'
+                  ? '📷 Photo'
+                  : replyingTo.type === 'gif'
+                  ? '🎞️ GIF'
+                  : replyingTo.type === 'voice'
+                  ? '🎤 Voice note'
+                  : replyingTo.type === 'location'
+                  ? '📍 Location'
+                  : replyingTo.content}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            aria-label="Cancel reply"
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200/80 hover:bg-gray-300 text-gray-600 active:scale-95 transition-all flex-shrink-0 cursor-pointer text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {error && (
         <p role="alert" className="mb-2 flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-200 px-3 py-1.5 text-[12px] font-semibold text-[#E11D48]">
@@ -124,7 +168,7 @@ export function Composer({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.nativeEvent.isComposing) onSend();
             }}
-            placeholder="Message…"
+            placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : 'Message…'}
             aria-label="Message"
             enterKeyHint="send"
             autoComplete="off"

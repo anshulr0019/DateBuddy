@@ -5,6 +5,13 @@ export type SendStatus = 'sending' | 'queued' | 'failed' | 'sent' | 'seen';
 /* Mirrors the server's message type enum. */
 export type MessageKind = 'text' | 'photo' | 'gif' | 'voice' | 'location';
 
+export interface ReplyTarget {
+  id: string;
+  senderName: string;
+  content: string;
+  type: MessageKind;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: number;
@@ -14,6 +21,11 @@ export interface ChatMessage {
   createdAt: string;
   /* Only present on the current user's own messages. */
   status?: SendStatus;
+  metadata?: {
+    reactions?: Record<string, string>;
+    replyTo?: ReplyTarget;
+    [key: string]: any;
+  } | null;
 }
 
 export interface Partner {

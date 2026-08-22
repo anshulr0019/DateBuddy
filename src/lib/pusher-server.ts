@@ -75,3 +75,7 @@ export async function triggerGlobalCallSignal(receiverId: number, signal: any) {
 export async function triggerUserNotification(userId: number, notification: any) {
   return triggerPusherEvent(`user-${userId}`, 'notification', notification);
 }
+
+export async function triggerMessageReaction(matchId: number, messageId: number, reactions: any) {
+  return triggerPusherEvent(`chat-${matchId}`, 'message-reaction', { messageId, reactions });
+}

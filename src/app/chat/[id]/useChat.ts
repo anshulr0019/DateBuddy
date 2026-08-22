@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getPusherClient } from '@/lib/pusher-client';
 import { compressImageForUpload } from '@/lib/image-compress';
-import type { ChatMessage, Partner, SendStatus } from './chatTypes';
+import type { ChatMessage, Partner, SendStatus, ReplyTarget } from './chatTypes';
 
 const POLL_INTERVAL_MS = 5_000;
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -17,6 +17,7 @@ interface ServerMessage {
   receiverId: number;
   type?: string;
   content: string;
+  metadata?: any;
   isRead?: boolean | null;
   createdAt: string;
 }
@@ -33,6 +34,7 @@ function mapServerMessage(m: ServerMessage, myId: number): ChatMessage {
     type: (m.type as ChatMessage['type']) || 'text',
     content: m.content,
     createdAt: m.createdAt,
+    metadata: m.metadata || null,
     status: m.senderId === myId ? (m.isRead ? 'seen' : 'sent') : undefined,
   };
 }
@@ -78,41 +80,33 @@ export function useChat(matchId: number | null, myId: number | null) {
       const mapped = raw.map((m) => mapServerMessage(m, myId));
       const oldestInPage = raw.length > 0 ? raw[0].id : null;
 
-      // Keep referential equality across polls when nothing changed so memoized
-      // bubbles don't re-render and scroll effects don't re-fire every tick.
-      const signature = (list: ChatMessage[]) => list.map((m) => `${m.id}:${m.status ?? ''}`).join('|');
+      const signature = (list: ChatMessage[]) =>
+        list.map((m) => `${m.id}:${m.status ?? ''}:${JSON.stringify(m.metadata?.reactions ?? '')}`).join('|');
       setServerMessages((prev) => {
-        // This only returns the newest page; older pages the user already
-        // scrolled back to must survive the merge.
         const older = oldestInPage === null ? [] : prev.filter((m) => Number(m.id) < oldestInPage);
         const merged = [...older, ...mapped];
         return signature(prev) === signature(merged) ? prev : merged;
       });
 
-      // Only the initial load defines the back-scroll boundary; polls refetch
-      // the newest page and know nothing about how far back the user has gone.
       if (opts.initial) setHasMore(Boolean(data.hasMore));
 
-      // Confirmed server messages supersede any optimistic copies still in flight bookkeeping.
       const serverIds = new Set(raw.map((m) => String(m.id)));
       setPending((prev) => prev.filter((p) => !serverIds.has(p.id)));
 
       const hasUnreadFromPartner = raw.some((m) => m.senderId !== myId && !m.isRead);
-      if (hasUnreadFromPartner) markRead();
+      if (hasUnreadFromPartner && !document.hidden) {
+        markRead();
+      }
+
       return 'ok';
     },
     [matchId, myId, markRead]
   );
 
-  /* Fetches the page immediately older than what we already hold. */
   const loadOlder = useCallback(async () => {
-    if (!matchId || myId === null) return;
-    if (loadingOlderRef.current || !hasMore) return;
-
-    const oldest = serverMessages[0];
-    if (!oldest) return;
-    const cursor = Number(oldest.id);
-    if (!Number.isInteger(cursor)) return;
+    if (!matchId || myId === null || loadingOlderRef.current || !hasMore) return;
+    const cursor = serverMessages[0]?.id;
+    if (!cursor) return;
 
     loadingOlderRef.current = true;
     setLoadingOlder(true);
@@ -143,51 +137,58 @@ export function useChat(matchId: number | null, myId: number | null) {
   }, [matchId, myId, hasMore, serverMessages]);
 
   const load = useCallback(async () => {
-    if (!matchId || myId === null) return;
-    setPhase('loading');
+    if (!matchId || myId === null) {
+      setPhase('notfound');
+      return;
+    }
 
+    setPhase('loading');
     loadAbortRef.current?.abort();
     const controller = new AbortController();
     loadAbortRef.current = controller;
-    const { signal } = controller;
+    const signal = controller.signal;
 
     try {
-      const [matchesRes, messagesResult] = await Promise.all([
-        fetch('/api/matches', { signal }),
-        fetchMessages({ signal, initial: true }),
-      ]);
-
-      if (messagesResult === 'notfound') {
+      const partnerRes = await fetch('/api/matches', { signal });
+      if (signal.aborted) return;
+      if (partnerRes.status === 404) {
         setPhase('notfound');
         return;
       }
-      if (messagesResult === 'error') {
+      const partnerData = await partnerRes.json().catch(() => null);
+      if (!partnerRes.ok || !partnerData?.success || !Array.isArray(partnerData.matches)) {
         setPhase('error');
         return;
       }
 
-      const matchesData = await matchesRes.json().catch(() => null);
-      if (!matchesRes.ok || !matchesData?.success || !Array.isArray(matchesData.matches)) {
-        setPhase('error');
-        return;
-      }
-
-      const found = matchesData.matches.find((m: { id: number }) => m.id === matchId);
+      const found = partnerData.matches.find(
+        (m: { matchId: number }) => Number(m.matchId) === Number(matchId)
+      );
       if (!found) {
         setPhase('notfound');
         return;
       }
 
+      const msgResult = await fetchMessages({ signal, initial: true });
+      if (signal.aborted) return;
+      if (msgResult === 'notfound') {
+        setPhase('notfound');
+        return;
+      }
+      if (msgResult === 'error') {
+        setPhase('error');
+        return;
+      }
+
       setPartner({
-        matchId,
-        partnerId: found.partnerId,
-        name: found.name ?? 'Match',
-        photo: found.photo ?? null,
+        matchId: Number(found.matchId),
+        partnerId: Number(found.partnerId),
+        name: String(found.name || 'Your Match'),
+        photo: found.photo ? String(found.photo) : null,
         verified: Boolean(found.verified),
       });
       setPhase('ready');
     } catch {
-      // An abort means a newer load (or unmount) superseded this one.
       if (signal.aborted) return;
       setPhase('error');
     }
@@ -197,7 +198,6 @@ export function useChat(matchId: number | null, myId: number | null) {
     load();
   }, [load]);
 
-  /* Drop any request still in flight when the chat changes or unmounts. */
   useEffect(() => {
     return () => {
       loadAbortRef.current?.abort();
@@ -205,7 +205,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     };
   }, [matchId]);
 
-  /* Real-time sub-50ms message updates & read receipts via Pusher WebSocket */
+  /* Real-time Pusher updates */
   useEffect(() => {
     if (!matchId || myId === null) return;
     const pusher = getPusherClient();
@@ -234,13 +234,29 @@ export function useChat(matchId: number | null, myId: number | null) {
       }
     });
 
+    channel.bind('message-reaction', (data: { messageId: number; reactions: Record<string, string> }) => {
+      setServerMessages((prev) =>
+        prev.map((m) =>
+          Number(m.id) === Number(data.messageId)
+            ? {
+                ...m,
+                metadata: {
+                  ...(m.metadata || {}),
+                  reactions: data.reactions,
+                },
+              }
+            : m
+        )
+      );
+    });
+
     return () => {
       channel.unbind_all();
       pusher.unsubscribe(channelName);
     };
   }, [matchId, myId, markRead]);
 
-  /* Safety background poll for messages and read-receipt changes when visible. */
+  /* Background poll */
   useEffect(() => {
     if (phase !== 'ready') return;
     const timer = setInterval(() => {
@@ -262,7 +278,7 @@ export function useChat(matchId: number | null, myId: number | null) {
       try {
         let content = msg.content;
 
-        // Photos upload first; the message row then stores the hosted URL.
+        // Photos upload first
         const rawFile = filesRef.current.get(msg.id);
         if (msg.type === 'photo' && rawFile) {
           let url = uploadedUrlsRef.current.get(msg.id);
@@ -284,7 +300,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         const res = await fetch('/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ matchId, content, type: msg.type }),
+          body: JSON.stringify({ matchId, content, type: msg.type, metadata: msg.metadata || undefined }),
         });
         const data = await res.json().catch(() => null);
         if (!res.ok || !data?.success || !data.message) {
@@ -304,7 +320,8 @@ export function useChat(matchId: number | null, myId: number | null) {
           URL.revokeObjectURL(objectUrl);
           objectUrlsRef.current.delete(msg.id);
         }
-      } catch {
+      } catch (err) {
+        console.error('[CHAT] Send failed:', err);
         const offline = typeof navigator !== 'undefined' && !navigator.onLine;
         setPendingStatus(msg.id, offline ? 'queued' : 'failed');
       } finally {
@@ -315,7 +332,7 @@ export function useChat(matchId: number | null, myId: number | null) {
   );
 
   const sendText = useCallback(
-    (text: string) => {
+    (text: string, replyTo?: ReplyTarget | null) => {
       const trimmed = text.trim();
       if (!trimmed || myId === null) return;
       const online = typeof navigator === 'undefined' || navigator.onLine;
@@ -325,6 +342,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         type: 'text',
         content: trimmed,
         createdAt: new Date().toISOString(),
+        metadata: replyTo ? { replyTo } : null,
         status: online ? 'sending' : 'queued',
       };
       setPending((prev) => [...prev, msg]);
@@ -334,7 +352,7 @@ export function useChat(matchId: number | null, myId: number | null) {
   );
 
   const sendPhoto = useCallback(
-    (file: File) => {
+    (file: File, replyTo?: ReplyTarget | null) => {
       if (myId === null) return;
       if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
         setComposerError('Only JPEG, PNG, WebP and HEIC images are supported.');
@@ -357,6 +375,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         type: 'photo',
         content: objectUrl,
         createdAt: new Date().toISOString(),
+        metadata: replyTo ? { replyTo } : null,
         status: online ? 'sending' : 'queued',
       };
       setPending((prev) => [...prev, msg]);
@@ -375,7 +394,52 @@ export function useChat(matchId: number | null, myId: number | null) {
     [doSend, setPendingStatus]
   );
 
-  /* Send a GIF or sticker by URL — no upload needed, the URL is already hosted. */
+  const reactToMessage = useCallback(
+    async (messageId: string, emoji: string) => {
+      if (!matchId || myId === null) return;
+      const numId = Number(messageId);
+      if (!numId) return;
+
+      // Optimistic update
+      setServerMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === messageId) {
+            const currentReactions: Record<string, string> = { ...(m.metadata?.reactions || {}) };
+            if (currentReactions[String(myId)] === emoji) {
+              delete currentReactions[String(myId)];
+            } else {
+              currentReactions[String(myId)] = emoji;
+            }
+            return {
+              ...m,
+              metadata: {
+                ...(m.metadata || {}),
+                reactions: currentReactions,
+              },
+            };
+          }
+          return m;
+        })
+      );
+
+      try {
+        await fetch('/api/messages', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            matchId,
+            messageId: numId,
+            reaction: emoji,
+          }),
+        });
+      } catch (err) {
+        console.error('[REACT] Failed to update reaction:', err);
+      }
+    },
+    [matchId, myId]
+  );
+
+  /* Send a GIF or sticker by URL */
   const sendGif = useCallback(
     (url: string) => {
       if (!url.trim() || myId === null) return;
@@ -394,7 +458,6 @@ export function useChat(matchId: number | null, myId: number | null) {
     [myId, doSend]
   );
 
-  /* Online/offline tracking + flushing the queue on reconnect. */
   useEffect(() => {
     setIsOnline(navigator.onLine);
     const goOnline = () => {
@@ -415,7 +478,6 @@ export function useChat(matchId: number | null, myId: number | null) {
     };
   }, [doSend, setPendingStatus]);
 
-  /* Release preview object URLs if the user leaves mid-send. */
   useEffect(() => {
     const urls = objectUrlsRef.current;
     return () => {
@@ -425,7 +487,6 @@ export function useChat(matchId: number | null, myId: number | null) {
   }, []);
 
   const messages = useMemo(() => [...serverMessages, ...pending], [serverMessages, pending]);
-
   const clearComposerError = useCallback(() => setComposerError(null), []);
 
   return {
@@ -442,6 +503,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     sendPhoto,
     sendGif,
     retry,
+    reactToMessage,
     reload: load,
   };
 }

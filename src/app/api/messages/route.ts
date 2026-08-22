@@ -3,13 +3,12 @@ import { db } from '@/db';
 import { messages, matches, users } from '@/db/schema';
 import { eq, desc, and, or, lt } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
-import { triggerChatMessage, triggerReadReceipt } from '@/lib/pusher-server';
+import { triggerChatMessage, triggerReadReceipt, triggerMessageReaction } from '@/lib/pusher-server';
 import { pushNotifyUser } from '@/lib/push-notify';
 
 export const dynamic = 'force-dynamic';
 
 const MESSAGE_TYPES = ['text', 'photo', 'voice', 'gif', 'location'] as const;
-const MAX_CONTENT_LENGTH = 4000;
 const PAGE_SIZE = 50;
 
 async function requireParticipation(matchId: number, userId: number) {
@@ -46,8 +45,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
 
-    /* Cursor pagination walks backwards from the newest message. Serial ids are
-       monotonic, so `id < before` is a stable cursor even for same-timestamp rows. */
     const rawBefore = new URL(request.url).searchParams.get('before');
     const before = rawBefore === null ? null : Number(rawBefore);
     if (before !== null && (!Number.isInteger(before) || before <= 0)) {
@@ -88,15 +85,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { matchId, content, type = 'text' } = await request.json();
+    const { matchId, content, type = 'text', metadata } = await request.json();
     const id = Number(matchId);
 
     if (!Number.isInteger(id) || id <= 0) {
       return NextResponse.json({ success: false, message: 'A valid matchId is required' }, { status: 400 });
     }
-    if (typeof content !== 'string' || !content.trim() || content.length > MAX_CONTENT_LENGTH) {
+
+    // Text messages capped at 4,000 characters; Photos/media dataUrls allowed up to 10MB
+    const maxLen = type === 'text' ? 4000 : 10 * 1024 * 1024;
+    if (typeof content !== 'string' || !content.trim() || content.length > maxLen) {
       return NextResponse.json(
-        { success: false, message: `Message must be between 1 and ${MAX_CONTENT_LENGTH} characters` },
+        { success: false, message: `Message content exceeds limit (max ${maxLen} chars)` },
         { status: 400 }
       );
     }
@@ -119,17 +119,16 @@ export async function POST(request: NextRequest) {
         receiverId,
         content: content.trim(),
         type,
+        metadata: metadata || null,
       })
       .returning();
 
     // Broadcast instant sub-50ms message to the match channel
     void triggerChatMessage(id, newMessage);
 
-    // Web Push — notify the receiver's device even if the app is closed/backgrounded.
-    // We fire-and-forget so this never slows down the response.
+    // Web Push
     void (async () => {
       try {
-        // Fetch sender's name for the notification title
         const [sender] = await db
           .select({ name: users.name })
           .from(users)
@@ -165,9 +164,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/* Marks every message addressed to the current user in a match as read.
-   Powers real read receipts (sender polls and sees isRead flip) and clears
-   the unread counts served by /api/conversations. */
+/* Marks messages read OR toggles emoji reactions */
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getAuthSession();
@@ -175,7 +172,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { matchId } = await request.json();
+    const body = await request.json();
+    const { matchId, messageId, reaction } = body;
     const id = Number(matchId);
     if (!Number.isInteger(id) || id <= 0) {
       return NextResponse.json({ success: false, message: 'A valid matchId is required' }, { status: 400 });
@@ -186,6 +184,42 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
 
+    // Reaction handling
+    if (messageId && typeof reaction === 'string') {
+      const numMsgId = Number(messageId);
+      const [targetMsg] = await db
+        .select()
+        .from(messages)
+        .where(and(eq(messages.id, numMsgId), eq(messages.matchId, id)))
+        .limit(1);
+
+      if (targetMsg) {
+        const currentMeta = (targetMsg.metadata as any) || {};
+        const currentReactions: Record<string, string> = { ...(currentMeta.reactions || {}) };
+
+        // Toggle: if same reaction tapped again, remove it
+        if (currentReactions[String(session.userId)] === reaction) {
+          delete currentReactions[String(session.userId)];
+        } else {
+          currentReactions[String(session.userId)] = reaction;
+        }
+
+        const newMeta = { ...currentMeta, reactions: currentReactions };
+
+        const [updatedMsg] = await db
+          .update(messages)
+          .set({ metadata: newMeta })
+          .where(eq(messages.id, numMsgId))
+          .returning();
+
+        // Broadcast real-time reaction via Pusher
+        void triggerMessageReaction(id, numMsgId, currentReactions);
+
+        return NextResponse.json({ success: true, message: updatedMsg, reactions: currentReactions });
+      }
+    }
+
+    // Mark as read handling
     await db
       .update(messages)
       .set({ isRead: true })
@@ -202,7 +236,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error marking messages read:', error);
+    console.error('Error in PATCH /api/messages:', error);
     return NextResponse.json({ success: false, message: 'Could not update messages' }, { status: 500 });
   }
 }

@@ -84,7 +84,7 @@ function MessageBubbleInner({
   const longPressFiredRef = useRef(false);
 
   const callEvent = parseCallEvent(message.content);
-  const canHaveActions = message.type === 'text' && !callEvent;
+  const canHaveActions = !callEvent;
 
   const startPress = () => {
     if (!canHaveActions) return;
@@ -192,7 +192,7 @@ function MessageBubbleInner({
   }
 
   return (
-    <div className={`flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'}`}>
+    <div id={`msg-${message.id}`} className={`flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'} ${message.metadata?.reactions && Object.keys(message.metadata.reactions).length > 0 ? 'mb-2' : ''}`}>
       <div
         onPointerDown={startPress}
         onPointerUp={cancelPress}
@@ -222,6 +222,42 @@ function MessageBubbleInner({
             : 'bg-white border border-gray-200/70 text-[#1E293B] rounded-tl-[4px]'
         }`}
       >
+        {/* WhatsApp Quoted Reply Preview */}
+        {message.metadata?.replyTo && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              const el = document.getElementById(`msg-${message.metadata?.replyTo?.id}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add("ring-2", "ring-[#F43F5E]", "transition-all");
+                setTimeout(() => el.classList.remove("ring-2", "ring-[#F43F5E]"), 1500);
+              }
+            }}
+            className={`mb-2 flex items-stretch gap-2.5 rounded-xl px-2.5 py-1.5 text-left cursor-pointer transition-all hover:opacity-90 ${
+              isMine
+                ? "bg-black/[0.06] border-l-[3.5px] border-[#F43F5E]"
+                : "bg-black/[0.04] border-l-[3.5px] border-[#7B68EE]"
+            }`}
+          >
+            <div className="min-w-0 flex-1">
+              <p className={`text-[11px] font-bold truncate ${isMine ? "text-[#F43F5E]" : "text-[#7B68EE]"}`}>
+                {message.metadata.replyTo.senderName || "Message"}
+              </p>
+              <p className="text-[11.5px] text-gray-500 truncate font-normal mt-0.5">
+                {message.metadata.replyTo.type === "photo"
+                  ? "📷 Photo"
+                  : message.metadata.replyTo.type === "gif"
+                  ? "🎞️ GIF"
+                  : message.metadata.replyTo.type === "voice"
+                  ? "🎤 Voice note"
+                  : message.metadata.replyTo.type === "location"
+                  ? "📍 Location"
+                  : message.metadata.replyTo.content}
+              </p>
+            </div>
+          </div>
+        )}
         {/* Text */}
         {message.type === 'text' && (
           <div className="flex flex-col">
@@ -328,6 +364,27 @@ function MessageBubbleInner({
               </div>
             </div>
             <MetaRow message={message} />
+          </div>
+        )}
+        {/* Reaction Pill Badge */}
+        {message.metadata?.reactions && Object.keys(message.metadata.reactions).length > 0 && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenActions(message);
+            }}
+            className={`absolute -bottom-2.5 ${
+              isMine ? 'right-2' : 'left-2'
+            } flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/95 backdrop-blur-md border border-gray-200 shadow-sm text-[12px] select-none z-10 cursor-pointer hover:scale-110 active:scale-95 transition-transform`}
+          >
+            {Array.from(new Set(Object.values(message.metadata.reactions as Record<string, string>))).slice(0, 3).map((emoji, idx) => (
+              <span key={idx} className="leading-none">{emoji}</span>
+            ))}
+            {Object.keys(message.metadata.reactions).length > 1 && (
+              <span className="text-[10px] font-bold text-gray-500 font-mono ml-0.5">
+                {Object.keys(message.metadata.reactions).length}
+              </span>
+            )}
           </div>
         )}
       </div>
