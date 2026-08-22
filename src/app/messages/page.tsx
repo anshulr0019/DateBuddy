@@ -25,6 +25,9 @@ type LoadPhase = 'loading' | 'ready' | 'error';
 
 const POLL_INTERVAL_MS = 10_000;
 
+// Module-level in-memory cache for 0ms instant display when navigating back
+let cachedConversations: Conversation[] | null = null;
+
 export default function MessagesPage() {
   const router = useRouter();
   const auth = useCurrentUser();
@@ -32,15 +35,15 @@ export default function MessagesPage() {
   const { openNotifications, unreadCount } = useNotifications();
   const [search, setSearch] = useState('');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [phase, setPhase] = useState<LoadPhase>('loading');
+  const [conversations, setConversations] = useState<Conversation[]>(cachedConversations || []);
+  const [phase, setPhase] = useState<LoadPhase>(cachedConversations ? 'ready' : 'loading');
   const abortRef = useRef<AbortController | null>(null);
 
   const loadConversations = useCallback(async (isRetry = false) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    if (isRetry) setPhase('loading');
+    if (isRetry && !cachedConversations) setPhase('loading');
 
     try {
       const res = await fetch('/api/conversations', { signal: controller.signal });
@@ -56,11 +59,12 @@ export default function MessagesPage() {
       const sorted = [...data.conversations].sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
+      cachedConversations = sorted;
       setConversations(sorted);
       setPhase('ready');
     } catch (err) {
       if (controller.signal.aborted) return;
-      setPhase((prev) => (prev === 'ready' ? 'ready' : 'error'));
+      setPhase((prev) => (prev === 'ready' || cachedConversations ? 'ready' : 'error'));
     }
   }, [router]);
 

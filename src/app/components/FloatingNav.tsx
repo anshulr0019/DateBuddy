@@ -33,6 +33,13 @@ export default function FloatingNav() {
 
   // Warm the Discover deck while the user is elsewhere so entering
   // /discover renders instantly. No-op when already cached or in flight.
+    // Prefetch all primary navigation tabs so switching tabs is instant (0ms lag)
+  useEffect(() => {
+    NAV_TABS.forEach((tab) => {
+      router.prefetch(tab.path);
+    });
+  }, [router]);
+
   useEffect(() => {
     if (!pathname.startsWith('/discover')) prefetchFeed();
   }, [pathname]);

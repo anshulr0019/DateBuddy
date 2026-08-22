@@ -44,6 +44,12 @@ export default function ChatPage() {
     if (auth.status === 'unauthenticated') router.replace('/welcome');
   }, [auth.status, router]);
 
+    // Prefetch messages list so tapping Back is instantaneous (0ms lag)
+  useEffect(() => {
+    router.prefetch('/messages');
+    router.prefetch('/profile');
+  }, [router]);
+
   const chat = useChat(validMatchId, myId);
   const { partner, messages, composerError, clearComposerError } = chat;
 

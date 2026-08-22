@@ -103,13 +103,18 @@ type TabId = (typeof TABS)[number]['id'];
    Page
 ───────────────────────────────────────────────── */
 
+// Module-level in-memory cache for 0ms instant display when navigating to profile
+let cachedProfile: Profile | null = null;
+let cachedConnections: number | null = null;
+let cachedIsGold = false;
+
 export default function ProfilePage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<TabId>('photos');
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(cachedProfile ? 'ready' : 'loading');
   const [isCached, setIsCached] = useState(false);
-  const [profile, setProfile] = useState<Profile>(EMPTY_PROFILE);
-  const [connections, setConnections] = useState<number | null>(null);
+  const [profile, setProfile] = useState<Profile>(cachedProfile || EMPTY_PROFILE);
+  const [connections, setConnections] = useState<number | null>(cachedConnections);
   const [reloadKey, setReloadKey] = useState(0);
   const [myMeetups, setMyMeetups] = useState<{ id: number; title: string; category: string; date: string; venueName: string | null; userJoinStatus: string | null }[]>([]);
   const [meetupsLoading, setMeetupsLoading] = useState(false);
@@ -119,7 +124,7 @@ export default function ProfilePage() {
   const [editError, setEditError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [photoLightboxOpen, setPhotoLightboxOpen] = useState(false);
-  const [isGold, setIsGold] = useState(false);
+  const [isGold, setIsGold] = useState(cachedIsGold);
 
   const openEditor = useCallback(() => {
     setEditDraft({
@@ -181,7 +186,7 @@ export default function ProfilePage() {
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
         if (data?.matches && Array.isArray(data.matches)) {
-          setConnections(data.matches.length);
+          cachedConnections = data.matches.length; setConnections(data.matches.length);
         }
       })
       .catch(() => {});
@@ -190,13 +195,13 @@ export default function ProfilePage() {
       .then(r => (r.ok ? r.json() : null))
       .then(d => {
         if (d?.success && d.subscription?.isActive) {
-          setIsGold(true);
+          cachedIsGold = true; setIsGold(true);
         }
       })
       .catch(() => {});
 
     async function loadProfile() {
-      setStatus('loading');
+      if (!cachedProfile) setStatus('loading');
       setIsCached(false);
       try {
         const res = await fetch('/api/users/me', { signal });
@@ -218,7 +223,7 @@ export default function ProfilePage() {
           ? (u.photos as string[]).filter((url): url is string => typeof url === 'string' && url.length > 0)
           : [];
 
-        setProfile({
+        const newProf: Profile = {
           name: u.name || '',
           age: calcAge(u.dateOfBirth),
           photo: sortedPhotos[0] || '',
@@ -232,7 +237,9 @@ export default function ProfilePage() {
           profession: u.profession || '',
           education: u.education || '',
           verified: u.isVerified ?? false,
-        });
+        };
+        cachedProfile = newProf;
+        setProfile(newProf);
         setStatus('ready');
         return;
       } catch {

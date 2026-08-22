@@ -17,12 +17,16 @@ type Match = {
   verified: boolean;
 };
 
+// Module-level in-memory cache for 0ms instant display
+let cachedMatches: Match[] | null = null;
+let cachedLikesCount: number | null = null;
+
 export default function ConnectionsPage() {
   const router = useRouter();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [matches, setMatches] = useState<Match[]>(cachedMatches || []);
+  const [loading, setLoading] = useState(!cachedMatches);
   const [error, setError] = useState(false);
-  const [likesCount, setLikesCount] = useState<number | null>(null);
+  const [likesCount, setLikesCount] = useState<number | null>(cachedLikesCount);
 
   useEffect(() => {
     async function loadMatches() {
@@ -34,7 +38,7 @@ export default function ConnectionsPage() {
         }
         const data = await res.json();
         if (data.success) {
-          setMatches(data.matches);
+          cachedMatches = data.matches; setMatches(data.matches);
         } else {
           setError(true);
         }
@@ -50,7 +54,7 @@ export default function ConnectionsPage() {
   useEffect(() => {
     fetch('/api/likes')
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.success) setLikesCount(d.count); })
+      .then((d) => { if (d?.success) { cachedLikesCount = d.count; setLikesCount(d.count); } })
       .catch(() => {});
   }, []);
 
