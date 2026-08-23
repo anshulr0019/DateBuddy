@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SafeImage } from './shared';
 import { hapticLight, hapticMedium } from '../lib/haptics';
+import { formatLastSeen } from '../lib/time';
 
 interface PartnerProfile {
   id: number;
@@ -390,12 +391,26 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 </h2>
                 {displayVerified && <VerifiedBadge />}
               </div>
-              {profile?.city && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-white/80 text-[13px] font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-                  <LocationIcon />
-                  <span>{profile.city}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3 flex-wrap mt-1.5">
+                {profile?.city && (
+                  <div className="flex items-center gap-1 text-white/80 text-[13px] font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                    <LocationIcon />
+                    <span>{profile.city}</span>
+                  </div>
+                )}
+                {profile?.lastActiveAt && (
+                  <div className="flex items-center gap-1.5 text-white/80 text-[12px] font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                    {formatLastSeen(profile.lastActiveAt).isOnline ? (
+                      <>
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        <span className="text-emerald-300 font-semibold">Active now</span>
+                      </>
+                    ) : (
+                      <span className="text-white/60">{formatLastSeen(profile.lastActiveAt).label}</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

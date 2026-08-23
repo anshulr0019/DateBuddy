@@ -34,4 +34,6 @@ export interface Partner {
   name: string;
   photo: string | null;
   verified: boolean;
+  online?: boolean;
+  lastActiveAt?: string | null;
 }

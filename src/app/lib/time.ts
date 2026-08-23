@@ -48,3 +48,45 @@ export function dayLabel(iso: string): string {
 
   return d.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
+/**
+ * Human-friendly last seen / presence label:
+ * - "Online" if active within 5 minutes or explicitly online
+ * - "Active 10m ago"
+ * - "Active 2h ago"
+ * - "Active yesterday"
+ * - "Offline"
+ */
+export function formatLastSeen(lastActiveAt?: string | null, isOnline?: boolean): { label: string; isOnline: boolean } {
+  if (isOnline) return { label: 'Online', isOnline: true };
+  if (!lastActiveAt) return { label: 'Offline', isOnline: false };
+
+  const d = new Date(lastActiveAt);
+  if (isNaN(d.getTime())) return { label: 'Offline', isOnline: false };
+
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  if (diffMs < 0) return { label: 'Online', isOnline: true };
+
+  const diffMins = Math.floor(diffMs / 60_000);
+
+  if (diffMins < 5) {
+    return { label: 'Online', isOnline: true };
+  }
+  if (diffMins < 60) {
+    return { label: `Active ${diffMins}m ago`, isOnline: false };
+  }
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) {
+    return { label: `Active ${diffHours}h ago`, isOnline: false };
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) {
+    return { label: 'Active yesterday', isOnline: false };
+  }
+  if (diffDays < 7) {
+    return { label: `Active ${diffDays}d ago`, isOnline: false };
+  }
+  return { label: 'Offline', isOnline: false };
+}
+

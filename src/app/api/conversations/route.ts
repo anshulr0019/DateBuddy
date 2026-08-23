@@ -110,6 +110,7 @@ export async function GET() {
         online: partner?.lastActiveAt
           ? now - new Date(partner.lastActiveAt).getTime() < ONLINE_WINDOW_MS
           : false,
+        lastActiveAt: partner?.lastActiveAt ? new Date(partner.lastActiveAt).toISOString() : null,
       };
     });
 

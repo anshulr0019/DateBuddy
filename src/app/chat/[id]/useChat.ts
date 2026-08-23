@@ -42,12 +42,16 @@ function mapServerMessage(m: ServerMessage, myId: number): ChatMessage {
 export function useChat(matchId: number | null, myId: number | null) {
   const [phase, setPhase] = useState<ChatPhase>('loading');
   const [partner, setPartner] = useState<Partner | null>(null);
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const [serverMessages, setServerMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState<ChatMessage[]>([]);
   const [isOnline, setIsOnline] = useState(true);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSentRef = useRef<number>(0);
 
   const filesRef = useRef<Map<string, File>>(new Map());
   const objectUrlsRef = useRef<Map<string, string>>(new Map());
@@ -197,6 +201,8 @@ export function useChat(matchId: number | null, myId: number | null) {
         name: String(found.name || 'Your Match'),
         photo: found.photo ? String(found.photo) : null,
         verified: Boolean(found.verified),
+        online: Boolean(found.online),
+        lastActiveAt: found.lastActiveAt ? String(found.lastActiveAt) : null,
       });
       setPhase('ready');
     } catch {
@@ -233,15 +239,32 @@ export function useChat(matchId: number | null, myId: number | null) {
         return [...prev, confirmed];
       });
       if (confirmed.senderId !== myId) {
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        setIsPartnerTyping(false);
+        setPartner((prev) => (prev ? { ...prev, online: true, lastActiveAt: new Date().toISOString() } : prev));
         markRead();
       }
     };
 
     const handleMessagesRead = ({ readerId }: { readerId: number }) => {
       if (readerId !== myId) {
+        setPartner((prev) => (prev ? { ...prev, online: true, lastActiveAt: new Date().toISOString() } : prev));
         setServerMessages((prev) =>
           prev.map((m) => (m.senderId === myId ? { ...m, status: 'seen' as const } : m))
         );
+      }
+    };
+
+    const handleTyping = (data: { senderId: number; isTyping: boolean }) => {
+      if (data.senderId !== myId) {
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        if (data.isTyping) {
+          setIsPartnerTyping(true);
+          setPartner((prev) => (prev ? { ...prev, online: true, lastActiveAt: new Date().toISOString() } : prev));
+          typingTimeoutRef.current = setTimeout(() => setIsPartnerTyping(false), 4000);
+        } else {
+          setIsPartnerTyping(false);
+        }
       }
     };
 
@@ -263,12 +286,15 @@ export function useChat(matchId: number | null, myId: number | null) {
 
     channel.bind('new-message', handleNewMessage);
     channel.bind('messages-read', handleMessagesRead);
+    channel.bind('typing', handleTyping);
     channel.bind('message-reaction', handleReaction);
 
     return () => {
       channel.unbind('new-message', handleNewMessage);
       channel.unbind('messages-read', handleMessagesRead);
+      channel.unbind('typing', handleTyping);
       channel.unbind('message-reaction', handleReaction);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, [matchId, myId, markRead]);
 
@@ -522,11 +548,25 @@ export function useChat(matchId: number | null, myId: number | null) {
   const messages = useMemo(() => [...serverMessages, ...pending], [serverMessages, pending]);
   const clearComposerError = useCallback(() => setComposerError(null), []);
 
+  const notifyTyping = useCallback(() => {
+    if (!matchId) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    lastTypingSentRef.current = now;
+
+    fetch('/api/messages/typing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ matchId, isTyping: true }),
+    }).catch(() => {});
+  }, [matchId]);
+
   return {
     phase,
     partner,
     messages,
     isOnline,
+    isPartnerTyping,
     composerError,
     clearComposerError,
     hasMore,
@@ -535,6 +575,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     sendText,
     sendPhoto,
     sendGif,
+    notifyTyping,
     retry,
     reactToMessage,
     reload: load,

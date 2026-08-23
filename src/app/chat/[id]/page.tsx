@@ -4,7 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '../../components/shared';
 import { Ic } from '../../components/icons';
-import { dayLabel, isSameDay } from '../../lib/time';
+import { dayLabel, isSameDay, formatLastSeen } from '../../lib/time';
 import { useCurrentUser } from '../../lib/useCurrentUser';
 import { useKeyboardInset } from '../../lib/useKeyboardInset';
 import { useChat } from './useChat';
@@ -51,7 +51,7 @@ export default function ChatPage() {
   }, [router]);
 
   const chat = useChat(validMatchId, myId);
-  const { partner, messages, composerError, clearComposerError } = chat;
+  const { partner, messages, isPartnerTyping, notifyTyping, composerError, clearComposerError } = chat;
 
   const [inputText, setInputText] = useState('');
   const [drawerTab, setDrawerTab] = useState<DrawerTab | null>(null);
@@ -266,10 +266,29 @@ export default function ChatPage() {
                           </svg>
                         )}
                       </h1>
-                      <p className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold mt-0.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        Online
-                      </p>
+                      {(() => {
+                        if (isPartnerTyping) {
+                          return (
+                            <p className="flex items-center gap-1 text-[11px] text-[#F43F5E] font-semibold mt-0.5 animate-pulse">
+                              <span>typing...</span>
+                            </p>
+                          );
+                        }
+                        const presence = formatLastSeen(partner.lastActiveAt, partner.online);
+                        if (presence.isOnline) {
+                          return (
+                            <p className="flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold mt-0.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Online
+                            </p>
+                          );
+                        }
+                        return (
+                          <p className="text-[11px] text-gray-400 font-medium mt-0.5 truncate">
+                            {presence.label}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </button>
                 ) : (
@@ -498,7 +517,10 @@ export default function ChatPage() {
                 </div>
                 <Composer
                   value={inputText}
-                  onChange={setInputText}
+                  onChange={(val) => {
+                    setInputText(val);
+                    if (val.trim()) notifyTyping();
+                  }}
                   onSend={handleSend}
                   onPickFile={handlePickFile}
                   replyingTo={replyingTo}
