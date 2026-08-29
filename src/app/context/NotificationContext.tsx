@@ -124,8 +124,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         return;
       }
       if (meta.meetupId) {
-        const applicantQuery = meta.applicantUserId ? `?applicant=${meta.applicantUserId}` : '';
-        router.push(`/meetups/${meta.meetupId}${applicantQuery}`);
+        router.push(`/meetups/${meta.meetupId}`);
         return;
       }
       if (notif.actionUrl) {

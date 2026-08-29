@@ -89,19 +89,6 @@ function MeetupDetailContent() {
     if (id) fetchMeetup();
   }, [id, fetchMeetup]);
 
-  // Auto-open applicant review profile if routed from notification query param
-  useEffect(() => {
-    const applicantId = searchParams?.get('applicant');
-    if (applicantId && meetup?.pendingRequests) {
-      const target = meetup.pendingRequests.find(p => p.id === Number(applicantId));
-      if (target) {
-        setInspectedUser({ id: target.id, name: target.name, photo: target.photo });
-      } else {
-        setInspectedUser({ id: Number(applicantId), name: 'Applicant', photo: null });
-      }
-    }
-  }, [searchParams, meetup]);
-
   const flash = (msg: string) => {
     setNotice(msg);
     window.setTimeout(() => setNotice(''), 3500);
@@ -357,45 +344,22 @@ function MeetupDetailContent() {
                   )}
 
                   <div className="p-5 space-y-4">
-                    {/* Host Controls */}
-                    {meetup.isHost && !isCancelled && (
-                      <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm space-y-3">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-[#1A1A2E]/40">Host Controls</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={openEditModal}
-                            disabled={busy}
-                            className="px-3 py-2.5 rounded-xl bg-[#7B68EE] text-white text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
-                          >
-                            ✏️ Edit Squad
-                          </button>
-                          <button
-                            onClick={() => { setEditError(''); setShowCancelConfirm(true); }}
-                            disabled={busy}
-                            className="px-3 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
-                          >
-                            ⛔ Cancel Squad
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Host Admin: Pending Join Requests */}
+                    {/* Host Admin: Pending Join Requests (Waiting List) — Shown prominently at top */}
                     {meetup.isHost && !isCancelled && (meetup.pendingRequests || []).length > 0 && (
-                      <div className="rounded-2xl bg-amber-50/90 border border-amber-200 p-4 shadow-sm space-y-3 animate-fade-in">
+                      <div className="rounded-2xl bg-amber-50/95 border-2 border-amber-300/80 p-4 shadow-md space-y-3 animate-fade-in ring-2 ring-amber-400/20">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11.5px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
-                            <span>✋</span> Pending Join Requests ({(meetup.pendingRequests || []).length})
+                          <span className="text-[12px] font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                            <span>✋</span> Waiting List / Requests ({(meetup.pendingRequests || []).length})
                           </span>
-                          <span className="text-[10px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200">
-                            Host Review
+                          <span className="text-[10.5px] font-extrabold text-amber-800 bg-amber-200/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                            Action Needed
                           </span>
                         </div>
                         <div className="space-y-2">
                           {(meetup.pendingRequests || []).map((applicant) => (
                             <div
                               key={applicant.id}
-                              className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-amber-200/70 shadow-xs"
+                              className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-amber-200/80 shadow-xs"
                             >
                               {/* Tappable Profile Preview */}
                               <button
@@ -428,7 +392,7 @@ function MeetupDetailContent() {
                                   type="button"
                                   onClick={() => handlePendingAction(applicant.id, 'approve')}
                                   disabled={busy}
-                                  className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-extrabold cursor-pointer active:scale-95 transition-all shadow-xs disabled:opacity-50"
+                                  className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-extrabold cursor-pointer active:scale-95 transition-all shadow-xs disabled:opacity-50"
                                 >
                                   Accept ✓
                                 </button>
@@ -443,6 +407,29 @@ function MeetupDetailContent() {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Host Controls */}
+                    {meetup.isHost && !isCancelled && (
+                      <div className="rounded-2xl bg-white border border-[#1A1A2E]/8 p-4 shadow-sm space-y-3">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-[#1A1A2E]/40">Host Controls</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={openEditModal}
+                            disabled={busy}
+                            className="px-3 py-2.5 rounded-xl bg-[#7B68EE] text-white text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
+                          >
+                            ✏️ Edit Squad
+                          </button>
+                          <button
+                            onClick={() => { setEditError(''); setShowCancelConfirm(true); }}
+                            disabled={busy}
+                            className="px-3 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
+                          >
+                            ⛔ Cancel Squad
+                          </button>
                         </div>
                       </div>
                     )}
