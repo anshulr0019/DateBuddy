@@ -3,7 +3,7 @@
 <br/>
 
 <!-- Header Banner -->
-<img src="./assets/banner.svg" alt="Infyn Header Banner" width="100%" />
+<img src="./assets/banner.png" alt="Infyn Header Banner" width="100%" />
 
 <br/>
 
@@ -418,7 +418,7 @@ infyn/
 <br/>
 
 <!-- Footer Wave -->
-<img src="./assets/footer.svg" alt="Infyn Footer Wave" width="100%" />
+<img src="./assets/footer.png" alt="Infyn Footer Wave" width="100%" />
 
 **[⭐ Star](https://github.com/anshulr0019/DateBuddy) · [🍴 Fork](https://github.com/anshulr0019/DateBuddy/fork) · [🐛 Issues](https://github.com/anshulr0019/DateBuddy/issues) · [📬 PRs Welcome](https://github.com/anshulr0019/DateBuddy/pulls)**
 
