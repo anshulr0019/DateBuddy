@@ -1,13 +1,13 @@
 <div align="center">
 
 <!-- Animated Header -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,20,26&height=220&section=header&text=💕%20DateBuddy&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=38&desc=Next-Gen%20Dating,%20Speed-Dating%20%26%20Real-Time%20Social%20Platform&descAlignY=62&descSize=20" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=DateBuddy&fontSize=70&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=Next-Gen%20Dating,%20Speed-Dating%20%26%20Real-Time%20Social%20Platform&descAlignY=60&descSize=19" />
 
 <br/>
 
 <!-- Animated Typing Subtitle -->
 <a href="https://github.com/anshulr0019/DateBuddy">
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=22&duration=2600&pause=1000&color=FF4D8D&center=true&vCenter=true&width=750&lines=Sub-50ms+Real-Time+Chat+Powered+by+Pusher+⚡;Free+P2P+WebRTC+Video+%26+Audio+Calling+📹;Interactive+In-Chat+Mini-Games+🎮;Anonymous+Speed-Dating+Radar+%26+Aliases+🎭;Context-Aware+AI+Dating+Wingman+🤖;Real-World+Meetup+Hosting+%26+Venues+📍;Haptic-Driven+PWA+%26+Capacitor+iOS%2FAndroid+📱" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=22&duration=2600&pause=1000&color=FF4D8D&center=true&vCenter=true&width=750&lines=Sub-50ms+Real-Time+Chat+Powered+by+Pusher%3BFree+P2P+WebRTC+Video+and+Audio+Calling%3BInteractive+In-Chat+Mini-Games%3BAnonymous+Speed-Dating+Radar+and+Aliases%3BContext-Aware+AI+Dating+Wingman%3BReal-World+Meetup+Hosting+and+Venues%3BHaptic-Driven+PWA+and+Capacitor+iOS%2FAndroid" alt="Typing SVG" />
 </a>
 
 <br/><br/>
@@ -26,13 +26,13 @@
   <img src="https://img.shields.io/badge/Capacitor_iOS-1199FF?style=for-the-badge&logo=capacitor&logoColor=white" />
 </p>
 
-<!-- Stats Badges -->
+<!-- Project Status Badges -->
 <p align="center">
-  <img src="https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=flat-square&color=FF4D8D" />
-  <img src="https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=flat-square&color=7B68EE" />
-  <img src="https://img.shields.io/github/last-commit/anshulr0019/DateBuddy?style=flat-square&color=00D2D3" />
+  <img src="https://img.shields.io/badge/Status-Active%20Development-success?style=flat-square&color=FF4D8D" />
+  <img src="https://img.shields.io/badge/Platform-Web%20%7C%20iOS%20%7C%20Android-7B68EE?style=flat-square" />
+  <img src="https://img.shields.io/badge/Real--Time-Pusher%20%26%20WebRTC-00D2D3?style=flat-square" />
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" />
-  <img src="https://img.shields.io/badge/Built%20with-💖%20for%20Gen--Z-rose?style=flat-square" />
+  <img src="https://img.shields.io/badge/Built%20with-%F0%9F%92%96%20for%20Gen--Z-rose?style=flat-square" />
 </p>
 
 </div>
@@ -331,13 +331,8 @@ DateBuddy/
 <div align="center">
 
 <!-- Footer Wave -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,20,26&height=120&section=footer" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" />
 
 **Crafted with 💖 by [Anshul](https://github.com/anshulr0019)**
-
-<br/>
-
-[![GitHub Stars](https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=social)](https://github.com/anshulr0019/DateBuddy)
-[![GitHub Forks](https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=social)](https://github.com/anshulr0019/DateBuddy/fork)
 
 </div>
