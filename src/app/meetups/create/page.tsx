@@ -5,22 +5,15 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { VenuePickerModal } from '@/app/components/VenuePickerModal';
+import { getCategoryCoverImage, PRESET_IMAGE_OPTIONS } from '@/app/lib/meetup-media';
 
 const CATEGORIES = [
-  { id: 'sports', icon: '⚽', label: 'Sports & Fitness', desc: 'Workout, football, running & yoga' },
+  { id: 'sports', icon: '⚽', label: 'Sports & Fitness', desc: 'Gym, badminton, football & running' },
   { id: 'social', icon: '🎉', label: 'Social & Parties', desc: 'House parties, mixers & meetups' },
   { id: 'food', icon: '☕', label: 'Food & Coffee', desc: 'Café hops, dinners & street food' },
   { id: 'outdoors', icon: '🏔️', label: 'Outdoors & Trips', desc: 'Hikes, weekend getaways & nature' },
   { id: 'arts', icon: '🎨', label: 'Arts & Culture', desc: 'Museums, live gigs & theatre' },
   { id: 'tech', icon: '💻', label: 'Tech & Gaming', desc: 'Hackathons, LAN parties & co-working' },
-];
-
-const PRESET_IMAGES = [
-  { label: 'Outdoors & Hiking', url: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Coffee & Chill', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Party & Social', url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Sports & Fitness', url: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Tech & Gaming', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=80' },
 ];
 
 export default function CreateMeetupPage() {
@@ -51,7 +44,7 @@ export default function CreateMeetupPage() {
     date: '',
     time: '',
     maxAttendees: 8,
-    imageUrl: PRESET_IMAGES[0].url,
+    imageUrl: getCategoryCoverImage('sports', ''),
   });
 
   const handleCreate = async () => {
@@ -76,7 +69,7 @@ export default function CreateMeetupPage() {
           city: userCity,
           date: dateTimeIso,
           maxAttendees: formData.maxAttendees,
-          imageUrl: formData.imageUrl || PRESET_IMAGES[0].url,
+          imageUrl: formData.imageUrl || getCategoryCoverImage(formData.category, formData.title, formData.venueName),
         }),
       });
 
@@ -166,9 +159,16 @@ export default function CreateMeetupPage() {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Sunday Morning Football, Specialty Coffee Hop..."
+                      placeholder="e.g. Leg Day Workout, Badminton Match, Coffee Hop..."
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) => {
+                        const newTitle = e.target.value;
+                        setFormData(prev => ({
+                          ...prev,
+                          title: newTitle,
+                          imageUrl: uploadedPreview ? prev.imageUrl : getCategoryCoverImage(prev.category, newTitle, prev.venueName),
+                        }));
+                      }}
                       className="w-full h-13 px-4 rounded-2xl bg-white border border-[#1A1A2E]/10 text-[16px] font-medium text-[#1A1A2E] placeholder-[#1A1A2E]/30 focus:outline-none focus:ring-2 focus:ring-[#FF6B9D]/40 focus:border-[#FF6B9D] transition-all shadow-sm"
                     />
                   </div>
@@ -184,7 +184,11 @@ export default function CreateMeetupPage() {
                           <button
                             key={cat.id}
                             type="button"
-                            onClick={() => setFormData({ ...formData, category: cat.id })}
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              category: cat.id,
+                              imageUrl: uploadedPreview ? prev.imageUrl : getCategoryCoverImage(cat.id, prev.title, prev.venueName),
+                            }))}
                             className={`p-3.5 rounded-2xl text-left border transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-gradient-to-br from-[#FF6B9D]/10 to-[#7B68EE]/10 border-[#FF6B9D] shadow-sm ring-1 ring-[#FF6B9D]/30'
@@ -323,22 +327,22 @@ export default function CreateMeetupPage() {
                     </button>
 
                     {/* Preset images */}
-                    <p className="text-[11px] font-semibold text-[#1A1A2E]/40 uppercase tracking-wider mb-2">Or choose a preset</p>
+                    <p className="text-[11px] font-semibold text-[#1A1A2E]/40 uppercase tracking-wider mb-2">Or choose from curated activity presets</p>
                     <div className="grid grid-cols-3 gap-2 mb-3">
-                      {PRESET_IMAGES.map((preset, idx) => {
+                      {PRESET_IMAGE_OPTIONS.map((preset) => {
                         const isSel = formData.imageUrl === preset.url && !uploadedPreview;
                         return (
                           <button
-                            key={idx}
+                            key={preset.id}
                             type="button"
                             onClick={() => { setUploadedPreview(null); setFormData({ ...formData, imageUrl: preset.url }); }}
                             className={`relative h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
-                              isSel ? 'border-[#FF6B9D] ring-2 ring-[#FF6B9D]/30 scale-102' : 'border-transparent opacity-80 hover:opacity-100'
+                              isSel ? 'border-[#FF6B9D] ring-2 ring-[#FF6B9D]/30 scale-102 shadow-md' : 'border-transparent opacity-80 hover:opacity-100'
                             }`}
                           >
                             <SafeImage src={preset.url} alt={preset.label} className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 bg-black/20 flex items-end p-1">
-                              <span className="text-[10px] text-white font-semibold truncate">{preset.label}</span>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end p-1.5">
+                              <span className="text-[10px] text-white font-bold leading-tight line-clamp-1">{preset.label}</span>
                             </div>
                           </button>
                         );

@@ -8,6 +8,7 @@ import { VenuePickerModal } from '../components/VenuePickerModal';
 import { useNotifications } from '../context/NotificationContext';
 import { PERSONAS, DEFAULT_PERSONA, calculateDynamicVibe } from '@/lib/personaGreeting';
 import { hapticLight, hapticMedium } from '../lib/haptics';
+import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 
 type Pick = {
   id: number;
@@ -227,6 +228,7 @@ export default function HomePage() {
           venueName: hostVenue.trim(),
           date: new Date(hostDate).toISOString(),
           maxAttendees: hostSlots,
+          imageUrl: getCategoryCoverImage(hostCategory, hostTitle, hostVenue),
           requireApproval: hostRequireApproval,
         }),
       });
@@ -815,19 +817,33 @@ export default function HomePage() {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none text-[13px]">
-              <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-gray-50 border border-gray-200/80">
-                <div className="flex items-center gap-2">
-                  <Ic.MapPin className="w-4 h-4 text-[#F43F5E]" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase text-gray-400">Venue</p>
-                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{selectedDetail.venueName ?? selectedDetail.city ?? 'TBA'}</p>
+              <div className="rounded-2xl bg-gray-50/90 border border-gray-200/80 p-3.5 space-y-3">
+                {/* Venue */}
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <div className="h-8 w-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Ic.MapPin className="w-4 h-4 text-[#F43F5E]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Venue</p>
+                    <p className="text-[13px] font-bold text-[#1E293B] leading-snug break-words">
+                      {selectedDetail.venueName ?? selectedDetail.city ?? 'TBA'}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Ic.Clock className="w-4 h-4 text-[#F43F5E]" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase text-gray-400">When</p>
-                    <p className="text-[12.5px] font-bold text-[#1E293B] truncate">{formatWhen(selectedDetail.date)}</p>
+
+                {/* Divider */}
+                <div className="h-px w-full bg-gray-200/60" />
+
+                {/* When */}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-8 w-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center flex-shrink-0">
+                    <Ic.Clock className="w-4 h-4 text-[#7B68EE]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">When</p>
+                    <p className="text-[13px] font-bold text-[#1E293B] leading-snug">
+                      {formatWhen(selectedDetail.date)}
+                    </p>
                   </div>
                 </div>
               </div>

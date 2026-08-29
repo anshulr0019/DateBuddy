@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { meetups, meetupAttendees } from '@/db/schema';
 import { getAuthSession } from '@/lib/auth';
+import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,10 @@ export async function POST(request: NextRequest) {
     const capacity = Number(maxAttendees);
     const safeCapacity = Number.isInteger(capacity) && capacity >= 2 && capacity <= 100 ? capacity : 10;
 
+    const resolvedImage = typeof imageUrl === 'string' && imageUrl.trim().length > 0
+      ? imageUrl.trim()
+      : getCategoryCoverImage(category, title, venueName);
+
     const [newMeetup] = await db
       .insert(meetups)
       .values({
@@ -49,7 +54,7 @@ export async function POST(request: NextRequest) {
         city: typeof city === 'string' ? city.slice(0, 100) : null,
         date: parsedDate,
         maxAttendees: safeCapacity,
-        imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
+        imageUrl: resolvedImage,
         requireApproval: Boolean(requireApproval),
       })
       .returning();

@@ -68,7 +68,7 @@ export async function POST(
         type: 'event_request',
         title: 'Join Request ✋',
         body: `${currentUser?.name ?? 'Someone'} requested to join your squad "${meetup.title}".`,
-        metadata: { meetupId, applicantUserId: userId },
+        metadata: { meetupId, applicantUserId: userId, actionUrl: `/meetups/${meetupId}?applicant=${userId}` },
       });
     }
 

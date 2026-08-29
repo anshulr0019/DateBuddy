@@ -7,12 +7,13 @@ import { hapticLight, hapticSuccess } from '../lib/haptics';
 export interface AppNotification {
   id: number;
   userId?: number;
-  type: 'like' | 'match' | 'message' | 'call' | 'system' | 'event' | string;
+  type: 'like' | 'match' | 'message' | 'call' | 'system' | 'event' | 'event_request' | 'meetup' | string;
   title: string;
   message?: string;
   body?: string;
   avatar?: string;
   actionUrl?: string;
+  metadata?: Record<string, unknown> | null;
   read?: boolean;
   isRead?: boolean;
   createdAt: string;
@@ -109,13 +110,39 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     );
 
     // Dynamic intelligent routing based on notification intent:
-    // 1. ONE-WAY LIKE -> Go to /likes (Who Liked You section)
+    // 1. SQUAD / MEETUP JOIN REQUEST -> Go directly to the squad host review page!
+    const meta = (notif.metadata || {}) as Record<string, unknown>;
+    if (
+      notif.type === 'event_request' ||
+      notif.type === 'meetup' ||
+      meta.meetupId ||
+      notif.title.toLowerCase().includes('join request') ||
+      notif.title.toLowerCase().includes('squad')
+    ) {
+      if (meta.actionUrl && typeof meta.actionUrl === 'string') {
+        router.push(meta.actionUrl);
+        return;
+      }
+      if (meta.meetupId) {
+        const applicantQuery = meta.applicantUserId ? `?applicant=${meta.applicantUserId}` : '';
+        router.push(`/meetups/${meta.meetupId}${applicantQuery}`);
+        return;
+      }
+      if (notif.actionUrl) {
+        router.push(notif.actionUrl);
+        return;
+      }
+      router.push('/discover/meetups');
+      return;
+    }
+
+    // 2. ONE-WAY LIKE -> Go to /likes (Who Liked You section)
     if (notif.type === 'like' || notif.actionUrl === '/likes' || notif.title.toLowerCase().includes('liked')) {
       router.push('/likes');
       return;
     }
 
-    // 2. MUTUAL MATCH / CONNECTION -> Go to the conversation / messages so they can chat!
+    // 3. MUTUAL MATCH / CONNECTION -> Go to the conversation / messages so they can chat!
     if (notif.type === 'match' || notif.title.toLowerCase().includes('match')) {
       if (notif.actionUrl && notif.actionUrl.startsWith('/chat')) {
         router.push(notif.actionUrl);
@@ -125,9 +152,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       return;
     }
 
-    // 3. Specific Action URL or fallback
+    // 4. Specific Action URL or fallback
     if (notif.actionUrl) {
       router.push(notif.actionUrl);
+    } else if (meta.actionUrl && typeof meta.actionUrl === 'string') {
+      router.push(meta.actionUrl);
     } else if (notif.type === 'message') {
       router.push('/messages');
     }

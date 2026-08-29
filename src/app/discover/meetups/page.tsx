@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
+import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Squads', icon: '✨' },
@@ -152,8 +153,9 @@ export default function DiscoverMeetupsPage() {
               ) : (
                 filteredMeetups.map((meetup) => {
                   const coverImg =
-                    meetup.imageUrl ||
-                    'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80';
+                    (meetup.imageUrl && !meetup.imageUrl.includes('photo-1511632765486-a01980e01a18'))
+                      ? meetup.imageUrl
+                      : getCategoryCoverImage(meetup.category, meetup.title, meetup.venueName);
                   
                   return (
                     <div

@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
+import { PartnerProfileSheet } from '@/app/components/PartnerProfileSheet';
+import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 
 interface Attendee {
   id: number;
@@ -52,6 +54,7 @@ interface EditForm {
 export default function MeetupDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = String(params?.id);
 
   const [meetup, setMeetup] = useState<MeetupDetail | null>(null);
@@ -64,6 +67,7 @@ export default function MeetupDetailPage() {
   const [notice, setNotice] = useState('');
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [editError, setEditError] = useState('');
+  const [inspectedUser, setInspectedUser] = useState<{ id: number; name: string; photo: string | null } | null>(null);
 
   const fetchMeetup = useCallback(async () => {
     try {
@@ -84,6 +88,19 @@ export default function MeetupDetailPage() {
   useEffect(() => {
     if (id) fetchMeetup();
   }, [id, fetchMeetup]);
+
+  // Auto-open applicant review profile if routed from notification query param
+  useEffect(() => {
+    const applicantId = searchParams?.get('applicant');
+    if (applicantId && meetup?.pendingRequests) {
+      const target = meetup.pendingRequests.find(p => p.id === Number(applicantId));
+      if (target) {
+        setInspectedUser({ id: target.id, name: target.name, photo: target.photo });
+      } else {
+        setInspectedUser({ id: Number(applicantId), name: 'Applicant', photo: null });
+      }
+    }
+  }, [searchParams, meetup]);
 
   const flash = (msg: string) => {
     setNotice(msg);
@@ -274,12 +291,16 @@ export default function MeetupDetailPage() {
                   {/* Hero Banner */}
                   <div className="relative h-64 w-full bg-gray-900">
                     <SafeImage
-                      src={meetup.imageUrl || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80'}
+                      src={
+                        (meetup.imageUrl && !meetup.imageUrl.includes('photo-1511632765486-a01980e01a18'))
+                          ? meetup.imageUrl
+                          : getCategoryCoverImage(meetup.category, meetup.title, meetup.venueName)
+                      }
                       alt={meetup.title}
                       className="h-full w-full object-cover"
                     />
                     {isCancelled && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><span className="px-4 py-2 rounded-full bg-red-500 text-white text-[13px] font-extrabold uppercase tracking-wider">Cancelled</span></div>}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
                     <button
                       onClick={() => router.back()}
@@ -288,19 +309,24 @@ export default function MeetupDetailPage() {
                       ←
                     </button>
 
-                    <span className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold uppercase tracking-wider z-20">
-                      {meetup.category}
-                    </span>
+                    {/* Top Right Badges: Category & High-Contrast Capacity Pill */}
+                    <div className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 flex items-center gap-2 z-20">
+                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
+                        {meetup.category}
+                      </span>
+                      <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[11.5px] font-extrabold shadow-md flex items-center gap-1">
+                        👥 {meetup.attendeesCount || 1} / {meetup.maxAttendees}
+                      </span>
+                    </div>
 
                     <div className="absolute bottom-4 left-5 right-5 text-white z-20">
-                      <h1 className="text-[22px] font-extrabold leading-snug drop-shadow-md">{meetup.title}</h1>
-                      <p className="text-[13px] text-white/80 mt-1 flex items-center gap-1.5 font-medium">
-                        <span>📍 {meetup.venueName || 'Mumbai'}</span>
-                        <span>·</span>
-                        <span>👥 {meetup.attendeesCount || 1} / {meetup.maxAttendees}</span>
+                      <h1 className="text-[22px] font-extrabold leading-snug drop-shadow-md line-clamp-2">{meetup.title}</h1>
+                      <p className="text-[13px] text-white/90 mt-1 flex items-center gap-1.5 font-medium truncate drop-shadow-sm">
+                        <span className="flex-shrink-0">📍</span>
+                        <span className="truncate">{meetup.venueName || 'Mumbai'}</span>
                       </p>
                       {meetup.isHost && (
-                        <span className="mt-2 inline-block px-2 py-0.5 rounded-full bg-[#FFD700]/90 text-[#1A1A2E] text-[10px] font-extrabold uppercase tracking-wider">
+                        <span className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10.5px] font-extrabold uppercase tracking-wider shadow-sm">
                           👑 You&apos;re the Host
                         </span>
                       )}
@@ -356,33 +382,53 @@ export default function MeetupDetailPage() {
 
                     {/* Host Admin: Pending Join Requests */}
                     {meetup.isHost && !isCancelled && (meetup.pendingRequests || []).length > 0 && (
-                      <div className="rounded-2xl bg-amber-50/80 border border-amber-200/80 p-4 shadow-sm space-y-3">
+                      <div className="rounded-2xl bg-amber-50/90 border border-amber-200 p-4 shadow-sm space-y-3 animate-fade-in">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-                            Pending Join Requests ({(meetup.pendingRequests || []).length})
+                          <span className="text-[11.5px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+                            <span>✋</span> Pending Join Requests ({(meetup.pendingRequests || []).length})
                           </span>
-                          <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                            Approval Required
+                          <span className="text-[10px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200">
+                            Host Review
                           </span>
                         </div>
                         <div className="space-y-2">
                           {(meetup.pendingRequests || []).map((applicant) => (
-                            <div key={applicant.id} className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-xl border border-amber-200/60 shadow-2xs">
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <SafeImage
-                                  src={applicant.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
-                                  className="h-8 w-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
-                                  name={applicant.name}
-                                  alt={applicant.name}
-                                />
-                                <span className="text-[13px] font-bold text-[#1E293B] truncate">{applicant.name}</span>
-                              </div>
-                              <div className="flex gap-1.5 flex-shrink-0">
+                            <div
+                              key={applicant.id}
+                              className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-amber-200/70 shadow-xs"
+                            >
+                              {/* Tappable Profile Preview */}
+                              <button
+                                type="button"
+                                onClick={() => setInspectedUser({ id: applicant.id, name: applicant.name, photo: applicant.photo })}
+                                className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all flex-1"
+                              >
+                                <div className="relative flex-shrink-0">
+                                  <SafeImage
+                                    src={applicant.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                                    className="h-10 w-10 rounded-full object-cover border border-amber-200 shadow-2xs"
+                                    name={applicant.name}
+                                    alt={applicant.name}
+                                  />
+                                  <span className="absolute -bottom-1 -right-1 bg-amber-500 text-white text-[8px] rounded-full px-1 font-bold">
+                                    👁️
+                                  </span>
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="text-[13.5px] font-extrabold text-[#1E293B] truncate block">{applicant.name}</span>
+                                  <span className="text-[11px] font-bold text-[#7B68EE] flex items-center gap-0.5">
+                                    View Profile →
+                                  </span>
+                                </div>
+                              </button>
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <button
                                   type="button"
                                   onClick={() => handlePendingAction(applicant.id, 'approve')}
                                   disabled={busy}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold cursor-pointer active:scale-95 transition-all shadow-2xs disabled:opacity-50"
+                                  className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-extrabold cursor-pointer active:scale-95 transition-all shadow-xs disabled:opacity-50"
                                 >
                                   Accept ✓
                                 </button>
@@ -390,7 +436,7 @@ export default function MeetupDetailPage() {
                                   type="button"
                                   onClick={() => handlePendingAction(applicant.id, 'decline')}
                                   disabled={busy}
-                                  className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                                  className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-[12px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
                                 >
                                   Decline ✕
                                 </button>
@@ -484,14 +530,20 @@ export default function MeetupDetailPage() {
                         <div className="space-y-1.5 border-t border-[#1A1A2E]/5 pt-3">
                           {(meetup.attendees || []).map((att: Attendee) => (
                             <div key={att.id} className="flex items-center gap-3">
-                              <SafeImage
-                                src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
-                                className="h-8 w-8 rounded-full object-cover border border-[#1A1A2E]/10"
-                                name={att.name}
-                                alt={att.name}
-                              />
-                              <span className="flex-1 text-[13px] font-semibold text-[#1A1A2E]">{att.name}</span>
-                              <span className="text-[10px] text-[#1A1A2E]/35 font-bold uppercase">Going</span>
+                              <button
+                                type="button"
+                                onClick={() => setInspectedUser({ id: att.id, name: att.name, photo: att.photo })}
+                                className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer hover:opacity-80 transition-opacity"
+                              >
+                                <SafeImage
+                                  src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
+                                  className="h-8 w-8 rounded-full object-cover border border-[#1A1A2E]/10"
+                                  name={att.name}
+                                  alt={att.name}
+                                />
+                                <span className="flex-1 text-[13px] font-semibold text-[#1A1A2E] truncate">{att.name}</span>
+                                <span className="text-[10px] text-[#1A1A2E]/35 font-bold uppercase mr-1">Going</span>
+                              </button>
                               {att.id !== meetup.host?.id && !isCancelled && (
                                 <button
                                   onClick={() => kickUser(att.id)}
@@ -670,6 +722,14 @@ export default function MeetupDetailPage() {
                 </p>
               </div>
             )}
+            {/* Partner Profile Sheet for Host Applicant Review */}
+            <PartnerProfileSheet
+              isOpen={!!inspectedUser}
+              partnerId={inspectedUser?.id ?? null}
+              matchId={null}
+              initialData={inspectedUser ? { name: inspectedUser.name, photo: inspectedUser.photo } : undefined}
+              onClose={() => setInspectedUser(null)}
+            />
           </div>
         </AuroraBackground>
       </div>
