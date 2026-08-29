@@ -106,15 +106,15 @@
   <!-- App Heart Logo & Title -->
   <g transform="translate(600, 125)">
     <!-- Heart Icon Badge -->
-    <g transform="translate(-185, -46)">
+    <g transform="translate(-130, -46)">
       <rect width="60" height="60" rx="16" fill="url(#roseViolet)" />
       <!-- Heart SVG Path -->
       <path d="M 30 45 C 30 45 14 34 14 23 C 14 17.5 18 13.5 23.5 13.5 C 26.5 13.5 29 15 30 17 C 31 15 33.5 13.5 36.5 13.5 C 42 13.5 46 17.5 46 23 C 46 34 30 45 30 45 Z" fill="#ffffff" />
     </g>
 
     <!-- Main Title -->
-    <text x="-105" y="0" class="title-text" fill="#FFFFFF" text-anchor="start">
-      Date<tspan fill="url(#roseViolet)">Buddy</tspan>
+    <text x="-50" y="0" class="title-text" fill="#FFFFFF" text-anchor="start">
+      Inf<tspan fill="url(#roseViolet)">yn</tspan>
     </text>
   </g>
 

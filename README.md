@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Header Banner -->
-<img src="./assets/banner.svg" alt="DateBuddy Header Banner" width="100%" />
+<img src="./assets/banner.svg" alt="Infyn Header Banner" width="100%" />
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 ## 🌟 Executive Overview
 
-**DateBuddy** is a full-stack, mobile-first social discovery and dating platform engineered for Gen-Z. It bridges the gap between digital interaction and real-world connection by combining **fluid swipe discovery**, **sub-50ms instant messaging**, **zero-cost P2P WebRTC video calling**, **anonymous radar speed-dating**, **in-chat 2-player mini games**, and **real-world meetup hosting**.
+**Infyn** is a full-stack, mobile-first social discovery and dating platform engineered for Gen-Z. It bridges the gap between digital interaction and real-world connection by combining **fluid swipe discovery**, **sub-50ms instant messaging**, **zero-cost P2P WebRTC video calling**, **anonymous radar speed-dating**, **in-chat 2-player mini games**, and **real-world meetup hosting**.
 
 Built with a modern tech stack featuring **Next.js 15 App Router**, **PostgreSQL (Neon)** via **Drizzle ORM**, **Pusher Channels**, and **Capacitor Mobile**.
 
@@ -225,7 +225,7 @@ npm install
 Create a `.env.local` file in the root directory:
 ```env
 # Database (Neon PostgreSQL)
-DATABASE_URL="postgresql://username:password@ep-sample.us-east-2.aws.neon.tech/datebuddy?sslmode=require"
+DATABASE_URL="postgresql://username:password@ep-sample.us-east-2.aws.neon.tech/infyn?sslmode=require"
 
 # Authentication & Session
 JWT_SECRET="your-super-secure-jwt-secret-key-32-chars-min"
@@ -247,7 +247,7 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_xxxx"
 # Web Push Notifications (VAPID)
 NEXT_PUBLIC_VAPID_PUBLIC_KEY="your_vapid_public_key"
 VAPID_PRIVATE_KEY="your_vapid_private_key"
-VAPID_EMAIL="mailto:hello@datebuddy.app"
+VAPID_EMAIL="mailto:hello@infyn.app"
 
 # Fast2SMS / Twilio OTP (Optional for Dev mode fallback)
 OTP_DEV_LOG=true
@@ -288,7 +288,7 @@ npx cap open ios
 ## 📂 Project Structure
 
 ```text
-DateBuddy/
+infyn/
 ├── src/
 │   ├── app/
 │   │   ├── api/                    # 20+ Serverless API Route Handlers
@@ -331,7 +331,7 @@ DateBuddy/
 <div align="center">
 
 <!-- Footer Wave -->
-<img src="./assets/footer.svg" alt="DateBuddy Footer Wave" width="100%" />
+<img src="./assets/footer.svg" alt="Infyn Footer Wave" width="100%" />
 
 **Crafted with 💖 by [Anshul](https://github.com/anshulr0019)**
 
