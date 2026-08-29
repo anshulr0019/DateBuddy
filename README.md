@@ -1,198 +1,343 @@
 <div align="center">
 
 <!-- Animated Header -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=💕%20DateBuddy&fontSize=80&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Where%20Connections%20Become%20Real&descAlignY=60&descSize=22" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,20,26&height=220&section=header&text=💕%20DateBuddy&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=38&desc=Next-Gen%20Dating,%20Speed-Dating%20%26%20Real-Time%20Social%20Platform&descAlignY=62&descSize=20" width="100%" />
 
 <br/>
 
 <!-- Animated Typing Subtitle -->
 <a href="https://github.com/anshulr0019/DateBuddy">
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=22&duration=2800&pause=1000&color=FF6B9D&center=true&vCenter=true&width=700&lines=Premium+Gen-Z+Dating+Platform+🔥;100%25+Free+P2P+Video+%26+Audio+Calling+📹;AI+Dynamic+Persona+Scoring+🤖;Anonymous+Speed+Dating+Radar+🎲;Real-World+Meetup+Hosting+📍;Face-Match+Identity+Verification+🛡️" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=22&duration=2600&pause=1000&color=FF4D8D&center=true&vCenter=true&width=750&lines=Sub-50ms+Real-Time+Chat+Powered+by+Pusher+⚡;Free+P2P+WebRTC+Video+%26+Audio+Calling+📹;Interactive+In-Chat+Mini-Games+🎮;Anonymous+Speed-Dating+Radar+%26+Aliases+🎭;Context-Aware+AI+Dating+Wingman+🤖;Real-World+Meetup+Hosting+%26+Venues+📍;Haptic-Driven+PWA+%26+Capacitor+iOS%2FAndroid+📱" alt="Typing SVG" />
 </a>
 
 <br/><br/>
 
-<!-- Premium Tech Stack Badges -->
-<img src="https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
-<img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
-<img src="https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
-<img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
-<img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" />
-<img src="https://img.shields.io/badge/Capacitor_8_iOS-1199FF?style=for-the-badge&logo=capacitor&logoColor=white" />
-<img src="https://img.shields.io/badge/WebRTC_P2P-333333?style=for-the-badge&logo=webrtc&logoColor=white" />
+<!-- Tech Stack Badges -->
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" />
+  <img src="https://img.shields.io/badge/Pusher_Realtime-300D4F?style=for-the-badge&logo=pusher&logoColor=white" />
+  <img src="https://img.shields.io/badge/WebRTC_P2P-333333?style=for-the-badge&logo=webrtc&logoColor=white" />
+  <img src="https://img.shields.io/badge/Razorpay-0C2340?style=for-the-badge&logo=razorpay&logoColor=2B83EA" />
+  <img src="https://img.shields.io/badge/Capacitor_iOS-1199FF?style=for-the-badge&logo=capacitor&logoColor=white" />
+</p>
 
-<br/><br/>
-
-<!-- GitHub Stats Badges -->
-<img src="https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=flat-square&color=FF6B9D" />
-<img src="https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=flat-square&color=7B68EE" />
-<img src="https://img.shields.io/github/last-commit/anshulr0019/DateBuddy?style=flat-square&color=4ECDC4" />
-<img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" />
-<img src="https://img.shields.io/badge/Built%20with-💖-rose?style=flat-square" />
-
-<br/><br/>
-
-<!-- HERO MOCKUP (Replace the src below with your actual GIF or Image) -->
-<picture>
-  <!-- <source media="(prefers-color-scheme: dark)" srcset="link-to-your-dark-gif.gif"> -->
-  <img alt="DateBuddy App UI" src="https://placehold.co/800x400/1A1A2E/FF6B9D?text=Replace+With+High-Fidelity+App+GIF&font=montserrat" width="800">
-</picture>
+<!-- Stats Badges -->
+<p align="center">
+  <img src="https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=flat-square&color=FF4D8D" />
+  <img src="https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=flat-square&color=7B68EE" />
+  <img src="https://img.shields.io/github/last-commit/anshulr0019/DateBuddy?style=flat-square&color=00D2D3" />
+  <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" />
+  <img src="https://img.shields.io/badge/Built%20with-💖%20for%20Gen--Z-rose?style=flat-square" />
+</p>
 
 </div>
 
 ---
 
-## 🌟 The Vision
+## 🌟 Executive Overview
 
-**DateBuddy** is a full-stack, mobile-first social discovery app engineered specifically for Gen-Z. It goes far beyond swiping. It is a complete ecosystem allowing users to **host real-world meetups**, **video call for free**, **speed-date anonymously**, and let a dynamic **AI engine calculate their vibe**.
+**DateBuddy** is a full-stack, mobile-first social discovery and dating platform engineered for Gen-Z. It bridges the gap between digital interaction and real-world connection by combining **fluid swipe discovery**, **sub-50ms instant messaging**, **zero-cost P2P WebRTC video calling**, **anonymous radar speed-dating**, **in-chat 2-player mini games**, and **real-world meetup hosting**.
 
-Built with a relentless focus on fluid UI, zero paid-API dependencies (100% free WebRTC & OSM), and native iOS performance via Capacitor.
-
----
-
-## ✨ Top-Tier Engineering & UX
-
-*   **Velocity-Based Gesture Engine:** Swipe cards that calculate finger drag velocity for organic, physical fling momentum. Horizontal swipe-to-like was intentionally removed to prevent accidental touches—actions require intentional taps.
-*   **$0/Month Infrastructure for Calls & Maps:** Engineered to use pure browser-native WebRTC peer-to-peer (via Google STUN) and OpenStreetMap Nominatim. No Agora. No Twilio. No Google Maps API fees.
-*   **Dynamic Glassmorphism:** Context-aware frosted glass (`backdrop-blur`) components that adapt to underlying moving aurora gradients.
-*   **Safe-Area Inset Architecture:** Zero-clipping edge-to-edge UI that perfectly wraps around the iPhone Dynamic Island and bottom home indicator.
-*   **Optimistic UI Mutations:** Instantly mutating the UI on likes and messages *before* the server responds, ensuring a 0ms perceived latency.
+Built with a modern tech stack featuring **Next.js 15 App Router**, **PostgreSQL (Neon)** via **Drizzle ORM**, **Pusher Channels**, and **Capacitor Mobile**.
 
 ---
 
-## 📱 Core Features Showcase
+## ⚡ Key Highlights & Architecture
 
-### 📹 1. WebRTC Calling (FaceTime UI)
-Completely free, high-definition audio and video calling built from scratch.
-*   **Audio Call UI:** Blurred partner photo background, centered avatar with pulsing ripple rings, live call timer.
-*   **Video Call UI:** Full-screen edge-to-edge remote video stream. Your selfie camera floats in a draggable Picture-in-Picture (PiP) window. Hovering glassmorphic control dock.
+```mermaid
+flowchart TB
+    subgraph Client ["Client Layer (Web & Capacitor Native)"]
+        UI[Next.js 15 UI + Tailwind + DVH Safe-Area]
+        SW[Service Worker Web Push API]
+        RTC_Client[WebRTC Audio / Video Stream]
+        Pusher_Client[Pusher WebSocket Client]
+    end
 
-### 🎭 2. Anonymous Radar Speed Dating
-Match with strangers based on a selected vibe (Chill, Deep, Flirty).
-*   **Rotating Trivia:** While the radar scans, funny trivia auto-rotates every 3.5s (e.g., *"Otters hold hands while sleeping so they don't float away"*).
-*   **True Anonymity:** Users are identified only by their first initial (e.g., `User A`). Full identity is only revealed if both users press "Connect".
+    subgraph Server ["Server & Real-Time Engine"]
+        API[Next.js Route Handlers / Server Actions]
+        Pusher_Server[Pusher Channels Real-Time Broadcast]
+        Push_Server[Web-Push VAPID Trigger]
+        Razorpay[Razorpay Payment Verification]
+    end
 
-### 🤖 3. AI Dynamic Vibe Persona
-The app watches *how* and *when* you use it, then auto-assigns your active persona. It is earned, not selected.
+    subgraph Data ["Data & Storage Layer"]
+        DB[(Neon PostgreSQL Serverless + Drizzle)]
+        Redis[(Upstash Redis Cache & Rate Limiting)]
+        Media[Cloudinary / CDN Media Storage]
+    end
 
-| Usage Trigger | Auto-Assigned Vibe |
-|:---|:---|
-| Active between 10 PM – 4 AM | 🦉 **Night Owl** |
-| Active between 5 AM – 9 AM | 🌅 **Early Spark** |
-| Long avg. message length | 🧠 **Deep Conversationalist** |
-| High emoji use, fast replies | 😏 **Flirt Mode** |
-| Spike in matches/views | 🔥 **High Demand** |
-
-### 📅 4. IRL Meetup Hosting & Venue Discovery
-Users can host physical meetups for their Gym, Turf, or local Cafe.
-*   **Venue Picker:** 1-tap live search for real gyms and cafes powered by OpenStreetMap.
-*   **RSVP System:** Host approval, capacity limits, and attendee tracking.
-
-### 🛡️ 5. Live Face-Match Verification
-Uses webcam selfie capture. AI compares the live selfie against uploaded profile photos. If passed, the premium `✓` verified badge is permanently unlocked.
+    UI --> API
+    UI --> RTC_Client
+    Pusher_Client <--> Pusher_Server
+    API --> Pusher_Server
+    API --> Push_Server --> SW
+    API --> Razorpay
+    API --> DB
+    API --> Redis
+    API --> Media
+```
 
 ---
 
-## 🗄️ Architecture & Schemas
+## 📱 Feature Showcase
+
+### 1. 💬 Ultra-Fast Messaging & Chat Engine
+*   **Sub-50ms Latency:** Instant bidirectional message sync powered by Pusher Channels.
+*   **WhatsApp-Style Emoji Reactions:** Long-press / hover reaction bar with `👍 ❤️ 😂 😮 😢 🔥`.
+*   **Quoted Replies:** Swipe-to-reply or one-click quoting for seamless multi-threaded banter.
+*   **Hold-to-Record Voice Notes:** In-browser audio recording with live waveform frequency visualizer and playback scrubber.
+*   **Dynamic Presence & Typing:** Live `"typing..."` indicators and real-time `"Online / Active X min ago"` status.
+*   **AI Wingman:** Contextual dating assistant offering witty icebreakers and conversation sparkers.
+
+---
+
+### 2. 🎮 Interactive In-Chat Mini-Games
+Play turn-based games directly within any active conversation:
+*   **🔢 Guess The Number:** Host picks a secret number (1–100); partner guesses with real-time "Too High" / "Too Low" hints and a celebratory winner screen.
+*   **🃏 Truth or Dare:** Turn-based deck featuring deep, funny, and spicy conversation cards designed to break the ice.
+
+---
+
+### 3. 📹 Zero-Cost WebRTC Video & Audio Calling
+*   **P2P Streaming:** HD video & crisp audio streaming directly between peers using browser WebRTC + Google STUN. No expensive third-party video SDK fees.
+*   **Global Call Listener:** Incoming call modal rings across any screen in the app with custom ringtones, vibration, and Accept/Decline actions.
+*   **Luxury Monochromatic UI:** Full-screen video stream, floating draggable Picture-in-Picture (PiP) camera dock, mute, and camera flip.
+*   **In-Chat Call History Logs:** Auto-inserts call summary cards directly into the message thread (`📞 Video Call · 4m 12s` or `📵 Missed Call`).
+
+---
+
+### 4. 🎭 Anonymous Radar Speed Dating
+*   **Vibe Matching:** Filter matches by vibe: *Chill, Deep Talk, Flirty, Late Night, Random*.
+*   **Radar Pulse UI:** Real-time pulse scanning animation with rotating trivia tidbits.
+*   **Pseudonym Aliases:** Fun server-generated identities (e.g., *"Cosmic Panda"*, *"Velvet Fox"*) to ensure privacy.
+*   **Mutual Reveal Mechanic:** Both users can request to reveal identity. When both accept, the session automatically converts into a permanent Match!
+
+---
+
+### 5. 🎴 Smart Swipe Discovery & Profile Cards
+*   **Velocity-Based Gestures:** Fluid card spring physics (Left = Pass, Right = Like, Up = Super Like).
+*   **Spotify-Style Anthem Badges:** Embedded music anthems showcasing users' favorite tracks.
+*   **Hinge-Style Interactive Prompts:** Answer cards (e.g., *"My ideal Sunday..."*, *"Two truths and a lie"*).
+*   **Instant Match Screen:** Celebratory match modal with confetti, common interests chips, and direct messaging CTA.
+
+---
+
+### 6. 📍 Real-World Meetups & Venue Discovery
+*   **Category Exploration:** Sports, Arts, Tech, Food, Nightlife, Coffee meetups.
+*   **Interactive Venue Picker:** OpenStreetMap location search with geocoding.
+*   **RSVP & Attendee Control:** Guest limits, host approval flow, and pinned announcements.
+
+---
+
+### 7. 💎 VIP Pass & Razorpay Monetization
+*   **Subscription Tiers:** Daily, Weekly, and Monthly VIP Passes.
+*   **VIP Perks:** Unlimited likes, **"See Who Liked You"** reveal tab, Swipe Rewind, profile spotlight boost, and exclusive gold profile badges.
+*   **Secure Checkout:** Razorpay order creation and HMAC SHA256 cryptographic signature validation.
+
+---
+
+### 8. 🛡️ Trust, Safety & Selfie Verification
+*   **Live Gesture Verification:** Front-camera selfie pose capture to unlock the blue verified checkmark.
+*   **Safety Suite:** Categorized user reporting, instant one-tap blocking, and automatic feed exclusion.
+
+---
+
+## 🗄️ Database Schema (`src/db/schema.ts`)
 
 <details>
-<summary><b>✨ Click to view the Database Schema (PostgreSQL + Drizzle ORM)</b></summary>
+<summary><b>✨ Click to Expand Database Schema Definitions</b></summary>
 
 <br/>
 
-**Users & Auth**
-*   `users` — id, name, phone, dob, gender, bio, location, isVerified
-*   `photos` — userId, url, orderIndex
-*   `interests` & `user_interests` — master tag list & relations
-*   `otp_codes` — phoneNumber, codeHash, attempts, expiresAt
-
-**Social & Real-Time**
-*   `swipes` — swiperId, swipedId, action (like/pass/super_like) *(Unique constraint prevents double-swiping)*
-*   `matches` — user1Id, user2Id, matchedAt
-*   `messages` — matchId, senderId, type (text/photo/voice), isRead
-*   `notifications` — userId, type, title, body, isRead
-
-**Anonymous Radar**
-*   `random_chat_queue` — userId, vibe, ageMin, ageMax, expiresAt
-*   `random_chat_sessions` — userAId, userBId, aliasA, aliasB, status
-*   `random_chat_messages` — sessionId, senderId, content
-
-**Meetups & Community**
-*   `meetups` — hostId, title, venueName, lat, lng, date, maxAttendees
-*   `meetup_attendees` — meetupId, userId, status
-
-</details>
-
-<details>
-<summary><b>🔌 Click to view Core API Routes (Serverless Next.js Handlers)</b></summary>
-
-<br/>
-
-| Method | Route | Description |
-|:---|:---|:---|
-| `POST` | `/api/auth/send-otp` | Sends SMS via Firebase |
-| `POST` | `/api/auth/verify-otp` | Verifies OTP & sets HTTP-Only JWT Cookie |
-| `GET` | `/api/feed` | Paginated discover profile deck |
-| `POST` | `/api/swipes` | Records action, triggers Match calculation |
-| `POST` | `/api/calls/signal` | Sends WebRTC SDP Offers/Answers/ICE |
-| `POST` | `/api/places/search` | OpenStreetMap Venue Search |
-| `POST` | `/api/users/verification` | AI Face-Match processing |
+| Table | Purpose | Key Columns |
+| :--- | :--- | :--- |
+| **`users`** | Core user accounts | `id`, `phone_number`, `email`, `name`, `date_of_birth`, `gender`, `looking_for`, `city`, `latitude`, `longitude`, `bio`, `is_verified`, `last_active_at` |
+| **`photos`** | User gallery | `id`, `user_id`, `url`, `order_index` |
+| **`interests` / `user_interests`** | Tag taxonomy | `id`, `name`, `icon`, `category`, `user_id`, `interest_id` |
+| **`prompts` / `user_prompt_answers`** | Interactive Q&A | `id`, `text`, `user_id`, `prompt_id`, `answer` |
+| **`preferences`** | Discovery filters | `user_id`, `age_min`, `age_max`, `distance_max`, `only_verified` |
+| **`swipes`** | Swipe tracking | `swiper_id`, `swiped_id`, `action` (*Unique constraint*) |
+| **`matches`** | Active connections | `id`, `user1_id`, `user2_id`, `matched_at`, `is_active` |
+| **`messages`** | Chat history | `id`, `match_id`, `sender_id`, `receiver_id`, `type`, `content`, `metadata`, `is_read` |
+| **`random_chat_queue`** | Speed dating queue | `user_id`, `vibe`, `age_min`, `age_max`, `expires_at` |
+| **`random_chat_sessions`** | Anonymous sessions | `id`, `user_a_id`, `user_b_id`, `alias_a`, `alias_b`, `status`, `match_id` |
+| **`meetups` / `meetup_attendees`**| IRL events & RSVPs | `id`, `host_id`, `title`, `venue_name`, `date`, `max_attendees`, `status` |
+| **`subscriptions`** | VIP memberships | `user_id`, `tier`, `start_date`, `end_date`, `transaction_id` |
+| **`notifications`** | Push & in-app alerts | `id`, `user_id`, `type`, `title`, `body`, `is_read` |
 
 </details>
 
 ---
 
-## ⚡ Quick Start (Local Development)
+## 🔌 API Endpoints Reference
 
-### 1. Clone & Install
+<details>
+<summary><b>🔌 Click to Expand API Route Handlers</b></summary>
+
+<br/>
+
+| Endpoint | Method | Description |
+| :--- | :---: | :--- |
+| `/api/auth/send-otp` | `POST` | Send SMS verification code |
+| `/api/auth/verify-otp` | `POST` | Verify OTP code & issue HTTP-only JWT session |
+| `/api/auth/google/login` | `GET` | Initiate Google OAuth 2.0 flow |
+| `/api/auth/google/callback` | `GET` | Handle Google OAuth code exchange |
+| `/api/auth/me` | `GET` | Get current authenticated user session |
+| `/api/feed` | `GET` | Fetch proximity & filter-matched profile cards |
+| `/api/swipes` | `POST` | Record swipe action (`like`/`pass`/`super_like`) |
+| `/api/conversations` | `GET` | List active message threads & unread counts |
+| `/api/messages` | `GET / POST` | Fetch messages & send new text/voice/media |
+| `/api/messages/typing` | `POST` | Trigger real-time Pusher typing indicators |
+| `/api/calls/signal` | `POST` | WebRTC signaling (`offer`, `answer`, `candidate`, `hangup`) |
+| `/api/calls/log` | `POST` | Log call duration / status into chat thread |
+| `/api/push/subscribe` | `POST` | Register Web Push VAPID subscription |
+| `/api/random-chat/join` | `POST` | Enter speed-dating queue with vibe filter |
+| `/api/random-chat/session` | `GET` | Poll / retrieve current speed-dating session |
+| `/api/meetups` | `GET / POST` | List & create community meetups |
+| `/api/premium/create-order` | `POST` | Create Razorpay payment order |
+| `/api/premium/verify` | `POST` | Cryptographically verify Razorpay payment |
+
+</details>
+
+---
+
+## 🚀 Quick Start Guide
+
+### Prerequisites
+- **Node.js**: `v18.18+` or `v20+`
+- **PostgreSQL Database**: [Neon Serverless Postgres](https://neon.tech)
+- **Pusher Channels Account**: [Pusher](https://pusher.com)
+- **Upstash Redis** (Optional for production rate limiting): [Upstash](https://upstash.com)
+
+### 1. Clone & Install Dependencies
 ```bash
 git clone https://github.com/anshulr0019/DateBuddy.git
 cd DateBuddy
 npm install
 ```
 
-### 2. Set Up Environment
-```bash
-cp .env.example .env.local
-```
-Fill in `.env.local`:
+### 2. Configure Environment Variables
+Create a `.env.local` file in the root directory:
 ```env
-DATABASE_URL="postgresql://[neon-db-url]"
-JWT_SECRET="your-secure-jwt-secret"
+# Database (Neon PostgreSQL)
+DATABASE_URL="postgresql://username:password@ep-sample.us-east-2.aws.neon.tech/datebuddy?sslmode=require"
+
+# Authentication & Session
+JWT_SECRET="your-super-secure-jwt-secret-key-32-chars-min"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
-# Optional: Razorpay for Gold Subscriptions
+
+# Pusher Channels (Real-Time Chat & Calling)
+PUSHER_APP_ID="your_pusher_app_id"
+PUSHER_KEY="your_pusher_key"
+PUSHER_SECRET="your_pusher_secret"
+PUSHER_CLUSTER="ap2"
+NEXT_PUBLIC_PUSHER_KEY="your_pusher_key"
+NEXT_PUBLIC_PUSHER_CLUSTER="ap2"
+
+# Razorpay (VIP Monetization)
 RAZORPAY_KEY_ID="rzp_test_xxxx"
+RAZORPAY_KEY_SECRET="your_razorpay_secret"
+NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_xxxx"
+
+# Web Push Notifications (VAPID)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="your_vapid_public_key"
+VAPID_PRIVATE_KEY="your_vapid_private_key"
+VAPID_EMAIL="mailto:hello@datebuddy.app"
+
+# Fast2SMS / Twilio OTP (Optional for Dev mode fallback)
+OTP_DEV_LOG=true
 ```
 
-### 3. Push Schema & Run
+### 3. Initialize Database Schema
 ```bash
+# Push Drizzle schema directly to your Postgres database
 npm run db:push
+
+# Optional: Seed sample test users and meetups
+npm run db:seed
+```
+
+### 4. Run Development Server
+```bash
 npm run dev
 ```
-*Tip: Open `http://localhost:3000` in Chrome DevTools. Set device view to **iPhone 15 Pro (393×852)** for the intended native experience.*
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+> 💡 **Tip:** In Chrome DevTools, toggle Device Mode to **iPhone 15 Pro (393 × 852)** to test the native mobile PWA layout and haptics!
 
 ---
 
-## 🗺️ Roadmap
+## 📱 Building Native Mobile Apps (Capacitor)
 
-- [x] Velocity-based swipe UI (No accidental dragging)
-- [x] 100% Free WebRTC Video & Audio Calling
-- [x] AI Dynamic Vibe Persona Engine
-- [x] Anonymous Radar Speed Dating
-- [x] OpenStreetMap IRL Meetup Integration
-- [ ] "Two Truths & A Lie" interactive chat widget
-- [ ] AI Rizz Wingman — context-aware banter suggestions
-- [ ] Spotify / Instagram profile integration
-- [ ] Spontaneous "Who's Down?" live venue beacon
+```bash
+# Sync web build to native iOS project
+npm run build
+npx cap sync ios
+
+# Open in Xcode
+npx cap open ios
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+DateBuddy/
+├── src/
+│   ├── app/
+│   │   ├── api/                    # 20+ Serverless API Route Handlers
+│   │   │   ├── auth/               # OTP & Google OAuth endpoints
+│   │   │   ├── calls/              # WebRTC signaling & call history
+│   │   │   ├── meetups/            # Meetups CRUD & RSVP
+│   │   │   ├── messages/           # Real-time chat & typing
+│   │   │   ├── premium/            # Razorpay order & verification
+│   │   │   ├── push/               # Web Push subscription
+│   │   │   ├── random-chat/        # Anonymous speed dating
+│   │   │   └── swipes/             # Swipe & match engine
+│   │   ├── chat/[id]/              # Real-time chat page & mini-games
+│   │   │   └── components/         # MiniGames, VoiceRecorder, Reactions
+│   │   ├── components/             # Reusable UI (CallModal, AIWingman, Nav)
+│   │   ├── discover/               # Discovery feed & map view
+│   │   ├── home/                   # Main swipe deck
+│   │   ├── meetups/                # Community meetup pages
+│   │   ├── onboarding/             # 8-step user onboarding flow
+│   │   ├── premium/                # VIP Pass purchase screen
+│   │   ├── random-chat/            # Radar speed-dating screen
+│   │   └── settings/               # User preferences & account
+│   ├── db/
+│   │   ├── index.ts                # Drizzle ORM client instance
+│   │   └── schema.ts               # PostgreSQL database tables & enums
+│   └── lib/
+│       ├── auth.ts                 # JWT session & cookie helpers
+│       ├── pusher-client.ts        # Client-side Pusher WebSocket
+│       ├── pusher-server.ts        # Server-side Pusher broadcast
+│       ├── web-push.ts             # VAPID Push Notification trigger
+│       └── rate-limit.ts           # Redis rate limiter
+├── public/
+│   ├── sw.js                       # Service Worker for Web Push
+│   └── icons/                      # PWA icons & assets
+├── capacitor.config.ts             # Capacitor iOS & Android config
+└── package.json
+```
 
 ---
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" />
+<!-- Footer Wave -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,20,26&height=120&section=footer" width="100%" />
 
-**Designed & Engineered with 💖 by [Anshul](https://github.com/anshulr0019)**
+**Crafted with 💖 by [Anshul](https://github.com/anshulr0019)**
+
+<br/>
 
 [![GitHub Stars](https://img.shields.io/github/stars/anshulr0019/DateBuddy?style=social)](https://github.com/anshulr0019/DateBuddy)
+[![GitHub Forks](https://img.shields.io/github/forks/anshulr0019/DateBuddy?style=social)](https://github.com/anshulr0019/DateBuddy/fork)
 
 </div>
