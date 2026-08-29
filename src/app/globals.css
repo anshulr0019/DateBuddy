@@ -671,6 +671,46 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
+/* ─────────────────────────────────────────────────
+   Smooth Luxury Photo Lightbox & Modal Transitions
+   Zero-overshoot, Apple/Instagram silky easing
+───────────────────────────────────────────────── */
+@keyframes photo-backdrop-fade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes photo-smooth-zoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes photo-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-photo-backdrop {
+  animation: photo-backdrop-fade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
+.animate-photo-zoom {
+  animation: photo-smooth-zoom 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-fade-smooth {
+  animation: photo-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
 /* Card/item bubble enter */
 @keyframes bubble-enter {
   0% {

@@ -345,7 +345,7 @@ export default function ProfilePage() {
               <>
                 {/* Hero — taller, like Hinge/Instagram */}
                 <div
-                  className="relative w-full overflow-hidden cursor-pointer"
+                  className="relative w-full overflow-hidden cursor-pointer group"
                   style={{ height: 'min(42dvh, 360px)' }}
                   onClick={() => profile.photo && setPhotoLightboxOpen(true)}
                   role="button"
@@ -353,14 +353,14 @@ export default function ProfilePage() {
                   aria-label="View your photo"
                   onKeyDown={e => { if (e.key === 'Enter') profile.photo && setPhotoLightboxOpen(true); }}
                 >
-                  <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/10 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent" />
+                  <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/10 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
                   {/* Tap-to-expand hint */}
                   {profile.photo && (
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1">
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/15 transition-all duration-300 shadow-md">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 3h6m0 0v6m0-6-7 7M9 21H3m0 0v-6m0 6 7-7"/></svg>
-                      <span className="text-[10px] font-semibold text-white">View</span>
+                      <span className="text-[11px] font-semibold text-white">View</span>
                     </div>
                   )}
                   <div className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
@@ -396,9 +396,9 @@ export default function ProfilePage() {
                     <button
                       onClick={() => profile.photo && setPhotoLightboxOpen(true)}
                       aria-label="View your photo"
-                      className="story-ring h-[88px] w-[88px] cursor-pointer active:scale-95 transition-transform"
+                      className="story-ring h-[88px] w-[88px] cursor-pointer active:scale-[0.97] transition-all duration-300"
                     >
-                      <div className="story-ring-inner h-full w-full overflow-hidden rounded-full">
+                      <div className="story-ring-inner h-full w-full overflow-hidden rounded-full shadow-lg">
                         <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full rounded-full object-cover" />
                       </div>
                     </button>
@@ -792,7 +792,7 @@ export default function ProfilePage() {
           {/* PHOTO LIGHTBOX — Premium Instagram/Hinge style fullscreen viewer */}
           {photoLightboxOpen && profile.photo && (
             <div
-              className="fixed inset-0 z-[200] flex flex-col justify-between items-center bg-black/92 backdrop-blur-2xl animate-popover-enter select-none p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1.25rem+env(safe-area-inset-top,0px))]"
+              className="fixed inset-0 z-[200] flex flex-col justify-between items-center bg-black/92 backdrop-blur-2xl animate-photo-backdrop select-none p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1.25rem+env(safe-area-inset-top,0px))]"
               role="dialog"
               aria-modal="true"
               aria-label="Profile photo lightbox"
@@ -815,7 +815,7 @@ export default function ProfilePage() {
 
               {/* Stage Image */}
               <div
-                className="w-full max-w-[420px] my-auto flex items-center justify-center p-2 animate-scale-pop"
+                className="w-full max-w-[420px] my-auto flex items-center justify-center p-2 animate-photo-zoom"
                 onClick={e => e.stopPropagation()}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

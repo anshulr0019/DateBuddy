@@ -46,9 +46,10 @@ export function SafeImage({
   width?: number;
 }) {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const getInitials = (str: string) => {
-    if (!str) return 'DS';
+    if (!str) return 'IN';
     const parts = str.trim().split(' ');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -77,9 +78,10 @@ export function SafeImage({
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : undefined}
       decoding="async"
+      onLoad={() => setLoaded(true)}
       onError={() => setError(true)}
       onClick={onClick}
-      className={className}
+      className={`transition-opacity duration-300 ease-out ${loaded || eager ? 'opacity-100' : 'opacity-0'} ${className}`}
       style={style}
     />
   );

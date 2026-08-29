@@ -76,23 +76,29 @@ function Sheet({
 /* ── Fullscreen photo lightbox ── */
 export function Lightbox({ url, onClose }: { url: string; onClose: () => void }) {
   return (
-    <Sheet label="Photo viewer" onClose={onClose} backdropClass="bg-black/90 backdrop-blur-2xl">
-      <div className="flex flex-col items-center">
-        <button
-          onClick={onClose}
-          aria-label="Close photo viewer"
-          className="self-end mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white text-xl font-bold hover:bg-white/30 cursor-pointer active:scale-90 transition-transform"
-        >
-          ✕
-        </button>
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-black/92 backdrop-blur-2xl animate-photo-backdrop p-4 select-none"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close photo viewer"
+        className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 border border-white/20 text-white hover:bg-white/30 cursor-pointer active:scale-90 transition-all backdrop-blur-md shadow-lg z-30"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div className="w-full max-w-[460px] flex items-center justify-center animate-photo-zoom" onClick={e => e.stopPropagation()}>
         <img
           src={url}
           alt="Full size photo"
           onClick={onClose}
-          className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/20"
+          className="max-h-[75vh] max-w-full object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10"
         />
       </div>
-    </Sheet>
+    </div>
   );
 }
 
