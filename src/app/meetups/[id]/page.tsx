@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { PartnerProfileSheet } from '@/app/components/PartnerProfileSheet';
@@ -51,7 +51,7 @@ interface EditForm {
   pinnedMessage: string;
 }
 
-export default function MeetupDetailPage() {
+function MeetupDetailContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -734,5 +734,22 @@ export default function MeetupDetailPage() {
         </AuroraBackground>
       </div>
     </div>
+  );
+}
+
+export default function MeetupDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-dvh w-full min-h-screen bg-[#FAFBF9] flex justify-center items-center font-sans">
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="h-8 w-8 rounded-full border-3 border-[#FF6B9D] border-t-transparent animate-spin" />
+            <p className="text-[14px] font-semibold text-[#1A1A2E]/60">Loading squad details...</p>
+          </div>
+        </div>
+      }
+    >
+      <MeetupDetailContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '../../components/shared';
 import { Ic } from '../../components/icons';
@@ -29,7 +29,7 @@ const ICEBREAKERS = [
 const NEAR_BOTTOM_PX = 120;
 const LOAD_OLDER_PX = 200;
 
-export default function ChatPage() {
+function ChatContent() {
   const router = useRouter();
   const params = useParams();
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
@@ -610,5 +610,19 @@ export default function ChatPage() {
       )}
 
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center items-center font-sans">
+          <div className="h-8 w-8 rounded-full border-3 border-[#FF6B9D] border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <ChatContent />
+    </Suspense>
   );
 }
