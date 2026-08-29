@@ -1,7 +1,7 @@
 <div align="center">
 
-<!-- Animated Header -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=DateBuddy&fontSize=70&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=Next-Gen%20Dating,%20Speed-Dating%20%26%20Real-Time%20Social%20Platform&descAlignY=60&descSize=19" />
+<!-- Header Banner -->
+<img src="./assets/banner.svg" alt="DateBuddy Header Banner" width="100%" />
 
 <br/>
 
@@ -331,7 +331,7 @@ DateBuddy/
 <div align="center">
 
 <!-- Footer Wave -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" />
+<img src="./assets/footer.svg" alt="DateBuddy Footer Wave" width="100%" />
 
 **Crafted with 💖 by [Anshul](https://github.com/anshulr0019)**
 
