@@ -2,12 +2,13 @@
 
 <br/>
 
-<img src="https://capsule-render.vercel.app/api?type=venom&color=FF4D8D,9B59B6,7B68EE&height=250&section=header&text=INFYN&fontSize=120&fontColor=ffffff&fontAlignY=55&animation=fadeIn&desc=Where%20Digital%20Sparks%20Become%20Real%20Connections&descSize=18&descAlignY=78&descColor=ffffff80" width="100%" />
+<!-- Header Banner -->
+<img src="./assets/banner.svg" alt="Infyn Header Banner" width="100%" />
 
 <br/>
 
 <a href="https://github.com/anshulr0019/DateBuddy">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=2400&pause=900&color=FF4D8D&center=true&vCenter=true&width=800&lines=⚡+Sub-50ms+Real-Time+Chat+via+Pusher+WebSockets;📡+Free+P2P+WebRTC+Video+%26+Audio+Calling;🎮+Interactive+In-Chat+2-Player+Mini-Games;🎭+Anonymous+Radar+Speed-Dating+%26+Aliases;🤖+Context-Aware+AI+Dating+Wingman;📍+Real-World+Meetup+Hosting+%26+Venue+Discovery;📱+Haptic+PWA+·+Capacitor+iOS+%2F+Android" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=2400&pause=900&color=FF4D8D&center=true&vCenter=true&width=800&lines=Sub-50ms+Real-Time+Chat+via+Pusher+WebSockets%3BFree+P2P+WebRTC+Video+%26+Audio+Calling%3BInteractive+In-Chat+2-Player+Mini-Games%3BAnonymous+Radar+Speed-Dating+%26+Aliases%3BContext-Aware+AI+Dating+Wingman%3BReal-World+Meetup+Hosting+%26+Venue+Discovery%3BHaptic+PWA+%E2%80%A2+Capacitor+iOS+%26+Android" alt="Typing SVG" />
 </a>
 
 <br/><br/>
@@ -416,7 +417,8 @@ infyn/
 
 <br/>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=FF4D8D,9B59B6,7B68EE&height=120&section=footer&fontColor=ffffff&fontSize=16&text=Crafted+with+%F0%9F%92%96+by+Anshul+%C2%B7+Built+for+Gen-Z%2C+with+Gen-Z+Energy&fontAlignY=65&animation=twinkling" width="100%"/>
+<!-- Footer Wave -->
+<img src="./assets/footer.svg" alt="Infyn Footer Wave" width="100%" />
 
 **[⭐ Star](https://github.com/anshulr0019/DateBuddy) · [🍴 Fork](https://github.com/anshulr0019/DateBuddy/fork) · [🐛 Issues](https://github.com/anshulr0019/DateBuddy/issues) · [📬 PRs Welcome](https://github.com/anshulr0019/DateBuddy/pulls)**
 
