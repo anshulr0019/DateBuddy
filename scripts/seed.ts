@@ -221,6 +221,18 @@ async function seed() {
           answer: pa.answer,
         }).catch(() => {});
       }
+
+      // User Interests
+      const allDbInterests = await db.select().from(interests).catch(() => []);
+      if (allDbInterests.length > 0) {
+        const selected = allDbInterests.slice(0, 4);
+        for (const it of selected) {
+          await db.insert(userInterests).values({
+            userId,
+            interestId: it.id,
+          }).onConflictDoNothing().catch(() => {});
+        }
+      }
     }
 
     // 4. Create sample matches & conversations for User 1
@@ -263,6 +275,72 @@ async function seed() {
       await db.insert(messages).values([
         { matchId: match2Id, senderId: user3, receiverId: user1, type: 'text', content: "Loved your prompt about Coorg! Have you trekked Kodachadri?", isRead: false },
       ]).catch(() => {});
+    }
+
+    // 5. Seed Community Meetups / Squads
+    console.log('Inserting community squads & meetups...');
+    const now = new Date();
+    const futureDate1 = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days ahead
+    const futureDate2 = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000); // 4 days ahead
+    const futureDate3 = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000); // 6 days ahead
+
+    const sampleMeetups = [
+      {
+        hostId: createdUserIds[0] || 1,
+        title: 'Sunday Box Cricket Match 🏏',
+        description: 'Casual 6v6 turf cricket match followed by cold coconut water! All skill levels welcome.',
+        category: 'sports',
+        venueName: 'Urban Sports Park, Lower Parel',
+        address: 'Opp. Phoenix Palladium Mall, Lower Parel, Mumbai',
+        city: 'Mumbai',
+        date: futureDate1,
+        duration: 120,
+        maxAttendees: 12,
+        imageUrl: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1200&auto=format&fit=crop&q=80',
+        pinnedMessage: 'Meeting outside the turf gate at 4:45 PM. Bats provided!',
+        status: 'active',
+      },
+      {
+        hostId: createdUserIds[1] || 1,
+        title: 'Weekend Specialty Coffee & Book Hop ☕',
+        description: 'Exploring artisanal roasters, sharing books, and good conversation.',
+        category: 'food',
+        venueName: 'Subko Specialty Coffee Roasters',
+        address: 'Ranwar Village, Bandra West, Mumbai',
+        city: 'Mumbai',
+        date: futureDate2,
+        duration: 90,
+        maxAttendees: 6,
+        imageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&auto=format&fit=crop&q=80',
+        pinnedMessage: 'Grab an outdoor table near the corner!',
+        status: 'active',
+      },
+      {
+        hostId: createdUserIds[2] || 1,
+        title: 'Sunset Seafront Running & Yoga 🏃‍♀️🧘',
+        description: 'Easy 4km sunset run along the promenade followed by a 20min stretching and cooldown session.',
+        category: 'sports',
+        venueName: 'Carter Road Seafront Promenade',
+        address: 'Carter Road, Bandra West, Mumbai',
+        city: 'Mumbai',
+        date: futureDate3,
+        duration: 60,
+        maxAttendees: 10,
+        imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=1200&auto=format&fit=crop&q=80',
+        pinnedMessage: 'Wear running shoes and bring a water bottle!',
+        status: 'active',
+      },
+    ];
+
+    for (const m of sampleMeetups) {
+      const [insertedMeetup] = await db.insert(require('../src/db/schema').meetups).values(m).returning().catch(() => []);
+      if (insertedMeetup) {
+        await db.insert(require('../src/db/schema').meetupAttendees).values({
+          meetupId: insertedMeetup.id,
+          userId: m.hostId,
+          status: 'going',
+        }).onConflictDoNothing().catch(() => {});
+      }
     }
 
     console.log('✅ Database seeding finished successfully!');
