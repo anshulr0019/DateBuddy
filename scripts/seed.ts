@@ -1,5 +1,5 @@
 import { db, pool } from '../src/db';
-import { users, photos, interests, userInterests, prompts, userPromptAnswers, preferences, matches, messages } from '../src/db/schema';
+import { users, photos, interests, userInterests, prompts, userPromptAnswers, preferences, matches, messages, meetups, meetupAttendees } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 
 async function seed() {
@@ -333,13 +333,17 @@ async function seed() {
     ];
 
     for (const m of sampleMeetups) {
-      const [insertedMeetup] = await db.insert(require('../src/db/schema').meetups).values(m).returning().catch(() => []);
-      if (insertedMeetup) {
-        await db.insert(require('../src/db/schema').meetupAttendees).values({
-          meetupId: insertedMeetup.id,
-          userId: m.hostId,
-          status: 'going',
-        }).onConflictDoNothing().catch(() => {});
+      try {
+        const [insertedMeetup] = await db.insert(meetups).values(m).returning();
+        if (insertedMeetup) {
+          await db.insert(meetupAttendees).values({
+            meetupId: insertedMeetup.id,
+            userId: m.hostId,
+            status: 'going',
+          }).onConflictDoNothing().catch(() => {});
+        }
+      } catch (err) {
+        console.warn('Could not insert sample meetup:', err);
       }
     }
 
