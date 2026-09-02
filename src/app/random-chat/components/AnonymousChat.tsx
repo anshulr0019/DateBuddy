@@ -159,7 +159,11 @@ export function AnonymousChat({
       >
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
-            <div className="h-14 w-14 flex items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-2xl mb-4">💬</div>
+            <div className="h-14 w-14 flex items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
             <h2 className="text-[17px] font-bold text-[#1E293B] mb-1">You matched with {partnerName}</h2>
             <p className="text-[13px] text-[#1E293B]/55 max-w-[250px] leading-relaxed mb-5">
               You&apos;re both anonymous. Break the ice with one of these — or send your own.
@@ -205,7 +209,7 @@ export function AnonymousChat({
       <div className="flex-shrink-0 px-4 pb-2 pt-1">
         {connection.isMutual ? (
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[12.5px] font-bold text-center py-2.5">
-            You two are connected! 🎉
+            You two are connected!
           </div>
         ) : (
           <button
@@ -217,7 +221,7 @@ export function AnonymousChat({
                 : 'bg-gradient-to-r from-[#7B68EE] to-[#FF6B9D] text-white shadow-2xs'
             }`}
           >
-            {connection.requestedByMe ? 'Connection requested ✓' : 'Request to connect 💫'}
+            {connection.requestedByMe ? 'Connection Requested' : 'Request Connection'}
           </button>
         )}
       </div>
@@ -259,15 +263,32 @@ export function AnonymousChat({
                 </div>
                 <div className="flex-1 overflow-y-auto scrollbar-none p-2 space-y-1">
                   <button onClick={() => openSheet('report')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
-                    <span className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">⚠️</span>
+                    <span className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                    </span>
                     <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">Report {myAlias.split(' ')[0]}</p><p className="text-[11.5px] text-[#1E293B]/50">Flag inappropriate behaviour</p></div>
                   </button>
                   <button onClick={() => openSheet('block')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
-                    <span className="h-9 w-9 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">🚫</span>
+                    <span className="h-9 w-9 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                      </svg>
+                    </span>
                     <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">Block &amp; end chat</p><p className="text-[11.5px] text-[#1E293B]/50">You won&apos;t match with them again</p></div>
                   </button>
                   <button onClick={() => openSheet('end')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
-                    <span className="h-9 w-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">👋</span>
+                    <span className="h-9 w-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                    </span>
                     <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">End conversation</p><p className="text-[11.5px] text-[#1E293B]/50">Move on to a new person</p></div>
                   </button>
                 </div>
@@ -316,7 +337,12 @@ export function AnonymousChat({
 
             {sheetKind === 'block' && (
               <div className="p-5 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl">🚫</div>
+                <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                </div>
                 <div className="text-center">
                   <h3 className="text-[17px] font-extrabold text-[#1E293B]">Block {myAlias.split(' ')[0]}?</h3>
                   <p className="text-[12.5px] text-gray-500 mt-1">They won&apos;t be matched with you again, and this chat will end.</p>
@@ -336,7 +362,13 @@ export function AnonymousChat({
 
             {sheetKind === 'end' && (
               <div className="p-5 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-gray-100 text-gray-500 mx-auto flex items-center justify-center text-xl">👋</div>
+                <div className="h-12 w-12 rounded-full bg-gray-100 text-gray-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </div>
                 <div className="text-center">
                   <h3 className="text-[17px] font-extrabold text-[#1E293B]">End this conversation?</h3>
                   <p className="text-[12.5px] text-gray-500 mt-1">You&apos;ll be matched with someone new.</p>
@@ -356,7 +388,11 @@ export function AnonymousChat({
 
             {sheetKind === 'safety' && (
               <div className="p-5 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-[#FFF0F4] text-[#F43F5E] mx-auto flex items-center justify-center text-xl">🛡️</div>
+                <div className="h-12 w-12 rounded-full bg-[#FFF0F4] text-[#F43F5E] mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
                 <div className="text-center">
                   <h3 className="text-[17px] font-extrabold text-[#1E293B]">Quick safety check</h3>
                   <p className="text-[12.5px] text-gray-500 mt-1">

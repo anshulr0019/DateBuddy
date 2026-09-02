@@ -19,16 +19,16 @@ export const RANDOM_CHAT_VIBES = [
 export type RandomChatVibe = (typeof RANDOM_CHAT_VIBES)[number];
 
 export const VIBE_EMOJI: Record<string, string> = {
-  'chill': '🍃',
-  'funny': '😂',
-  'deep talks': '🌌',
-  'flirty': '😉',
-  'random': '🎲',
-  'late night': '🌙',
-  'creative': '🎨',
-  'gaming': '🎮',
-  'fitness': '💪',
-  'music': '🎵',
+  'chill': '',
+  'funny': '',
+  'deep talks': '',
+  'flirty': '',
+  'random': '',
+  'late night': '',
+  'creative': '',
+  'gaming': '',
+  'fitness': '',
+  'music': '',
 };
 
 export const GENDER_PREFS = ['men', 'women', 'everyone'] as const;
@@ -75,37 +75,36 @@ export const RATE_LIMITS = {
 } as const;
 export type RateLimitKey = keyof typeof RATE_LIMITS;
 
-/* Deterministic icebreaker templates. Prompts themed on shared interests are
-   generated at runtime from this pool when the pair has common tags. */
+/* Deterministic icebreaker templates without distracting emojis. */
 export const ICEBREAKERS = [
-  "What's on repeat right now? 🎧",
-  "What's your ideal weekend? 🌤️",
-  "What's something you've always wanted to try? ✨",
-  "What's the most random thing you're into? 🎲",
-  'Would you rather travel or stay home? 🧳',
-  'Describe your perfect lazy Sunday. ☁️',
-  "What's a movie you can watch a hundred times? 🎬",
+  "What's on repeat right now?",
+  "What's your ideal weekend?",
+  "What's something you've always wanted to try?",
+  "What's the most random thing you're into?",
+  'Would you rather travel or stay home?',
+  'Describe your perfect lazy Sunday.',
+  "What's a movie you can watch a hundred times?",
 ] as const;
 
 export const INTEREST_ICEBREAKERS: Record<string, string[]> = {
-  'music': ['What song are you obsessed with lately? 🎧', 'Top artist at your last concert? 🎤'],
-  'fitness': ['Gym in the morning or evening? 💪', 'Current PR you are chasing? 🏆'],
-  'travel': ['One place you would move to tomorrow? ✈️', 'Best trip you have ever taken? 🌍'],
-  'gaming': ['What are you grinding right now? 🎮', 'Single-player or squad? 🕹️'],
-  'food': ['Instant noodles or a five-course meal? 🍜', 'Go-to comfort food after a bad day? 🍕'],
-  'movies': ['What genre do you always pick? 🎬', 'Popcorn or nachos? 🍿'],
-  'books': ['Last book that kept you up? 📚', 'Physical books or e-reader? 📖'],
-  'photography': ['What do you love shooting most? 📷', 'Golden hour or blue hour? 🌅'],
-  'hiking': ['What is the best trail you have done? 🏔️', 'Summit sunrise or sunset? 🌄'],
-  'yoga': ['Morning flow or evening wind-down? 🧘', 'Favourite pose to reset? 🌿'],
-  'dancing': ['Best place to dance in your city? 💃', 'Freestyle or choreo? 🕺'],
-  'cooking': ['What is your signature dish? 👨‍🍳', 'Spicy or mild? 🌶️'],
-  'anime': ['What are you binging this season? 🎌', 'Sub or dub? 🤔'],
-  'tech': ['Android or iOS? 📱', 'What is the next big thing in tech? 🚀'],
-  'pets': ['Cat person or dog person? 🐾', 'Tell me about your pet 🐶'],
-  'plants': ['How many plants is too many? 🌱', 'Do you talk to your plants? 🌿'],
-  'coffee': ['How do you take your coffee? ☕', 'Latte art — yes or no? 🎨'],
-  'nightlife': ['Clubs or chill rooftop bars? 🌃', 'Best night out you remember? ✨'],
-  'sports': ['Which sport can you watch all day? ⚽', 'Play or spectate? 🏃'],
-  'art': ['Paint, sketch or digital? 🎨', 'Favourite art museum? 🖼️'],
+  'music': ['What song are you obsessed with lately?', 'Top artist at your last concert?'],
+  'fitness': ['Gym in the morning or evening?', 'Current PR you are chasing?'],
+  'travel': ['One place you would move to tomorrow?', 'Best trip you have ever taken?'],
+  'gaming': ['What are you grinding right now?', 'Single-player or squad?'],
+  'food': ['Instant noodles or a five-course meal?', 'Go-to comfort food after a bad day?'],
+  'movies': ['What genre do you always pick?', 'Popcorn or nachos?'],
+  'books': ['Last book that kept you up?', 'Physical books or e-reader?'],
+  'photography': ['What do you love shooting most?', 'Golden hour or blue hour?'],
+  'hiking': ['What is the best trail you have done?', 'Summit sunrise or sunset?'],
+  'yoga': ['Morning flow or evening wind-down?', 'Favourite pose to reset?'],
+  'dancing': ['Best place to dance in your city?', 'Freestyle or choreo?'],
+  'cooking': ['What is your signature dish?', 'Spicy or mild?'],
+  'anime': ['What are you binging this season?', 'Sub or dub?'],
+  'tech': ['Android or iOS?', 'What is the next big thing in tech?'],
+  'pets': ['Cat person or dog person?', 'Tell me about your pet.'],
+  'plants': ['How many plants is too many?', 'Do you talk to your plants?'],
+  'coffee': ['How do you take your coffee?', 'Latte art — yes or no?'],
+  'nightlife': ['Clubs or chill rooftop bars?', 'Best night out you remember?'],
+  'sports': ['Which sport can you watch all day?', 'Play or spectate?'],
+  'art': ['Paint, sketch or digital?', 'Favourite art museum?'],
 };

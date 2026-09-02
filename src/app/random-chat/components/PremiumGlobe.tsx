@@ -483,9 +483,15 @@ export function PremiumGlobe({
           </span>
         </div>
 
-        {/* Orbiting Sparkle / Touch Indicator */}
-        <div className="absolute bottom-1 right-3 text-[10px] font-medium text-[#1E293B]/40 bg-white/60 backdrop-blur-xs px-2 py-0.5 rounded-full border border-gray-200/50 pointer-events-none">
-          Swipe to spin 🌐
+        {/* Drag to rotate indicator */}
+        <div className="absolute bottom-1 right-3 text-[10px] font-medium text-[#1E293B]/45 bg-white/70 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-gray-200/50 pointer-events-none flex items-center gap-1">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span>Drag to rotate</span>
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </div>
       </div>
 

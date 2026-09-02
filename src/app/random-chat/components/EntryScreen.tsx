@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { PrimaryButton } from '@/app/components/shared';
 import { hapticLight } from '@/app/lib/haptics';
-import { RANDOM_CHAT_VIBES, VIBE_EMOJI, GENDER_PREFS } from '@/lib/random-chat-config';
+import { RANDOM_CHAT_VIBES, GENDER_PREFS } from '@/lib/random-chat-config';
 import type { RandomChatOverview, RandomChatPrefs } from '../types';
 
 const SAFETY_POINTS = [
@@ -42,7 +42,6 @@ export function EntryScreen({
     });
   };
 
-  // Quick age presets
   const handlePreset = (min: number, max: number) => {
     hapticLight();
     setAgeMin(min);
@@ -73,7 +72,9 @@ export function EntryScreen({
 
         {/* Chatting Now */}
         <div className="flex items-center gap-2.5 flex-1 pr-1">
-          <span className="text-base flex-shrink-0">💬</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           <div className="leading-tight">
             <p className="text-[14px] font-extrabold text-[#1E293B] tracking-tight">
               {overview ? Math.max(0, overview.chattingNow) : '—'}{' '}
@@ -84,14 +85,14 @@ export function EntryScreen({
         </div>
       </div>
 
-      {/* 2. Mood / Vibe Selection */}
+      {/* 2. Mood / Vibe Selection — Clean typographic chips */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[12px] font-bold uppercase tracking-wider text-[#1E293B]/50">
             Your mood tonight
           </h2>
-          <span className="text-[11px] font-semibold text-[#F43F5E] bg-[#FFF0F4] px-2 py-0.5 rounded-full">
-            {VIBE_EMOJI[vibe] ?? '✨'} {vibe}
+          <span className="text-[11px] font-semibold text-[#F43F5E] bg-[#FFF0F4] px-2.5 py-0.5 rounded-full capitalize">
+            {vibe}
           </span>
         </div>
 
@@ -105,13 +106,13 @@ export function EntryScreen({
                   hapticLight();
                   setVibe(v);
                 }}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all duration-200 cursor-pointer active:scale-95 ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all duration-200 cursor-pointer active:scale-95 capitalize ${
                   isSelected
                     ? 'bg-gradient-to-r from-[#F43F5E] to-[#FF6B9D] text-white shadow-[0_4px_12px_rgba(244,63,94,0.28)] ring-2 ring-[#F43F5E]/20 font-bold scale-[1.02]'
                     : 'bg-white/80 border border-gray-200/70 text-[#1E293B]/70 hover:bg-white hover:border-gray-300'
                 }`}
               >
-                <span>{VIBE_EMOJI[v] ?? ''}</span>
+                <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#F43F5E]/60'}`} />
                 <span>{v}</span>
               </button>
             );
@@ -119,7 +120,7 @@ export function EntryScreen({
         </div>
       </div>
 
-      {/* 3. Age Range — Unified Minimal Card (No clunky separate boxes) */}
+      {/* 3. Age Range — Unified Minimal Card */}
       <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-3.5 border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex items-center justify-between">
           <div className="leading-tight">
@@ -146,9 +147,8 @@ export function EntryScreen({
           </div>
         </div>
 
-        {/* Dual Stepper Control in a single minimal strip */}
+        {/* Dual Stepper Control */}
         <div className="grid grid-cols-2 gap-2.5 pt-0.5">
-          {/* Min Control */}
           <div className="flex items-center justify-between bg-gray-50/80 rounded-xl px-2.5 py-1.5 border border-gray-100">
             <span className="text-[11px] font-bold uppercase text-[#1E293B]/40">Min</span>
             <div className="flex items-center gap-2">
@@ -180,7 +180,6 @@ export function EntryScreen({
             </div>
           </div>
 
-          {/* Max Control */}
           <div className="flex items-center justify-between bg-gray-50/80 rounded-xl px-2.5 py-1.5 border border-gray-100">
             <span className="text-[11px] font-bold uppercase text-[#1E293B]/40">Max</span>
             <div className="flex items-center gap-2">
@@ -237,7 +236,7 @@ export function EntryScreen({
         </div>
       </div>
 
-      {/* 4. Gender Preference — Swiggy / iOS Segmented Control */}
+      {/* 4. Gender Preference — Minimal Segmented Control */}
       <div className="space-y-1.5">
         <h2 className="text-[12px] font-bold uppercase tracking-wider text-[#1E293B]/50 px-0.5">
           Show me
@@ -246,7 +245,6 @@ export function EntryScreen({
           {GENDER_PREFS.map((g) => {
             const isSelected = genderPref === g;
             const label = g === 'men' ? 'Men' : g === 'women' ? 'Women' : 'Everyone';
-            const emoji = g === 'men' ? '🙋‍♂️' : g === 'women' ? '🙋‍♀️' : '✨';
             return (
               <button
                 key={g}
@@ -254,13 +252,12 @@ export function EntryScreen({
                   hapticLight();
                   setGenderPref(g);
                 }}
-                className={`flex-1 py-2 rounded-xl text-[13px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`flex-1 py-2 rounded-xl text-[13px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                   isSelected
                     ? 'bg-white text-[#1E293B] shadow-[0_2px_8px_rgba(0,0,0,0.06)] scale-[1.01]'
                     : 'text-[#1E293B]/60 hover:text-[#1E293B]'
                 }`}
               >
-                <span className="text-[13px]">{emoji}</span>
                 <span>{label}</span>
               </button>
             );
@@ -288,11 +285,13 @@ export function EntryScreen({
         </div>
       )}
 
-      {/* 6. Safety Card — Minimal & Discreet */}
+      {/* 6. Safety Card — Minimal & Discreet with SVG icon */}
       <div className="bg-white/80 backdrop-blur-md rounded-2xl p-3.5 border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-2.5">
         <div className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-[11px]">
-            🛡️
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
           </span>
           <h2 className="text-[12px] font-bold text-[#1E293B]/70 tracking-tight">
             Safe &amp; Anonymous Matching
@@ -332,8 +331,14 @@ export function EntryScreen({
       </div>
 
       {/* 7. Start Anonymous Chat CTA */}
-      <PrimaryButton onClick={start} className="mt-1 shadow-[0_8px_24px_-6px_rgba(244,63,94,0.45)]">
-        {busy ? 'Connecting to vibe radar…' : 'Start Anonymous Chat 🎲'}
+      <PrimaryButton onClick={start} className="mt-1 shadow-[0_8px_24px_-6px_rgba(244,63,94,0.45)] flex items-center justify-center gap-2">
+        <span>{busy ? 'Connecting to vibe radar…' : 'Start Anonymous Chat'}</span>
+        {!busy && (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        )}
       </PrimaryButton>
     </div>
   );

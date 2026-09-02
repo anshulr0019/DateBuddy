@@ -73,8 +73,9 @@ export function PreviewScreen({
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {partner.sharedInterests.map((tag) => (
-                <span key={tag} className="px-2.5 py-1 rounded-full bg-white/90 border border-[#F9C0D0]/50 text-[11.5px] font-bold text-[#F43F5E]">
-                  ✨ {tag}
+                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 border border-[#F9C0D0]/50 text-[11.5px] font-bold text-[#F43F5E]">
+                  <span className="text-[#F43F5E]/60 text-[10px]">#</span>
+                  <span>{tag}</span>
                 </span>
               ))}
             </div>
@@ -90,7 +91,7 @@ export function PreviewScreen({
             disabled={busy || connected}
             className="w-full py-3.5 rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[14.5px] font-extrabold text-[#F43F5E] hover:bg-[#FDE3EA] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
           >
-            {connected ? 'Connection requested ✓' : 'Maybe we connect? 💫'}
+            {connected ? 'Connection Requested' : 'Request Connection'}
           </button>
           <button
             onClick={() => { hapticLight(); onEnd(); }}
