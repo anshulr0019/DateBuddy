@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { hapticLight } from '@/app/lib/haptics';
+import { PremiumGlobe } from './PremiumGlobe';
 
 const FUNNY_FACTS = [
   {
@@ -96,33 +97,8 @@ export function RadarScreen({
         </p>
       </div>
 
-      {/* Radar Animation Area */}
-      <div className="relative h-48 w-48 my-2" role="status" aria-label="Searching for a conversation partner">
-        {/* Radar rings */}
-        <div className="rc-ring absolute inset-0 rounded-full border border-[#FF6B9D]/30" style={{ animationDelay: '0s' }} />
-        <div className="rc-ring absolute inset-0 rounded-full border border-[#7B68EE]/30" style={{ animationDelay: '0.5s' }} />
-        <div className="rc-ring absolute inset-0 rounded-full border border-[#FF6B9D]/20" style={{ animationDelay: '1s' }} />
-
-        {/* Sweep */}
-        <div className="absolute inset-0 rounded-full overflow-hidden">
-          <div className="rc-sweep absolute inset-0" />
-        </div>
-
-        {/* Blips */}
-        <div className="rc-blip absolute left-[38%] top-[30%] h-2.5 w-2.5 rounded-full bg-[#F43F5E] shadow-[0_0_10px_rgba(244,63,94,0.9)]" />
-        <div className="rc-blip absolute right-[28%] top-[55%] h-2 w-2 rounded-full bg-[#7B68EE] shadow-[0_0_10px_rgba(123,104,238,0.9)]" style={{ animationDelay: '1.2s' }} />
-        <div className="rc-blip absolute left-[26%] bottom-[30%] h-2.5 w-2.5 rounded-full bg-[#FB7185] shadow-[0_0_10px_rgba(251,113,133,0.9)]" style={{ animationDelay: '2.1s' }} />
-
-        {/* Center Dice */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            <div className="rc-pulse absolute inset-0 rounded-full bg-[#FF6B9D]/40" />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_12px_40px_-10px_rgba(244,63,94,0.6)]">
-              <span className="text-2xl">🎲</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 3D Holographic Matchmaking Globe */}
+      <PremiumGlobe vibe={vibe} onlineCount={onlineCount} />
 
       {/* Rotating Funny Facts Card */}
       <div className="w-full max-w-[340px] flex flex-col items-center">
