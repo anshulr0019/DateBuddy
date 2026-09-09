@@ -7,6 +7,7 @@ import { TwentyQuestionsGame } from './TwentyQuestionsGame';
 
 interface MiniGamesDrawerProps {
   isOpen: boolean;
+  matchId: number;
   partnerName: string;
   onSendGameMessage: (text: string) => void;
   onClose: () => void;
@@ -16,6 +17,7 @@ type ActiveGame = 'menu' | 'guess_number' | 'truth_dare' | 'twenty_questions';
 
 export function MiniGamesDrawer({
   isOpen,
+  matchId,
   partnerName,
   onSendGameMessage,
   onClose,
@@ -42,6 +44,7 @@ export function MiniGamesDrawer({
 
         {activeGame === 'guess_number' ? (
           <GuessNumberGame
+            matchId={matchId}
             partnerName={partnerName}
             onSendGameMessage={(msg) => {
               onSendGameMessage(msg);
@@ -62,6 +65,7 @@ export function MiniGamesDrawer({
           />
         ) : activeGame === 'twenty_questions' ? (
           <TwentyQuestionsGame
+            matchId={matchId}
             partnerName={partnerName}
             onSendGameMessage={(msg) => {
               onSendGameMessage(msg);

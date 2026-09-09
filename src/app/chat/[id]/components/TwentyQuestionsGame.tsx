@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+const STORAGE_KEY_PREFIX = 'datebuddy_20q_';
 
 const CATEGORIES = [
   { id: 'person', emoji: '👤', label: 'Person' },
@@ -10,86 +12,76 @@ const CATEGORIES = [
 ];
 
 interface TwentyQuestionsGameProps {
+  matchId: number;
   partnerName: string;
   onSendGameMessage: (text: string) => void;
   onSendAndClose: (text: string) => void;
   onClose: () => void;
 }
 
+interface GameState {
+  secretWord: string;
+  category: string;
+  isLockedIn: boolean;
+  isRevealed: boolean;
+}
+
 export function TwentyQuestionsGame({
+  matchId,
   partnerName,
   onSendGameMessage,
   onSendAndClose,
   onClose,
 }: TwentyQuestionsGameProps) {
   const cleanPartnerName = partnerName?.split(' ')[0] || 'Partner';
+  const storageKey = `${STORAGE_KEY_PREFIX}${matchId}`;
 
-  // Phase: 'setup' → 'playing' → 'ended'
-  const [phase, setPhase] = useState<'setup' | 'playing' | 'ended'>('setup');
-  const [secretWord, setSecretWord] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
-  const [questionsUsed, setQuestionsUsed] = useState(0);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [guessInput, setGuessInput] = useState('');
-  const [customQuestion, setCustomQuestion] = useState('');
+  // Load persisted state from localStorage
+  const [gameState, setGameState] = useState<GameState>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return JSON.parse(stored) as GameState;
+    } catch { /* ignore */ }
+    return { secretWord: '', category: '', isLockedIn: false, isRevealed: false };
+  });
 
-  const questionsLeft = 20 - questionsUsed;
-  const progressPercent = (questionsUsed / 20) * 100;
+  const [inputWord, setInputWord] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Ring SVG dimensions
-  const ringRadius = 22;
-  const ringCircumference = 2 * Math.PI * ringRadius;
-  const ringOffset = ringCircumference - (progressPercent / 100) * ringCircumference;
+  // Persist game state to localStorage whenever it changes
+  useEffect(() => {
+    if (gameState.isLockedIn) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(gameState));
+      } catch { /* ignore */ }
+    }
+  }, [gameState, storageKey]);
 
-  const handleLockIn = (e: React.FormEvent) => {
+  const handleLockIn = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    if (!secretWord.trim() || !category) return;
-    setPhase('playing');
-    const cat = CATEGORIES.find((c) => c.id === category);
+    if (!inputWord.trim() || !selectedCategory) return;
+    const cat = CATEGORIES.find((c) => c.id === selectedCategory);
+    setGameState({ secretWord: inputWord.trim(), category: selectedCategory, isLockedIn: true, isRevealed: false });
     onSendGameMessage(
       `🎯 I'm thinking of something! 20 Questions starts now.\n${cat?.emoji} Category: ${cat?.label}\nAsk me Yes/No questions to figure it out!`
     );
-  };
+  }, [inputWord, selectedCategory, onSendGameMessage]);
 
-  const handleQuickReply = (reply: string, emoji: string) => {
-    setQuestionsUsed((prev) => Math.min(prev + 1, 20));
-    onSendAndClose(`${emoji} ${reply} (${questionsLeft - 1} questions left)`);
-  };
+  const handleReveal = useCallback(() => {
+    setGameState((prev) => ({ ...prev, isRevealed: true }));
+    onSendAndClose(`👁 Revealing my secret: ✨ ${gameState.secretWord} ✨ — That's what I was thinking of!`);
+  }, [gameState.secretWord, onSendAndClose]);
 
-  const handleAskQuestion = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customQuestion.trim()) return;
-    setQuestionsUsed((prev) => Math.min(prev + 1, 20));
-    onSendAndClose(`❓ Q${questionsUsed + 1}/20: ${customQuestion.trim()}`);
-    setCustomQuestion('');
-  };
+  const handleNewGame = useCallback(() => {
+    setGameState({ secretWord: '', category: '', isLockedIn: false, isRevealed: false });
+    setInputWord('');
+    setSelectedCategory(null);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch { /* ignore */ }
+  }, [storageKey]);
 
-  const handleMakeGuess = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!guessInput.trim()) return;
-    onSendAndClose(`🎯 My Final Answer: Is it "${guessInput.trim()}"?`);
-    setGuessInput('');
-  };
-
-  const handleReveal = () => {
-    setIsRevealed(true);
-    onSendAndClose(
-      `👁 Revealing my secret: ✨ ${secretWord} ✨ — That's what I was thinking of!`
-    );
-  };
-
-  const handleEndGame = (theyGotIt: boolean) => {
-    setPhase('ended');
-    if (theyGotIt) {
-      onSendAndClose(
-        `🏆 ${cleanPartnerName} figured it out! It was "${secretWord}". Amazing detective work! ✨`
-      );
-    } else {
-      onSendAndClose(
-        `😅 20 Questions is over! Nobody guessed it — my secret was "${secretWord}". Better luck next time! 🎮`
-      );
-    }
-  };
+  const categoryObj = CATEGORIES.find((c) => c.id === gameState.category);
 
   return (
     <div className="w-full space-y-4 text-white select-none animate-page-entry">
@@ -112,46 +104,13 @@ export function TwentyQuestionsGame({
           </div>
         </div>
 
-        {phase === 'playing' && (
-          <div className="flex items-center gap-2">
-            {/* Animated Progress Ring */}
-            <div className="relative h-12 w-12 flex items-center justify-center">
-              <svg className="absolute inset-0 -rotate-90" width="48" height="48" viewBox="0 0 48 48">
-                <circle
-                  cx="24" cy="24" r={ringRadius}
-                  fill="none"
-                  stroke="rgba(255,255,255,0.06)"
-                  strokeWidth="3"
-                />
-                <circle
-                  cx="24" cy="24" r={ringRadius}
-                  fill="none"
-                  stroke={questionsLeft <= 5 ? '#F43F5E' : questionsLeft <= 10 ? '#F59E0B' : '#22C55E'}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray={ringCircumference}
-                  strokeDashoffset={ringOffset}
-                  className="transition-all duration-500 ease-out"
-                />
-              </svg>
-              <span className={`text-[14px] font-mono font-black ${
-                questionsLeft <= 5 ? 'text-[#F43F5E]' : questionsLeft <= 10 ? 'text-amber-400' : 'text-emerald-400'
-              }`}>
-                {questionsLeft}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {phase === 'setup' && (
-          <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] font-mono text-white/60">
-            20 Qs
-          </span>
-        )}
+        <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] font-mono text-white/60">
+          Y/N
+        </span>
       </div>
 
-      {/* Setup Phase */}
-      {phase === 'setup' && (
+      {/* Before lock-in: setup */}
+      {!gameState.isLockedIn ? (
         <form onSubmit={handleLockIn} className="space-y-4">
           {/* Category Picker */}
           <div className="space-y-2">
@@ -161,9 +120,9 @@ export function TwentyQuestionsGame({
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setCategory(cat.id)}
+                  onClick={() => setSelectedCategory(cat.id)}
                   className={`py-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
-                    category === cat.id
+                    selectedCategory === cat.id
                       ? 'bg-white/[0.12] border-white/40 shadow-sm scale-[1.02]'
                       : 'bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/20'
                   }`}
@@ -186,15 +145,15 @@ export function TwentyQuestionsGame({
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                value={secretWord}
-                onChange={(e) => setSecretWord(e.target.value)}
+                value={inputWord}
+                onChange={(e) => setInputWord(e.target.value)}
                 placeholder="e.g. Eiffel Tower"
                 maxLength={100}
                 className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[15px] text-white placeholder:text-white/25 outline-none transition-colors"
               />
               <button
                 type="submit"
-                disabled={!secretWord.trim() || !category}
+                disabled={!inputWord.trim() || !selectedCategory}
                 className="rounded-xl px-5 py-2.5 bg-white text-black text-[13px] font-bold shadow-sm cursor-pointer active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
               >
                 Start
@@ -202,31 +161,32 @@ export function TwentyQuestionsGame({
             </div>
           </div>
         </form>
-      )}
-
-      {/* Playing Phase */}
-      {phase === 'playing' && (
-        <div className="space-y-3.5">
+      ) : (
+        /* After lock-in: clean 2-button UI */
+        <div className="space-y-4">
           {/* Secret Word Badge */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-white/40">Your Secret</p>
-              <p className="text-[18px] font-black text-white mt-0.5">
-                {secretWord}{' '}
-                <span className="text-[11px] font-normal text-white/40">
-                  {isRevealed ? '(Revealed)' : '(Hidden)'}
-                </span>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-white/40">Your Secret</p>
+                {categoryObj && (
+                  <span className="text-[10px] text-white/40">
+                    {categoryObj.emoji} {categoryObj.label}
+                  </span>
+                )}
+              </div>
+              <p className="text-[22px] font-black text-white">
+                {gameState.secretWord}
               </p>
             </div>
-            {isRevealed ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10.5px] font-mono font-bold">
-                <span className="text-[12px]">👁</span>
-                Revealed
+            {gameState.isRevealed ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-bold">
+                👁 Revealed
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10.5px] font-mono font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Live
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Hidden
               </span>
             )}
           </div>
@@ -235,121 +195,40 @@ export function TwentyQuestionsGame({
           <button
             type="button"
             onClick={handleReveal}
-            disabled={isRevealed}
-            className={`w-full py-3 rounded-2xl text-[13.5px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2 ${
-              isRevealed
+            disabled={gameState.isRevealed}
+            className={`w-full py-3.5 rounded-2xl text-[14px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2.5 ${
+              gameState.isRevealed
                 ? 'bg-white/[0.04] border border-white/[0.08] text-white/40'
                 : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30'
             }`}
           >
-            {isRevealed ? (
+            {gameState.isRevealed ? (
               <>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                Secret Revealed to {cleanPartnerName}
+                Revealed to {cleanPartnerName}
               </>
             ) : (
               <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                 Reveal My Secret to {cleanPartnerName}
               </>
             )}
           </button>
 
-          {/* Quick Replies — for answering the guesser's questions */}
-          <div className="space-y-2">
-            <p className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
-              Reply to their question:
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickReply('Yes!', '✅')}
-                className="py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-[13px] font-bold cursor-pointer active:scale-95 transition-all"
-              >
-                ✅ Yes
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickReply('No', '❌')}
-                className="py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-[13px] font-bold cursor-pointer active:scale-95 transition-all"
-              >
-                ❌ No
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickReply('Kind of...', '🤷')}
-                className="py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400 text-[13px] font-bold cursor-pointer active:scale-95 transition-all"
-              >
-                🤷 Kind of
-              </button>
-            </div>
-          </div>
+          {/* Start New Game */}
+          <button
+            type="button"
+            onClick={handleNewGame}
+            className="w-full py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+            Start New Game
+          </button>
 
-          {/* Ask a Question */}
-          <form onSubmit={handleAskQuestion} className="space-y-2">
-            <p className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
-              Ask a Yes/No question:
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={customQuestion}
-                onChange={(e) => setCustomQuestion(e.target.value)}
-                placeholder="Is it alive?"
-                maxLength={200}
-                className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[13.5px] text-white placeholder:text-white/25 outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={!customQuestion.trim()}
-                className="rounded-xl px-4 py-2.5 bg-white/[0.08] hover:bg-white/[0.15] text-white text-[13px] font-bold cursor-pointer active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all border border-white/10"
-              >
-                Ask
-              </button>
-            </div>
-          </form>
-
-          {/* Make a Guess */}
-          <form onSubmit={handleMakeGuess} className="space-y-2">
-            <p className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
-              Make your guess:
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={guessInput}
-                onChange={(e) => setGuessInput(e.target.value)}
-                placeholder={`Guess what ${cleanPartnerName} is thinking...`}
-                maxLength={100}
-                className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[13.5px] text-white placeholder:text-white/25 outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={!guessInput.trim()}
-                className="rounded-xl px-4 py-2.5 bg-white text-black text-[13px] font-bold shadow-sm cursor-pointer active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
-              >
-                Guess
-              </button>
-            </div>
-          </form>
-
-          {/* End Game Controls */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/[0.08] text-[12px]">
-            <button
-              type="button"
-              onClick={() => handleEndGame(true)}
-              className="text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
-            >
-              🎉 They Got It!
-            </button>
-            <button
-              type="button"
-              onClick={() => handleEndGame(false)}
-              className="text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
-            >
-              😅 Nobody Guessed
-            </button>
-          </div>
+          {/* Hint text */}
+          <p className="text-[11px] text-white/30 text-center">
+            Use the chat to ask Yes/No questions and make guesses
+          </p>
         </div>
       )}
     </div>

@@ -1,69 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+const STORAGE_KEY_PREFIX = 'datebuddy_guessnumber_';
 
 interface GuessNumberGameProps {
+  matchId: number;
   partnerName: string;
   onSendGameMessage: (text: string) => void;
   onSendAndClose: (text: string) => void;
   onClose: () => void;
 }
 
+interface GameState {
+  mySecretNumber: string;
+  isLockedIn: boolean;
+  isRevealed: boolean;
+}
+
 export function GuessNumberGame({
+  matchId,
   partnerName,
   onSendGameMessage,
   onSendAndClose,
   onClose,
 }: GuessNumberGameProps) {
   const cleanPartnerName = partnerName?.split(' ')[0] || 'Partner';
+  const storageKey = `${STORAGE_KEY_PREFIX}${matchId}`;
 
-  const [mySecretNumber, setMySecretNumber] = useState<string>('');
-  const [isLockedIn, setIsLockedIn] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [rangeMin, setRangeMin] = useState(0);
-  const [rangeMax, setRangeMax] = useState(100);
-  const [guessInput, setGuessInput] = useState('');
+  // Load persisted state from localStorage
+  const [gameState, setGameState] = useState<GameState>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return JSON.parse(stored) as GameState;
+    } catch { /* ignore */ }
+    return { mySecretNumber: '', isLockedIn: false, isRevealed: false };
+  });
 
-  // Lock-in sends message but keeps the game panel open
-  const handleLockIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    const num = Number(mySecretNumber);
-    if (isNaN(num) || num < 0 || num > 100) return;
-    setIsLockedIn(true);
-    onSendGameMessage(`🎮 I locked in my secret number for Guess The Number (0–100)! Ask clue questions or make your guess.`);
-  };
+  const [inputNumber, setInputNumber] = useState('');
 
-  // Reveal sends message AND closes the drawer so both see it in chat
-  const handleRevealNumber = () => {
-    setIsRevealed(true);
-    onSendAndClose(`👁 Revealing my secret number: ✨ ${mySecretNumber} ✨ — I had this locked in from the start!`);
-  };
-
-  const handleAskQuickQuestion = (threshold: number) => {
-    const text = `🔢 Clue Question: Is your secret number greater than ${threshold}?`;
-    onSendAndClose(text);
-  };
-
-  const handleNarrowRange = (newMin: number, newMax: number) => {
-    setRangeMin(Math.max(0, newMin));
-    setRangeMax(Math.min(100, newMax));
-  };
-
-  const handleMakeGuess = (e: React.FormEvent) => {
-    e.preventDefault();
-    const num = Number(guessInput);
-    if (isNaN(num)) return;
-    onSendAndClose(`🎯 My Final Guess: Is your number ${num}?`);
-    setGuessInput('');
-  };
-
-  const handleDeclareResult = (iWon: boolean) => {
-    if (iWon) {
-      onSendAndClose(`🏆 Bingo! You guessed my secret number correctly! You win! ✨`);
-    } else {
-      onSendAndClose(`🎉 I guessed your number! That was a great game! ✨`);
+  // Persist game state to localStorage whenever it changes
+  useEffect(() => {
+    if (gameState.isLockedIn) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(gameState));
+      } catch { /* ignore */ }
     }
-  };
+  }, [gameState, storageKey]);
+
+  const handleLockIn = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const num = Number(inputNumber);
+    if (isNaN(num) || num < 0 || num > 100) return;
+    setGameState({ mySecretNumber: inputNumber, isLockedIn: true, isRevealed: false });
+    onSendGameMessage(`🎮 I locked in my secret number for Guess The Number (0–100)! Ask clue questions or make your guess.`);
+  }, [inputNumber, onSendGameMessage]);
+
+  const handleReveal = useCallback(() => {
+    setGameState((prev) => ({ ...prev, isRevealed: true }));
+    onSendAndClose(`👁 Revealing my secret number: ✨ ${gameState.mySecretNumber} ✨ — I had this locked in from the start!`);
+  }, [gameState.mySecretNumber, onSendAndClose]);
+
+  const handleNewGame = useCallback(() => {
+    setGameState({ mySecretNumber: '', isLockedIn: false, isRevealed: false });
+    setInputNumber('');
+    try {
+      localStorage.removeItem(storageKey);
+    } catch { /* ignore */ }
+  }, [storageKey]);
 
   return (
     <div className="w-full space-y-4 text-white select-none animate-page-entry">
@@ -91,8 +95,8 @@ export function GuessNumberGame({
         </span>
       </div>
 
-      {/* Step 1: Secret Number Lock-in */}
-      {!isLockedIn ? (
+      {/* Before lock-in: input field */}
+      {!gameState.isLockedIn ? (
         <form onSubmit={handleLockIn} className="space-y-3.5 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
           <div>
             <p className="text-[13px] font-bold text-white">Choose your secret number</p>
@@ -100,20 +104,19 @@ export function GuessNumberGame({
               Only you can see this. {cleanPartnerName} will try to guess it.
             </p>
           </div>
-
           <div className="flex items-center gap-2">
             <input
               type="number"
               min={0}
               max={100}
-              value={mySecretNumber}
-              onChange={(e) => setMySecretNumber(e.target.value)}
+              value={inputNumber}
+              onChange={(e) => setInputNumber(e.target.value)}
               placeholder="e.g. 74"
               className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[15px] font-mono text-white placeholder:text-white/25 outline-none transition-colors"
             />
             <button
               type="submit"
-              disabled={!mySecretNumber.trim()}
+              disabled={!inputNumber.trim()}
               className="rounded-xl px-5 py-2.5 bg-white text-black text-[13px] font-bold shadow-sm cursor-pointer active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
             >
               Lock In
@@ -121,24 +124,24 @@ export function GuessNumberGame({
           </div>
         </form>
       ) : (
-        <div className="space-y-3.5">
-          {/* Secret Number Status Badge */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+        /* After lock-in: clean 2-button UI */
+        <div className="space-y-4">
+          {/* Secret Number Badge */}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
             <div>
               <p className="text-[10px] font-mono uppercase tracking-wider text-white/40">Your Secret Number</p>
-              <p className="text-[20px] font-mono font-black text-white mt-0.5">
-                {mySecretNumber} <span className="text-[11px] font-normal text-white/40">{isRevealed ? '(Revealed)' : '(Hidden)'}</span>
+              <p className="text-[24px] font-mono font-black text-white mt-1">
+                {gameState.mySecretNumber}
               </p>
             </div>
-            {isRevealed ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10.5px] font-mono font-bold">
-                <span className="text-[12px]">👁</span>
-                Revealed
+            {gameState.isRevealed ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-bold">
+                👁 Revealed
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10.5px] font-mono font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Live
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Hidden
               </span>
             )}
           </div>
@@ -146,121 +149,41 @@ export function GuessNumberGame({
           {/* Reveal Button */}
           <button
             type="button"
-            onClick={handleRevealNumber}
-            disabled={isRevealed}
-            className={`w-full py-3 rounded-2xl text-[13.5px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2 ${
-              isRevealed
+            onClick={handleReveal}
+            disabled={gameState.isRevealed}
+            className={`w-full py-3.5 rounded-2xl text-[14px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2.5 ${
+              gameState.isRevealed
                 ? 'bg-white/[0.04] border border-white/[0.08] text-white/40'
                 : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30'
             }`}
           >
-            {isRevealed ? (
+            {gameState.isRevealed ? (
               <>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                Number Revealed to {cleanPartnerName}
+                Revealed to {cleanPartnerName}
               </>
             ) : (
               <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                 Reveal My Number to {cleanPartnerName}
               </>
             )}
           </button>
 
-          {/* Dynamic Range Tracker */}
-          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2.5">
-            <div className="flex items-center justify-between text-[12px]">
-              <span className="text-white/60 font-medium">Search Range:</span>
-              <span className="font-mono font-bold text-white text-[13.5px]">[{rangeMin} — {rangeMax}]</span>
-            </div>
+          {/* Start New Game */}
+          <button
+            type="button"
+            onClick={handleNewGame}
+            className="w-full py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+            Start New Game
+          </button>
 
-            {/* Quick Narrow Buttons */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleNarrowRange(0, 50)}
-                className="py-1.5 px-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-mono text-white/70 border border-white/5 cursor-pointer transition-colors"
-              >
-                0–50
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNarrowRange(50, 100)}
-                className="py-1.5 px-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-mono text-white/70 border border-white/5 cursor-pointer transition-colors"
-              >
-                50–100
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNarrowRange(0, 100)}
-                className="py-1.5 px-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-mono text-white/70 border border-white/5 cursor-pointer transition-colors"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Clue Starters */}
-          <div className="space-y-2">
-            <p className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">Ask Clue Question:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {[25, 50, 75].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => handleAskQuickQuestion(val)}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.12] text-[11.5px] font-medium text-white/80 border border-white/5 cursor-pointer transition-colors"
-                >
-                  Is it &gt; {val}?
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => onSendAndClose('🔢 Clue Question: Is your secret number an EVEN or ODD number?')}
-                className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.12] text-[11.5px] font-medium text-white/80 border border-white/5 cursor-pointer transition-colors"
-              >
-                Even or Odd?
-              </button>
-            </div>
-          </div>
-
-          {/* Guess Submission Form */}
-          <form onSubmit={handleMakeGuess} className="flex items-center gap-2 pt-1">
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={guessInput}
-              onChange={(e) => setGuessInput(e.target.value)}
-              placeholder={`Guess ${cleanPartnerName}'s number...`}
-              className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[13.5px] font-mono text-white placeholder:text-white/25 outline-none transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={!guessInput.trim()}
-              className="rounded-xl px-4 py-2.5 bg-white text-black text-[13px] font-bold shadow-sm cursor-pointer active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
-            >
-              Guess
-            </button>
-          </form>
-
-          {/* End Game / Win Buttons */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/[0.08] text-[12px]">
-            <button
-              type="button"
-              onClick={() => handleDeclareResult(true)}
-              className="text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
-            >
-              🎉 Match Guessed Mine
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDeclareResult(false)}
-              className="text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
-            >
-              🤝 I Guessed Theirs
-            </button>
-          </div>
+          {/* Hint text */}
+          <p className="text-[11px] text-white/30 text-center">
+            Use the chat to ask clue questions and make guesses
+          </p>
         </div>
       )}
     </div>
