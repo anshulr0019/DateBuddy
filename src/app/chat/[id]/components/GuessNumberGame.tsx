@@ -5,12 +5,14 @@ import React, { useState } from 'react';
 interface GuessNumberGameProps {
   partnerName: string;
   onSendGameMessage: (text: string) => void;
+  onSendAndClose: (text: string) => void;
   onClose: () => void;
 }
 
 export function GuessNumberGame({
   partnerName,
   onSendGameMessage,
+  onSendAndClose,
   onClose,
 }: GuessNumberGameProps) {
   const cleanPartnerName = partnerName?.split(' ')[0] || 'Partner';
@@ -22,6 +24,7 @@ export function GuessNumberGame({
   const [rangeMax, setRangeMax] = useState(100);
   const [guessInput, setGuessInput] = useState('');
 
+  // Lock-in sends message but keeps the game panel open
   const handleLockIn = (e: React.FormEvent) => {
     e.preventDefault();
     const num = Number(mySecretNumber);
@@ -30,14 +33,15 @@ export function GuessNumberGame({
     onSendGameMessage(`🎮 I locked in my secret number for Guess The Number (0–100)! Ask clue questions or make your guess.`);
   };
 
+  // Reveal sends message AND closes the drawer so both see it in chat
   const handleRevealNumber = () => {
     setIsRevealed(true);
-    onSendGameMessage(`👁 Revealing my secret number: ✨ ${mySecretNumber} ✨ — I had this locked in from the start!`);
+    onSendAndClose(`👁 Revealing my secret number: ✨ ${mySecretNumber} ✨ — I had this locked in from the start!`);
   };
 
   const handleAskQuickQuestion = (threshold: number) => {
     const text = `🔢 Clue Question: Is your secret number greater than ${threshold}?`;
-    onSendGameMessage(text);
+    onSendAndClose(text);
   };
 
   const handleNarrowRange = (newMin: number, newMax: number) => {
@@ -49,15 +53,15 @@ export function GuessNumberGame({
     e.preventDefault();
     const num = Number(guessInput);
     if (isNaN(num)) return;
-    onSendGameMessage(`🎯 My Final Guess: Is your number ${num}?`);
+    onSendAndClose(`🎯 My Final Guess: Is your number ${num}?`);
     setGuessInput('');
   };
 
   const handleDeclareResult = (iWon: boolean) => {
     if (iWon) {
-      onSendGameMessage(`🏆 Bingo! You guessed my secret number correctly! You win! ✨`);
+      onSendAndClose(`🏆 Bingo! You guessed my secret number correctly! You win! ✨`);
     } else {
-      onSendGameMessage(`🎉 I guessed your number! That was a great game! ✨`);
+      onSendAndClose(`🎉 I guessed your number! That was a great game! ✨`);
     }
   };
 
@@ -212,7 +216,7 @@ export function GuessNumberGame({
               ))}
               <button
                 type="button"
-                onClick={() => onSendGameMessage('🔢 Clue Question: Is your secret number an EVEN or ODD number?')}
+                onClick={() => onSendAndClose('🔢 Clue Question: Is your secret number an EVEN or ODD number?')}
                 className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.12] text-[11.5px] font-medium text-white/80 border border-white/5 cursor-pointer transition-colors"
               >
                 Even or Odd?

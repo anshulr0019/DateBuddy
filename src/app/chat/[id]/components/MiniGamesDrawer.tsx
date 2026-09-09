@@ -44,6 +44,9 @@ export function MiniGamesDrawer({
             partnerName={partnerName}
             onSendGameMessage={(msg) => {
               onSendGameMessage(msg);
+            }}
+            onSendAndClose={(msg) => {
+              onSendGameMessage(msg);
               onClose();
             }}
             onClose={() => setActiveGame('menu')}
