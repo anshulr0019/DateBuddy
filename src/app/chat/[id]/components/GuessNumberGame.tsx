@@ -17,6 +17,7 @@ export function GuessNumberGame({
 
   const [mySecretNumber, setMySecretNumber] = useState<string>('');
   const [isLockedIn, setIsLockedIn] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
   const [rangeMin, setRangeMin] = useState(0);
   const [rangeMax, setRangeMax] = useState(100);
   const [guessInput, setGuessInput] = useState('');
@@ -27,6 +28,11 @@ export function GuessNumberGame({
     if (isNaN(num) || num < 0 || num > 100) return;
     setIsLockedIn(true);
     onSendGameMessage(`🎮 I locked in my secret number for Guess The Number (0–100)! Ask clue questions or make your guess.`);
+  };
+
+  const handleRevealNumber = () => {
+    setIsRevealed(true);
+    onSendGameMessage(`👁 Revealing my secret number: ✨ ${mySecretNumber} ✨ — I had this locked in from the start!`);
   };
 
   const handleAskQuickQuestion = (threshold: number) => {
@@ -117,14 +123,45 @@ export function GuessNumberGame({
             <div>
               <p className="text-[10px] font-mono uppercase tracking-wider text-white/40">Your Secret Number</p>
               <p className="text-[20px] font-mono font-black text-white mt-0.5">
-                {mySecretNumber} <span className="text-[11px] font-normal text-white/40">(Hidden)</span>
+                {mySecretNumber} <span className="text-[11px] font-normal text-white/40">{isRevealed ? '(Revealed)' : '(Hidden)'}</span>
               </p>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10.5px] font-mono font-bold">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Live
-            </span>
+            {isRevealed ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10.5px] font-mono font-bold">
+                <span className="text-[12px]">👁</span>
+                Revealed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10.5px] font-mono font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Live
+              </span>
+            )}
           </div>
+
+          {/* Reveal Button */}
+          <button
+            type="button"
+            onClick={handleRevealNumber}
+            disabled={isRevealed}
+            className={`w-full py-3 rounded-2xl text-[13.5px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2 ${
+              isRevealed
+                ? 'bg-white/[0.04] border border-white/[0.08] text-white/40'
+                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30'
+            }`}
+          >
+            {isRevealed ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                Number Revealed to {cleanPartnerName}
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                Reveal My Number to {cleanPartnerName}
+              </>
+            )}
+          </button>
 
           {/* Dynamic Range Tracker */}
           <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2.5">
