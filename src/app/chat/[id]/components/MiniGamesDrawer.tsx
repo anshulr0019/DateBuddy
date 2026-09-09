@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { GuessNumberGame } from './GuessNumberGame';
 import { TruthOrDareGame } from './TruthOrDareGame';
+import { TwentyQuestionsGame } from './TwentyQuestionsGame';
 
 interface MiniGamesDrawerProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface MiniGamesDrawerProps {
   onClose: () => void;
 }
 
-type ActiveGame = 'menu' | 'guess_number' | 'truth_dare';
+type ActiveGame = 'menu' | 'guess_number' | 'truth_dare' | 'twenty_questions';
 
 export function MiniGamesDrawer({
   isOpen,
@@ -54,6 +55,18 @@ export function MiniGamesDrawer({
         ) : activeGame === 'truth_dare' ? (
           <TruthOrDareGame
             onSendGameMessage={(msg) => {
+              onSendGameMessage(msg);
+              onClose();
+            }}
+            onClose={() => setActiveGame('menu')}
+          />
+        ) : activeGame === 'twenty_questions' ? (
+          <TwentyQuestionsGame
+            partnerName={partnerName}
+            onSendGameMessage={(msg) => {
+              onSendGameMessage(msg);
+            }}
+            onSendAndClose={(msg) => {
               onSendGameMessage(msg);
               onClose();
             }}
@@ -127,6 +140,31 @@ export function MiniGamesDrawer({
                   </div>
                   <p className="text-[12px] text-white/50 mt-1 line-clamp-1">
                     Curated questions and fun voice & camera challenges.
+                  </p>
+                </div>
+                <span className="text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all text-sm font-bold">
+                  &rarr;
+                </span>
+              </button>
+
+              {/* Option 3: 20 Questions */}
+              <button
+                type="button"
+                onClick={() => setActiveGame('twenty_questions')}
+                className="w-full p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
+              >
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
+                  03
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[15px] font-bold text-white tracking-tight">20 Questions</p>
+                    <span className="px-2 py-0.5 rounded-full bg-white/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
+                      Y/N
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-white/50 mt-1 line-clamp-1">
+                    Think of something — they ask 20 Yes/No questions to guess it.
                   </p>
                 </div>
                 <span className="text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all text-sm font-bold">
