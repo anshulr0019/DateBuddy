@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AuroraBackground, GlassCard, PrimaryButton } from '../components/shared';
+import { Ic } from '../components/icons';
+import styles from './messages.module.css';
 
 export default function MessagesError({
   error,
@@ -15,24 +16,14 @@ export default function MessagesError({
   }, [error]);
 
   return (
-    <div className="h-dvh w-full bg-[#FAFBF9] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
-        <AuroraBackground subtle>
-          <div className="flex flex-1 items-center justify-center px-6 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
-            <GlassCard className="w-full p-8 text-center">
-              <p className="text-[40px] mb-3" aria-hidden>
-                💬
-              </p>
-              <h1 className="text-[18px] font-semibold text-[#1A1A2E] mb-1.5">
-                Something went wrong
-              </h1>
-              <p className="text-[13px] text-[#1A1A2E]/60 mb-6">
-                We couldn&apos;t load your chats. Please try again.
-              </p>
-              <PrimaryButton onClick={reset}>Try again</PrimaryButton>
-            </GlassCard>
-          </div>
-        </AuroraBackground>
+    <div className={styles.root}>
+      <div className={styles.shell}>
+        <main className={styles.error} role="alert">
+          <div className={styles.emptyIcon} aria-hidden><Ic.Chat /></div>
+          <h1 className={styles.emptyTitle}>Something went wrong</h1>
+          <p className={styles.emptyText}>We couldn’t load your messages. Please try again.</p>
+          <button type="button" className={styles.primaryButton} onClick={reset}>Try again</button>
+        </main>
       </div>
     </div>
   );

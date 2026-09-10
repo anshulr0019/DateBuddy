@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Ic } from './icons';
+import discoverStyles from '../discover/discover.module.css';
+import messagesStyles from '../messages/messages.module.css';
 import { useNotifications } from '../context/NotificationContext';
 import { prefetchFeed } from '../lib/feedCache';
 
@@ -75,6 +77,7 @@ export default function FloatingNav() {
       if (Math.abs(dy) > Math.abs(dx) * 0.65) return;
 
       const current = pathnameRef.current;
+      if (current === '/discover') return;
       const idx = TAB_PATHS.findIndex((p) => current.startsWith(p));
       if (idx === -1) return;
 
@@ -126,6 +129,24 @@ export default function FloatingNav() {
 
   const active = getActiveTab();
   const activeIndex = NAV_TABS.findIndex(t => t.id === active);
+
+  if (pathname === '/discover') {
+    return <nav className={discoverStyles.nav} aria-label="Main navigation"><div className={discoverStyles.navInner}>
+      {NAV_TABS.map(tab => <button key={tab.id} className={discoverStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
+        <span className={discoverStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
+        {tab.id === 'messages' && unreadCount > 0 && <span className={discoverStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
+      </button>)}
+    </div></nav>;
+  }
+
+  if (pathname === '/messages') {
+    return <nav className={messagesStyles.nav} aria-label="Main navigation"><div className={messagesStyles.navInner}>
+      {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
+        <span className={messagesStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
+        {tab.id === 'messages' && unreadCount > 0 && <span className={messagesStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
+      </button>)}
+    </div></nav>;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">

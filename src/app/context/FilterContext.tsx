@@ -1,5 +1,7 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+import discoverStyles from '../discover/discover.module.css';
 import React, { createContext, useContext, useState } from 'react';
 
 export interface FilterState {
@@ -38,6 +40,7 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
+  const editorial = usePathname() === '/discover';
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -109,7 +112,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
       {/* ── FILTER DRAWER SHEET OVERLAY ── */}
       {isMounted && (
-        <div className="fixed inset-0 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 overflow-hidden pointer-events-auto">
+        <div className={`${editorial ? discoverStyles.filterTheme : ''} fixed inset-0 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 overflow-hidden pointer-events-auto`} role="dialog" aria-modal="true" aria-label="Discovery preferences">
           {/* Backdrop */}
           <div
             onClick={closeFilters}
@@ -121,31 +124,31 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
           {/* Sliding Sheet Container */}
           <div
-            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[#FAFAF7] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
+            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[var(--infyn-paper,#FAFAF7)] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
               animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-full sm:translate-y-8 sm:scale-95 opacity-0'
             }`}
             style={{ willChange: 'transform, opacity' }}
           >
             {/* Drag Handle */}
             <div className="pt-3 pb-1 flex justify-center">
-              <div className="h-1 w-10 rounded-full bg-[#1A1A2E]/15" />
+              <div className="h-1 w-10 rounded-full bg-[var(--infyn-ink,#1A1A2E)]/15" />
             </div>
 
             {/* Header */}
-            <div className="px-6 py-3 flex items-center justify-between border-b border-[#1A1A2E]/[0.06]">
-              <h2 className="text-[20px] font-extrabold tracking-tight text-[#1A1A2E]">
+            <div className="px-6 py-3 flex items-center justify-between border-b border-[var(--infyn-ink,#1A1A2E)]/[0.06]">
+              <h2 className="text-[20px] font-extrabold tracking-tight text-[var(--infyn-ink,#1A1A2E)]">
                 Discovery Preferences
               </h2>
               <div className="flex items-center gap-3">
                 <button
                   onClick={resetFilters}
-                  className="text-[12px] font-semibold text-[#FF6B9D] active:opacity-60 transition-opacity cursor-pointer"
+                  className="text-[12px] font-semibold text-[var(--infyn-pink,#FF6B9D)] active:opacity-60 transition-opacity cursor-pointer"
                 >
                   Reset
                 </button>
                 <button
                   onClick={closeFilters}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A2E]/5 text-[#1A1A2E]/60 active:scale-95 transition-transform cursor-pointer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--infyn-ink,#1A1A2E)]/5 text-[var(--infyn-ink,#1A1A2E)]/60 active:scale-95 transition-transform cursor-pointer"
                   aria-label="Close filters"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -161,18 +164,18 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
               
               {/* 1. Show Me */}
               <div>
-                <label className="block text-[13px] font-bold text-[#1A1A2E] mb-2.5">
+                <label className="block text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)] mb-2.5">
                   Show Me
                 </label>
-                <div className="grid grid-cols-3 gap-2 p-1 bg-[#1A1A2E]/5 rounded-2xl">
+                <div className="grid grid-cols-3 gap-2 p-1 bg-[var(--infyn-ink,#1A1A2E)]/5 rounded-2xl">
                   {(['Everyone', 'Women', 'Men'] as const).map((gender) => (
                     <button
                       key={gender}
                       onClick={() => setLocalFilters(prev => ({ ...prev, lookingFor: gender }))}
                       className={`py-2 text-[13px] font-semibold rounded-xl transition-all cursor-pointer ${
                         localFilters.lookingFor === gender
-                          ? 'bg-white text-[#1A1A2E] shadow-sm'
-                          : 'text-[#1A1A2E]/50 hover:text-[#1A1A2E]'
+                          ? 'bg-white text-[var(--infyn-ink,#1A1A2E)] shadow-sm'
+                          : 'text-[var(--infyn-ink,#1A1A2E)]/50 hover:text-[var(--infyn-ink,#1A1A2E)]'
                       }`}
                     >
                       {gender}
@@ -184,10 +187,10 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
               {/* 2. Maximum Distance */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[13px] font-bold text-[#1A1A2E]">
+                  <label className="text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)]">
                     Maximum Distance
                   </label>
-                  <span className="text-[13px] font-bold text-[#FF6B9D]">
+                  <span className="text-[13px] font-bold text-[var(--infyn-pink,#FF6B9D)]">
                     {localFilters.maxDistance} km
                   </span>
                 </div>
@@ -197,9 +200,9 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                   max="100"
                   value={localFilters.maxDistance}
                   onChange={(e) => setLocalFilters(prev => ({ ...prev, maxDistance: Number(e.target.value) }))}
-                  className="w-full accent-[#FF6B9D] cursor-pointer h-2 bg-[#1A1A2E]/10 rounded-lg appearance-none"
+                  className="w-full accent-[var(--infyn-pink,#FF6B9D)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
                 />
-                <div className="flex justify-between text-[11px] font-medium text-[#1A1A2E]/40 mt-1.5">
+                <div className="flex justify-between text-[11px] font-medium text-[var(--infyn-ink,#1A1A2E)]/40 mt-1.5">
                   <span>2 km</span>
                   <span>50 km</span>
                   <span>100 km</span>
@@ -209,10 +212,10 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
               {/* 3. Age Range */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[13px] font-bold text-[#1A1A2E]">
+                  <label className="text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)]">
                     Age Range
                   </label>
-                  <span className="text-[13px] font-bold text-[#7B68EE]">
+                  <span className="text-[13px] font-bold text-[var(--infyn-purple,#7B68EE)]">
                     {localFilters.ageMin} – {localFilters.ageMax} yrs
                   </span>
                 </div>
@@ -228,7 +231,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                         setLocalFilters(prev => ({ ...prev, ageMin: val }));
                       }
                     }}
-                    className="w-full accent-[#7B68EE] cursor-pointer h-2 bg-[#1A1A2E]/10 rounded-lg appearance-none"
+                    className="w-full accent-[var(--infyn-purple,#7B68EE)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
                   />
                   <input
                     type="range"
@@ -241,22 +244,22 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                         setLocalFilters(prev => ({ ...prev, ageMax: val }));
                       }
                     }}
-                    className="w-full accent-[#7B68EE] cursor-pointer h-2 bg-[#1A1A2E]/10 rounded-lg appearance-none"
+                    className="w-full accent-[var(--infyn-purple,#7B68EE)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
                   />
                 </div>
               </div>
 
               {/* 4. Verified Profiles Only Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white border border-[#1A1A2E]/[0.06] shadow-sm">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-white border border-[var(--infyn-ink,#1A1A2E)]/[0.06] shadow-sm">
                 <div>
-                  <p className="text-[14px] font-bold text-[#1A1A2E]">Verified Profiles Only</p>
-                  <p className="text-[12px] text-[#1A1A2E]/50 mt-0.5">Only show photos with a blue checkmark badge</p>
+                  <p className="text-[14px] font-bold text-[var(--infyn-ink,#1A1A2E)]">Verified Profiles Only</p>
+                  <p className="text-[12px] text-[var(--infyn-ink,#1A1A2E)]/50 mt-0.5">Only show photos with a blue checkmark badge</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setLocalFilters(prev => ({ ...prev, verifiedOnly: !prev.verifiedOnly }))}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                    localFilters.verifiedOnly ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE]' : 'bg-[#1A1A2E]/20'
+                    localFilters.verifiedOnly ? 'bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)]' : 'bg-[var(--infyn-ink,#1A1A2E)]/20'
                   }`}
                 >
                   <span
@@ -269,7 +272,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
               {/* 5. Vibe & Interest Chips */}
               <div>
-                <label className="block text-[13px] font-bold text-[#1A1A2E] mb-2.5">
+                <label className="block text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)] mb-2.5">
                   Filter by Interest Vibe
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -281,8 +284,8 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                         onClick={() => toggleInterest(interest)}
                         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-sm scale-105'
-                            : 'bg-white border border-[#1A1A2E]/10 text-[#1A1A2E]/60 hover:border-[#1A1A2E]/25'
+                            ? 'bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-white shadow-sm scale-105'
+                            : 'bg-white border border-[var(--infyn-ink,#1A1A2E)]/10 text-[var(--infyn-ink,#1A1A2E)]/60 hover:border-[var(--infyn-ink,#1A1A2E)]/25'
                         }`}
                       >
                         {interest}
@@ -295,10 +298,10 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Bottom Apply CTA */}
-            <div className="p-4 border-t border-[#1A1A2E]/[0.06] bg-white">
+            <div className="p-4 border-t border-[var(--infyn-ink,#1A1A2E)]/[0.06] bg-white">
               <button
                 onClick={handleApply}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-[15px] font-bold text-white shadow-[0_8px_24px_-6px_rgba(255,107,157,0.4)] active:scale-[0.985] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-[15px] font-bold text-white shadow-[0_8px_24px_-6px_rgba(255,107,157,0.4)] active:scale-[0.985] transition-all cursor-pointer"
               >
                 Apply Preferences
               </button>

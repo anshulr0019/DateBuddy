@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
-import { AuroraBackground, SafeImage } from '../components/shared';
+import { SafeImage } from '../components/shared';
+import styles from './messages.module.css';
 import { useNotifications } from '../context/NotificationContext';
 import { formatListTime } from '../lib/time';
 import { PartnerProfileSheet } from '../components/PartnerProfileSheet';
@@ -22,11 +23,16 @@ interface Conversation {
 }
 
 type LoadPhase = 'loading' | 'ready' | 'error';
+type Filter = 'all' | 'unread' | 'active';
 
 const POLL_INTERVAL_MS = 10_000;
-
-// Module-level in-memory cache for 0ms instant display when navigating back
 let cachedConversations: Conversation[] | null = null;
+
+function isThisWeek(timestamp: string) {
+  const time = new Date(timestamp).getTime();
+  if (!Number.isFinite(time)) return true;
+  return Date.now() - time < 7 * 24 * 60 * 60 * 1000;
+}
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -34,6 +40,7 @@ export default function MessagesPage() {
   const myId = auth.status === 'authenticated' ? auth.userId : null;
   const { openNotifications, unreadCount } = useNotifications();
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>(cachedConversations || []);
   const [phase, setPhase] = useState<LoadPhase>(cachedConversations ? 'ready' : 'loading');
@@ -55,14 +62,13 @@ export default function MessagesPage() {
       if (!res.ok || !data.success || !Array.isArray(data.conversations)) {
         throw new Error(data.message || 'Failed to load conversations');
       }
-      // Sort conversations strictly by latest message/activity timestamp
       const sorted = [...data.conversations].sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
       cachedConversations = sorted;
       setConversations(sorted);
       setPhase('ready');
-    } catch (err) {
+    } catch {
       if (controller.signal.aborted) return;
       setPhase((prev) => (prev === 'ready' || cachedConversations ? 'ready' : 'error'));
     }
@@ -80,12 +86,10 @@ export default function MessagesPage() {
     };
   }, [loadConversations]);
 
-  // ── Real-Time Pusher Subscription for Instant Auto-Move to Top ──
   useEffect(() => {
     if (conversations.length === 0) return;
     const pusher = getPusherClient();
     if (!pusher) return;
-
     const channels: string[] = [];
 
     conversations.forEach((conv) => {
@@ -97,14 +101,13 @@ export default function MessagesPage() {
         setConversations((prev) => {
           const foundIdx = prev.findIndex((c) => c.id === conv.id);
           if (foundIdx === -1) return prev;
-
           const target = prev[foundIdx];
           let displayMsg = data.content;
           if (typeof data.content === 'string' && data.content.startsWith('CALL_EVENT:')) {
             try {
               const parsed = JSON.parse(data.content.replace('CALL_EVENT:', ''));
               const isVideo = parsed.callType === 'video';
-              const isMissed = parsed.status === 'missed' || parsed.status === 'declined' || parsed.status === 'cancelled';
+              const isMissed = ['missed', 'declined', 'cancelled'].includes(parsed.status);
               displayMsg = isMissed
                 ? isVideo ? '📹 Missed video call' : '📞 Missed audio call'
                 : isVideo ? '📹 Video call' : '📞 Audio call';
@@ -113,10 +116,7 @@ export default function MessagesPage() {
             }
           } else {
             const byType: Record<string, string> = {
-              photo: '📷 Photo',
-              voice: '🎙️ Voice Note',
-              location: '📍 Location',
-              gif: '🎬 GIF',
+              photo: '📷 Photo', voice: '🎙️ Voice Note', location: '📍 Location', gif: '🎬 GIF',
             };
             displayMsg = byType[data.type] ?? data.content;
           }
@@ -128,226 +128,185 @@ export default function MessagesPage() {
             time: data.createdAt || new Date().toISOString(),
             unread: isIncoming ? target.unread + 1 : target.unread,
           };
-
-          // Remove previous position and smoothly prepend to top (index 0)
-          const remaining = prev.filter((c) => c.id !== conv.id);
-          return [updated, ...remaining];
+          return [updated, ...prev.filter((c) => c.id !== conv.id)];
         });
       });
     });
 
-    return () => {
-      channels.forEach((ch) => {
-        pusher.unsubscribe(ch);
-      });
-    };
-  }, [conversations.length, myId]);
+    return () => channels.forEach((ch) => pusher.unsubscribe(ch));
+  }, [conversations, myId]);
 
   const query = search.trim().toLowerCase();
-  const filtered = query
-    ? conversations.filter((c) => (c.name ?? '').toLowerCase().includes(query))
-    : conversations;
+  const filtered = useMemo(() => conversations.filter((conversation) => {
+    const matchesQuery = !query || [conversation.name, conversation.lastMsg]
+      .some((value) => (value ?? '').toLowerCase().includes(query));
+    const matchesFilter = filter === 'all'
+      || (filter === 'unread' && conversation.unread > 0)
+      || (filter === 'active' && conversation.online);
+    return matchesQuery && matchesFilter;
+  }), [conversations, filter, query]);
+
+  const activePeople = useMemo(() => conversations.filter((conversation) => conversation.online).slice(0, 5), [conversations]);
+  const unreadTotal = conversations.reduce((total, conversation) => total + conversation.unread, 0);
+  const groups = useMemo(() => [
+    { label: 'THIS WEEK', rows: filtered.filter((conversation) => isThisWeek(conversation.time)) },
+    { label: 'EARLIER', rows: filtered.filter((conversation) => !isThisWeek(conversation.time)) },
+  ].filter((group) => group.rows.length > 0), [filtered]);
+
+  const renderConversation = (conversation: Conversation) => (
+    <div
+      key={conversation.id}
+      role="listitem"
+      className={`${styles.conversation} ${conversation.unread > 0 ? styles.conversationUnread : ''}`}
+      onClick={() => router.push(`/chat/${conversation.id}`)}
+    >
+      <button
+        type="button"
+        className={styles.avatarButton}
+        onClick={(event) => { event.stopPropagation(); setSelectedConv(conversation); }}
+        aria-label={`View ${conversation.name}'s profile`}
+      >
+        <span className={`${styles.avatar} ${styles.avatarSmall}`}>
+          <SafeImage src={conversation.photo} name={conversation.name} alt={conversation.name} className={styles.avatarImage} />
+          {conversation.online && <span className={styles.onlineDot} aria-label="Online now" />}
+        </span>
+      </button>
+      <div className={styles.details}>
+        <div className={styles.nameLine}>
+          <h2 className={styles.name}>{conversation.name}</h2>
+          <span className={`${styles.time} ${conversation.unread > 0 ? styles.timeUnread : ''}`}>{formatListTime(conversation.time)}</span>
+        </div>
+        <div className={styles.previewLine}>
+          <p className={`${styles.preview} ${conversation.unread > 0 ? styles.previewUnread : ''}`}>{conversation.lastMsg}</p>
+          {conversation.unread > 0 && (
+            <span className={styles.unreadBadge} aria-label={`${conversation.unread} unread messages`}>
+              {conversation.unread > 99 ? '99+' : conversation.unread}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="h-dvh w-full min-h-screen bg-[#FAFBF9] flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFBF9] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
-        <AuroraBackground subtle>
-          <div className="flex flex-col h-full w-full z-10 overflow-hidden">
-
-            {/* SMOOTH BLENDED HEADER & SEARCH */}
-            <div className="flex-shrink-0 z-20 px-5 pt-[max(3rem,calc(1.25rem+env(safe-area-inset-top,0px)))] pb-3.5 bg-white/40 backdrop-blur-xl border-b border-white/50 shadow-xs">
-              <div className="mb-3.5 flex items-center justify-between">
-                <h1 className="text-[26px] font-extrabold tracking-tight text-[#191C1E]">Chats</h1>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={openNotifications}
-                    aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
-                    className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/70 border border-white/80 shadow-xs hover:bg-white transition-all cursor-pointer backdrop-blur-md"
-                  >
-                    <Ic.Bell />
-                    {unreadCount > 0 && (
-                      <span aria-hidden className="absolute -top-0.5 -right-0.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#F43F5E] text-[8px] font-bold text-white ring-2 ring-white shadow-xs px-1">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Search input */}
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-400">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </div>
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search chats…"
-                  aria-label="Search chats by name"
-                  enterKeyHint="search"
-                  className="h-11 w-full rounded-2xl border border-white/60 bg-white/50 pl-11 pr-10 text-[16px] text-[#191C1E] placeholder-gray-400 outline-none backdrop-blur-md transition-all focus:bg-white/90 focus:ring-2 focus:ring-[#F43F5E]/20"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    aria-label="Clear search"
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                )}
-              </div>
+    <div className={styles.root}>
+      <div className={styles.shell}>
+        <header className={styles.header}>
+          <div className={styles.titleRow}>
+            <div className={styles.titleCluster}>
+              <h1 className={styles.title}>Messages</h1>
+              {unreadTotal > 0 && <span className={styles.countBadge}>{unreadTotal > 99 ? '99+' : unreadTotal}</span>}
             </div>
-
-            {/* CONVERSATION LIST */}
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
-              {phase === 'loading' ? (
-                <div className="space-y-3 pt-2" aria-label="Loading conversations" role="status">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="h-16 rounded-[22px] bg-white/50 animate-pulse" />
-                  ))}
-                </div>
-              ) : phase === 'error' ? (
-                <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 shadow-sm text-2xl" aria-hidden>
-                    💔
-                  </div>
-                  <h3 className="text-[18px] font-bold text-[#1A1A2E] mb-1">Couldn&apos;t load your chats</h3>
-                  <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">
-                    Something went wrong on our end. Check your connection and try again.
-                  </p>
-                  <button
-                    onClick={() => loadConversations(true)}
-                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : filtered.length === 0 ? (
-                search ? (
-                  <div className="flex flex-col items-center justify-center h-[50vh] text-center px-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 shadow-sm text-2xl" aria-hidden>
-                      🔍
-                    </div>
-                    <h3 className="text-[18px] font-bold text-[#1A1A2E] mb-1">No matches found</h3>
-                    <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed">
-                      No chats match “{search}”. Try a different name.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-[#F43F5E] mb-4 shadow-sm text-2xl" aria-hidden>
-                      💬
-                    </div>
-                    <h3 className="text-[18px] font-bold text-[#1A1A2E] mb-1">No chats yet</h3>
-                    <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">
-                      Start discovering profiles and when you both like each other, your conversations will appear here!
-                    </p>
-                    <button
-                      onClick={() => router.push('/discover')}
-                      className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
-                    >
-                      Start Discovering ✨
-                    </button>
-                  </div>
-                )
-              ) : (
-                <div className="flex flex-col gap-1.5" role="list" aria-label="Conversations">
-                  {filtered.map((c, i) => (
-                    <div
-                      key={c.id}
-                      role="listitem"
-                      className={`relative flex w-full items-center gap-3.5 rounded-[22px] px-3.5 py-3 transition-all duration-300 ease-out border ${
-                        c.unread > 0
-                          ? 'bg-white/85 border-[#F43F5E]/15 shadow-[0_4px_16px_-6px_rgba(244,63,94,0.12)]'
-                          : 'border-transparent hover:bg-white/70 hover:border-white/60'
-                      }`}
-                    >
-                      {/* Avatar — tapping opens profile sheet */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedConv(c);
-                        }}
-                        aria-label={`View ${c.name}'s profile`}
-                        className="relative h-13 w-13 flex-shrink-0 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#191C1E]/5 active:scale-90 transition-transform cursor-pointer"
-                      >
-                        <SafeImage
-                          src={c.photo}
-                          name={c.name}
-                          alt={c.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </button>
-
-                      {/* Conversation details — tapping opens chat */}
-                      <div
-                        onClick={() => router.push(`/chat/${c.id}`)}
-                        className="flex-1 min-w-0 cursor-pointer text-left"
-                      >
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                          <h2 className="text-[15.5px] font-bold text-[#191C1E] truncate">
-                            {c.name}
-                          </h2>
-                          <span
-                            className={`text-[11px] font-semibold flex-shrink-0 whitespace-nowrap ${
-                              c.unread > 0 ? 'text-[#F43F5E]' : 'text-[#191C1E]/40'
-                            }`}
-                          >
-                            {formatListTime(c.time)}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-2">
-                          <p
-                            className={`text-[13.5px] truncate max-w-[220px] ${
-                              c.unread > 0
-                                ? 'font-bold text-[#191C1E]'
-                                : 'font-normal text-[#191C1E]/55'
-                            }`}
-                          >
-                            {c.lastMsg}
-                          </p>
-
-                          {c.unread > 0 && (
-                            <span
-                              aria-label={`${c.unread} unread messages`}
-                              className="flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-1.5 text-[10px] font-extrabold text-white shadow-xs"
-                            >
-                              {c.unread > 99 ? '99+' : c.unread}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className={styles.headerActions}>
+              <button
+                type="button"
+                className={styles.iconButton}
+                onClick={openNotifications}
+                aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
+              >
+                <Ic.Bell />
+                {unreadCount > 0 && <span className={styles.navUnread} aria-hidden />}
+              </button>
             </div>
           </div>
-        </AuroraBackground>
+
+          <div className={styles.searchWrap}>
+            <span className={styles.searchIcon}><Ic.Search /></span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search names or chats…"
+              aria-label="Search names or chats"
+              enterKeyHint="search"
+              className={styles.searchInput}
+            />
+            {search && <button type="button" className={styles.clearButton} onClick={() => setSearch('')} aria-label="Clear search">×</button>}
+          </div>
+
+          <div className={styles.filters} role="tablist" aria-label="Message filters">
+            {([
+              ['all', 'All'], ['unread', 'Unread'], ['active', 'Active'],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={filter === value}
+                className={`${styles.filterChip} ${filter === value ? styles.filterChipActive : ''}`}
+                onClick={() => setFilter(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        <main className={styles.scroll}>
+          {phase === 'loading' ? (
+            <div className={styles.skeletonStack} aria-label="Loading messages" role="status">
+              {[1, 2, 3, 4, 5].map((item) => <div key={item} className={styles.skeleton} />)}
+            </div>
+          ) : phase === 'error' ? (
+            <div className={styles.error} role="alert">
+              <div className={styles.emptyIcon} aria-hidden><Ic.Chat /></div>
+              <h2 className={styles.emptyTitle}>Couldn’t load your messages</h2>
+              <p className={styles.emptyText}>Check your connection and try again. Your conversations will be right here.</p>
+              <button type="button" className={styles.primaryButton} onClick={() => loadConversations(true)}>Try again</button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className={styles.empty}>
+              <div className={styles.emptyIcon} aria-hidden><Ic.Chat /></div>
+              <h2 className={styles.emptyTitle}>{query || filter !== 'all' ? 'No conversations found' : 'No messages yet'}</h2>
+              <p className={styles.emptyText}>
+                {query ? `Nothing matches “${search}”. Try another name or phrase.` : filter !== 'all' ? 'You’re all caught up. New conversations will appear here.' : 'Start discovering people and your conversations will appear here.'}
+              </p>
+              {query || filter !== 'all' ? (
+                <button type="button" className={styles.primaryButton} onClick={() => { setSearch(''); setFilter('all'); }}>Show all messages</button>
+              ) : (
+                <button type="button" className={styles.primaryButton} onClick={() => router.push('/discover')}>Start discovering</button>
+              )}
+            </div>
+          ) : (
+            <>
+              {activePeople.length > 0 && (
+                <section className={styles.activeSection} aria-labelledby="active-heading">
+                  <h2 id="active-heading" className={styles.sectionLabel}>ACTIVE NOW</h2>
+                  <div className={styles.activeRow}>
+                    {activePeople.map((person) => (
+                      <button key={person.id} type="button" className={styles.activePerson} onClick={() => router.push(`/chat/${person.id}`)} aria-label={`Message ${person.name}`}>
+                        <span className={styles.avatar}>
+                          <SafeImage src={person.photo} name={person.name} alt={person.name} className={styles.avatarImage} />
+                          <span className={styles.onlineDot} aria-hidden />
+                        </span>
+                        <span className={styles.activeName}>{person.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {groups.map((group) => (
+                <section key={group.label} className={styles.group} aria-labelledby={`group-${group.label}`}>
+                  <h2 id={`group-${group.label}`} className={styles.sectionLabel}>{group.label}</h2>
+                  <div className={styles.listCard} role="list" aria-label={`${group.label.toLowerCase()} conversations`}>
+                    {group.rows.map(renderConversation)}
+                  </div>
+                </section>
+              ))}
+            </>
+          )}
+        </main>
       </div>
 
-      {/* Partner Profile Sheet (opened on avatar tap) */}
       <PartnerProfileSheet
         isOpen={Boolean(selectedConv)}
         partnerId={selectedConv?.partnerId ?? null}
         matchId={selectedConv?.id ?? null}
         initialData={selectedConv ? { name: selectedConv.name, photo: selectedConv.photo } : undefined}
         onClose={() => setSelectedConv(null)}
-        onAudioCall={() => {
-          if (selectedConv) router.push(`/chat/${selectedConv.id}?call=audio`);
-        }}
-        onVideoCall={() => {
-          if (selectedConv) router.push(`/chat/${selectedConv.id}?call=video`);
-        }}
+        onAudioCall={() => { if (selectedConv) router.push(`/chat/${selectedConv.id}?call=audio`); }}
+        onVideoCall={() => { if (selectedConv) router.push(`/chat/${selectedConv.id}?call=video`); }}
       />
     </div>
   );
