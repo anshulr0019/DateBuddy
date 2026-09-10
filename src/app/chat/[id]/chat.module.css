@@ -30,6 +30,7 @@
   --rose-line: #e8c4cc;
   --wine: #7d1d3f;
   --wine-dark: #631430;
+  height: 100dvh;
   min-height: 100dvh;
   width: 100%;
   display: flex;
@@ -43,8 +44,10 @@
 .shell {
   position: relative;
   display: flex;
+  flex: 1;
   height: 100%;
-  min-height: 100dvh;
+  min-height: 0;
+  min-width: 0;
   width: 100%;
   max-width: 520px;
   flex-direction: column;
@@ -57,9 +60,10 @@
   position: relative;
   display: flex;
   min-height: 0;
-  height: 100%;
+  height: auto;
   width: 100%;
   flex: 1;
+  min-width: 0;
   flex-direction: column;
   overflow: hidden;
 }
