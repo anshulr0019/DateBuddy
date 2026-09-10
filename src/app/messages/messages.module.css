@@ -263,6 +263,7 @@
 
 .avatar {
   position: relative;
+  display: block;
   height: 3.35rem;
   width: 3.35rem;
   flex-shrink: 0;
