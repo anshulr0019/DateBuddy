@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { AuroraBackground, SafeImage } from '../../components/shared';
+import { SafeImage } from '../../components/shared';
+import chatStyles from './chat.module.css';
 import { Ic } from '../../components/icons';
 import { dayLabel, isSameDay, formatLastSeen } from '../../lib/time';
 import { useCurrentUser } from '../../lib/useCurrentUser';
@@ -262,20 +263,16 @@ function ChatContent() {
   const isLoading = auth.status === 'loading' || (auth.status === 'authenticated' && chat.phase === 'loading');
 
   return (
-    <div
-      className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans"
-      style={{ paddingBottom: keyboardInset }}
-    >
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
-        <AuroraBackground subtle>
-          <div className="flex flex-col h-full w-full z-10 overflow-hidden">
+    <div className={chatStyles.root} style={{ paddingBottom: keyboardInset }}>
+      <div className={chatStyles.shell}>
+        <div className={chatStyles.content}>
 
             {/* ── HEADER ── */}
-            <div className="flex-shrink-0 z-40 px-4 pt-[max(3.25rem,calc(2.5rem+env(safe-area-inset-top,0px)))] pb-3 bg-white/95 backdrop-blur-2xl border-b border-gray-200/70 flex items-center justify-between shadow-xs">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className={chatStyles.header}>
+              <div className={chatStyles.headerIdentity}>
                 <button
                   onClick={() => router.back()}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[#1E293B] hover:bg-gray-100 active:scale-90 transition-all duration-200 cursor-pointer"
+                  className={chatStyles.headerBack}
                   aria-label="Back to chats"
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -286,14 +283,14 @@ function ChatContent() {
                 {partner ? (
                   <button
                     onClick={() => setProfileSheetOpen(true)}
-                    className="flex items-center gap-3 min-w-0 cursor-pointer active:opacity-70 transition-opacity"
+                    className={chatStyles.partnerButton}
                     aria-label={`View ${partner.name}'s profile`}
                   >
-                    <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#FF6B9D]/40 shadow-2xs ring-2 ring-[#FF6B9D]/10">
+                    <div className={chatStyles.partnerAvatar}>
                       <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" className="h-full w-full object-cover" />
                     </div>
-                    <div className="min-w-0">
-                      <h1 className="flex items-center gap-1 text-[15px] font-bold text-[#1E293B] leading-tight truncate">
+                    <div className={chatStyles.partnerCopy}>
+                      <h1 className={chatStyles.partnerName}>
                         {partner.name}
                         {partner.verified && (
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#F43F5E" aria-label="Verified profile" className="flex-shrink-0">
@@ -305,7 +302,7 @@ function ChatContent() {
                       {(() => {
                         if (isPartnerTyping) {
                           return (
-                            <p className="flex items-center gap-1 text-[11px] text-[#F43F5E] font-semibold mt-0.5 animate-pulse">
+                            <p className={`${chatStyles.presence} text-[#7D1D3F] animate-pulse`}>
                               <span className="transition-all duration-300">
                                 {isLongTyping ? 'writing a long message...' : 'typing...'}
                               </span>
@@ -315,14 +312,14 @@ function ChatContent() {
                         const presence = formatLastSeen(partner.lastActiveAt, partner.online);
                         if (presence.isOnline) {
                           return (
-                            <p className="flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold mt-0.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            <p className={`${chatStyles.presence} ${chatStyles.presenceOnline}`}>
+                              <span className={chatStyles.presenceDot} />
                               Online
                             </p>
                           );
                         }
                         return (
-                          <p className="text-[11px] text-gray-400 font-medium mt-0.5 truncate">
+                            <p className={chatStyles.presence}>
                             {presence.label}
                           </p>
                         );
@@ -330,7 +327,7 @@ function ChatContent() {
                     </div>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-3">
+                  <div className={chatStyles.headerIdentity}>
                     <div className="h-10 w-10 rounded-full bg-gray-100 animate-pulse" />
                     <div className="h-3.5 w-24 rounded-full bg-gray-100 animate-pulse" />
                   </div>
@@ -338,11 +335,11 @@ function ChatContent() {
               </div>
 
               {partner && (
-                <div className="flex items-center gap-1.5">
+                <div className={chatStyles.headerActions}>
                   {/* Minimalist Games Button */}
                   <button
                     onClick={() => setGamesOpen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    className={`${chatStyles.headerAction}`}
                     title="Mini Games"
                     aria-label="Play mini games"
                   >
@@ -358,7 +355,7 @@ function ChatContent() {
                   {/* Date Planner Button */}
                   <button
                     onClick={() => setDatePlannerOpen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    className={`${chatStyles.headerAction}`}
                     title="Plan a Date"
                     aria-label="Plan a date"
                   >
@@ -373,7 +370,7 @@ function ChatContent() {
                   {/* Audio Call */}
                   <button
                     onClick={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#7B68EE] hover:bg-[#7B68EE]/10 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    className={`${chatStyles.headerAction}`}
                     title="Audio Call"
                     aria-label="Start audio call"
                   >
@@ -384,7 +381,7 @@ function ChatContent() {
                   {/* Video Call */}
                   <button
                     onClick={() => setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' })}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-sm active:scale-90 transition-all cursor-pointer"
+                    className={`${chatStyles.headerAction} ${chatStyles.headerActionVideo}`}
                     title="Video Call"
                     aria-label="Start video call"
                   >
@@ -396,7 +393,7 @@ function ChatContent() {
                   <button
                     onClick={() => setSafetyOpen(true)}
                     aria-label="Conversation options: report or block"
-                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer shadow-2xs"
+                    className={`${chatStyles.headerAction}`}
                   >
                     <Ic.Dots />
                   </button>
@@ -406,8 +403,8 @@ function ChatContent() {
 
             {/* Offline banner */}
             {!chat.isOnline && (
-              <div role="status" className="flex-shrink-0 z-30 px-4 py-2 bg-amber-50/95 backdrop-blur-xl border-b border-amber-200/70 text-center">
-                <span className="text-[12px] font-semibold text-amber-700">
+              <div role="status" className={chatStyles.offline}>
+                <span className={chatStyles.offlineText}>
                   You&apos;re offline — messages will send when you reconnect
                 </span>
               </div>
@@ -415,40 +412,40 @@ function ChatContent() {
 
             {/* ── FEED ── */}
             {isLoading ? (
-              <div className="flex-1 min-h-0 px-4 pt-6 space-y-4" role="status" aria-label="Loading conversation">
+              <div className={chatStyles.loading} role="status" aria-label="Loading conversation">
                 <div className="h-14 w-3/5 rounded-[20px] rounded-tl-[4px] bg-white/70 animate-pulse" />
                 <div className="h-14 w-3/5 rounded-[20px] rounded-tr-[4px] bg-[#FFF0F4]/70 animate-pulse ml-auto" />
                 <div className="h-10 w-2/5 rounded-[20px] rounded-tl-[4px] bg-white/70 animate-pulse" />
                 <div className="h-20 w-3/5 rounded-[20px] rounded-tr-[4px] bg-[#FFF0F4]/70 animate-pulse ml-auto" />
               </div>
             ) : chat.phase === 'notfound' || validMatchId === null ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 mb-4 shadow-sm text-2xl" aria-hidden>
+              <div className={chatStyles.state}>
+                <div className={chatStyles.stateIcon} aria-hidden>
                   💔
                 </div>
-                <h2 className="text-[18px] font-bold text-[#1A1A2E] mb-1">This conversation isn&apos;t available</h2>
-                <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">
+                <h2 className={chatStyles.stateTitle}>This conversation isn&apos;t available</h2>
+                <p className={chatStyles.stateText}>
                   The match may have ended, or the link is wrong.
                 </p>
                 <button
                   onClick={() => router.replace('/messages')}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                  className={chatStyles.stateButton}
                 >
                   Back to Chats
                 </button>
               </div>
             ) : chat.phase === 'error' ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 mb-4 shadow-sm text-2xl" aria-hidden>
+              <div className={chatStyles.state}>
+                <div className={chatStyles.stateIcon} aria-hidden>
                   ⚠️
                 </div>
-                <h2 className="text-[18px] font-bold text-[#1A1A2E] mb-1">Couldn&apos;t load this chat</h2>
-                <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">
+                <h2 className={chatStyles.stateTitle}>Couldn&apos;t load this chat</h2>
+                <p className={chatStyles.stateText}>
                   Check your connection and try again.
                 </p>
                 <button
                   onClick={chat.reload}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                  className={chatStyles.stateButton}
                 >
                   Try again
                 </button>
@@ -460,16 +457,16 @@ function ChatContent() {
                 role="log"
                 aria-live="polite"
                 aria-label={partner ? `Conversation with ${partner.name}` : 'Conversation'}
-                className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-4 pb-4 space-y-3.5"
+                className={chatStyles.feed}
               >
                 {messages.length === 0 && partner ? (
                   /* New match — honest empty state with icebreakers */
-                  <div className="flex flex-col items-center justify-center h-full text-center px-6">
-                    <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-[#F9C0D0]/60 shadow-md mb-4">
+                  <div className={`${chatStyles.state} ${chatStyles.newMatch}`}>
+                    <div className={`${chatStyles.newMatchAvatar} mb-4`}>
                       <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" className="h-full w-full object-cover" />
                     </div>
-                    <h2 className="text-[18px] font-bold text-[#1A1A2E] mb-1">You matched with {partner.name}!</h2>
-                    <p className="text-[14px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-5">
+                    <h2 className={chatStyles.stateTitle}>You matched with {partner.name}!</h2>
+                    <p className={chatStyles.stateText}>
                       Say hi and get the conversation going 👋
                     </p>
                     <div className="flex flex-col gap-2 w-full max-w-[280px]">
@@ -490,10 +487,10 @@ function ChatContent() {
                 ) : (
                   <>
                     {/* End-to-End Encryption Notice */}
-                    <div className="flex justify-center my-2 select-none">
-                      <div className="flex items-center gap-2 max-w-[320px] rounded-2xl bg-amber-500/10 border border-amber-400/25 px-3.5 py-2 text-center shadow-2xs backdrop-blur-md">
+                    <div className={chatStyles.encryption}>
+                      <div className={chatStyles.encryptionCard}>
                         <span className="text-[14px]">🔒</span>
-                        <p className="text-[11px] font-semibold text-amber-900/80 leading-snug">
+                        <p>
                           Messages &amp; calls are end-to-end encrypted. No one outside of this chat can read or listen to them.
                         </p>
                       </div>
@@ -517,8 +514,8 @@ function ChatContent() {
                     )}
                     {feedItems.map((item) =>
                       item.kind === 'divider' ? (
-                        <div key={item.key} className="flex justify-center my-2">
-                          <span className="rounded-full bg-white/90 border border-gray-200/80 backdrop-blur-md px-3.5 py-0.5 text-[11px] font-semibold text-gray-400 tracking-wide shadow-2xs">
+                        <div key={item.key} className={chatStyles.dateDivider}>
+                          <span>
                             {item.label}
                           </span>
                         </div>
@@ -547,7 +544,7 @@ function ChatContent() {
               <div className="relative z-30 flex justify-center">
                 <button
                   onClick={() => scrollToBottom()}
-                  className="absolute -top-14 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F43F5E] to-[#FB7185] px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_-6px_rgba(244,63,94,0.6)] hover:shadow-[0_6px_20px_-6px_rgba(244,63,94,0.7)] active:scale-95 transition-all cursor-pointer animate-popover-enter"
+                  className={`${chatStyles.stateButton} absolute -top-14`}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <polyline points="6 9 12 15 18 9" />
@@ -581,7 +578,7 @@ function ChatContent() {
                     }}
                   />
                 )}
-                <div className="px-3.5 pt-1 bg-white/95 backdrop-blur-xl border-t border-gray-100">
+                <div className={chatStyles.wingmanHost}>
                   <AIWingman
                     partnerName={partner?.name || 'Match'}
                     onSelectOpener={(opener) => {
@@ -615,8 +612,7 @@ function ChatContent() {
               </>
             )}
 
-          </div>
-        </AuroraBackground>
+        </div>
       </div>
 
       {/* ── OVERLAYS ── */}
@@ -701,8 +697,8 @@ export default function ChatPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center items-center font-sans">
-          <div className="h-8 w-8 rounded-full border-3 border-[#FF6B9D] border-t-transparent animate-spin" />
+        <div className={chatStyles.fallback}>
+          <div className={chatStyles.fallbackSpinner} />
         </div>
       }
     >

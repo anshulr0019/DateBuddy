@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { Ic } from '../../../components/icons';
 import type { ReplyTarget } from '../chatTypes';
+import chatStyles from '../chat.module.css';
 
 const EMOJI_RECENT = ['❤️', '🥰', '😂', '🤗', '😅', '🔥', '✨', '☕'];
 const EMOJI_SMILEYS = [
@@ -13,7 +14,7 @@ const EMOJI_SMILEYS = [
 
 export function EmojiDrawer({ onPick }: { onPick: (emoji: string) => void }) {
   return (
-    <div className="z-30 px-3.5 py-2.5 bg-white/95 backdrop-blur-xl border-t border-gray-200/80 shadow-2xl animate-popover-enter flex flex-col gap-2 max-h-[200px]">
+    <div className={`${chatStyles.drawer} z-30 px-3.5 py-2.5 max-h-[200px] animate-popover-enter flex flex-col gap-2`}>
       <div className="flex-1 overflow-y-auto scrollbar-none space-y-2 pr-0.5">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Recent</p>
@@ -86,7 +87,7 @@ export function Composer({
   const canSend = value.trim().length > 0;
 
   return (
-    <div className="flex-shrink-0 z-30 px-3.5 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] bg-white/95 backdrop-blur-xl border-t border-gray-200/60 shadow-lg">
+    <div className={chatStyles.composer}>
       <input
         type="file"
         ref={fileInputRef}
@@ -103,7 +104,7 @@ export function Composer({
 
       {/* WhatsApp-Style Quoted Reply Preview */}
       {replyingTo && (
-        <div className="mb-2.5 flex items-center justify-between gap-2.5 rounded-2xl bg-neutral-100/90 border border-neutral-200/80 px-3.5 py-2 shadow-2xs animate-slide-down">
+        <div className={`${chatStyles.replyPreview} mb-2.5 flex items-center justify-between gap-2.5 rounded-2xl px-3.5 py-2 shadow-2xs animate-slide-down`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-1 self-stretch rounded-full bg-gradient-to-b from-[#F43F5E] to-[#7B68EE]" />
             <div className="min-w-0 flex-1">
@@ -141,24 +142,24 @@ export function Composer({
       )}
 
       {error && (
-        <p role="alert" className="mb-2 flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-200 px-3 py-1.5 text-[12px] font-semibold text-[#E11D48]">
+        <p role="alert" className={`${chatStyles.composerError} mb-2 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-semibold`}>
           <Ic.Alert className="w-3.5 h-3.5 flex-shrink-0" />
           {error}
         </p>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className={chatStyles.composerRow}>
         {/* Camera */}
         <button
           onClick={() => fileInputRef.current?.click()}
           aria-label="Attach a photo"
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-90 transition-all duration-200 cursor-pointer"
+          className={chatStyles.composerButton}
         >
           <Ic.Camera className="w-5 h-5" />
         </button>
 
         {/* Text input */}
-        <div className="relative flex-1 flex items-center bg-gray-100/90 rounded-2xl h-10 px-4 border border-transparent focus-within:border-[#F43F5E]/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#F43F5E]/15 transition-all duration-200">
+        <div className={`${chatStyles.composerInputShell} relative flex-1 flex items-center h-10 px-4 transition-all duration-200`}>
           <input
             ref={inputRef}
             type="text"
@@ -172,7 +173,7 @@ export function Composer({
             aria-label="Message"
             enterKeyHint="send"
             autoComplete="off"
-            className="w-full bg-transparent text-[16px] text-[#1E293B] placeholder-gray-400 outline-none pr-7"
+            className={`${chatStyles.composerInput} w-full bg-transparent placeholder-gray-400 outline-none pr-7`}
           />
           <button
             onClick={onToggleEmoji}
@@ -191,7 +192,7 @@ export function Composer({
           onClick={onSend}
           disabled={!canSend}
           aria-label="Send message"
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${
+            className={`${chatStyles.sendButton} transition-all duration-200 ${
             canSend
               ? 'bg-[#F43F5E] text-white shadow-2xs hover:bg-[#E11D48] active:scale-90 hover:scale-105 cursor-pointer'
               : 'bg-gray-100 text-gray-300 cursor-default'

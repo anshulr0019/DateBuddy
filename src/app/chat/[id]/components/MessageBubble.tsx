@@ -4,6 +4,7 @@ import React, { memo, useRef, useState } from 'react';
 import { Ic, WhatsAppTicks } from '../../../components/icons';
 import { formatClock } from '../../../lib/time';
 import type { ChatMessage } from '../chatTypes';
+import chatStyles from '../chat.module.css';
 
 const LONG_PRESS_MS = 450;
 
@@ -53,7 +54,7 @@ function StatusIndicator({ status }: { status: ChatMessage['status'] }) {
 
 function MetaRow({ message }: { message: ChatMessage }) {
   return (
-    <div className="flex items-center justify-end gap-1 mt-1 -mr-0.5 text-[10.5px] font-medium text-gray-400 select-none">
+    <div className={`${chatStyles.messageMeta} flex items-center justify-end gap-1 mt-1 -mr-0.5 font-medium select-none`}>
       <span>{formatClock(message.createdAt)}</span>
       <StatusIndicator status={message.status} />
     </div>
@@ -130,10 +131,10 @@ function MessageBubbleInner({
     }
 
     return (
-      <div className={`flex flex-col my-1 ${isMine ? 'items-end' : 'items-start'}`}>
+      <div className={`${chatStyles.messageRow} flex flex-col my-1 ${isMine ? 'items-end' : 'items-start'}`}>
         <div
           onClick={() => onStartCall?.(callEvent.callType)}
-          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border transition-all select-none cursor-pointer active:scale-[0.98] ${
+          className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} flex items-center gap-3 border transition-all select-none cursor-pointer active:scale-[0.98] ${
             isMine
               ? 'bg-[#FFF2F5] border-[#F9C0D0]/70 text-[#2D1B28] rounded-tr-[4px]'
               : 'bg-white border-gray-200/80 text-[#1E293B] rounded-tl-[4px]'
@@ -184,7 +185,7 @@ function MessageBubbleInner({
         </div>
 
         {/* Time Stamp */}
-        <div className="px-1 text-[10px] text-neutral-400 mt-0.5">
+        <div className={`${chatStyles.messageMeta} px-1 mt-0.5`}>
           {formatClock(message.createdAt)}
         </div>
       </div>
@@ -192,7 +193,7 @@ function MessageBubbleInner({
   }
 
   return (
-    <div id={`msg-${message.id}`} className={`flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'} ${message.metadata?.reactions && Object.keys(message.metadata.reactions).length > 0 ? 'mb-2' : ''}`}>
+    <div id={`msg-${message.id}`} className={`${chatStyles.messageRow} flex flex-col ${isMine ? 'items-end animate-msg-mine' : 'items-start animate-msg-theirs'} ${message.metadata?.reactions && Object.keys(message.metadata.reactions).length > 0 ? 'mb-2' : ''}`}>
       <div
         onPointerDown={startPress}
         onPointerUp={cancelPress}
@@ -216,7 +217,7 @@ function MessageBubbleInner({
             ? `Message from ${isMine ? 'you' : partnerName}: ${message.content}. Press Enter for options.`
             : undefined
         }
-        className={`relative max-w-[84%] sm:max-w-[78%] px-3.5 py-2.5 rounded-[20px] transition-transform duration-200 shadow-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F43F5E]/40 ${
+        className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} relative max-w-[84%] sm:max-w-[78%] transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D1D3F]/35 ${
           isMine
             ? 'bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#2D1B28] rounded-tr-[4px]'
             : 'bg-white border border-gray-200/70 text-[#1E293B] rounded-tl-[4px]'
@@ -261,7 +262,7 @@ function MessageBubbleInner({
         {/* Text */}
         {message.type === 'text' && (
           <div className="flex flex-col">
-            <p className="text-[14.5px] leading-relaxed font-normal select-text whitespace-pre-wrap break-words">
+            <p className={`${chatStyles.messageText} leading-relaxed font-normal select-text whitespace-pre-wrap break-words`}>
               {message.content}
             </p>
             <MetaRow message={message} />
@@ -393,7 +394,7 @@ function MessageBubbleInner({
       {message.status === 'failed' && (
         <button
           onClick={() => onRetry(message.id)}
-          className="mt-1 flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-[11px] font-bold text-[#E11D48] hover:bg-rose-100 active:scale-95 transition-all cursor-pointer"
+          className={`${chatStyles.stateButton} mt-1 flex items-center gap-1.5 px-3 py-1 text-[11px] hover:bg-[#631430] active:scale-95 transition-all cursor-pointer`}
         >
           <Ic.Alert className="w-3.5 h-3.5" />
           Failed to send — tap to retry
