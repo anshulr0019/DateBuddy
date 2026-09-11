@@ -108,7 +108,7 @@ export default function ReviewPage() {
         setFounderData({ isFounder: true, founderNumber: data.founderNumber || 1 });
       } else {
         hapticSuccess();
-        window.location.assign('/onboarding/tutorial');
+        window.location.assign('/discover');
       }
     } catch {
       hapticWarning();
@@ -278,7 +278,7 @@ export default function ReviewPage() {
       <FounderVIPModal
         isOpen={Boolean(founderData)}
         founderNumber={founderData?.founderNumber}
-        onClose={() => window.location.assign('/onboarding/tutorial')}
+        onClose={() => window.location.assign('/discover')}
       />
     </div>
   );

@@ -25,12 +25,18 @@ export async function GET() {
 
     const gold = await isGoldSubscriber(currentUserId);
 
-    // Find everyone who swiped like/super_like on the current user
-    // but the current user has NOT yet swiped on them.
+    // Find everyone who swiped like/super_like on the current user. A previous
+    // Pass is not a response to an incoming like: people who like you later
+    // must still appear in Who Liked You until you like them back.
     const alreadySwiped = db
       .select({ id: swipes.swipedId })
       .from(swipes)
-      .where(eq(swipes.swiperId, currentUserId));
+      .where(
+        and(
+          eq(swipes.swiperId, currentUserId),
+          ne(swipes.action, 'pass'),
+        )
+      );
 
     const likers = await db
       .select({
@@ -49,7 +55,7 @@ export async function GET() {
     const alreadySwipedIds = await alreadySwiped;
     const alreadySwipedSet = new Set(alreadySwipedIds.map((r) => r.id));
 
-    // Filter out people already responded to and the user themselves
+    // Filter out people already liked back and the user themselves
     const pendingLikers = likers.filter(
       (l) => !alreadySwipedSet.has(l.swiperId) && l.swiperId !== currentUserId
     );
