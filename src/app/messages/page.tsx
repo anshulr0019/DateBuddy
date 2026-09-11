@@ -45,6 +45,16 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>(cachedConversations || []);
   const [phase, setPhase] = useState<LoadPhase>(cachedConversations ? 'ready' : 'loading');
   const abortRef = useRef<AbortController | null>(null);
+  // Subscription membership changes only when chats are added or removed,
+  // not whenever a preview, unread count, or polling timestamp changes.
+  const conversationIds = useMemo(() => conversations.map(c => c.id).sort((a, b) => a - b).join(','), [conversations]);
+  const recentChatIds = conversations.slice(0, 5).map(c => c.id).join(',');
+
+  useEffect(() => {
+    // Prefetch route code only: opening the screen still performs the normal
+    // authenticated message request, and prefetching never marks a chat read.
+    recentChatIds.split(',').filter(Boolean).forEach(id => router.prefetch(`/chat/${id}`));
+  }, [recentChatIds, router]);
 
   const loadConversations = useCallback(async (isRetry = false) => {
     abortRef.current?.abort();
@@ -87,19 +97,19 @@ export default function MessagesPage() {
   }, [loadConversations]);
 
   useEffect(() => {
-    if (conversations.length === 0) return;
+    if (!conversationIds) return;
     const pusher = getPusherClient();
     if (!pusher) return;
     const channels: string[] = [];
 
-    conversations.forEach((conv) => {
-      const channelName = `chat-${conv.id}`;
+    conversationIds.split(',').map(Number).forEach((id) => {
+      const channelName = `chat-${id}`;
       channels.push(channelName);
       const channel = pusher.subscribe(channelName);
 
       channel.bind('new-message', (data: any) => {
         setConversations((prev) => {
-          const foundIdx = prev.findIndex((c) => c.id === conv.id);
+          const foundIdx = prev.findIndex((c) => c.id === id);
           if (foundIdx === -1) return prev;
           const target = prev[foundIdx];
           let displayMsg = data.content;
@@ -128,13 +138,15 @@ export default function MessagesPage() {
             time: data.createdAt || new Date().toISOString(),
             unread: isIncoming ? target.unread + 1 : target.unread,
           };
-          return [updated, ...prev.filter((c) => c.id !== conv.id)];
+          const next = [updated, ...prev.filter((c) => c.id !== id)];
+          cachedConversations = next;
+          return next;
         });
       });
     });
 
     return () => channels.forEach((ch) => pusher.unsubscribe(ch));
-  }, [conversations, myId]);
+  }, [conversationIds, myId]);
 
   const query = search.trim().toLowerCase();
   const filtered = useMemo(() => conversations.filter((conversation) => {

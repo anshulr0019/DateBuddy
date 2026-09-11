@@ -28,6 +28,11 @@ export default function ConnectionsPage() {
   const [error, setError] = useState(false);
   const [likesCount, setLikesCount] = useState<number | null>(cachedLikesCount);
 
+  const recentChatIds = matches.slice(0, 5).map(match => match.id).join(',');
+  useEffect(() => {
+    recentChatIds.split(',').filter(Boolean).forEach(id => router.prefetch(`/chat/${id}`));
+  }, [recentChatIds, router]);
+
   useEffect(() => {
     async function loadMatches() {
       try {

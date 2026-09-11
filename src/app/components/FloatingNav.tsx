@@ -22,19 +22,19 @@ const NAV_TABS: { id: NavTab; icon: (active: boolean) => React.ReactNode; label:
 // conflicting with card/scroll interactions in the center of the screen.
 const EDGE_PX = 28;
 const MIN_SWIPE_PX = 60;
+const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy', '/random-chat'];
 
 export default function FloatingNav() {
   const router = useRouter();
   const pathname = usePathname();
   const { unreadCount } = useNotifications();
+  const isStandalonePage = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/';
   // Keep a ref to pathname so the touch handler always has the latest value
   // without being re-registered on every navigation.
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
 
-  // Warm the Discover deck while the user is elsewhere so entering
-  // /discover renders instantly. No-op when already cached or in flight.
-    // Prefetch all primary navigation tabs so switching tabs is instant (0ms lag)
+  // Warm the primary route bundles before a tab is tapped.
   useEffect(() => {
     NAV_TABS.forEach((tab) => {
       router.prefetch(tab.path);
@@ -100,20 +100,26 @@ export default function FloatingNav() {
   const [hasModal, setHasModal] = useState(false);
 
   useEffect(() => {
+    // Hidden navigation need not scan chat messages or standalone screens.
+    if (isStandalonePage) return;
     const checkModal = () => {
       const modal = document.querySelector('[role="dialog"], [data-modal="true"], [aria-modal="true"], .animate-sheet-up');
       setHasModal(Boolean(modal));
     };
     checkModal();
     const observer = new MutationObserver(checkModal);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['role', 'data-modal', 'aria-modal', 'class'],
+    });
     return () => observer.disconnect();
-  }, []);
+  }, [isStandalonePage]);
 
 
   // Hide floating nav on standalone flow pages or when any modal/lightbox is open
-  const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/verification', '/welcome', '/settings', '/premium', '/likes', '/terms', '/privacy', '/random-chat'];
-  const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/' || hasModal;
+  const isHidden = isStandalonePage || hasModal;
 
   if (isHidden) return null;
 

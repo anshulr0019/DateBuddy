@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { messages, matches, users } from '@/db/schema';
+import { messages, matches, users, photos } from '@/db/schema';
 import { eq, desc, and, or, lt } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 import { triggerChatMessage, triggerReadReceipt, triggerMessageReaction } from '@/lib/pusher-server';
@@ -54,7 +54,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const page = await db
+    // Only the initial chat load needs its header. Resolve that one partner
+    // alongside the message page instead of downloading every match first.
+    const includePartner = new URL(request.url).searchParams.get('includePartner') === 'true';
+    const partnerId = match.user1Id === session.userId ? match.user2Id : match.user1Id;
+    const partnerPromise = includePartner
+      ? Promise.all([
+          db.select({ name: users.name, verified: users.isVerified, lastActiveAt: users.lastActiveAt })
+            .from(users).where(eq(users.id, partnerId)).limit(1),
+          db.select({ url: photos.url }).from(photos).where(eq(photos.userId, partnerId))
+            .orderBy(photos.orderIndex).limit(1),
+        ]).then(([[user], [photo]]) => ({
+          matchId,
+          partnerId,
+          name: user?.name ?? 'Your Match',
+          photo: photo?.url ?? null,
+          verified: Boolean(user?.verified),
+          online: user?.lastActiveAt ? Date.now() - new Date(user.lastActiveAt).getTime() < 5 * 60 * 1000 : false,
+          lastActiveAt: user?.lastActiveAt ? new Date(user.lastActiveAt).toISOString() : null,
+        }))
+      : Promise.resolve(null);
+
+    const [page, partner] = await Promise.all([db
       .select()
       .from(messages)
       .where(
@@ -63,12 +84,12 @@ export async function GET(request: NextRequest) {
           : and(eq(messages.matchId, matchId), lt(messages.id, before))
       )
       .orderBy(desc(messages.id))
-      .limit(PAGE_SIZE + 1);
+      .limit(PAGE_SIZE + 1), partnerPromise]);
 
     const hasMore = page.length > PAGE_SIZE;
     const conversation = (hasMore ? page.slice(0, PAGE_SIZE) : page).reverse();
 
-    return NextResponse.json({ success: true, messages: conversation, hasMore });
+    return NextResponse.json({ success: true, messages: conversation, hasMore, ...(includePartner ? { partner } : {}) });
   } catch (error) {
     console.error('Error fetching messages:', error);
     return NextResponse.json(

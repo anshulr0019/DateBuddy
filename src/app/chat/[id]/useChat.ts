@@ -75,10 +75,15 @@ export function useChat(matchId: number | null, myId: number | null) {
   const fetchMessages = useCallback(
     async (opts: { signal?: AbortSignal; initial?: boolean } = {}): Promise<'ok' | 'notfound' | 'error'> => {
       if (!matchId || myId === null) return 'error';
-      const res = await fetch(`/api/messages?matchId=${matchId}`, { signal: opts.signal });
+      const res = await fetch(`/api/messages?matchId=${matchId}${opts.initial ? '&includePartner=true' : ''}`, { signal: opts.signal });
       if (res.status === 404) return 'notfound';
       const data = await res.json().catch(() => null);
+      if (opts.signal?.aborted) return 'error';
       if (!res.ok || !data?.success || !Array.isArray(data.messages)) return 'error';
+      if (opts.initial) {
+        if (!data.partner || Number(data.partner.matchId) !== matchId) return 'error';
+        setPartner(data.partner as Partner);
+      }
 
       const raw = data.messages as ServerMessage[];
       const mapped = raw.map((m) => mapServerMessage(m, myId));
@@ -153,37 +158,6 @@ export function useChat(matchId: number | null, myId: number | null) {
     const signal = controller.signal;
 
     try {
-      const partnerRes = await fetch('/api/matches', { signal });
-      if (signal.aborted) return;
-      if (partnerRes.status === 404) {
-        setPhase('notfound');
-        return;
-      }
-      const partnerData = await partnerRes.json().catch(() => null);
-      if (!partnerRes.ok || !partnerData?.success || !Array.isArray(partnerData.matches)) {
-        setPhase('error');
-        return;
-      }
-
-      let found = partnerData.matches.find(
-        (m: any) => Number(m.matchId ?? m.id) === Number(matchId)
-      );
-      if (!found) {
-        try {
-          const convRes = await fetch('/api/conversations', { signal });
-          const convData = await convRes.json().catch(() => null);
-          if (convData?.success && Array.isArray(convData.conversations)) {
-            found = convData.conversations.find(
-              (c: any) => Number(c.matchId ?? c.id) === Number(matchId)
-            );
-          }
-        } catch { /* ignore */ }
-      }
-      if (!found) {
-        setPhase('notfound');
-        return;
-      }
-
       const msgResult = await fetchMessages({ signal, initial: true });
       if (signal.aborted) return;
       if (msgResult === 'notfound') {
@@ -195,15 +169,6 @@ export function useChat(matchId: number | null, myId: number | null) {
         return;
       }
 
-      setPartner({
-        matchId: Number(found.matchId ?? found.id),
-        partnerId: Number(found.partnerId),
-        name: String(found.name || 'Your Match'),
-        photo: found.photo ? String(found.photo) : null,
-        verified: Boolean(found.verified),
-        online: Boolean(found.online),
-        lastActiveAt: found.lastActiveAt ? String(found.lastActiveAt) : null,
-      });
       setPhase('ready');
     } catch {
       if (signal.aborted) return;
@@ -318,12 +283,18 @@ export function useChat(matchId: number | null, myId: number | null) {
   /* Background poll */
   useEffect(() => {
     if (phase !== 'ready') return;
-    const timer = setInterval(() => {
+    let polling = false;
+    const controller = new AbortController();
+    const timer = setInterval(async () => {
       if (document.hidden || !navigator.onLine) return;
-      if (sendsInFlightRef.current > 0) return;
-      fetchMessages().catch(() => {});
+      if (sendsInFlightRef.current > 0 || polling) return;
+      polling = true;
+      try {
+        await fetchMessages({ signal: controller.signal });
+      } catch { /* Retry on the next poll. */ }
+      finally { polling = false; }
     }, POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
+    return () => { clearInterval(timer); controller.abort(); };
   }, [phase, fetchMessages]);
 
   const setPendingStatus = useCallback((id: string, status: SendStatus) => {

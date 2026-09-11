@@ -9,6 +9,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { PERSONAS, DEFAULT_PERSONA, calculateDynamicVibe } from '@/lib/personaGreeting';
 import { hapticLight, hapticMedium } from '../lib/haptics';
 import { getCategoryCoverImage } from '@/app/lib/meetup-media';
+import { loadFeedPage } from '../lib/feedCache';
 
 type Pick = {
   id: number;
@@ -43,6 +44,12 @@ type RandomChatCard = {
   hasActiveSession: boolean;
 };
 
+// Keep the last successful view across tab switches; each visit still refreshes
+// from the server. These snapshots reset with the document on logout.
+let cachedPicks: Pick[] | null = null;
+let cachedMeetups: Meetup[] | null = null;
+let cachedRandomChat: RandomChatCard | null = null;
+
 const CATEGORIES = ['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const;
 const CATEGORY_EMOJI: Record<string, string> = {
   Gym: '🏋️ ',
@@ -67,10 +74,11 @@ export default function HomePage() {
   const router = useRouter();
   const { openNotifications, unreadCount, addNotification } = useNotifications();
 
-  const [picks, setPicks] = useState<Pick[]>([]);
-  const [meetups, setMeetups] = useState<Meetup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [randomChat, setRandomChat] = useState<RandomChatCard | null>(null);
+  const [picks, setPicks] = useState<Pick[]>(cachedPicks ?? []);
+  const [meetups, setMeetups] = useState<Meetup[]>(cachedMeetups ?? []);
+  const [loading, setLoading] = useState(cachedPicks === null);
+  const [loadingMeetups, setLoadingMeetups] = useState(cachedMeetups === null);
+  const [randomChat, setRandomChat] = useState<RandomChatCard | null>(cachedRandomChat);
 
   const [activePersona, setActivePersona] = useState({
     title: DEFAULT_PERSONA.title,
@@ -95,33 +103,45 @@ export default function HomePage() {
   const [hostError, setHostError] = useState('');
   const [publishing, setPublishing] = useState(false);
 
-  const loadMeetups = useCallback(async () => {
-    const res = await fetch('/api/meetups');
+  const loadMeetups = useCallback(async (signal?: AbortSignal) => {
+    const res = await fetch('/api/meetups', { signal });
     const data = await res.json();
-    if (data.success) setMeetups(data.meetups);
+    if (signal?.aborted) return;
+    if (data.success) {
+      cachedMeetups = data.meetups;
+      setMeetups(data.meetups);
+    }
   }, []);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [feedRes, rcRes] = await Promise.all([
-          fetch('/api/feed'),
-          fetch('/api/random-chat/overview'),
-          loadMeetups(),
-        ]);
-        const feed = await feedRes.json();
-        if (feed.success) setPicks(feed.profiles.slice(0, 4));
-        if (rcRes.ok) {
-          const rc = await rcRes.json();
-          if (rc.success) setRandomChat(rc);
-        }
-      } catch {
-        /* sections render their own empty states */
-      } finally {
-        setLoading(false);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    // A slow squad or anonymous-chat request must not hold back Today's Picks.
+    // Share an in-flight feed request with the navigation's Discover warmup.
+    loadFeedPage(null).then((feed) => {
+      if (signal.aborted) return;
+      if (feed.kind === 'success') {
+        cachedPicks = feed.profiles.slice(0, 4);
+        setPicks(cachedPicks);
       }
-    }
-    load();
+      setLoading(false);
+    });
+
+    loadMeetups(signal).catch(() => {}).finally(() => {
+      if (!signal.aborted) setLoadingMeetups(false);
+    });
+
+    fetch('/api/random-chat/overview', { signal })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!signal.aborted && data?.success) {
+          cachedRandomChat = data;
+          setRandomChat(data);
+        }
+      }).catch(() => {});
+
+    return () => controller.abort();
   }, [loadMeetups]);
 
   useEffect(() => {
@@ -448,7 +468,7 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                {!loading && filteredMeetups.length === 0 && (
+                {!loadingMeetups && filteredMeetups.length === 0 && (
                   <GlassCard className="p-5 text-center border border-infyn-border/70">
                     <p className="text-[13.5px] font-bold text-infyn-ink/70">No sessions here yet</p>
                     <p className="text-[12px] text-infyn-ink/50 mt-1">Be the first — tap <span className="font-bold">+ Host</span> to start one.</p>
@@ -539,7 +559,7 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                {!loading && meetups.length === 0 ? (
+                {!loadingMeetups && meetups.length === 0 ? (
                   <GlassCard className="p-5 text-center border border-infyn-border/70">
                     <p className="text-[13.5px] font-bold text-infyn-ink/70">No upcoming events</p>
                   </GlassCard>
