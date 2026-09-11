@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import styles from './discover.module.css';
 import DiscoverProfileCard from './components/DiscoverProfileCard';
 import DiscoverActionBar from './components/DiscoverActionBar';
@@ -49,14 +49,23 @@ export default function DiscoverPage() {
   const router = useRouter();
   const { addNotification } = useNotifications();
 
+  const { filters, openFilters } = useFilters();
+  const feedFilters: FeedFilters = useMemo(() => ({
+    ageMin: filters.ageMin,
+    ageMax: filters.ageMax,
+    verifiedOnly: filters.verifiedOnly,
+  }), [filters.ageMin, filters.ageMax, filters.verifiedOnly]);
+  const filtersKey = JSON.stringify(feedFilters);
+  const [deckFiltersKey, setDeckFiltersKey] = useState(filtersKey);
+
   // Seed from the navigation-surviving cache so re-entering Discover
   // (or entering after the nav prefetch landed) renders instantly.
-  const [profiles, setProfiles] = useState<Profile[]>(() => getCachedFeed()?.profiles ?? []);
+  const [profiles, setProfiles] = useState<Profile[]>(() => getCachedFeed(feedFilters)?.profiles ?? []);
   const [status, setStatus] = useState<Status>(() =>
-    (getCachedFeed()?.profiles.length ?? 0) > 0 ? 'ready' : 'loading'
+    getCachedFeed(feedFilters) ? 'ready' : 'loading'
   );
-  const [nextCursor, setNextCursor] = useState<number | null>(() => getCachedFeed()?.nextCursor ?? null);
-  const [hasMore, setHasMore] = useState(() => getCachedFeed()?.hasMore ?? true);
+  const [nextCursor, setNextCursor] = useState<number | null>(() => getCachedFeed(feedFilters)?.nextCursor ?? null);
+  const [hasMore, setHasMore] = useState(() => getCachedFeed(feedFilters)?.hasMore ?? true);
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [exit, setExit] = useState<{ dir: ExitDir; viaDrag: boolean } | null>(null);
@@ -71,6 +80,7 @@ export default function DiscoverPage() {
 
   const [likedPrompts, setLikedPrompts] = useState<Record<string, boolean>>({});
   const [actionError, setActionError] = useState<string | null>(null);
+  const [feedError, setFeedError] = useState(false);
 
   const [safetySheetOpen, setSafetySheetOpen] = useState(false);
   const [reportSubmitting, setReportSubmitting] = useState(false);
@@ -83,26 +93,21 @@ export default function DiscoverPage() {
   const pendingAdvanceRef = useRef<{ id: number } | null>(null);
   const matchedIdsRef = useRef<Set<number>>(new Set());
   const reducedMotionRef = useRef(false);
-  const fetchingRef = useRef(false);
+  const requestRef = useRef<{ key: string } | null>(null);
+  const activeFiltersRef = useRef(filtersKey);
+  activeFiltersRef.current = filtersKey;
 
   const currentProfile = profiles[0];
 
-  const { filters, openFilters } = useFilters();
-
-  const feedFilters: FeedFilters = {
-    ageMin: filters.ageMin,
-    ageMax: filters.ageMax,
-    verifiedOnly: filters.verifiedOnly,
-  };
-  const feedFiltersRef = useRef(feedFilters);
-  feedFiltersRef.current = feedFilters;
-
   const loadFeed = useCallback(async (cursor: number | null) => {
-    if (fetchingRef.current) return;
-    fetchingRef.current = true;
+    if (requestRef.current?.key === filtersKey) return;
+    const request = { key: filtersKey };
+    requestRef.current = request;
+    setFeedError(false);
     try {
       // First-page loads are deduped with the nav prefetch inside loadFeedPage.
-      const result = await loadFeedPage(cursor, feedFiltersRef.current);
+      const result = await loadFeedPage(cursor, feedFilters);
+      if (requestRef.current !== request || activeFiltersRef.current !== filtersKey) return;
 
       if (result.kind === 'unauthorized') {
         router.replace('/welcome');
@@ -119,55 +124,52 @@ export default function DiscoverPage() {
       });
       setNextCursor(result.nextCursor);
       setHasMore(result.nextCursor !== null && incoming.length > 0);
+      setDeckFiltersKey(filtersKey);
       setStatus('ready');
-      markCacheFresh();
+      markCacheFresh(feedFilters);
       preloadDeckImages(incoming);
     } catch {
+      if (requestRef.current !== request || activeFiltersRef.current !== filtersKey) return;
+      setFeedError(true);
       // Only surface a full-page error when there is nothing to show.
       setStatus((prev) => (prev === 'ready' ? 'ready' : 'error'));
     } finally {
-      fetchingRef.current = false;
+      if (requestRef.current === request) requestRef.current = null;
     }
-  }, [router]);
+  }, [router, feedFilters, filtersKey]);
 
   useEffect(() => {
-    // Cache hit: skip the network entirely unless the deck is stale,
-    // in which case refresh in the background (dedup keeps it safe —
-    // already-swiped people are excluded server-side).
-    if (profiles.length > 0) {
-      if (isCacheStale()) loadFeed(null);
-      return;
+    const cached = getCachedFeed(feedFilters);
+    setProfiles(cached?.profiles ?? []);
+    setNextCursor(cached?.nextCursor ?? null);
+    setHasMore(cached?.hasMore ?? true);
+    setStatus(cached ? 'ready' : 'loading');
+    setDeckFiltersKey(filtersKey);
+    setCurrentPhotoIndex(0);
+    setActionError(null);
+    setFeedError(false);
+    // Cancel the old deck's visual transition when preferences change.
+    if (swipeTimerRef.current) clearTimeout(swipeTimerRef.current);
+    pendingAdvanceRef.current = null;
+    exitLockRef.current = false;
+    setExit(null);
+    if (!cached || isCacheStale(feedFilters)) void loadFeed(null);
+    return () => { requestRef.current = null; };
+  }, [feedFilters, filtersKey, loadFeed]);
+
+  // Never save the previous render's profiles under newly selected filters.
+  useEffect(() => {
+    if (status !== 'ready' || deckFiltersKey !== filtersKey) return;
+    setCachedFeed({ profiles, nextCursor, hasMore }, feedFilters);
+  }, [status, profiles, nextCursor, hasMore, feedFilters, filtersKey, deckFiltersKey]);
+
+  useEffect(() => {
+    if (status === 'ready' && deckFiltersKey === filtersKey && hasMore && nextCursor !== null && profiles.length <= REFILL_THRESHOLD) {
+      void loadFeed(nextCursor);
     }
-    loadFeed(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadFeed]);
+  }, [status, hasMore, profiles.length, nextCursor, loadFeed, deckFiltersKey, filtersKey]);
 
-  // Keep the cache in sync with the live deck so leaving and returning
-  // resumes exactly where the user left off.
-  useEffect(() => {
-    if (status !== 'ready') return;
-    setCachedFeed({ profiles, nextCursor, hasMore });
-  }, [status, profiles, nextCursor, hasMore]);
-
-  // Top up the deck before it runs dry so there is no dead end.
-  useEffect(() => {
-    if (status === 'ready' && hasMore && profiles.length <= REFILL_THRESHOLD) {
-      loadFeed(nextCursor);
-    }
-  }, [status, hasMore, profiles.length, nextCursor, loadFeed]);
-
-  // Reload deck from scratch when discovery filters change.
-  const filtersKey = JSON.stringify(feedFilters);
-  useEffect(() => {
-    // Reset deck and fetch with new filters
-    setProfiles([]);
-    setNextCursor(null);
-    setHasMore(true);
-    setStatus('loading');
-    loadFeed(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtersKey]);
-
+  useEffect(() => { setCurrentPhotoIndex(0); }, [currentProfile?.id]);
 
   // Current user's own photo for the match celebration.
   useEffect(() => {
@@ -194,7 +196,11 @@ export default function DiscoverPage() {
   }, []);
 
   useEffect(() => {
-    reducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => { reducedMotionRef.current = media.matches; };
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
   }, []);
 
   const resetDragVisuals = useCallback((_animate: boolean) => {
@@ -237,7 +243,9 @@ export default function DiscoverPage() {
 
     setLastSwipe({ profile: target, action, promise });
 
+    const swipeFiltersKey = filtersKey;
     const restoreTarget = () => {
+      if (activeFiltersRef.current !== swipeFiltersKey) return;
       setLastSwipe(cur => cur?.profile.id === target.id ? null : cur);
       setLikedPrompts(cur => Object.fromEntries(Object.entries(cur).filter(([key]) => !key.startsWith(`${target.id}-`))));
       if (pendingAdvanceRef.current?.id === target.id) {
@@ -291,7 +299,7 @@ export default function DiscoverPage() {
       setProfiles((prev) => prev.filter((p) => p.id !== target.id));
       exitLockRef.current = false;
     }, reducedMotionRef.current ? REDUCED_EXIT_MS : SWIPE_ANIMATION_MS);
-  }, [profiles, router, resetDragVisuals, addNotification]);
+  }, [profiles, router, resetDragVisuals, addNotification, filtersKey]);
 
   const togglePromptLike = useCallback((promptKey: string) => {
     if (exitLockRef.current) return;
@@ -463,11 +471,12 @@ export default function DiscoverPage() {
 
   /* ---- Loading ---- */
   const unavailable = status !== 'ready' || !currentProfile;
-  const failed = status === 'error';
+  const loading = status === 'loading' || (status === 'ready' && !currentProfile && hasMore && !feedError);
+  const failed = status === 'error' || (!currentProfile && feedError);
   return (
     <Shell>
       <TopBar />
-      {status === 'loading' ? <div className={styles.loading} role="status" aria-label="Loading profiles">
+      {loading ? <div className={styles.loading} role="status" aria-label="Loading profiles">
         <div className={styles.skeletonPhoto} /><div className={styles.skeletonLine} /><div className={styles.skeletonExcerpt} />
         <span className={styles.srOnly}>Finding people for you…</span>
       </div> : unavailable ? <div className={styles.state}>
@@ -476,7 +485,7 @@ export default function DiscoverPage() {
         <h2>{failed ? 'Couldn’t load profiles' : 'You’re all caught up'}</h2>
         <p>{failed ? 'Check your connection and try again. We’ll be here.' : 'No more profiles to show right now. Try adjusting your age or verification preferences, or check back later.'}</p>
         {!failed && <button className={styles.primary} onClick={openFilters}>Adjust filters</button>}
-        <button className={failed ? styles.primary : styles.textButton} onClick={() => { setStatus('loading'); loadFeed(null); }}>{failed ? 'Try again' : 'Refresh profiles'}</button>
+        <button className={failed ? styles.primary : styles.textButton} onClick={() => { setStatus('loading'); loadFeed(nextCursor); }}>{failed ? 'Try again' : 'Refresh profiles'}</button>
         {lastSwipe && <button className={styles.textButton} disabled={undoBusy} onClick={handleUndo}>{undoBusy ? 'Undoing…' : 'Undo last decision'}</button>}
       </div> : <div className={styles.deck}>
         <div key={`${currentProfile.id}-${cardKey}`} ref={scrollRef} className={`${styles.profileScroll} ${exit ? styles['exit' + exit.dir] : enterAnim ? styles.enter : ''}`}>
@@ -486,8 +495,9 @@ export default function DiscoverPage() {
             likedPrompts={likedPrompts} onPromptLike={togglePromptLike} disabled={Boolean(exit) || undoBusy} />
         </div>
       </div>}
+      {feedError && currentProfile && <div role="alert" className={styles.actionError}><span>Couldn’t load more profiles.</span><button className={styles.retryFeed} onClick={() => loadFeed(nextCursor)}>Retry</button></div>}
       {actionError && <div role="alert" className={styles.actionError}><span>{actionError}</span><button onClick={() => setActionError(null)} aria-label="Dismiss error">×</button></div>}
-      {!unavailable || status === 'loading' ? <DiscoverActionBar onPass={() => commitSwipe('pass', false)} onLike={() => commitSwipe('like', false)}
+      {!unavailable || loading ? <DiscoverActionBar onPass={() => commitSwipe('pass', false)} onLike={() => commitSwipe('like', false)}
         onSuperLike={() => commitSwipe('super_like', false)} onUndo={handleUndo}
         canUndo={Boolean(lastSwipe)} undoBusy={undoBusy} disabled={Boolean(exit) || undoBusy || unavailable} /> : null}
 

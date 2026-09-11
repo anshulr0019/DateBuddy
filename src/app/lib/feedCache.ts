@@ -43,8 +43,8 @@ export type FeedResult =
 export const FEED_MAX_AGE_MS = 5 * 60 * 1000;
 
 let cache: CachedFeed | null = null;
-let inflightFirstPage: Promise<FeedResult> | null = null;
-let cachedFilters: string | null = null; // JSON key to detect filter changes
+const inflightFirstPages = new Map<string, Promise<FeedResult>>();
+let cachedFilters: string | null = null;
 
 export type FeedFilters = {
   ageMin?: number;
@@ -71,39 +71,43 @@ async function fetchPage(cursor: number | null, filters?: FeedFilters): Promise<
   }
 }
 
-/* First-page loads are shared: concurrent callers get one request.
-   If filters changed, invalidate the cache and start a fresh request. */
+// Normalize omitted values to the API defaults; request order does not affect identity.
+function filterKey(filters?: FeedFilters): string {
+  return JSON.stringify([filters?.ageMin ?? 18, filters?.ageMax ?? 60, Boolean(filters?.verifiedOnly)]);
+}
+
+/* Only requests with the same filters share a first page. An older request
+   must never clear a newer request or invalidate the deck being displayed. */
 export function loadFeedPage(cursor: number | null, filters?: FeedFilters): Promise<FeedResult> {
-  const filterKey = JSON.stringify(filters ?? {});
-  // If filters changed, reset cache and inflight so we get a fresh deck.
-  if (cursor === null && filterKey !== cachedFilters) {
-    cache = null;
-    inflightFirstPage = null;
-    cachedFilters = filterKey;
-  }
   if (cursor !== null) return fetchPage(cursor, filters);
-  if (!inflightFirstPage) {
-    inflightFirstPage = fetchPage(null, filters).finally(() => {
-      inflightFirstPage = null;
-    });
-  }
-  return inflightFirstPage;
+  const key = filterKey(filters);
+  const pending = inflightFirstPages.get(key);
+  if (pending) return pending;
+  const request = fetchPage(null, filters).finally(() => {
+    if (inflightFirstPages.get(key) === request) inflightFirstPages.delete(key);
+  });
+  inflightFirstPages.set(key, request);
+  return request;
 }
 
-export function getCachedFeed(): CachedFeed | null {
-  return cache;
+export function getCachedFeed(filters?: FeedFilters): CachedFeed | null {
+  return cachedFilters === filterKey(filters) ? cache : null;
 }
 
-export function isCacheStale(): boolean {
-  return !cache || Date.now() - cache.fetchedAt > FEED_MAX_AGE_MS;
+export function isCacheStale(filters?: FeedFilters): boolean {
+  const cached = getCachedFeed(filters);
+  return !cached || Date.now() - cached.fetchedAt > FEED_MAX_AGE_MS;
 }
 
-export function setCachedFeed(update: Omit<CachedFeed, 'fetchedAt'>): void {
-  cache = { ...update, fetchedAt: cache?.fetchedAt ?? Date.now() };
+export function setCachedFeed(update: Omit<CachedFeed, 'fetchedAt'>, filters?: FeedFilters): void {
+  const previous = getCachedFeed(filters);
+  cache = { ...update, fetchedAt: previous?.fetchedAt ?? Date.now() };
+  cachedFilters = filterKey(filters);
 }
 
-export function markCacheFresh(): void {
-  if (cache) cache.fetchedAt = Date.now();
+export function markCacheFresh(filters?: FeedFilters): void {
+  const cached = getCachedFeed(filters);
+  if (cached) cached.fetchedAt = Date.now();
 }
 
 /* Warm the first card photos so the deck never appears as a grey box. */
@@ -123,10 +127,11 @@ export function preloadDeckImages(profiles: FeedProfile[], count = 2): void {
    ever taps Discover. No-ops when a deck is already cached or loading. */
 export function prefetchFeed(): void {
   if (typeof window === 'undefined') return;
-  if (cache && cache.profiles.length > 0) return;
+  if (cache) return;
 
   loadFeedPage(null).then((result) => {
-    if (result.kind !== 'success') return; // stay silent — the page handles errors itself
+    if (result.kind !== 'success' || cache) return; // never overwrite a live deck
+    cachedFilters = filterKey();
     cache = {
       profiles: result.profiles,
       nextCursor: result.nextCursor,

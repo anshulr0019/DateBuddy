@@ -7,7 +7,7 @@
   font-family: 'Infyn DM', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--ink);
 }
-.root { height: 100dvh; width: 100%; display: flex; justify-content: center; background: #efe8dc; }
+.root { height: 100vh; height: 100dvh; width: 100%; display: flex; justify-content: center; background: #efe8dc; }
 .shell { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; overflow: hidden; background: var(--paper); padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
 .root button, .nav button { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 150ms ease, background-color 150ms ease; }
 .root button:active:not(:disabled), .nav button:active { transform: scale(.98); }
@@ -24,7 +24,7 @@
 .iconButton { width: 44px; }
 .count { background: var(--rose); color: white; border-radius: 50%; min-width: 18px; line-height: 18px; font-size: 11px; }
 .unread { position: absolute; width: 7px; height: 7px; background: var(--rose); border-radius: 50%; top: 8px; right: 8px; }
-.deck { flex: 1; min-height: 0; position: relative; margin: 0 20px; }
+.deck { container-type: size; flex: 1; min-height: 0; position: relative; margin: 0 20px; }
 .profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); }
 .profileScroll::-webkit-scrollbar { display: none; }
 .profileCard { background: var(--surface); min-height: 100%; }
@@ -38,10 +38,13 @@
 .safety { position: absolute; top: 24px; right: 12px; width: 44px; height: 44px; border-radius: 50%; background: #fffefaed; color: var(--ink); letter-spacing: 2px; font-weight: 700; }
 .identity { position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 18px 18px; color: #fffefa; background: linear-gradient(transparent, #201a16d9); pointer-events: none; }
 .nameRow { display: flex; align-items: center; gap: 9px; }
-.nameRow h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 30px; line-height: 1.18; font-weight: 400; overflow-wrap: anywhere; }
+.nameRow h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 30px; line-height: 1.18; font-weight: 400; min-width: 0; display: flex; align-items: baseline; }
+.profileName { overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.age { flex-shrink: 0; white-space: pre; }
 .verified { background: #fffefa; color: var(--rose); display: inline-flex; padding: 3px; border-radius: 50%; flex-shrink: 0; }
 .verified svg { width: 15px; height: 15px; }
 .identity p { font-size: 14px; display: flex; gap: 5px; margin-top: 7px; align-items: center; }
+.identity p span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .identity p svg { width: 14px; height: 14px; flex-shrink: 0; }
 .photoArrow { position: absolute; top: 40%; height: 44px; width: 44px; color: white; font-size: 30px; text-shadow: 0 1px 4px #000; background: #201a1633; border-radius: 10px; }
 .previous { left: 6px; } .next { right: 6px; }
@@ -79,14 +82,15 @@
 .secondaryAction > span:first-child { font-size: 25px; line-height: 26px; }
 .actionError { display: flex; align-items: center; gap: 10px; margin: 8px 20px 0; padding: 6px 12px; border-radius: 12px; background: #f6e0e4; color: #801c37; font-size: 13px; flex-shrink: 0; }
 .actionError button { min-width: 44px; min-height: 44px; font-size: 24px; margin-left: auto; }
-.state { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 32px; text-align: center; }
+.actionError .retryFeed { font-size: 13px; font-weight: 600; }
+.state { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: safe center; padding: 24px 32px; text-align: center; }
 .state h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 32px; line-height: 1.2; margin: 12px 0; }
 .state > p:not(.eyebrow) { font-size: 16px; line-height: 1.6; color: var(--secondary); max-width: 320px; margin-bottom: 24px; }
 .stateIcon { width: 72px; height: 72px; border: 1px solid #e6c6cd; background: #f6e0e4; color: var(--rose); border-radius: 50%; display: grid; place-items: center; margin-bottom: 26px; }
 .stateIcon svg { width: 27px; height: 27px; }
 .primary { min-height: 52px; background: var(--rose); color: #fff8f0; border-radius: 16px; width: 100%; padding: 12px 20px; font-size: 15px; font-weight: 600; }
 .textButton { min-height: 48px; padding: 10px 16px; font-size: 14px; color: var(--secondary); }
-.loading { margin: 0 20px; flex: 1; min-height: 0; border: 1px solid var(--border); border-radius: 24px; overflow: hidden; background: var(--surface); }
+.loading { container-type: size; margin: 0 20px; flex: 1; min-height: 0; border: 1px solid var(--border); border-radius: 24px; overflow: hidden; background: var(--surface); }
 .skeletonPhoto { height: clamp(200px, calc(100dvh - 388px), 530px); background: #e9dfcf; animation: breathe 1.8s ease-in-out infinite; }
 .skeletonLine { width: 45%; height: 12px; margin: 22px 18px 16px; background: #e9dfcf; border-radius: 8px; }
 .skeletonExcerpt { height: 42px; margin: 0 18px; background: #f0e8dc; border-radius: 8px; }
@@ -101,13 +105,15 @@
 .navUnread { position: absolute; top: 2px; right: calc(50% - 17px); width: 7px; height: 7px; background: #9e1b41; border: 1px solid #fffefa; border-radius: 50%; }
 .enter { animation: arrive 220ms ease-out both; }
 .exitleft { animation: leaveLeft 260ms ease-in both; pointer-events: none; }
-.exitright, .exitup { animation: leaveRight 260ms ease-in both; pointer-events: none; }
+.exitright { animation: leaveRight 260ms ease-in both; pointer-events: none; }
+.exitup { animation: leaveUp 260ms ease-in both; pointer-events: none; }
+@keyframes leaveUp { to { opacity: 0; transform: translateY(-35px); } }
 @keyframes arrive { from { opacity: .5; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 @keyframes leaveLeft { to { opacity: 0; transform: translateX(-35px) rotate(-2deg); } }
 @keyframes leaveRight { to { opacity: 0; transform: translateX(35px) rotate(2deg); } }
 @keyframes breathe { 50% { opacity: .65; } }
 @media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 6px; grid-template-columns: 44px 1fr 1fr 50px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }
-@media (max-height: 700px) { .header { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; } .portrait { min-height: 190px; } .preview { padding-top: 8px; } .actionBar { padding-top: 8px; padding-bottom: 8px; } }
+@media (max-height: 700px) { .header { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; }  .preview { padding-top: 8px; } .actionBar { padding-top: 8px; padding-bottom: 8px; } }
 @media (prefers-reduced-motion: reduce) { .root *, .nav *, .filterTheme *, .matchTheme * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
 /* Shared overlays receive these hooks only while opened from Discover. */
 .filterTheme h2 { font-family: 'Infyn Serif', Georgia, serif; font-weight: 400; }
@@ -127,3 +133,9 @@
 .matchTheme [class*='Glow'], .matchTheme [class*='uppercase'] { background: #f6e0e4; color: var(--rose); box-shadow: none; }
 
 :global(html):has(.root), :global(body):has(.root) { scrollbar-gutter: auto; }
+
+/* Size the photograph from the space actually left by the header, actions,
+   safe areas and any error banner, keeping the personality excerpt in view. */
+@supports (height: 1cqh) {
+  .portrait, .skeletonPhoto { height: clamp(160px, calc(100cqh - 156px), 530px); }
+}

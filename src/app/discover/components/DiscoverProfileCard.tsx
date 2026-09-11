@@ -25,22 +25,26 @@ export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange
     details.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
     details.current?.focus({ preventScroll: true });
   };
-  const changePhoto = (delta: number) => onPhotoChange((photoIndex + delta + profile.photos.length) % profile.photos.length);
+  // Background refreshes can replace a profile with fewer photos.
+  const visiblePhotoIndex = Math.min(photoIndex, Math.max(0, profile.photos.length - 1));
+  const changePhoto = (delta: number) => {
+    if (!disabled && profile.photos.length > 1) onPhotoChange((visiblePhotoIndex + delta + profile.photos.length) % profile.photos.length);
+  };
   return <article className={styles.profileCard} aria-label={`${profile.name}'s profile`}>
     <div className={styles.portrait}>
-      <SafeImage key={`${profile.id}-${photoIndex}`} eager src={profile.photos[photoIndex]} name={profile.name}
-        alt={`${profile.name}, photo ${photoIndex + 1}`} className={styles.photo}
+      <SafeImage key={`${profile.id}-${visiblePhotoIndex}`} eager src={profile.photos[visiblePhotoIndex]} name={profile.name}
+        alt={`${profile.name}, photo ${visiblePhotoIndex + 1}`} className={styles.photo}
         onClick={profile.photos.length > 1 ? e => { const r = e.currentTarget.getBoundingClientRect(); changePhoto(e.clientX - r.left > r.width / 2 ? 1 : -1); } : undefined} />
       {profile.photos.length > 1 && <>
-        <div className={styles.photoProgress} aria-hidden="true">{profile.photos.map((_, i) => <span key={i} data-active={i === photoIndex} />)}</div>
-        <button className={`${styles.photoArrow} ${styles.previous}`} onClick={() => changePhoto(-1)} aria-label="Previous photo">‹</button>
-        <button className={`${styles.photoArrow} ${styles.next}`} onClick={() => changePhoto(1)} aria-label="Next photo">›</button>
-        <span className={styles.photoCount}>{photoIndex + 1} / {profile.photos.length}</span>
+        <div className={styles.photoProgress} aria-hidden="true">{profile.photos.map((_, i) => <span key={i} data-active={i === visiblePhotoIndex} />)}</div>
+        <button className={`${styles.photoArrow} ${styles.previous}`} disabled={disabled} onClick={() => changePhoto(-1)} aria-label="Previous photo">‹</button>
+        <button className={`${styles.photoArrow} ${styles.next}`} disabled={disabled} onClick={() => changePhoto(1)} aria-label="Next photo">›</button>
+        <span className={styles.photoCount}>{visiblePhotoIndex + 1} / {profile.photos.length}</span>
       </>}
       {profile.online && <span className={styles.online}><span />Active now</span>}
-      <button className={styles.safety} onClick={onSafety} aria-label={`Report or block ${profile.name}`}>•••</button>
+      <button className={styles.safety} disabled={disabled} onClick={onSafety} aria-label={`Report or block ${profile.name}`}>•••</button>
       <div className={styles.identity}>
-        <div className={styles.nameRow}><h2>{profile.name}{profile.age ? `, ${profile.age}` : ''}</h2>{profile.verified && <span className={styles.verified} role="img" aria-label="Verified profile"><Ic.Check /></span>}</div>
+        <div className={styles.nameRow}><h2 aria-label={`${profile.name}${profile.age ? `, ${profile.age}` : ''}`}><span className={styles.profileName}>{profile.name}</span>{profile.age ? <span className={styles.age}>, {profile.age}</span> : null}</h2>{profile.verified && <span className={styles.verified} role="img" aria-label="Verified profile"><Ic.Check /></span>}</div>
         {(profile.distance || profile.city) && <p><Ic.MapPin /><span>{[profile.distance, profile.city].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' · ')}</span></p>}
       </div>
     </div>
@@ -57,7 +61,7 @@ export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange
       {profile.prompts.filter(p => p.a.trim()).length > 0 && <section><h3>A little more personality</h3><div className={styles.prompts}>{profile.prompts.map((p, i) => p.a.trim() && <div key={i} className={styles.prompt}>
         <div><span>{p.q}</span><p>{p.a}</p></div><button disabled={disabled} aria-label={`Like ${profile.name}'s answer to "${p.q}"`} aria-pressed={Boolean(likedPrompts[`${profile.id}-${i}`])} onClick={() => onPromptLike(`${profile.id}-${i}`)}><Ic.Heart filled={Boolean(likedPrompts[`${profile.id}-${i}`])} /></button>
       </div>)}</div></section>}
-      <div className={styles.safetyFooter}><span>{profile.verified ? 'Verified profile' : 'Take your time. Trust your instincts.'}</span><button onClick={onSafety}>Report or block</button></div>
+      <div className={styles.safetyFooter}><span>{profile.verified ? 'Verified profile' : 'Take your time. Trust your instincts.'}</span><button disabled={disabled} onClick={onSafety}>Report or block</button></div>
     </div>
   </article>;
 }
