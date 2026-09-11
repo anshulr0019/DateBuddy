@@ -61,7 +61,7 @@ export function SafeImage({
     return (
       <div
         onClick={onClick}
-        className={`flex items-center justify-center bg-[#1A1A2E]/10 text-[#1A1A2E]/70 font-bold tracking-tight select-none ${className}`}
+        className={`flex items-center justify-center bg-infyn-ink/10 text-infyn-ink/70 font-bold tracking-tight select-none ${className}`}
         style={style}
       >
         <span className="drop-shadow-sm">{getInitials(name || alt)}</span>
@@ -89,7 +89,7 @@ export function SafeImage({
 
 export function AuroraBackground({ subtle = false, children, className = '' }: { subtle?: boolean; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`relative h-full w-full overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] flex flex-col flex-1 min-h-0 ${subtle ? 'aurora-subtle' : ''} ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden bg-infyn-paper text-infyn-ink flex flex-col flex-1 min-h-0 ${subtle ? 'aurora-subtle' : ''} ${className}`}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         <div className="aurora-blob aurora-blob-1" />
         <div className="aurora-blob aurora-blob-2" />
@@ -103,7 +103,7 @@ export function AuroraBackground({ subtle = false, children, className = '' }: {
 
 export function GlassCard({ children, className = '', style, onClick }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void }) {
   return (
-    <div onClick={onClick} className={`rounded-[24px] border border-white/80 bg-white/85 shadow-[0_12px_36px_-18px_rgba(26,26,46,0.12)] backdrop-blur-md ${className}`} style={style}>
+    <div onClick={onClick} className={`rounded-[24px] border border-infyn-border/80 bg-infyn-surface/85 shadow-[0_12px_36px_-18px_rgba(32,26,22,0.12)] backdrop-blur-md ${className}`} style={style}>
       {children}
     </div>
   );
@@ -112,7 +112,7 @@ export function GlassCard({ children, className = '', style, onClick }: { childr
 export function PrimaryButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button onClick={onClick}
-      className={`group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-[15px] font-bold text-white shadow-[0_12px_32px_-10px_rgba(123,104,238,0.55)] transition-all duration-200 active:scale-[0.985] cursor-pointer ${className}`}>
+      className={`group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-[15px] font-bold text-white shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] transition-all duration-200 active:scale-[0.985] cursor-pointer ${className}`}>
       {/* Hover shimmer */}
       <span aria-hidden className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: 'linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.22) 50%, transparent 80%)' }} />
@@ -122,12 +122,12 @@ export function PrimaryButton({ children, onClick, className = '' }: { children:
 }
 
 export function OnlineDot({ className = '' }: { className?: string }) {
-  return <div className={`rounded-full border-2 border-[#FAFAF7] bg-[#22C55E] pulse-glow ${className}`} />;
+  return <div className={`rounded-full border-2 border-infyn-paper bg-[#22C55E] pulse-glow ${className}`} />;
 }
 
 export function VerifiedBadge() {
   return (
-    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F43F5E] text-white shadow-2xs">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-infyn-rose text-white shadow-2xs">
       <Ic.Check />
     </div>
   );
@@ -135,7 +135,7 @@ export function VerifiedBadge() {
 
 export function GradientText({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={`bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent font-bold ${className}`}>
+    <span className={`bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent font-bold ${className}`}>
       {children}
     </span>
   );

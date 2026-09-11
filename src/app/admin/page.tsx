@@ -255,18 +255,18 @@ export default function AdminDashboardPage() {
   /* ── 1. LOGIN PIN MODAL ── */
   if (!isAuthenticated) {
     return (
-      <div className="min-h-dvh w-full bg-[#0A0A0E] text-white flex items-center justify-center p-5 font-sans select-none">
-        <div className="relative w-full max-w-sm rounded-[32px] bg-[#14141B] border border-white/15 p-8 text-center shadow-2xl overflow-hidden">
+      <div className="min-h-dvh w-full bg-infyn-dark text-white flex items-center justify-center p-5 font-sans select-none">
+        <div className="relative w-full max-w-sm rounded-[32px] bg-infyn-dark-surface border border-white/15 p-8 text-center shadow-2xl overflow-hidden">
           {/* Ambient Glow */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-[#FF6B9D]/30 blur-[60px]" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-[#7B68EE]/30 blur-[60px]" />
+          <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-infyn-rose/30 blur-[60px]" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-infyn-rose/30 blur-[60px]" />
 
           <div className="relative z-10">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 border border-white/15 mx-auto mb-4 text-3xl shadow-md">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-infyn-surface/10 border border-white/15 mx-auto mb-4 text-3xl shadow-md">
               👑
             </div>
 
-            <h1 className="text-[22px] font-black tracking-tight mb-1">Founder Access</h1>
+            <h1 className="text-[22px] font-normal tracking-tight mb-1 font-display">Founder Access</h1>
             <p className="text-[13px] text-white/55 mb-6">Enter your secret PIN to access Infyn Live Hub.</p>
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
@@ -276,7 +276,7 @@ export default function AdminDashboardPage() {
                 onChange={(e) => setInputPin(e.target.value)}
                 placeholder="Enter PIN (e.g. infyn2026)"
                 autoFocus
-                className="w-full h-12 rounded-2xl bg-black/50 border border-white/20 px-4 text-center text-[16px] font-bold text-white tracking-widest outline-none focus:border-[#FF6B9D] focus:ring-2 focus:ring-[#FF6B9D]/20 transition-all placeholder:text-white/30 placeholder:tracking-normal"
+                className="w-full h-12 rounded-2xl bg-black/50 border border-white/20 px-4 text-center text-[16px] font-bold text-white tracking-widest outline-none focus:border-infyn-rose focus:ring-2 focus:ring-infyn-rose/20 transition-all placeholder:text-white/30 placeholder:tracking-normal"
               />
 
               {authError && (
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
               <button
                 type="submit"
                 disabled={loading || !inputPin.trim()}
-                className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white font-extrabold text-[14px] shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                className="w-full h-12 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white font-extrabold text-[14px] shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center"
               >
                 {loading ? 'Verifying…' : 'Unlock Dashboard ✨'}
               </button>
@@ -302,17 +302,17 @@ export default function AdminDashboardPage() {
   const earlyVipPct = Math.min(100, Math.round((earlyVipClaimed / 500) * 100));
 
   return (
-    <div className="min-h-dvh w-full bg-[#08080C] text-white font-sans select-none pb-20">
+    <div className="min-h-dvh w-full bg-infyn-dark text-white font-sans select-none pb-20">
       {/* ── TOP NAV HEADER ── */}
-      <header className="sticky top-0 z-30 bg-[#08080C]/85 backdrop-blur-xl border-b border-white/10 px-5 py-4">
+      <header className="sticky top-0 z-30 bg-infyn-dark/85 backdrop-blur-xl border-b border-white/10 px-5 py-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-[#FF6B9D] to-[#7B68EE] text-xl shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-infyn-rose to-infyn-rose text-xl shadow-sm">
               👑
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-[18px] font-black tracking-tight leading-none">Infyn Founder Hub</h1>
+                <h1 className="text-[18px] font-normal tracking-tight leading-none font-display">Infyn Founder Hub</h1>
                 <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   LIVE
@@ -325,11 +325,11 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Tab Switcher: Users vs Chats */}
-          <div className="flex items-center gap-1 bg-white/[0.08] p-1 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-1 bg-infyn-surface/[0.08] p-1 rounded-2xl border border-white/10">
             <button
               onClick={() => setActiveTab('users')}
               className={`px-4 py-1.5 rounded-xl text-[12.5px] font-extrabold transition-all cursor-pointer ${
-                activeTab === 'users' ? 'bg-white text-black shadow-sm' : 'text-white/60 hover:text-white'
+                activeTab === 'users' ? 'bg-infyn-surface text-black shadow-sm' : 'text-white/60 hover:text-white'
               }`}
             >
               👥 Users ({usersList.length})
@@ -337,11 +337,11 @@ export default function AdminDashboardPage() {
             <button
               onClick={() => setActiveTab('chats')}
               className={`px-4 py-1.5 rounded-xl text-[12.5px] font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'chats' ? 'bg-white text-black shadow-sm' : 'text-white/60 hover:text-white'
+                activeTab === 'chats' ? 'bg-infyn-surface text-black shadow-sm' : 'text-white/60 hover:text-white'
               }`}
             >
               <span>💬 Live Chats</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-[#FF6B9D]/30 text-[#FF6B9D] text-[10px] font-black">
+              <span className="px-1.5 py-0.2 rounded-full bg-infyn-rose/30 text-infyn-rose-light text-[10px] font-black">
                 {conversations.length}
               </span>
             </button>
@@ -352,7 +352,7 @@ export default function AdminDashboardPage() {
             <button
               onClick={() => fetchMetrics(adminKey)}
               disabled={loading}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-[12px] font-bold cursor-pointer active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-infyn-surface/10 hover:bg-infyn-surface/15 border border-white/15 text-[12px] font-bold cursor-pointer active:scale-95 transition-all"
               title="Refresh live data"
             >
               <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -372,7 +372,7 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={handleLogout}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 text-white/60 hover:text-rose-400 text-[12px] font-bold border border-white/10 transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-infyn-surface/5 hover:bg-rose-500/20 text-white/60 hover:text-rose-400 text-[12px] font-bold border border-white/10 transition-all cursor-pointer"
             >
               Lock
             </button>
@@ -386,9 +386,9 @@ export default function AdminDashboardPage() {
         {/* ── SUMMARY STATS (Visible on both tabs) ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
-            { label: 'Total Signups', value: metrics?.totalUsers ?? '—', icon: '👥', color: 'from-[#FF6B9D]/20 to-[#FF6B9D]/5', border: 'border-[#FF6B9D]/30' },
+            { label: 'Total Signups', value: metrics?.totalUsers ?? '—', icon: '👥', color: 'from-infyn-rose/20 to-infyn-rose/5', border: 'border-infyn-rose/30' },
             { label: 'Active in 24h', value: metrics?.activeToday ?? '—', icon: '⚡', color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/30' },
-            { label: 'Total Matches', value: metrics?.totalMatches ?? '—', icon: '💖', color: 'from-[#7B68EE]/20 to-[#7B68EE]/5', border: 'border-[#7B68EE]/30' },
+            { label: 'Total Matches', value: metrics?.totalMatches ?? '—', icon: '💖', color: 'from-infyn-rose/20 to-infyn-rose/5', border: 'border-infyn-rose/30' },
             { label: 'Messages Sent', value: metrics?.totalMessages ?? '—', icon: '💬', color: 'from-sky-500/20 to-sky-500/5', border: 'border-sky-500/30' },
           ].map((stat) => (
             <div
@@ -423,7 +423,7 @@ export default function AdminDashboardPage() {
 
               <div className="w-full h-3.5 rounded-full bg-black/40 border border-white/10 overflow-hidden p-0.5">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-400 via-rose-500 to-[#7B68EE] transition-all duration-700 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 via-rose-500 to-infyn-rose transition-all duration-700 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
                   style={{ width: `${Math.max(4, earlyVipPct)}%` }}
                 />
               </div>
@@ -431,16 +431,16 @@ export default function AdminDashboardPage() {
 
             {/* Top Cities */}
             {metrics?.cityStats && metrics.cityStats.length > 0 && (
-              <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-5 backdrop-blur-xl">
+              <div className="rounded-3xl bg-infyn-surface/[0.04] border border-white/10 p-5 backdrop-blur-xl">
                 <h3 className="text-[13px] font-bold text-white/50 uppercase tracking-wider mb-3">📍 Top Cities</h3>
                 <div className="flex flex-wrap gap-2">
                   {metrics.cityStats.map((c) => (
                     <span
                       key={c.city}
-                      className="px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 text-[12.5px] font-bold text-white/90 flex items-center gap-1.5"
+                      className="px-3.5 py-1.5 rounded-full bg-infyn-surface/[0.08] border border-white/15 text-[12.5px] font-bold text-white/90 flex items-center gap-1.5"
                     >
                       <span>{c.city}</span>
-                      <span className="px-1.5 py-0.2 rounded-full bg-[#FF6B9D]/30 text-[#FF6B9D] text-[11px] font-extrabold">{c.count}</span>
+                      <span className="px-1.5 py-0.2 rounded-full bg-infyn-rose/30 text-infyn-rose-light text-[11px] font-extrabold">{c.count}</span>
                     </span>
                   ))}
                 </div>
@@ -448,7 +448,7 @@ export default function AdminDashboardPage() {
             )}
 
             {/* Users Directory Table */}
-            <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-5 backdrop-blur-xl space-y-4">
+            <div className="rounded-3xl bg-infyn-surface/[0.04] border border-white/10 p-5 backdrop-blur-xl space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="text-[18px] font-black text-white">Live Signups Feed</h2>
@@ -461,7 +461,7 @@ export default function AdminDashboardPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search name, phone, city, gmail…"
-                    className="w-full h-9 pl-9 pr-4 rounded-xl bg-black/40 border border-white/15 text-[12.5px] text-white placeholder:text-white/40 outline-none focus:border-[#FF6B9D]"
+                    className="w-full h-9 pl-9 pr-4 rounded-xl bg-black/40 border border-white/15 text-[12.5px] text-white placeholder:text-white/40 outline-none focus:border-infyn-rose"
                   />
                   <svg className="absolute left-3 top-2.5 text-white/40" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -483,8 +483,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setGenderFilter(tab.id)}
                     className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
                       genderFilter === tab.id
-                        ? 'bg-white text-black shadow-sm'
-                        : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.12] hover:text-white'
+                        ? 'bg-infyn-surface text-black shadow-sm'
+                        : 'bg-infyn-surface/[0.06] text-white/60 hover:bg-infyn-surface/[0.12] hover:text-white'
                     }`}
                   >
                     {tab.label}
@@ -512,7 +512,7 @@ export default function AdminDashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-white/[0.06]">
                       {filteredUsers.map((u) => (
-                        <tr key={u.id} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={u.id} className="hover:bg-infyn-surface/[0.02] transition-colors">
                           <td className="py-3.5 pl-2">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-800 border border-white/20">
@@ -521,7 +521,7 @@ export default function AdminDashboardPage() {
                               <div>
                                 <div className="flex items-center gap-1.5">
                                   <span className="font-bold text-white text-[14px]">{u.name}</span>
-                                  {u.isVerified && <span className="text-[#F43F5E] text-xs">✓</span>}
+                                  {u.isVerified && <span className="text-infyn-rose-light text-xs">✓</span>}
                                 </div>
                                 <span className="text-[11px] text-white/40 capitalize">ID #{u.id} • {u.gender}</span>
                               </div>
@@ -530,7 +530,7 @@ export default function AdminDashboardPage() {
 
                           <td className="py-3.5">
                             <p className="font-semibold text-white/90">{u.phone}</p>
-                            <p className="text-[11.5px] text-[#FF6B9D] font-medium">{u.email !== '—' ? u.email : 'No email linked'}</p>
+                            <p className="text-[11.5px] text-infyn-rose-light font-medium">{u.email !== '—' ? u.email : 'No email linked'}</p>
                           </td>
 
                           <td className="py-3.5">
@@ -574,13 +574,13 @@ export default function AdminDashboardPage() {
         {activeTab === 'chats' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Conversation Threads (5 cols) */}
-            <div className="lg:col-span-5 rounded-3xl bg-white/[0.04] border border-white/10 p-5 backdrop-blur-xl space-y-4">
+            <div className="lg:col-span-5 rounded-3xl bg-infyn-surface/[0.04] border border-white/10 p-5 backdrop-blur-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-[17px] font-black text-white">Active Match Threads</h2>
                   <p className="text-[11.5px] text-white/50">Click any match to read messages</p>
                 </div>
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/80 text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-infyn-surface/10 text-white/80 text-[11px] font-bold">
                   {filteredConversations.length} Matches
                 </span>
               </div>
@@ -592,7 +592,7 @@ export default function AdminDashboardPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Filter by name, email, text…"
-                  className="w-full h-9 pl-9 pr-3 rounded-xl bg-black/40 border border-white/15 text-[12px] text-white outline-none focus:border-[#FF6B9D]"
+                  className="w-full h-9 pl-9 pr-3 rounded-xl bg-black/40 border border-white/15 text-[12px] text-white outline-none focus:border-infyn-rose"
                 />
                 <svg className="absolute left-3 top-2.5 text-white/40" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -617,8 +617,8 @@ export default function AdminDashboardPage() {
                         }}
                         className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2 ${
                           isSelected
-                            ? 'bg-[#FF6B9D]/15 border-[#FF6B9D]/40 shadow-sm'
-                            : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.07]'
+                            ? 'bg-infyn-rose/15 border-infyn-rose/40 shadow-sm'
+                            : 'bg-infyn-surface/[0.03] border-white/10 hover:bg-infyn-surface/[0.07]'
                         }`}
                       >
                         {/* Participants Row */}
@@ -654,7 +654,7 @@ export default function AdminDashboardPage() {
                         <div className="bg-black/30 rounded-xl px-3 py-1.5 border border-white/5">
                           {conv.lastMessage ? (
                             <p className="text-[11.5px] text-white/80 truncate">
-                              <strong className="text-[#FF6B9D]">{conv.lastMessage.senderName}: </strong>
+                              <strong className="text-infyn-rose-light">{conv.lastMessage.senderName}: </strong>
                               {conv.lastMessage.type === 'photo' ? '📷 Photo' : conv.lastMessage.type === 'voice' ? '🎙️ Voice Note' : conv.lastMessage.type === 'gif' ? '🎬 GIF' : conv.lastMessage.content}
                             </p>
                           ) : (
@@ -669,7 +669,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Right Column: Full Chat Transcript Inspector (7 cols) */}
-            <div className="lg:col-span-7 rounded-3xl bg-white/[0.04] border border-white/10 p-5 backdrop-blur-xl flex flex-col h-[720px]">
+            <div className="lg:col-span-7 rounded-3xl bg-infyn-surface/[0.04] border border-white/10 p-5 backdrop-blur-xl flex flex-col h-[720px]">
               {selectedConv ? (
                 <>
                   {/* Chat Inspector Header (User Profiles & Emails) */}
@@ -681,7 +681,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <button
                         onClick={() => fetchChatMessages(selectedConv.matchId)}
-                        className="px-2.5 py-1 rounded-lg bg-white/10 text-[11px] font-bold hover:bg-white/15 cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-infyn-surface/10 text-[11px] font-bold hover:bg-infyn-surface/15 cursor-pointer"
                       >
                         Refresh Chat
                       </button>
@@ -690,25 +690,25 @@ export default function AdminDashboardPage() {
                     {/* Both Users Summary Cards */}
                     <div className="grid grid-cols-2 gap-2">
                       {/* User 1 */}
-                      <div className="p-2.5 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center gap-2.5">
+                      <div className="p-2.5 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 flex items-center gap-2.5">
                         <div className="h-9 w-9 rounded-full overflow-hidden bg-neutral-800 flex-shrink-0">
                           <SafeImage src={selectedConv.user1.photo} name={selectedConv.user1.name} className="h-full w-full object-cover" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[12px] font-bold text-white truncate">{selectedConv.user1.name} (ID #{selectedConv.user1.id})</p>
-                          <p className="text-[10px] text-[#FF6B9D] truncate">{selectedConv.user1.email}</p>
+                          <p className="text-[10px] text-infyn-rose-light truncate">{selectedConv.user1.email}</p>
                           <p className="text-[10px] text-white/40 truncate">{selectedConv.user1.phone}</p>
                         </div>
                       </div>
 
                       {/* User 2 */}
-                      <div className="p-2.5 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center gap-2.5">
+                      <div className="p-2.5 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 flex items-center gap-2.5">
                         <div className="h-9 w-9 rounded-full overflow-hidden bg-neutral-800 flex-shrink-0">
                           <SafeImage src={selectedConv.user2.photo} name={selectedConv.user2.name} className="h-full w-full object-cover" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[12px] font-bold text-white truncate">{selectedConv.user2.name} (ID #{selectedConv.user2.id})</p>
-                          <p className="text-[10px] text-[#7B68EE] truncate">{selectedConv.user2.email}</p>
+                          <p className="text-[10px] text-infyn-rose-light truncate">{selectedConv.user2.email}</p>
                           <p className="text-[10px] text-white/40 truncate">{selectedConv.user2.phone}</p>
                         </div>
                       </div>
@@ -735,13 +735,13 @@ export default function AdminDashboardPage() {
                             key={msg.id}
                             className={`flex flex-col max-w-[85%] rounded-2xl p-3 border ${
                               isUser1
-                                ? 'bg-gradient-to-br from-[#FF6B9D]/20 to-[#FF6B9D]/5 border-[#FF6B9D]/30 ml-auto items-end text-right'
-                                : 'bg-gradient-to-br from-[#7B68EE]/20 to-[#7B68EE]/5 border-[#7B68EE]/30 mr-auto items-start text-left'
+                                ? 'bg-gradient-to-br from-infyn-rose/20 to-infyn-rose/5 border-infyn-rose/30 ml-auto items-end text-right'
+                                : 'bg-gradient-to-br from-infyn-rose/20 to-infyn-rose/5 border-infyn-rose/30 mr-auto items-start text-left'
                             }`}
                           >
                             {/* Sender Info Tag */}
                             <div className="flex items-center gap-1.5 text-[10.5px] font-bold mb-1">
-                              <span className={isUser1 ? 'text-[#FF6B9D]' : 'text-[#7B68EE]'}>{msg.senderName}</span>
+                              <span className={isUser1 ? 'text-infyn-rose-light' : 'text-infyn-rose-light'}>{msg.senderName}</span>
                               <span className="text-white/40 font-normal">({msg.senderEmail !== '—' ? msg.senderEmail : msg.senderPhone})</span>
                             </div>
 

@@ -39,7 +39,7 @@ function StatusIndicator({ status }: { status: ChatMessage['status'] }) {
   if (status === 'sending' || status === 'queued') {
     return (
       <>
-        <Ic.Clock className="w-3 h-3 text-gray-400" />
+        <Ic.Clock className="w-3 h-3 text-infyn-muted" />
         <span className="sr-only">{status === 'queued' ? 'Waiting to send' : 'Sending'}</span>
       </>
     );
@@ -136,8 +136,8 @@ function MessageBubbleInner({
           onClick={() => onStartCall?.(callEvent.callType)}
           className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} flex items-center gap-3 border transition-all select-none cursor-pointer active:scale-[0.98] ${
             isMine
-              ? 'bg-[#FFF2F5] border-[#F9C0D0]/70 text-[#2D1B28] rounded-tr-[4px]'
-              : 'bg-white border-gray-200/80 text-[#1E293B] rounded-tl-[4px]'
+              ? 'bg-infyn-blush border-infyn-rose-line/70 text-infyn-ink rounded-tr-[4px]'
+              : 'bg-infyn-surface border-infyn-border/80 text-infyn-ink rounded-tl-[4px]'
           } shadow-2xs hover:shadow-xs min-w-[210px] max-w-[84%] sm:max-w-[78%]`}
         >
           {/* Call Type Icon */}
@@ -163,7 +163,7 @@ function MessageBubbleInner({
 
           {/* Call Description */}
           <div className="flex-1 min-w-0">
-            <h4 className={`text-[13px] font-bold leading-tight truncate ${isMissed && !isMine ? 'text-rose-600' : 'text-[#1E293B]'}`}>
+            <h4 className={`text-[13px] font-bold leading-tight truncate ${isMissed && !isMine ? 'text-rose-600' : 'text-infyn-ink'}`}>
               {title}
             </h4>
             <p className="text-[11px] text-neutral-400 font-medium mt-0.5">
@@ -178,7 +178,7 @@ function MessageBubbleInner({
               e.stopPropagation();
               onStartCall?.(callEvent.callType);
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#1E293B] text-[11px] font-semibold transition-colors flex-shrink-0 cursor-pointer active:scale-95"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-100 hover:bg-neutral-200 text-infyn-ink text-[11px] font-semibold transition-colors flex-shrink-0 cursor-pointer active:scale-95"
           >
             <span>Call</span>
           </button>
@@ -219,8 +219,8 @@ function MessageBubbleInner({
         }
         className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} relative max-w-[84%] sm:max-w-[78%] transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D1D3F]/35 ${
           isMine
-            ? 'bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#2D1B28] rounded-tr-[4px]'
-            : 'bg-white border border-gray-200/70 text-[#1E293B] rounded-tl-[4px]'
+            ? 'bg-infyn-blush border border-infyn-rose-line/60 text-infyn-ink rounded-tr-[4px]'
+            : 'bg-infyn-surface border border-infyn-border/70 text-infyn-ink rounded-tl-[4px]'
         }`}
       >
         {/* WhatsApp Quoted Reply Preview */}
@@ -237,15 +237,15 @@ function MessageBubbleInner({
             }}
             className={`mb-2 flex items-stretch gap-2.5 rounded-xl px-2.5 py-1.5 text-left cursor-pointer transition-all hover:opacity-90 ${
               isMine
-                ? "bg-black/[0.06] border-l-[3.5px] border-[#F43F5E]"
-                : "bg-black/[0.04] border-l-[3.5px] border-[#7B68EE]"
+                ? "bg-black/[0.06] border-l-[3.5px] border-infyn-rose"
+                : "bg-black/[0.04] border-l-[3.5px] border-infyn-rose"
             }`}
           >
             <div className="min-w-0 flex-1">
-              <p className={`text-[11px] font-bold truncate ${isMine ? "text-[#F43F5E]" : "text-[#7B68EE]"}`}>
+              <p className={`text-[11px] font-bold truncate ${isMine ? "text-infyn-rose" : "text-infyn-rose"}`}>
                 {message.metadata.replyTo.senderName || "Message"}
               </p>
-              <p className="text-[11.5px] text-gray-500 truncate font-normal mt-0.5">
+              <p className="text-[11.5px] text-infyn-secondary truncate font-normal mt-0.5">
                 {message.metadata.replyTo.type === "photo"
                   ? "📷 Photo"
                   : message.metadata.replyTo.type === "gif"
@@ -273,7 +273,7 @@ function MessageBubbleInner({
         {message.type === 'photo' && (
           <div className="flex flex-col gap-1.5">
             {imageBroken ? (
-              <div className="flex w-[210px] aspect-[4/3] items-center justify-center gap-2 rounded-2xl border border-gray-200/60 bg-gray-50 text-gray-400">
+              <div className="flex w-[210px] aspect-[4/3] items-center justify-center gap-2 rounded-2xl border border-infyn-border/60 bg-infyn-surface-soft text-infyn-muted">
                 <Ic.Camera className="w-5 h-5" />
                 <span className="text-[12px] font-medium">Photo unavailable</span>
               </div>
@@ -281,7 +281,7 @@ function MessageBubbleInner({
               <button
                 onClick={() => onOpenPhoto(message.content)}
                 aria-label={`View photo from ${isMine ? 'you' : partnerName} full screen`}
-                className="relative w-[210px] aspect-[4/3] overflow-hidden rounded-2xl border border-gray-200/60 bg-gray-100 shadow-2xs cursor-pointer group block"
+                className="relative w-[210px] aspect-[4/3] overflow-hidden rounded-2xl border border-infyn-border/60 bg-infyn-surface-soft shadow-2xs cursor-pointer group block"
               >
                 <img
                   src={message.content}
@@ -304,11 +304,11 @@ function MessageBubbleInner({
         {message.type === 'gif' && (
           <div className="flex flex-col gap-1.5">
             {imageBroken ? (
-              <div className="flex w-[200px] aspect-square items-center justify-center gap-2 rounded-2xl border border-gray-200/60 bg-gray-50 text-gray-400">
+              <div className="flex w-[200px] aspect-square items-center justify-center gap-2 rounded-2xl border border-infyn-border/60 bg-infyn-surface-soft text-infyn-muted">
                 <span className="text-[12px] font-medium">GIF unavailable</span>
               </div>
             ) : (
-              <div className="relative w-[200px] overflow-hidden rounded-2xl border border-gray-200/40 bg-gray-100 shadow-2xs">
+              <div className="relative w-[200px] overflow-hidden rounded-2xl border border-infyn-border/40 bg-infyn-surface-soft shadow-2xs">
                 <img
                   src={message.content}
                   alt={`GIF from ${isMine ? 'you' : partnerName}`}
@@ -328,19 +328,19 @@ function MessageBubbleInner({
         {message.type === 'location' && (
           <div className="flex flex-col gap-2 min-w-[210px]">
             <div className="flex items-start gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-[#F43F5E]/10 text-[#F43F5E] flex items-center justify-center flex-shrink-0">
+              <div className="h-9 w-9 rounded-xl bg-infyn-rose/10 text-infyn-rose flex items-center justify-center flex-shrink-0">
                 <Ic.MapPin className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-bold text-[#1E293B] break-words">{message.content || 'Shared location'}</p>
+                <p className="text-[14px] font-bold text-infyn-ink break-words">{message.content || 'Shared location'}</p>
               </div>
             </div>
-            <div className="flex items-center justify-between text-[10.5px] font-medium text-gray-400">
+            <div className="flex items-center justify-between text-[10.5px] font-medium text-infyn-muted">
               <a
                 href={`https://maps.google.com/?q=${encodeURIComponent(message.content)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#F43F5E] font-bold hover:underline"
+                className="text-infyn-rose font-bold hover:underline"
               >
                 Open in Maps →
               </a>
@@ -356,12 +356,12 @@ function MessageBubbleInner({
         {message.type === 'voice' && (
           <div className="flex flex-col gap-1.5 min-w-[190px]">
             <div className="flex items-center gap-2.5 py-1">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted">
                 <Ic.Mic className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-[#1E293B]">Voice note</p>
-                <p className="text-[11px] text-gray-400">Playback isn&apos;t supported here yet</p>
+                <p className="text-[13px] font-semibold text-infyn-ink">Voice note</p>
+                <p className="text-[11px] text-infyn-muted">Playback isn&apos;t supported here yet</p>
               </div>
             </div>
             <MetaRow message={message} />
@@ -376,13 +376,13 @@ function MessageBubbleInner({
             }}
             className={`absolute -bottom-2.5 ${
               isMine ? 'right-2' : 'left-2'
-            } flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/95 backdrop-blur-md border border-gray-200 shadow-sm text-[12px] select-none z-10 cursor-pointer hover:scale-110 active:scale-95 transition-transform`}
+            } flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-infyn-surface/95 backdrop-blur-md border border-infyn-border shadow-sm text-[12px] select-none z-10 cursor-pointer hover:scale-110 active:scale-95 transition-transform`}
           >
             {Array.from(new Set(Object.values(message.metadata.reactions as Record<string, string>))).slice(0, 3).map((emoji, idx) => (
               <span key={idx} className="leading-none">{emoji}</span>
             ))}
             {Object.keys(message.metadata.reactions).length > 1 && (
-              <span className="text-[10px] font-bold text-gray-500 font-mono ml-0.5">
+              <span className="text-[10px] font-bold text-infyn-secondary font-mono ml-0.5">
                 {Object.keys(message.metadata.reactions).length}
               </span>
             )}
@@ -401,7 +401,7 @@ function MessageBubbleInner({
         </button>
       )}
       {message.status === 'queued' && (
-        <span className="mt-1 px-1 text-[10.5px] font-medium text-gray-400">
+        <span className="mt-1 px-1 text-[10.5px] font-medium text-infyn-muted">
           Waiting for connection…
         </span>
       )}

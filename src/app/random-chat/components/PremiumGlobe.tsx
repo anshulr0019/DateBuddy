@@ -470,21 +470,21 @@ export function PremiumGlobe({
         />
 
         {/* Floating Top Pill: Live City Beacon Detection */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-[#FF6B9D]/30 shadow-[0_4px_16px_rgba(244,63,94,0.12)] pointer-events-none transition-all duration-300 whitespace-nowrap">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-infyn-surface/90 backdrop-blur-md border border-infyn-rose/30 shadow-[0_4px_16px_rgba(32,26,22,0.12)] pointer-events-none transition-all duration-300 whitespace-nowrap">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F43F5E] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F43F5E]" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-infyn-rose opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-infyn-rose" />
           </span>
-          <span className="text-[11px] font-bold text-[#1E293B]">
+          <span className="text-[11px] font-bold text-infyn-ink">
             {activeCityName}
           </span>
-          <span className="text-[10px] text-[#1E293B]/50 font-medium">
+          <span className="text-[10px] text-infyn-ink/50 font-medium">
             • {activeCityVibe}
           </span>
         </div>
 
         {/* Drag to rotate indicator */}
-        <div className="absolute bottom-1 right-3 text-[10px] font-medium text-[#1E293B]/45 bg-white/70 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-gray-200/50 pointer-events-none flex items-center gap-1">
+        <div className="absolute bottom-1 right-3 text-[10px] font-medium text-infyn-ink/45 bg-infyn-surface/70 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-infyn-border/50 pointer-events-none flex items-center gap-1">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -496,9 +496,9 @@ export function PremiumGlobe({
       </div>
 
       {/* Dynamic Telemetry Status Ticker */}
-      <div className="flex items-center gap-2 mt-1 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#FFF0F5] via-white to-[#F3E8FF] border border-[#FF6B9D]/25 shadow-2xs">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#F43F5E] animate-pulse" />
-        <span className="text-[12px] font-semibold text-[#1E293B]/75 animate-fade-in tracking-tight">
+      <div className="flex items-center gap-2 mt-1 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#FFF0F5] via-white to-[#F3E8FF] border border-infyn-rose/25 shadow-2xs">
+        <span className="h-1.5 w-1.5 rounded-full bg-infyn-rose animate-pulse" />
+        <span className="text-[12px] font-semibold text-infyn-ink/75 animate-fade-in tracking-tight">
           {SCAN_MESSAGES[scanMessageIndex]}
         </span>
       </div>

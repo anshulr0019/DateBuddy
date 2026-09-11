@@ -106,23 +106,23 @@ export default function RandomChatPage() {
   const session = rc.session;
 
   return (
-    <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-infyn-paper flex justify-center overflow-hidden font-sans select-none">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-border/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
             {/* Header */}
-            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between shadow-2xs">
+            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-surface/90 backdrop-blur-xl border-b border-infyn-border/50 flex items-center justify-between shadow-2xs">
               <button
                 onClick={() => { void rc.end(); router.push('/home'); }}
                 aria-label="Back to home"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[#1E293B] hover:bg-gray-100 active:scale-90 transition-all duration-200 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-infyn-ink hover:bg-infyn-surface-soft active:scale-90 transition-all duration-200 cursor-pointer"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
               <div className="flex items-center gap-2">
-                <h1 className="text-[17px] font-extrabold tracking-tight text-[#1E293B]">Anonymous Chat</h1>
+                <h1 className="text-[17px] font-normal tracking-tight text-infyn-ink font-display">Anonymous Chat</h1>
               </div>
               <div className="h-9 w-9" />
             </div>
@@ -131,8 +131,8 @@ export default function RandomChatPage() {
             {rc.phase === 'loading' && (
               <div className="flex-1 min-h-0 flex items-center justify-center px-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
                 <div className="flex flex-col items-center gap-3">
-                  <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-[#F43F5E]" />
-                  <p className="text-[12.5px] text-[#1E293B]/50 font-medium">Loading anonymous chat…</p>
+                  <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-infyn-border border-t-infyn-rose" />
+                  <p className="text-[12.5px] text-infyn-ink/50 font-medium">Loading anonymous chat…</p>
                 </div>
               </div>
             )}
@@ -200,11 +200,11 @@ export default function RandomChatPage() {
             {rc.phase === 'error' && (
               <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
                 <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 mb-4 text-2xl">⚠️</div>
-                <h2 className="text-[18px] font-bold text-[#1A1A2E] mb-1">Couldn&apos;t load anonymous chat</h2>
-                <p className="text-[13px] text-[#1A1A2E]/55 max-w-[260px] leading-relaxed mb-6">{rc.error ?? 'Check your connection and try again.'}</p>
+                <h2 className="text-[18px] font-bold text-infyn-ink mb-1">Couldn&apos;t load anonymous chat</h2>
+                <p className="text-[13px] text-infyn-ink/55 max-w-[260px] leading-relaxed mb-6">{rc.error ?? 'Check your connection and try again.'}</p>
                 <button
                   onClick={() => void rc.reload()}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
                 >
                   Try again
                 </button>

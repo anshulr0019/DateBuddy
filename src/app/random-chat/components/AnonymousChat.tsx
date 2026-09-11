@@ -93,17 +93,17 @@ export function AnonymousChat({
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between">
+      <div className="flex-shrink-0 px-4 py-3 bg-infyn-surface/90 backdrop-blur-xl border-b border-infyn-border/50 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-10 w-10 flex-shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-[16px] font-black shadow-2xs">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose text-white text-[16px] font-black shadow-2xs">
               {initialLetter}
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#22C55E] border-2 border-white" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#22C55E] border-2 border-infyn-border" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-[15px] font-bold text-[#1E293B] leading-tight truncate">{partnerName}</h1>
-            <p className="text-[11px] text-[#1E293B]/50 font-medium truncate">
+            <h1 className="text-[15px] font-normal text-infyn-ink leading-tight truncate font-display">{partnerName}</h1>
+            <p className="text-[11px] text-infyn-ink/50 font-medium truncate">
               {partner?.age ? `${partner.age} years · ` : ''}anonymous conversation
             </p>
           </div>
@@ -112,7 +112,7 @@ export function AnonymousChat({
           <button
             onClick={() => openSheet('menu')}
             aria-label="Conversation options"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-[#1E293B] hover:bg-gray-200 active:scale-90 transition-all cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-infyn-surface-soft/90 text-infyn-ink hover:bg-infyn-surface-soft active:scale-90 transition-all cursor-pointer"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="12" r="1.5" /><circle cx="6" cy="12" r="1.5" /><circle cx="18" cy="12" r="1.5" />
@@ -123,8 +123,8 @@ export function AnonymousChat({
 
       {/* Connection banner */}
       {connection.requestedByMe && !connection.isMutual && (
-        <div className="flex-shrink-0 px-4 py-2 bg-[#FFF0F4] border-b border-[#F9C0D0]/50 text-center">
-          <span className="text-[12px] font-semibold text-[#F43F5E]">
+        <div className="flex-shrink-0 px-4 py-2 bg-infyn-blush border-b border-infyn-rose-line/50 text-center">
+          <span className="text-[12px] font-semibold text-infyn-rose">
             Connection request sent — waiting for {partnerName} to accept…
           </span>
         </div>
@@ -159,13 +159,13 @@ export function AnonymousChat({
       >
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
-            <div className="h-14 w-14 flex items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] mb-4">
+            <div className="h-14 w-14 flex items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose mb-4">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h2 className="text-[17px] font-bold text-[#1E293B] mb-1">You matched with {partnerName}</h2>
-            <p className="text-[13px] text-[#1E293B]/55 max-w-[250px] leading-relaxed mb-5">
+            <h2 className="text-[17px] font-bold text-infyn-ink mb-1">You matched with {partnerName}</h2>
+            <p className="text-[13px] text-infyn-ink/55 max-w-[250px] leading-relaxed mb-5">
               You&apos;re both anonymous. Break the ice with one of these — or send your own.
             </p>
             <div className="flex flex-col gap-2 w-full max-w-[280px]">
@@ -173,7 +173,7 @@ export function AnonymousChat({
                 <button
                   key={line}
                   onClick={() => { setInput(line); inputRef.current?.focus(); }}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-white/80 border border-[#F9C0D0]/50 text-[13px] font-semibold text-[#2D1B28] hover:bg-[#FFF0F4] active:scale-95 transition-all cursor-pointer shadow-2xs"
+                  className="w-full px-4 py-2.5 rounded-2xl bg-infyn-surface/80 border border-infyn-rose-line/50 text-[13px] font-semibold text-infyn-ink hover:bg-infyn-blush active:scale-95 transition-all cursor-pointer shadow-2xs"
                 >
                   {line}
                 </button>
@@ -186,20 +186,20 @@ export function AnonymousChat({
           <div key={m.idKey} className={`flex ${m.senderIsMe ? 'justify-end' : 'justify-start'} ${m.idKey.startsWith('local-') ? 'opacity-80' : ''}`}>
             <div className={`max-w-[78%] ${m.senderIsMe ? 'items-end' : 'items-start'} flex flex-col`}>
               {m.showHeader && (
-                <span className={`mb-1 px-1 text-[10px] font-bold ${m.senderIsMe ? 'text-right text-[#F43F5E]/70' : 'text-[#7B68EE]/70'}`}>
+                <span className={`mb-1 px-1 text-[10px] font-bold ${m.senderIsMe ? 'text-right text-infyn-rose/70' : 'text-infyn-rose/70'}`}>
                   {m.senderIsMe ? 'You' : myAlias.split(' ')[0]}
                 </span>
               )}
               <div
                 className={`px-3.5 py-2.5 rounded-[18px] text-[14px] leading-snug break-words ${
                   m.senderIsMe
-                    ? 'bg-gradient-to-br from-[#F43F5E] to-[#FB7185] text-white rounded-br-[6px] shadow-2xs'
-                    : 'bg-white border border-gray-200/70 text-[#1E293B] rounded-bl-[6px] shadow-2xs'
+                    ? 'bg-gradient-to-br from-infyn-rose to-infyn-rose text-white rounded-br-[6px] shadow-2xs'
+                    : 'bg-infyn-surface border border-infyn-border/70 text-infyn-ink rounded-bl-[6px] shadow-2xs'
                 }`}
               >
                 {m.content}
               </div>
-              <span className="mt-0.5 px-1 text-[9.5px] text-[#1E293B]/35">{formatClock(m.createdAt)}</span>
+              <span className="mt-0.5 px-1 text-[9.5px] text-infyn-ink/35">{formatClock(m.createdAt)}</span>
             </div>
           </div>
         ))}
@@ -217,8 +217,8 @@ export function AnonymousChat({
             disabled={busy}
             className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer disabled:opacity-60 ${
               connection.requestedByMe
-                ? 'bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E]'
-                : 'bg-gradient-to-r from-[#7B68EE] to-[#FF6B9D] text-white shadow-2xs'
+                ? 'bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose'
+                : 'bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-2xs'
             }`}
           >
             {connection.requestedByMe ? 'Connection Requested' : 'Request Connection'}
@@ -227,7 +227,7 @@ export function AnonymousChat({
       </div>
 
       {/* Composer */}
-      <div className="flex-shrink-0 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-1.5 flex items-center gap-2 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/95 to-transparent">
+      <div className="flex-shrink-0 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-1.5 flex items-center gap-2 bg-gradient-to-t from-infyn-paper via-infyn-paper/95 to-transparent">
         <input
           ref={inputRef}
           value={input}
@@ -235,14 +235,14 @@ export function AnonymousChat({
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendNow(); } }}
           placeholder={`Message ${myAlias.split(' ')[0]}…`}
           maxLength={4000}
-          className="flex-1 min-w-0 rounded-full bg-white border border-gray-200 px-4 py-2.5 text-[14px] outline-none focus:border-[#F43F5E]"
+          className="flex-1 min-w-0 rounded-full bg-infyn-surface border border-infyn-border px-4 py-2.5 text-[14px] outline-none focus:border-infyn-rose"
           aria-label="Type a message"
         />
         <button
           onClick={sendNow}
           disabled={!input.trim() || Boolean(pending)}
           aria-label="Send message"
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#F43F5E] to-[#FB7185] text-white shadow-2xs active:scale-90 transition-all cursor-pointer disabled:opacity-40"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose text-white shadow-2xs active:scale-90 transition-all cursor-pointer disabled:opacity-40"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
         </button>
@@ -252,17 +252,17 @@ export function AnonymousChat({
       {showSheets && (
         <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center overflow-hidden">
           <div onClick={closeSheets} className="absolute inset-0 bg-black/45 backdrop-blur-md" />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[28px] sm:rounded-[24px] max-h-[82dvh] flex flex-col shadow-2xl animate-sheet-up">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 flex-shrink-0" />
+          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[28px] sm:rounded-[24px] max-h-[82dvh] flex flex-col shadow-2xl animate-sheet-up">
+            <div className="w-10 h-1 bg-infyn-surface-soft rounded-full mx-auto mt-3 flex-shrink-0" />
 
             {sheetKind === 'menu' && (
               <>
-                <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
-                  <h3 className="text-[16px] font-extrabold text-[#1E293B]">Conversation options</h3>
-                  <p className="text-[12px] text-[#1E293B]/50">This chat is anonymous.</p>
+                <div className="px-5 py-4 border-b border-infyn-border flex-shrink-0">
+                  <h3 className="text-[16px] font-extrabold text-infyn-ink">Conversation options</h3>
+                  <p className="text-[12px] text-infyn-ink/50">This chat is anonymous.</p>
                 </div>
                 <div className="flex-1 overflow-y-auto scrollbar-none p-2 space-y-1">
-                  <button onClick={() => openSheet('report')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
+                  <button onClick={() => openSheet('report')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-infyn-surface-soft transition-all cursor-pointer">
                     <span className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -270,26 +270,26 @@ export function AnonymousChat({
                         <line x1="12" y1="17" x2="12.01" y2="17" />
                       </svg>
                     </span>
-                    <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">Report {myAlias.split(' ')[0]}</p><p className="text-[11.5px] text-[#1E293B]/50">Flag inappropriate behaviour</p></div>
+                    <div className="text-left"><p className="text-[14px] font-bold text-infyn-ink">Report {myAlias.split(' ')[0]}</p><p className="text-[11.5px] text-infyn-ink/50">Flag inappropriate behaviour</p></div>
                   </button>
-                  <button onClick={() => openSheet('block')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
+                  <button onClick={() => openSheet('block')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-infyn-surface-soft transition-all cursor-pointer">
                     <span className="h-9 w-9 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
                       </svg>
                     </span>
-                    <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">Block &amp; end chat</p><p className="text-[11.5px] text-[#1E293B]/50">You won&apos;t match with them again</p></div>
+                    <div className="text-left"><p className="text-[14px] font-bold text-infyn-ink">Block &amp; end chat</p><p className="text-[11.5px] text-infyn-ink/50">You won&apos;t match with them again</p></div>
                   </button>
-                  <button onClick={() => openSheet('end')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-gray-50 transition-all cursor-pointer">
-                    <span className="h-9 w-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                  <button onClick={() => openSheet('end')} className="w-full flex items-center gap-3 rounded-2xl p-3 hover:bg-infyn-surface-soft transition-all cursor-pointer">
+                    <span className="h-9 w-9 rounded-xl bg-infyn-surface-soft text-infyn-secondary flex items-center justify-center">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                         <polyline points="16 17 21 12 16 7" />
                         <line x1="21" y1="12" x2="9" y2="12" />
                       </svg>
                     </span>
-                    <div className="text-left"><p className="text-[14px] font-bold text-[#1E293B]">End conversation</p><p className="text-[11.5px] text-[#1E293B]/50">Move on to a new person</p></div>
+                    <div className="text-left"><p className="text-[14px] font-bold text-infyn-ink">End conversation</p><p className="text-[11.5px] text-infyn-ink/50">Move on to a new person</p></div>
                   </button>
                 </div>
               </>
@@ -297,9 +297,9 @@ export function AnonymousChat({
 
             {sheetKind === 'report' && (
               <>
-                <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
-                  <h3 className="text-[16px] font-extrabold text-[#1E293B]">Report this person</h3>
-                  <p className="text-[12px] text-[#1E293B]/50">Reports go to our review team.</p>
+                <div className="px-5 py-4 border-b border-infyn-border flex-shrink-0">
+                  <h3 className="text-[16px] font-extrabold text-infyn-ink">Report this person</h3>
+                  <p className="text-[12px] text-infyn-ink/50">Reports go to our review team.</p>
                 </div>
                 <div className="flex-1 overflow-y-auto scrollbar-none px-5 py-3 space-y-2">
                   {REPORT_REASONS.map((r) => (
@@ -307,7 +307,7 @@ export function AnonymousChat({
                       key={r}
                       onClick={() => setReportReason(r)}
                       className={`w-full text-left px-3.5 py-2.5 rounded-xl text-[13px] font-semibold transition-all cursor-pointer ${
-                        reportReason === r ? 'bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E]' : 'bg-gray-50 border border-transparent text-[#1E293B]/70'
+                        reportReason === r ? 'bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose' : 'bg-infyn-surface-soft border border-transparent text-infyn-ink/70'
                       }`}
                     >
                       {r}
@@ -318,12 +318,12 @@ export function AnonymousChat({
                     onChange={(e) => setReportDetails(e.target.value)}
                     placeholder="Add details (optional)"
                     maxLength={1000}
-                    className="w-full mt-2 rounded-xl bg-gray-50 border border-gray-200 px-3.5 py-2.5 text-[13px] outline-none focus:border-[#F43F5E] resize-none"
+                    className="w-full mt-2 rounded-xl bg-infyn-surface-soft border border-infyn-border px-3.5 py-2.5 text-[13px] outline-none focus:border-infyn-rose resize-none"
                     rows={3}
                   />
                 </div>
-                <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100 flex gap-2">
-                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-[13px] font-bold cursor-pointer">Back</button>
+                <div className="flex-shrink-0 px-5 py-3 border-t border-infyn-border flex gap-2">
+                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-infyn-surface-soft text-infyn-secondary text-[13px] font-bold cursor-pointer">Back</button>
                   <button
                     onClick={() => { hapticWarning(); onReport(reportReason, reportDetails.trim() || null); closeSheets(); }}
                     disabled={busy}
@@ -344,11 +344,11 @@ export function AnonymousChat({
                   </svg>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-[17px] font-extrabold text-[#1E293B]">Block {myAlias.split(' ')[0]}?</h3>
-                  <p className="text-[12.5px] text-gray-500 mt-1">They won&apos;t be matched with you again, and this chat will end.</p>
+                  <h3 className="text-[17px] font-extrabold text-infyn-ink">Block {myAlias.split(' ')[0]}?</h3>
+                  <p className="text-[12.5px] text-infyn-secondary mt-1">They won&apos;t be matched with you again, and this chat will end.</p>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-[13px] font-bold cursor-pointer">Cancel</button>
+                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-infyn-surface-soft text-infyn-secondary text-[13px] font-bold cursor-pointer">Cancel</button>
                   <button
                     onClick={() => { hapticWarning(); onBlock(); closeSheets(); }}
                     disabled={busy}
@@ -362,7 +362,7 @@ export function AnonymousChat({
 
             {sheetKind === 'end' && (
               <div className="p-5 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-gray-100 text-gray-500 mx-auto flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-infyn-surface-soft text-infyn-secondary mx-auto flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <polyline points="16 17 21 12 16 7" />
@@ -370,15 +370,15 @@ export function AnonymousChat({
                   </svg>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-[17px] font-extrabold text-[#1E293B]">End this conversation?</h3>
-                  <p className="text-[12.5px] text-gray-500 mt-1">You&apos;ll be matched with someone new.</p>
+                  <h3 className="text-[17px] font-extrabold text-infyn-ink">End this conversation?</h3>
+                  <p className="text-[12.5px] text-infyn-secondary mt-1">You&apos;ll be matched with someone new.</p>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-[13px] font-bold cursor-pointer">Cancel</button>
+                  <button onClick={closeSheets} className="flex-1 py-2.5 rounded-xl bg-infyn-surface-soft text-infyn-secondary text-[13px] font-bold cursor-pointer">Cancel</button>
                   <button
                     onClick={() => { onEnd(); closeSheets(); }}
                     disabled={busy}
-                    className="flex-1 py-2.5 rounded-xl bg-[#F43F5E] text-white text-[13px] font-bold cursor-pointer disabled:opacity-60"
+                    className="flex-1 py-2.5 rounded-xl bg-infyn-rose text-white text-[13px] font-bold cursor-pointer disabled:opacity-60"
                   >
                     End chat
                   </button>
@@ -388,21 +388,21 @@ export function AnonymousChat({
 
             {sheetKind === 'safety' && (
               <div className="p-5 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-[#FFF0F4] text-[#F43F5E] mx-auto flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-infyn-blush text-infyn-rose mx-auto flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-[17px] font-extrabold text-[#1E293B]">Quick safety check</h3>
-                  <p className="text-[12.5px] text-gray-500 mt-1">
+                  <h3 className="text-[17px] font-extrabold text-infyn-ink">Quick safety check</h3>
+                  <p className="text-[12.5px] text-infyn-secondary mt-1">
                     Remember: you&apos;re talking to a stranger. Never share your address, bank details, or private photos.
                     You can report or block anytime.
                   </p>
                 </div>
                 <button
                   onClick={() => { setSafetyDismissed(true); closeSheets(); }}
-                  className="w-full py-3 rounded-xl bg-[#F43F5E] text-white text-[13px] font-bold cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-infyn-rose text-white text-[13px] font-bold cursor-pointer"
                 >
                   Got it
                 </button>

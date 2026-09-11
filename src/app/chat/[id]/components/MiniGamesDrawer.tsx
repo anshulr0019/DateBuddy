@@ -38,9 +38,9 @@ export function MiniGamesDrawer({
       <div onClick={onClose} className="absolute inset-0" />
 
       {/* Main Sheet Container */}
-      <div className="relative z-10 w-full max-w-[420px] rounded-t-[32px] sm:rounded-[28px] p-6 bg-[#0D0D11] border border-white/[0.08] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] text-white flex flex-col items-center animate-sheet-up">
+      <div className="relative z-10 w-full max-w-[420px] rounded-t-[32px] sm:rounded-[28px] p-6 bg-infyn-dark border border-white/[0.08] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] text-white flex flex-col items-center animate-sheet-up">
         {/* Minimalist Drag Handle */}
-        <div className="h-1 w-9 rounded-full bg-white/20 mb-4" />
+        <div className="h-1 w-9 rounded-full bg-infyn-surface/20 mb-4" />
 
         {activeGame === 'guess_number' ? (
           <GuessNumberGame
@@ -93,7 +93,7 @@ export function MiniGamesDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label="Close modal"
-                className="h-8 w-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer"
+                className="h-8 w-8 rounded-full bg-infyn-surface/[0.06] hover:bg-infyn-surface/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -105,15 +105,15 @@ export function MiniGamesDrawer({
               <button
                 type="button"
                 onClick={() => setActiveGame('guess_number')}
-                className="w-full p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
+                className="w-full p-4 rounded-2xl bg-infyn-surface/[0.03] hover:bg-infyn-surface/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
               >
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-infyn-surface/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
                   01
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[15px] font-bold text-white tracking-tight">Guess The Number</p>
-                    <span className="px-2 py-0.5 rounded-full bg-white/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full bg-infyn-surface/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
                       0–100
                     </span>
                   </div>
@@ -130,15 +130,15 @@ export function MiniGamesDrawer({
               <button
                 type="button"
                 onClick={() => setActiveGame('truth_dare')}
-                className="w-full p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
+                className="w-full p-4 rounded-2xl bg-infyn-surface/[0.03] hover:bg-infyn-surface/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
               >
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-infyn-surface/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
                   02
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[15px] font-bold text-white tracking-tight">Truth or Dare</p>
-                    <span className="px-2 py-0.5 rounded-full bg-white/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full bg-infyn-surface/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
                       Prompts
                     </span>
                   </div>
@@ -155,15 +155,15 @@ export function MiniGamesDrawer({
               <button
                 type="button"
                 onClick={() => setActiveGame('twenty_questions')}
-                className="w-full p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
+                className="w-full p-4 rounded-2xl bg-infyn-surface/[0.03] hover:bg-infyn-surface/[0.06] border border-white/[0.08] hover:border-white/20 text-left transition-all active:scale-[0.985] cursor-pointer flex items-center gap-4 group"
               >
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-infyn-surface/[0.06] border border-white/[0.08] text-white font-mono font-bold text-[16px] group-hover:scale-105 transition-transform">
                   03
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[15px] font-bold text-white tracking-tight">20 Questions</p>
-                    <span className="px-2 py-0.5 rounded-full bg-white/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full bg-infyn-surface/[0.08] text-white/80 border border-white/10 text-[9.5px] font-mono uppercase tracking-wider">
                       Y/N
                     </span>
                   </div>

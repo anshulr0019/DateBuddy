@@ -40,11 +40,11 @@ export default function TutorialPage() {
   const slide = SLIDES[currentSlide];
 
   return (
-    <div className="mobile-container min-h-screen bg-[#FAFAFA] flex flex-col">
+    <div className="mobile-container min-h-screen bg-infyn-paper flex flex-col">
       {/* Skip Button */}
       {currentSlide < SLIDES.length - 1 && (
         <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] text-right">
-          <button onClick={handleSkip} className="text-gray-600 font-medium">
+          <button onClick={handleSkip} className="text-infyn-secondary font-medium">
             Skip
           </button>
         </div>
@@ -56,12 +56,12 @@ export default function TutorialPage() {
         <div className="text-8xl mb-8 pulse">{slide.emoji}</div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-4 text-center">
+        <h1 className="text-2xl font-normal text-infyn-ink mb-4 text-center font-display">
           {slide.title}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-gray-600 text-center mb-8">
+        <p className="text-infyn-secondary text-center mb-8">
           {slide.subtitle}
         </p>
 
@@ -71,7 +71,7 @@ export default function TutorialPage() {
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlide ? 'bg-[#FF6B9D] w-6' : 'bg-gray-300'
+                index === currentSlide ? 'bg-infyn-rose w-6' : 'bg-infyn-surface-soft'
               }`}
             />
           ))}
@@ -79,7 +79,7 @@ export default function TutorialPage() {
       </div>
 
       {/* Bottom Button */}
-      <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-200">
+      <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-infyn-border">
         <button onClick={handleNext} className="btn-primary w-full">
           {currentSlide === SLIDES.length - 1 ? 'Got it!' : 'Next'}
         </button>

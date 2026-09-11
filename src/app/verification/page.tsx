@@ -87,7 +87,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       aria-label="Go back"
-      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] cursor-pointer"
+      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] cursor-pointer"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6" />
@@ -194,14 +194,14 @@ export default function VerificationPage() {
 
   /* ── Shared shell ── */
   const Shell = ({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) => (
-    <div className={`h-dvh w-full flex justify-center overflow-hidden font-sans ${dark ? 'bg-[#0d0917]' : 'bg-[#FAFAF7]'}`}>
+    <div className={`h-dvh w-full flex justify-center overflow-hidden font-sans ${dark ? 'bg-infyn-dark' : 'bg-infyn-paper'}`}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <div className={`relative h-full w-full max-w-[440px] flex flex-col overflow-hidden ${dark ? '' : 'bg-[#FAFAF7]'}`}>
+      <div className={`relative h-full w-full max-w-[440px] flex flex-col overflow-hidden ${dark ? '' : 'bg-infyn-paper'}`}>
         {!dark && (
           <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-            <div className="absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-[#FF6B9D]/10 blur-[60px]" />
-            <div className="absolute -right-20 top-10 h-80 w-80 rounded-full bg-[#7B68EE]/08 blur-[70px]" />
-            <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-[#FFB4D0]/12 blur-[60px]" />
+            <div className="absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-infyn-rose/10 blur-[60px]" />
+            <div className="absolute -right-20 top-10 h-80 w-80 rounded-full bg-infyn-rose/08 blur-[70px]" />
+            <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-infyn-blush/12 blur-[60px]" />
           </div>
         )}
         {children}
@@ -218,17 +218,17 @@ export default function VerificationPage() {
 
       <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-5 pb-6">
         <div className="vfy-rise mb-8" style={{ animationDelay: '60ms' }}>
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#22C55E]/15 to-[#7B68EE]/15 border border-[#22C55E]/25 shadow-sm">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#22C55E]/15 to-infyn-rose/15 border border-[#22C55E]/25 shadow-sm">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <polyline points="9 12 11 14 15 10" />
             </svg>
           </div>
-          <h1 className="text-[30px] font-black tracking-tight text-[#1A1A2E] leading-[1.1] mb-2">
+          <h1 className="text-[30px] font-normal tracking-tight text-infyn-ink leading-[1.1] mb-2 font-display">
             Get Your Blue<br />
-            <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">Verified Badge</span>
+            <span className="bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">Verified Badge</span>
           </h1>
-          <p className="text-[14.5px] text-[#1A1A2E]/55 leading-relaxed">
+          <p className="text-[14.5px] text-infyn-ink/55 leading-relaxed">
             A quick selfie video proves you&apos;re genuine — and unlocks more matches.
           </p>
         </div>
@@ -238,46 +238,46 @@ export default function VerificationPage() {
           {BENEFITS.map((b, i) => (
             <div
               key={i}
-              className="flex items-start gap-4 rounded-[22px] border border-white/80 bg-white/80 p-4 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.08)] backdrop-blur-md"
+              className="flex items-start gap-4 rounded-[22px] border border-infyn-border/80 bg-infyn-surface/80 p-4 shadow-[0_4px_20px_-10px_rgba(32,26,22,0.08)] backdrop-blur-md"
             >
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B9D]/12 to-[#7B68EE]/12 text-[#7B68EE] border border-[#7B68EE]/15">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-infyn-rose/12 to-infyn-rose/12 text-infyn-rose border border-infyn-rose/15">
                 {b.icon}
               </div>
               <div>
-                <p className="text-[14px] font-bold text-[#1A1A2E]">{b.title}</p>
-                <p className="text-[12.5px] text-[#1A1A2E]/55 mt-0.5 leading-snug">{b.sub}</p>
+                <p className="text-[14px] font-bold text-infyn-ink">{b.title}</p>
+                <p className="text-[12.5px] text-infyn-ink/55 mt-0.5 leading-snug">{b.sub}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* How it works */}
-        <div className="vfy-rise rounded-[22px] border border-white/80 bg-white/80 p-5 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.08)] backdrop-blur-md" style={{ animationDelay: '180ms' }}>
-          <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#1A1A2E]/45 mb-4">How it works</p>
+        <div className="vfy-rise rounded-[22px] border border-infyn-border/80 bg-infyn-surface/80 p-5 shadow-[0_4px_20px_-10px_rgba(32,26,22,0.08)] backdrop-blur-md" style={{ animationDelay: '180ms' }}>
+          <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-infyn-ink/45 mb-4">How it works</p>
           <div className="space-y-3.5">
             {HOW_STEPS.map((s) => (
               <div key={s.n} className="flex items-start gap-3.5">
-                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white text-[11px] font-black shadow-sm">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose text-white text-[11px] font-black shadow-sm">
                   {s.n}
                 </div>
-                <p className="text-[13.5px] text-[#1A1A2E]/70 leading-snug pt-0.5">{s.text}</p>
+                <p className="text-[13.5px] text-infyn-ink/70 leading-snug pt-0.5">{s.text}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex-shrink-0 z-10 px-5 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent">
+      <div className="flex-shrink-0 z-10 px-5 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-paper via-infyn-paper/90 to-transparent">
         <button
           onClick={() => { hapticLight(); setStep('camera'); }}
-          className="group relative w-full h-14 rounded-2xl overflow-hidden bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(255,107,157,0.55)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="group relative w-full h-14 rounded-2xl overflow-hidden bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M23 7l-7 5 7 5V7z" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
           </svg>
           Start Verification
         </button>
-        <p className="mt-2.5 text-center text-[11.5px] text-[#1A1A2E]/40">
+        <p className="mt-2.5 text-center text-[11.5px] text-infyn-ink/40">
           Your video is never stored — used only to verify your identity
         </p>
       </div>
@@ -291,7 +291,7 @@ export default function VerificationPage() {
         <button
           onClick={() => setStep('info')}
           aria-label="Go back"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white/80 active:scale-[0.92] transition-all cursor-pointer"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-infyn-surface/10 text-white/80 active:scale-[0.92] transition-all cursor-pointer"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
@@ -301,7 +301,7 @@ export default function VerificationPage() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
         {/* Camera frame */}
-        <div className="relative w-64 h-80 mb-8 rounded-[32px] overflow-hidden border-2 border-white/30 bg-black flex items-center justify-center shadow-2xl">
+        <div className="relative w-64 h-80 mb-8 rounded-[32px] overflow-hidden border-2 border-infyn-border/30 bg-black flex items-center justify-center shadow-2xl">
           <video
             ref={videoRef}
             autoPlay
@@ -322,7 +322,7 @@ export default function VerificationPage() {
           )}
           {/* Face oval overlay */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-44 h-56 rounded-full border-2 border-white/60 border-dashed shadow-[0_0_20px_rgba(255,255,255,0.2)]" />
+            <div className="w-44 h-56 rounded-full border-2 border-infyn-border/60 border-dashed shadow-[0_0_20px_rgba(255,255,255,0.2)]" />
           </div>
           {/* Corner brackets */}
           {[
@@ -331,12 +331,12 @@ export default function VerificationPage() {
             'bottom-4 left-4 border-b-2 border-l-2',
             'bottom-4 right-4 border-b-2 border-r-2',
           ].map((cls, i) => (
-            <div key={i} className={`absolute h-6 w-6 ${cls} border-white/90 rounded-sm`} />
+            <div key={i} className={`absolute h-6 w-6 ${cls} border-infyn-border/90 rounded-sm`} />
           ))}
         </div>
 
         {/* Pose instructions */}
-        <div className="rounded-[22px] bg-white/10 backdrop-blur-md border border-white/15 p-4 w-full mb-6">
+        <div className="rounded-[22px] bg-infyn-surface/10 backdrop-blur-md border border-infyn-border/15 p-4 w-full mb-6">
           <p className="text-white font-bold text-[14px] text-center mb-3">Follow these poses</p>
           <div className="flex justify-center gap-8">
             {[['👋', 'Wave'], ['😊', 'Smile'], ['↩️', 'Turn']].map(([emoji, label]) => (
@@ -354,9 +354,9 @@ export default function VerificationPage() {
         <button
           onClick={handleTakePhoto}
           aria-label="Record verification video"
-          className="relative flex h-20 w-20 items-center justify-center rounded-full border-4 border-white/30 active:scale-95 transition-all cursor-pointer"
+          className="relative flex h-20 w-20 items-center justify-center rounded-full border-4 border-infyn-border/30 active:scale-95 transition-all cursor-pointer"
         >
-          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_32px_rgba(255,107,157,0.6)]" />
+          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose shadow-[0_0_32px_rgba(32,26,22,0.16)]" />
         </button>
       </div>
     </Shell>
@@ -366,13 +366,13 @@ export default function VerificationPage() {
   if (step === 'processing') return (
     <Shell>
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D]/15 to-[#7B68EE]/15 border border-[#7B68EE]/20 mb-6">
-          <svg className="vfy-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" strokeWidth="2.5" strokeLinecap="round">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-infyn-rose/20 mb-6">
+          <svg className="vfy-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2.5" strokeLinecap="round">
             <path d="M21 12a9 9 0 1 1-6.2-8.56" />
           </svg>
         </div>
-        <h2 className="text-[22px] font-extrabold text-[#1A1A2E] mb-2">Submitting…</h2>
-        <p className="text-[14px] text-[#1A1A2E]/55 max-w-[240px] leading-relaxed">
+        <h2 className="text-[22px] font-extrabold text-infyn-ink mb-2">Submitting…</h2>
+        <p className="text-[14px] text-infyn-ink/55 max-w-[240px] leading-relaxed">
           This will only take a moment
         </p>
       </div>
@@ -386,10 +386,10 @@ export default function VerificationPage() {
         <div className="vfy-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#F59E0B]/15 to-[#F97316]/15 border border-[#F59E0B]/25 mb-6">
           <span className="text-4xl">⏳</span>
         </div>
-        <h1 className="vfy-rise text-[24px] font-extrabold text-[#1A1A2E] mb-3" style={{ animationDelay: '100ms' }}>
+        <h1 className="vfy-rise text-[24px] font-normal text-infyn-ink mb-3 font-display" style={{ animationDelay: '100ms' }}>
           Under Review
         </h1>
-        <p className="vfy-rise text-[14.5px] text-[#1A1A2E]/60 max-w-[280px] leading-relaxed" style={{ animationDelay: '160ms' }}>
+        <p className="vfy-rise text-[14.5px] text-infyn-ink/60 max-w-[280px] leading-relaxed" style={{ animationDelay: '160ms' }}>
           {step === 'submitted'
             ? "Thanks! Our team will review your submission. Your badge will appear on your profile once approved."
             : "You've already submitted — our team is reviewing it. Your badge will appear once approved."}
@@ -398,7 +398,7 @@ export default function VerificationPage() {
       <div className="flex-shrink-0 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
         <button
           onClick={() => router.push('/profile')}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(255,107,157,0.55)] active:scale-[0.985] transition-all cursor-pointer"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer"
         >
           Back to Profile
         </button>
@@ -411,7 +411,7 @@ export default function VerificationPage() {
     <Shell>
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
         <div className="vfy-pop relative mb-6">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#22C55E]/20 to-[#7B68EE]/20 border border-[#22C55E]/30">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#22C55E]/20 to-infyn-rose/20 border border-[#22C55E]/30">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -419,17 +419,17 @@ export default function VerificationPage() {
           <div className="vfy-ring" />
           <div className="vfy-ring-2" />
         </div>
-        <h1 className="vfy-rise text-[28px] font-extrabold text-[#1A1A2E] mb-3 tracking-tight" style={{ animationDelay: '100ms' }}>
+        <h1 className="vfy-rise text-[28px] font-normal text-infyn-ink mb-3 tracking-tight font-display" style={{ animationDelay: '100ms' }}>
           You&apos;re Verified! 🎉
         </h1>
-        <p className="vfy-rise text-[14.5px] text-[#1A1A2E]/60 max-w-[260px] leading-relaxed" style={{ animationDelay: '160ms' }}>
+        <p className="vfy-rise text-[14.5px] text-infyn-ink/60 max-w-[260px] leading-relaxed" style={{ animationDelay: '160ms' }}>
           Your blue badge is now live on your profile. Expect more matches!
         </p>
       </div>
       <div className="flex-shrink-0 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
         <button
           onClick={() => { hapticSuccess(); router.push('/profile'); }}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#22C55E] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(34,197,94,0.45)] active:scale-[0.985] transition-all cursor-pointer"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#22C55E] to-infyn-rose text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(34,197,94,0.45)] active:scale-[0.985] transition-all cursor-pointer"
         >
           View My Profile
         </button>
@@ -441,30 +441,30 @@ export default function VerificationPage() {
   return (
     <Shell>
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <div className="vfy-pop flex h-20 w-20 items-center justify-center rounded-full bg-rose-50 border border-rose-200 text-[#F43F5E] mb-6">
+        <div className="vfy-pop flex h-20 w-20 items-center justify-center rounded-full bg-rose-50 border border-rose-200 text-infyn-rose mb-6">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
         </div>
-        <h2 className="vfy-rise text-[22px] font-extrabold text-[#1A1A2E] mb-2" style={{ animationDelay: '80ms' }}>
+        <h2 className="vfy-rise text-[22px] font-extrabold text-infyn-ink mb-2" style={{ animationDelay: '80ms' }}>
           Couldn&apos;t Submit
         </h2>
-        <p className="vfy-rise text-[14px] text-[#1A1A2E]/60 max-w-[260px] leading-relaxed mb-8" style={{ animationDelay: '140ms' }}>
+        <p className="vfy-rise text-[14px] text-infyn-ink/60 max-w-[260px] leading-relaxed mb-8" style={{ animationDelay: '140ms' }}>
           {error || 'Something went wrong. Check your connection and try again.'}
         </p>
       </div>
       <div className="flex-shrink-0 px-5 space-y-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
         <button
           onClick={() => { hapticLight(); setStep('camera'); }}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(255,107,157,0.55)] active:scale-[0.985] transition-all cursor-pointer"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[15px] font-bold shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer"
         >
           Try Again
         </button>
         <button
           onClick={() => router.push('/profile')}
-          className="w-full h-12 rounded-2xl border border-[#1A1A2E]/10 bg-white/80 text-[#1A1A2E] text-[14px] font-bold active:scale-[0.98] transition-all cursor-pointer"
+          className="w-full h-12 rounded-2xl border border-infyn-ink/10 bg-infyn-surface/80 text-infyn-ink text-[14px] font-bold active:scale-[0.98] transition-all cursor-pointer"
         >
           Maybe Later
         </button>

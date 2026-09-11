@@ -49,13 +49,13 @@ const GLOBAL_ANIMATIONS_CSS = `
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
-    background-color: #FAFAF7;
+    background-color: var(--infyn-paper);
   }
 
   /* Custom text selection */
   ::selection {
-    background: rgba(255, 107, 157, 0.25);
-    color: #1A1A2E;
+    background: rgba(var(--infyn-rose-rgb), 0.25);
+    color: var(--infyn-ink);
   }
 
   /* Hide scrollbar utility */
@@ -97,16 +97,16 @@ const GLOBAL_ANIMATIONS_CSS = `
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`bg-[#FAFAF7] ${jakarta.variable} ${jakarta.className}`}>
+    <html lang="en" className={`bg-infyn-paper ${jakarta.variable} ${jakarta.className}`}>
       <head>
         {/* Match system chrome to app background — avoids jarring pink Android status bar */}
-        <meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#1A1A2E" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#FAF5EB" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#201A16" media="(prefers-color-scheme: dark)" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <style dangerouslySetInnerHTML={{ __html: GLOBAL_ANIMATIONS_CSS }} />
       </head>
-      <body className="bg-[#FAFAF7] text-[#1A1A2E] min-h-screen overflow-x-hidden antialiased font-sans selection:bg-[#FF6B9D]/25 selection:text-[#1A1A2E]">
+      <body className="bg-infyn-paper text-infyn-ink min-h-screen overflow-x-hidden antialiased font-sans selection:bg-infyn-rose/25 selection:text-infyn-ink">
         <NotificationProvider>
           <FilterProvider>
             <main className="min-h-screen w-full">

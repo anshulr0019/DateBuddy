@@ -119,7 +119,7 @@ export default function PWAInstallBanner() {
             <div
               className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] text-white text-lg font-black shadow-sm"
               style={{
-                background: 'linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%)',
+                background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%)',
               }}
             >
               ✦
@@ -127,7 +127,7 @@ export default function PWAInstallBanner() {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <p className="text-[13.5px] font-bold text-white leading-tight">Install Infyn</p>
-                <span className="rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-1.5 py-0.2 text-[9px] font-extrabold text-white">
+                <span className="rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose px-1.5 py-0.2 text-[9px] font-extrabold text-white">
                   Fast
                 </span>
               </div>
@@ -150,7 +150,7 @@ export default function PWAInstallBanner() {
               onClick={handleInstallClick}
               className="rounded-xl px-3.5 py-2 text-[12.5px] font-bold text-white shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-1"
               style={{
-                background: 'linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%)',
+                background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%)',
               }}
             >
               <span>Install</span>
@@ -174,17 +174,17 @@ export default function PWAInstallBanner() {
           <div
             className="relative z-10 w-full max-w-[420px] rounded-t-[32px] sm:rounded-[32px] p-6 text-center text-white border border-white/10 shadow-2xl flex flex-col items-center animate-sheet-up"
             style={{
-              background: 'linear-gradient(160deg, #181422 0%, #0d0c13 100%)',
+              background: 'linear-gradient(160deg, var(--infyn-dark-surface) 0%, var(--infyn-dark) 100%)',
             }}
           >
             {/* Drag Handle */}
-            <div className="h-1 w-10 rounded-full bg-white/20 mb-4" />
+            <div className="h-1 w-10 rounded-full bg-infyn-surface/20 mb-4" />
 
             {/* App Icon */}
             <div
               className="flex h-16 w-16 items-center justify-center rounded-[20px] text-white text-2xl font-black shadow-lg mb-3"
               style={{
-                background: 'linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%)',
+                background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%)',
               }}
             >
               ✦
@@ -199,34 +199,34 @@ export default function PWAInstallBanner() {
 
             {/* Steps Visual */}
             <div className="w-full space-y-3 mb-6 text-left">
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.06] border border-white/10">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-[14px]">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-infyn-surface/[0.06] border border-white/10">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-infyn-surface/10 text-[14px]">
                   1
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-bold text-white">
-                    Tap the <span className="text-[#FF6B9D]">Share</span> button
+                    Tap the <span className="text-infyn-rose-light">Share</span> button
                   </p>
                   <p className="text-[11.5px] text-white/50">At the bottom of your Safari screen</p>
                 </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                   <polyline points="16 6 12 2 8 6" />
                   <line x1="12" y1="2" x2="12" y2="15" />
                 </svg>
               </div>
 
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.06] border border-white/10">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-[14px]">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-infyn-surface/[0.06] border border-white/10">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-infyn-surface/10 text-[14px]">
                   2
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-bold text-white">
-                    Select <span className="text-[#7B68EE]">Add to Home Screen</span>
+                    Select <span className="text-infyn-rose-light">Add to Home Screen</span>
                   </p>
                   <p className="text-[11.5px] text-white/50">Scroll down the share menu options</p>
                 </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="4" />
                   <line x1="12" y1="8" x2="12" y2="16" />
                   <line x1="8" y1="12" x2="16" y2="12" />
@@ -239,7 +239,7 @@ export default function PWAInstallBanner() {
                 setShowIOSGuide(false);
                 handleDismiss();
               }}
-              className="w-full py-3.5 rounded-2xl bg-white text-[#121217] font-bold text-[14.5px] active:scale-95 transition-all cursor-pointer shadow-lg"
+              className="w-full py-3.5 rounded-2xl bg-infyn-surface text-infyn-dark font-bold text-[14.5px] active:scale-95 transition-all cursor-pointer shadow-lg"
             >
               Got it!
             </button>

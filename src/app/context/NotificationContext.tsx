@@ -186,14 +186,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           <div onClick={closeNotifications} className="absolute inset-0" />
 
           <div
-            className="relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[#FAFAF7] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] animate-sheet-up"
+            className="relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-infyn-paper rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-infyn-border/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] animate-sheet-up"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[#1A1A2E]/[0.06] bg-white/80">
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-infyn-ink/[0.06] bg-infyn-surface/80">
               <div className="flex items-center gap-2">
-                <h3 className="text-[17px] font-extrabold text-[#1A1A2E]">Notifications</h3>
+                <h3 className="text-[17px] font-extrabold text-infyn-ink">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-[#FF6B9D] text-white text-[10px] font-black">
+                  <span className="px-2 py-0.5 rounded-full bg-infyn-rose text-white text-[10px] font-black">
                     {unreadCount} new
                   </span>
                 )}
@@ -202,14 +202,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
-                    className="text-[11.5px] font-bold text-[#7B68EE] hover:underline cursor-pointer"
+                    className="text-[11.5px] font-bold text-infyn-rose hover:underline cursor-pointer"
                   >
                     Mark all read
                   </button>
                 )}
                 <button
                   onClick={closeNotifications}
-                  className="h-8 w-8 rounded-full bg-[#1A1A2E]/[0.05] flex items-center justify-center text-[#1A1A2E]/60 hover:text-[#1A1A2E] cursor-pointer"
+                  className="h-8 w-8 rounded-full bg-infyn-ink/[0.05] flex items-center justify-center text-infyn-ink/60 hover:text-infyn-ink cursor-pointer"
                 >
                   ✕
                 </button>
@@ -219,7 +219,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-2.5">
               {notifications.length === 0 ? (
-                <div className="py-12 text-center text-[#1A1A2E]/40 text-[13px]">
+                <div className="py-12 text-center text-infyn-ink/40 text-[13px]">
                   <p className="text-3xl mb-2">🔔</p>
                   <p className="font-semibold">No notifications yet</p>
                   <p className="text-[11.5px] mt-1">Likes, matches, and messages will appear here</p>
@@ -236,39 +236,39 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                       onClick={() => handleNotificationClick(notif)}
                       className={`p-3.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
                         isUnread
-                          ? 'bg-white border-[#FF6B9D]/30 shadow-xs ring-1 ring-[#FF6B9D]/15'
-                          : 'bg-white/60 border-gray-200/60'
+                          ? 'bg-infyn-surface border-infyn-rose/30 shadow-xs ring-1 ring-infyn-rose/15'
+                          : 'bg-infyn-surface/60 border-infyn-border/60'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div
                           className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg ${
                             isMatch
-                              ? 'bg-gradient-to-tr from-[#FF6B9D] to-[#F43F5E] text-white shadow-xs'
+                              ? 'bg-gradient-to-tr from-infyn-rose to-infyn-rose text-white shadow-xs'
                               : isLike
                               ? 'bg-gradient-to-tr from-rose-500 to-amber-500 text-white shadow-xs'
-                              : 'bg-gradient-to-tr from-[#7B68EE] to-[#A855F7] text-white shadow-xs'
+                              : 'bg-gradient-to-tr from-infyn-rose to-[#A855F7] text-white shadow-xs'
                           }`}
                         >
                           {isMatch ? '💕' : isLike ? '✨' : '💬'}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
-                            <p className={`text-[13.5px] leading-tight truncate ${isUnread ? 'font-extrabold text-[#1A1A2E]' : 'font-bold text-[#1A1A2E]/80'}`}>
+                            <p className={`text-[13.5px] leading-tight truncate ${isUnread ? 'font-extrabold text-infyn-ink' : 'font-bold text-infyn-ink/80'}`}>
                               {notif.title}
                             </p>
                             {isUnread && (
-                              <span className="h-2 w-2 rounded-full bg-[#FF6B9D] flex-shrink-0" />
+                              <span className="h-2 w-2 rounded-full bg-infyn-rose flex-shrink-0" />
                             )}
                           </div>
-                          <p className="text-[12px] text-[#1A1A2E]/60 leading-snug mt-0.5 line-clamp-2">
+                          <p className="text-[12px] text-infyn-ink/60 leading-snug mt-0.5 line-clamp-2">
                             {notif.message || notif.body || (isLike ? 'Tap to view who liked you' : 'Tap to open')}
                           </p>
                           <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-[10px] text-[#1A1A2E]/40">
+                            <span className="text-[10px] text-infyn-ink/40">
                               {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
-                            <span className="text-[10.5px] font-bold text-[#7B68EE]">
+                            <span className="text-[10.5px] font-bold text-infyn-rose">
                               {isLike ? 'View in Who Liked You →' : isMatch ? 'Chat now →' : 'View →'}
                             </span>
                           </div>

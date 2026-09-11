@@ -127,9 +127,9 @@ export function DatePlannerDrawer({
       <div onClick={onClose} className="absolute inset-0" />
 
       {/* Main Sheet */}
-      <div className="relative z-10 w-full max-w-[420px] rounded-t-[32px] sm:rounded-[28px] p-6 bg-[#0D0D11] border border-white/[0.08] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] text-white flex flex-col animate-sheet-up">
+      <div className="relative z-10 w-full max-w-[420px] rounded-t-[32px] sm:rounded-[28px] p-6 bg-infyn-dark border border-white/[0.08] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] text-white flex flex-col animate-sheet-up">
         {/* Drag Handle */}
-        <div className="h-1 w-9 rounded-full bg-white/20 mb-4 self-center" />
+        <div className="h-1 w-9 rounded-full bg-infyn-surface/20 mb-4 self-center" />
 
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
@@ -138,7 +138,7 @@ export function DatePlannerDrawer({
               <button
                 type="button"
                 onClick={goBack}
-                className="h-8 w-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-sm"
+                className="h-8 w-8 rounded-full bg-infyn-surface/[0.06] hover:bg-infyn-surface/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-sm"
               >
                 &larr;
               </button>
@@ -157,7 +157,7 @@ export function DatePlannerDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="h-8 w-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer"
+            className="h-8 w-8 rounded-full bg-infyn-surface/[0.06] hover:bg-infyn-surface/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer"
           >
             ✕
           </button>
@@ -170,10 +170,10 @@ export function DatePlannerDrawer({
               key={i}
               className={`h-1.5 rounded-full transition-all duration-500 ${
                 i === step
-                  ? 'w-6 bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE]'
+                  ? 'w-6 bg-gradient-to-r from-infyn-rose to-infyn-rose'
                   : i < step
-                  ? 'w-1.5 bg-[#FF6B9D]/60'
-                  : 'w-1.5 bg-white/15'
+                  ? 'w-1.5 bg-infyn-rose/60'
+                  : 'w-1.5 bg-infyn-surface/15'
               }`}
             />
           ))}
@@ -195,8 +195,8 @@ export function DatePlannerDrawer({
                     onClick={() => setActivity(act)}
                     className={`py-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
                       activity?.label === act.label
-                        ? 'bg-white/[0.12] border-white/40 scale-[1.03] shadow-sm'
-                        : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/15'
+                        ? 'bg-infyn-surface/[0.12] border-white/40 scale-[1.03] shadow-sm'
+                        : 'bg-infyn-surface/[0.03] border-white/[0.06] hover:bg-infyn-surface/[0.06] hover:border-white/15'
                     }`}
                   >
                     <span className="text-[22px] block">{act.emoji}</span>
@@ -226,8 +226,8 @@ export function DatePlannerDrawer({
                       }}
                       className={`py-3.5 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
                         selectedQuickDate === qd.label
-                          ? 'bg-white/[0.12] border-white/40 scale-[1.02]'
-                          : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                          ? 'bg-infyn-surface/[0.12] border-white/40 scale-[1.02]'
+                          : 'bg-infyn-surface/[0.03] border-white/[0.06] hover:bg-infyn-surface/[0.06]'
                       }`}
                     >
                       <span className="text-[14px] font-bold text-white block">{qd.label}</span>
@@ -273,8 +273,8 @@ export function DatePlannerDrawer({
                     onClick={() => setTimeSlot(slot)}
                     className={`py-4 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
                       timeSlot?.label === slot.label
-                        ? 'bg-white/[0.12] border-white/40 scale-[1.02]'
-                        : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                        ? 'bg-infyn-surface/[0.12] border-white/40 scale-[1.02]'
+                        : 'bg-infyn-surface/[0.03] border-white/[0.06] hover:bg-infyn-surface/[0.06]'
                     }`}
                   >
                     <span className="text-[24px] block">{slot.emoji}</span>
@@ -294,7 +294,7 @@ export function DatePlannerDrawer({
               </p>
 
               {/* Preview Card */}
-              <div className="rounded-2xl bg-gradient-to-br from-[#FF6B9D]/15 to-[#7B68EE]/15 border border-white/[0.08] p-4 space-y-2">
+              <div className="rounded-2xl bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-white/[0.08] p-4 space-y-2">
                 <p className="text-[10px] font-mono uppercase tracking-wider text-white/40 mb-2">Preview</p>
                 <div className="space-y-1">
                   <p className="text-[13px] text-white font-medium">
@@ -328,7 +328,7 @@ export function DatePlannerDrawer({
               type="button"
               onClick={goNext}
               disabled={!canProceed()}
-              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[13.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-lg shadow-[#FF6B9D]/15 flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[13.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-lg shadow-infyn-ink/15 flex items-center justify-center gap-2"
             >
               Continue
               <span className="text-[12px]">&rarr;</span>
@@ -338,7 +338,7 @@ export function DatePlannerDrawer({
               type="button"
               onClick={handleSubmit}
               disabled={!activity || !selectedDate || !timeSlot}
-              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[13.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-lg shadow-[#FF6B9D]/15 flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[13.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-lg shadow-infyn-ink/15 flex items-center justify-center gap-2"
             >
               Send Date Plan to {cleanName} 💕
             </button>

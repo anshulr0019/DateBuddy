@@ -15,18 +15,18 @@ export default function ProfileError({
   }, [error]);
 
   return (
-    <div className="h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-1 items-center justify-center px-6 pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             <GlassCard className="w-full p-8 text-center">
               <p className="text-[40px] mb-3" aria-hidden>
                 💔
               </p>
-              <h1 className="text-[18px] font-semibold text-[#1A1A2E] mb-1.5">
+              <h1 className="text-[18px] font-normal text-infyn-ink mb-1.5 font-display">
                 Something went wrong
               </h1>
-              <p className="text-[13px] text-[#1A1A2E]/60 mb-6">
+              <p className="text-[13px] text-infyn-ink/60 mb-6">
                 We couldn&apos;t load your profile. Please try again.
               </p>
               <PrimaryButton onClick={reset}>Try again</PrimaryButton>

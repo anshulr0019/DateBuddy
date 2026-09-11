@@ -293,7 +293,7 @@ function ChatContent() {
                       <h1 className={chatStyles.partnerName}>
                         {partner.name}
                         {partner.verified && (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F43F5E" aria-label="Verified profile" className="flex-shrink-0">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--infyn-rose)" aria-label="Verified profile" className="flex-shrink-0">
                             <path d="M12 2l2.4 2.4 3.3-.5.6 3.3 3 1.5-1.5 3 1.5 3-3 1.5-.6 3.3-3.3-.5L12 22l-2.4-2.4-3.3.5-.6-3.3-3-1.5 1.5-3-1.5-3 3-1.5.6-3.3 3.3.5z" />
                             <path d="M9.5 12.2l1.8 1.8 3.6-3.8" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                           </svg>
@@ -328,8 +328,8 @@ function ChatContent() {
                   </button>
                 ) : (
                   <div className={chatStyles.headerIdentity}>
-                    <div className="h-10 w-10 rounded-full bg-gray-100 animate-pulse" />
-                    <div className="h-3.5 w-24 rounded-full bg-gray-100 animate-pulse" />
+                    <div className="h-10 w-10 rounded-full bg-infyn-surface-soft animate-pulse" />
+                    <div className="h-3.5 w-24 rounded-full bg-infyn-surface-soft animate-pulse" />
                   </div>
                 )}
               </div>
@@ -413,10 +413,10 @@ function ChatContent() {
             {/* ── FEED ── */}
             {isLoading ? (
               <div className={chatStyles.loading} role="status" aria-label="Loading conversation">
-                <div className="h-14 w-3/5 rounded-[20px] rounded-tl-[4px] bg-white/70 animate-pulse" />
-                <div className="h-14 w-3/5 rounded-[20px] rounded-tr-[4px] bg-[#FFF0F4]/70 animate-pulse ml-auto" />
-                <div className="h-10 w-2/5 rounded-[20px] rounded-tl-[4px] bg-white/70 animate-pulse" />
-                <div className="h-20 w-3/5 rounded-[20px] rounded-tr-[4px] bg-[#FFF0F4]/70 animate-pulse ml-auto" />
+                <div className="h-14 w-3/5 rounded-[20px] rounded-tl-[4px] bg-infyn-surface/70 animate-pulse" />
+                <div className="h-14 w-3/5 rounded-[20px] rounded-tr-[4px] bg-infyn-blush/70 animate-pulse ml-auto" />
+                <div className="h-10 w-2/5 rounded-[20px] rounded-tl-[4px] bg-infyn-surface/70 animate-pulse" />
+                <div className="h-20 w-3/5 rounded-[20px] rounded-tr-[4px] bg-infyn-blush/70 animate-pulse ml-auto" />
               </div>
             ) : chat.phase === 'notfound' || validMatchId === null ? (
               <div className={chatStyles.state}>
@@ -477,7 +477,7 @@ function ChatContent() {
                             setInputText(line);
                             inputRef.current?.focus();
                           }}
-                          className="w-full px-4 py-2.5 rounded-2xl bg-white/80 border border-[#F9C0D0]/50 text-[13px] font-semibold text-[#2D1B28] hover:bg-[#FFF0F4] active:scale-95 transition-all cursor-pointer shadow-2xs"
+                          className="w-full px-4 py-2.5 rounded-2xl bg-infyn-surface/80 border border-infyn-rose-line/50 text-[13px] font-semibold text-infyn-ink hover:bg-infyn-blush active:scale-95 transition-all cursor-pointer shadow-2xs"
                         >
                           {line}
                         </button>
@@ -509,7 +509,7 @@ function ChatContent() {
 
                     {chat.loadingOlder && (
                       <div className="flex justify-center py-1" role="status" aria-label="Loading earlier messages">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#F43F5E]" />
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-infyn-border border-t-infyn-rose" />
                       </div>
                     )}
                     {feedItems.map((item) =>

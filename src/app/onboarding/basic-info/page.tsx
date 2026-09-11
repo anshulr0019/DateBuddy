@@ -34,13 +34,13 @@ const LOOKING_OPTIONS = [
 /* Deterministic particle field — fixed positions avoid any
    server/client render mismatch and keep the DOM tiny. */
 const PARTICLES = [
-  { left: '12%', top: '78%', size: 4, delay: '0s', dur: '13s', o: 0.28, color: '#FF6B9D' },
-  { left: '26%', top: '92%', size: 3, delay: '2.2s', dur: '11s', o: 0.22, color: '#7B68EE' },
-  { left: '44%', top: '85%', size: 5, delay: '4.6s', dur: '15s', o: 0.18, color: '#FFB4D0' },
-  { left: '63%', top: '95%', size: 3, delay: '1.4s', dur: '12s', o: 0.24, color: '#FF6B9D' },
-  { left: '78%', top: '82%', size: 4, delay: '3.8s', dur: '14s', o: 0.2, color: '#7B68EE' },
-  { left: '90%', top: '90%', size: 3, delay: '6s', dur: '12s', o: 0.22, color: '#FFB4D0' },
-  { left: '52%', top: '99%', size: 4, delay: '7.5s', dur: '13s', o: 0.16, color: '#B76CFF' },
+  { left: '12%', top: '78%', size: 4, delay: '0s', dur: '13s', o: 0.28, color: 'var(--infyn-rose)' },
+  { left: '26%', top: '92%', size: 3, delay: '2.2s', dur: '11s', o: 0.22, color: 'var(--infyn-rose)' },
+  { left: '44%', top: '85%', size: 5, delay: '4.6s', dur: '15s', o: 0.18, color: 'var(--infyn-blush)' },
+  { left: '63%', top: '95%', size: 3, delay: '1.4s', dur: '12s', o: 0.24, color: 'var(--infyn-rose)' },
+  { left: '78%', top: '82%', size: 4, delay: '3.8s', dur: '14s', o: 0.2, color: 'var(--infyn-rose)' },
+  { left: '90%', top: '90%', size: 3, delay: '6s', dur: '12s', o: 0.22, color: 'var(--infyn-blush)' },
+  { left: '52%', top: '99%', size: 4, delay: '7.5s', dur: '13s', o: 0.16, color: 'var(--infyn-rose)' },
 ];
 
 /* Scoped animation system. Transform/opacity only (compositor-friendly);
@@ -423,10 +423,10 @@ export default function BasicInfoPage() {
 
   /* Shared field shell: glass at rest; focus lifts it and blooms a soft glow. */
   const fieldShell =
-    'relative rounded-2xl border border-white/80 bg-white/75 backdrop-blur-xl ' +
-    'shadow-[0_10px_30px_-18px_rgba(26,26,46,0.18)] transition-all duration-300 ' +
-    'focus-within:-translate-y-[2px] focus-within:border-[#FF6B9D]/45 focus-within:bg-white/90 ' +
-    'focus-within:shadow-[0_0_0_4px_rgba(255,107,157,0.10),0_18px_40px_-16px_rgba(255,107,157,0.35)]';
+    'relative rounded-2xl border border-infyn-border/80 bg-infyn-surface/75 backdrop-blur-xl ' +
+    'shadow-[0_10px_30px_-18px_rgba(32,26,22,0.16)] transition-all duration-300 ' +
+    'focus-within:-translate-y-[2px] focus-within:border-infyn-rose/45 focus-within:bg-infyn-surface/90 ' +
+    'focus-within:shadow-[0_0_0_4px_rgba(32,26,22,0.1),0_18px_40px_-16px_rgba(32,26,22,0.16)]';
 
   const isStepValid =
     step === 0 ? nameValid : step === 1 ? ageValid : step === 2 ? Boolean(formData.gender) : Boolean(formData.lookingFor);
@@ -438,9 +438,9 @@ export default function BasicInfoPage() {
       : 'bi-step-enter';
 
   return (
-    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
+    <div className="min-h-screen h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-sans">
       <style>{STYLES}</style>
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         {/* Atmosphere — aurora blobs + slow rising light particles */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
           <div className="aurora-blob aurora-blob-1" />
@@ -470,14 +470,14 @@ export default function BasicInfoPage() {
             <button
               onClick={handleBack}
               aria-label="Go back"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 cursor-pointer"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-infyn-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infyn-rose/40 cursor-pointer"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
             <div
-              className="flex-1 h-[6px] rounded-full bg-[#1A1A2E]/[0.06] overflow-hidden"
+              className="flex-1 h-[6px] rounded-full bg-infyn-ink/[0.06] overflow-hidden"
               role="progressbar"
               aria-valuenow={1}
               aria-valuemin={1}
@@ -485,11 +485,11 @@ export default function BasicInfoPage() {
               aria-label={`Onboarding progress: step 1 of ${TOTAL_STEPS}`}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="h-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{ width: progressIn ? `${(1 / TOTAL_STEPS) * 100}%` : '2%' }}
               />
             </div>
-            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">1 of {TOTAL_STEPS}</span>
+            <span className="text-[12px] font-bold tabular-nums text-infyn-ink/45">1 of {TOTAL_STEPS}</span>
           </div>
 
           {/* Sub-step segments — shows where you are inside this question group */}
@@ -499,10 +499,10 @@ export default function BasicInfoPage() {
                 key={i}
                 className={`h-[4px] flex-1 rounded-full transition-all duration-500 ${
                   i < step
-                    ? 'bg-gradient-to-r from-[#FF6B9D]/70 to-[#7B68EE]/70'
+                    ? 'bg-gradient-to-r from-infyn-rose/70 to-infyn-rose/70'
                     : i === step
-                      ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.35)]'
-                      : 'bg-[#1A1A2E]/[0.07]'
+                      ? 'bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)]'
+                      : 'bg-infyn-ink/[0.07]'
                 }`}
               />
             ))}
@@ -521,16 +521,16 @@ export default function BasicInfoPage() {
               {step === 0 && (
                 <div key="s-name" className="flex flex-col">
                   <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
-                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                    <h1 className="text-[30px] leading-[1.12] font-normal tracking-tight text-infyn-ink font-display">
                       What should
                       <br />
                       we call{' '}
-                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">
                         you
                       </span>
                       ?
                     </h1>
-                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-infyn-ink/55">
                       Your first name — it’s how people will know you.
                     </p>
                   </div>
@@ -553,16 +553,16 @@ export default function BasicInfoPage() {
                           onFocus={(e) => scrollFieldIntoView(e.currentTarget.closest('div'))}
                           onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
                           autoFocus
-                          className="peer w-full h-[64px] rounded-2xl bg-transparent px-5 pt-6 pb-2 pr-12 text-center text-[16px] font-semibold text-[#1A1A2E] placeholder-transparent caret-[#FF6B9D] focus:outline-none"
+                          className="peer w-full h-[64px] rounded-2xl bg-transparent px-5 pt-6 pb-2 pr-12 text-center text-[16px] font-semibold text-infyn-ink placeholder-transparent caret-infyn-rose focus:outline-none"
                         />
                         <label
                           htmlFor="bi-name"
-                          className="pointer-events-none absolute left-0 right-0 top-[11px] text-center text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#1A1A2E]/45 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[#1A1A2E]/35 peer-focus:top-[11px] peer-focus:translate-y-0 peer-focus:text-[10.5px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-[0.14em] peer-focus:text-[#FF6B9D]"
+                          className="pointer-events-none absolute left-0 right-0 top-[11px] text-center text-[10.5px] font-bold uppercase tracking-[0.14em] text-infyn-ink/45 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-infyn-ink/35 peer-focus:top-[11px] peer-focus:translate-y-0 peer-focus:text-[10.5px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-[0.14em] peer-focus:text-infyn-rose"
                         >
                           First name
                         </label>
                         {nameValid && (
-                          <span className="bi-pop pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.4)]">
+                          <span className="bi-pop pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose text-white shadow-[0_2px_8px_rgba(32,26,22,0.16)]">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12" />
                             </svg>
@@ -578,15 +578,15 @@ export default function BasicInfoPage() {
               {step === 1 && (
                 <div key="s-dob" className="flex flex-col">
                   <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
-                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                    <h1 className="text-[30px] leading-[1.12] font-normal tracking-tight text-infyn-ink font-display">
                       When&apos;s your
                       <br />
-                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">
                         birthday
                       </span>
                       ?
                     </h1>
-                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-infyn-ink/55">
                       So we can show your age alongside your profile.
                     </p>
                   </div>
@@ -594,14 +594,14 @@ export default function BasicInfoPage() {
                   <div className="bi-rise flex justify-center" style={{ animationDelay: '120ms' }}>
                     <div ref={dobWrapRef} className={`w-full max-w-[300px] ${shake ? 'bi-shake' : ''}`}>
                       <div className={fieldShell}>
-                        <div className="h-[64px] px-5 pt-[26px] pb-2 pr-20 text-center text-[16px] font-semibold text-[#1A1A2E] whitespace-nowrap overflow-hidden text-ellipsis">
+                        <div className="h-[64px] px-5 pt-[26px] pb-2 pr-20 text-center text-[16px] font-semibold text-infyn-ink whitespace-nowrap overflow-hidden text-ellipsis">
                           {formData.dateOfBirth ? formatBirthday(formData.dateOfBirth) : ''}
                         </div>
                         <span
                           className={`pointer-events-none absolute left-0 right-0 text-center transition-all duration-200 ${
                             dobFloated
-                              ? `top-[11px] text-[10.5px] font-bold uppercase tracking-[0.14em] ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/45'}`
-                              : 'top-1/2 -translate-y-1/2 text-[15px] font-medium text-[#1A1A2E]/35'
+                              ? `top-[11px] text-[10.5px] font-bold uppercase tracking-[0.14em] ${dobFocused ? 'text-infyn-rose' : 'text-infyn-ink/45'}`
+                              : 'top-1/2 -translate-y-1/2 text-[15px] font-medium text-infyn-ink/35'
                           }`}
                         >
                           Birthday
@@ -609,9 +609,9 @@ export default function BasicInfoPage() {
                         {ageValid ? (
                           <span
                             key={age}
-                            className="bi-pop bi-halo pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#FF6B9D]/12 to-[#7B68EE]/12 px-3 py-1 text-[12.5px] font-bold text-[#1A1A2E]/75 ring-1 ring-[#FF6B9D]/30"
+                            className="bi-pop bi-halo pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-infyn-rose/12 to-infyn-rose/12 px-3 py-1 text-[12.5px] font-bold text-infyn-ink/75 ring-1 ring-infyn-rose/30"
                           >
-                            <svg aria-hidden width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg aria-hidden width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 1c.7 4.5 2 6.5 5 8-3 1.5-4.3 3.5-5 8-.7-4.5-2-6.5-5-8 3-1.5 4.3-3.5 5-8z" />
                             </svg>
                             {age}
@@ -627,7 +627,7 @@ export default function BasicInfoPage() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${dobFocused ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/30'}`}
+                            className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${dobFocused ? 'text-infyn-rose' : 'text-infyn-ink/30'}`}
                           >
                             <rect x="3" y="4" width="18" height="18" rx="4" />
                             <line x1="16" y1="2" x2="16" y2="6" />
@@ -660,7 +660,7 @@ export default function BasicInfoPage() {
                       {/* Privacy trust chip */}
                       <div
                         className={`mt-3 flex items-center justify-center gap-1.5 text-[12px] font-medium leading-snug px-2 ${
-                          ageValid ? 'text-[#16A34A] bi-fade' : 'text-[#1A1A2E]/45'
+                          ageValid ? 'text-[#16A34A] bi-fade' : 'text-infyn-ink/45'
                         }`}
                       >
                         <svg
@@ -696,15 +696,15 @@ export default function BasicInfoPage() {
               {step === 2 && (
                 <div key="s-gender" className="flex flex-col">
                   <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
-                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                    <h1 className="text-[30px] leading-[1.12] font-normal tracking-tight text-infyn-ink font-display">
                       Which describes
                       <br />
-                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">
                         you
                       </span>
                       ?
                     </h1>
-                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-infyn-ink/55">
                       This shows next to your name — you can change it anytime.
                     </p>
                   </div>
@@ -725,19 +725,19 @@ export default function BasicInfoPage() {
                             type="button"
                             aria-pressed={selected}
                             onClick={() => selectGender(option.value)}
-                            className={`relative flex h-[88px] flex-col items-center justify-center gap-1.5 rounded-2xl border text-[13.5px] backdrop-blur-md transition-all duration-200 active:scale-[0.96] cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
+                            className={`relative flex h-[88px] flex-col items-center justify-center gap-1.5 rounded-2xl border text-[13.5px] backdrop-blur-md transition-all duration-200 active:scale-[0.96] cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infyn-rose/40 ${
                               selected
-                                ? 'border-transparent bg-gradient-to-br from-[#FF6B9D]/12 to-[#7B68EE]/12 font-bold text-[#1A1A2E] ring-1 ring-[#FF6B9D]/45 shadow-[0_8px_24px_-12px_rgba(255,107,157,0.45)]'
-                                : 'border-white/80 bg-white/70 font-semibold text-[#1A1A2E]/55 shadow-[0_4px_16px_-12px_rgba(26,26,46,0.2)] hover:text-[#1A1A2E]/80'
+                                ? 'border-transparent bg-gradient-to-br from-infyn-rose/12 to-infyn-rose/12 font-bold text-infyn-ink ring-1 ring-infyn-rose/45 shadow-[0_8px_24px_-12px_rgba(32,26,22,0.16)]'
+                                : 'border-infyn-border/80 bg-infyn-surface/70 font-semibold text-infyn-ink/55 shadow-[0_4px_16px_-12px_rgba(32,26,22,0.16)] hover:text-infyn-ink/80'
                             }`}
                           >
                             <GenderGlyph
                               glyph={option.glyph}
-                              className={`transition-colors duration-200 ${selected ? 'text-[#FF6B9D]' : 'text-[#1A1A2E]/40'}`}
+                              className={`transition-colors duration-200 ${selected ? 'text-infyn-rose' : 'text-infyn-ink/40'}`}
                             />
                             {option.label}
                             {selected && (
-                              <span className="bi-pop absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_2px_8px_rgba(255,107,157,0.5)] ring-2 ring-[#FAFAF7]">
+                              <span className="bi-pop absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose text-white shadow-[0_2px_8px_rgba(32,26,22,0.16)] ring-2 ring-infyn-paper">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12" />
                                 </svg>
@@ -759,16 +759,16 @@ export default function BasicInfoPage() {
               {step === 3 && (
                 <div key="s-looking" className="flex flex-col">
                   <div className="bi-headline mb-8 text-center" style={{ animationDelay: '40ms' }}>
-                    <h1 className="text-[30px] leading-[1.12] font-black tracking-tight text-[#1A1A2E]">
+                    <h1 className="text-[30px] leading-[1.12] font-normal tracking-tight text-infyn-ink font-display">
                       Who would you
                       <br />
                       like to{' '}
-                      <span className="bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">
                         meet
                       </span>
                       ?
                     </h1>
-                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#1A1A2E]/55">
+                    <p className="mt-2.5 text-[14.5px] leading-relaxed text-infyn-ink/55">
                       We’ll use this to shape your discovery feed.
                     </p>
                   </div>
@@ -777,7 +777,7 @@ export default function BasicInfoPage() {
                     <div className="max-w-[320px] mx-auto">
                       <div
                         ref={lookingWrapRef}
-                        className={`relative grid grid-cols-3 rounded-2xl bg-[#1A1A2E]/[0.05] p-1 ${shake ? 'bi-shake' : ''}`}
+                        className={`relative grid grid-cols-3 rounded-2xl bg-infyn-ink/[0.05] p-1 ${shake ? 'bi-shake' : ''}`}
                         role="group"
                         aria-label="Who would you like to meet"
                         aria-describedby={showErrors && errors.lookingFor ? 'bi-looking-error' : undefined}
@@ -785,7 +785,7 @@ export default function BasicInfoPage() {
                         {lookingIndex >= 0 && (
                           <span
                             aria-hidden
-                            className="bi-fade absolute left-1 top-1 bottom-1 w-[calc((100%-8px)/3)] rounded-xl bg-white shadow-[0_4px_14px_-4px_rgba(26,26,46,0.18)] ring-1 ring-[#FF6B9D]/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                            className="bi-fade absolute left-1 top-1 bottom-1 w-[calc((100%-8px)/3)] rounded-xl bg-infyn-surface shadow-[0_4px_14px_-4px_rgba(32,26,22,0.16)] ring-1 ring-infyn-rose/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                             style={{ transform: `translateX(${lookingIndex * 100}%)` }}
                           />
                         )}
@@ -797,8 +797,8 @@ export default function BasicInfoPage() {
                               type="button"
                               aria-pressed={selected}
                               onClick={() => selectLookingFor(option.value)}
-                              className={`relative z-10 h-12 rounded-xl text-[13.5px] transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 ${
-                                selected ? 'font-bold text-[#1A1A2E]' : 'font-semibold text-[#1A1A2E]/45 active:text-[#1A1A2E]/70'
+                              className={`relative z-10 h-12 rounded-xl text-[13.5px] transition-colors duration-200 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infyn-rose/40 ${
+                                selected ? 'font-bold text-infyn-ink' : 'font-semibold text-infyn-ink/45 active:text-infyn-ink/70'
                               }`}
                             >
                               {option.label}
@@ -809,13 +809,13 @@ export default function BasicInfoPage() {
 
                       {/* Recommended hint */}
                       {!formData.lookingFor && (
-                        <p className="mt-3.5 flex items-start gap-1.5 text-center justify-center text-[12.5px] font-medium text-[#1A1A2E]/45 leading-snug">
-                          <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-[2px] flex-shrink-0">
+                        <p className="mt-3.5 flex items-start gap-1.5 text-center justify-center text-[12.5px] font-medium text-infyn-ink/45 leading-snug">
+                          <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-[2px] flex-shrink-0">
                             <path d="M9 18h6" />
                             <path d="M10 22h4" />
                             <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z" />
                           </svg>
-                          <span><b className="text-[#7B68EE]">Everyone</b> is the most popular choice — matches you with more people.</span>
+                          <span><b className="text-infyn-rose">Everyone</b> is the most popular choice — matches you with more people.</span>
                         </p>
                       )}
                       {showErrors && errors.lookingFor && (
@@ -832,17 +832,17 @@ export default function BasicInfoPage() {
         </div>
 
         {/* FOOTER — Continue CTA */}
-        <div className="bi-rise flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/92 to-transparent" style={{ animationDelay: '420ms' }}>
+        <div className="bi-rise flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-paper via-infyn-paper/92 to-transparent" style={{ animationDelay: '420ms' }}>
           <button
             onClick={handleContinue}
             aria-disabled={!isStepValid}
             aria-busy={phase === 'saving'}
-            className={`group relative h-[56px] w-full overflow-hidden rounded-[20px] text-[15.5px] font-bold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/50 focus-visible:ring-offset-2 ${
+            className={`group relative h-[56px] w-full overflow-hidden rounded-[20px] text-[15.5px] font-bold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infyn-rose/50 focus-visible:ring-offset-2 ${
               shake ? 'bi-shake' : ''
             } ${
               isStepValid || phase !== 'idle'
-                ? 'bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_16px_40px_-12px_rgba(255,107,157,0.55)] active:scale-[0.97]'
-                : 'border border-[#1A1A2E]/8 bg-[#1A1A2E]/[0.05] text-[#1A1A2E]/35 active:scale-[0.99]'
+                ? 'bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-[0_16px_40px_-12px_rgba(32,26,22,0.16)] active:scale-[0.97]'
+                : 'border border-infyn-ink/8 bg-infyn-ink/[0.05] text-infyn-ink/35 active:scale-[0.99]'
             }`}
           >
             {isStepValid && phase === 'idle' && (
@@ -858,7 +858,7 @@ export default function BasicInfoPage() {
                 </svg>
               ) : phase === 'done' ? (
                 <>
-                  <span className="bi-pop flex h-6 w-6 items-center justify-center rounded-full bg-white/25">
+                  <span className="bi-pop flex h-6 w-6 items-center justify-center rounded-full bg-infyn-surface/25">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -904,7 +904,7 @@ export default function BasicInfoPage() {
               )}
             </span>
           </button>
-          <p className="mt-3 text-center text-[12px] font-medium text-[#1A1A2E]/35">
+          <p className="mt-3 text-center text-[12px] font-medium text-infyn-ink/35">
             {step === 1
               ? 'We never share your birthday — only your age'
               : 'This appears on your profile — you can edit it anytime'}

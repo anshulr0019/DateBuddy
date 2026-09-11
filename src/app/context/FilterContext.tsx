@@ -124,7 +124,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
           {/* Sliding Sheet Container */}
           <div
-            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[var(--infyn-paper,#FAFAF7)] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-white/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
+            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[var(--infyn-paper,#FAFAF7)] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-infyn-border/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
               animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-full sm:translate-y-8 sm:scale-95 opacity-0'
             }`}
             style={{ willChange: 'transform, opacity' }}
@@ -174,7 +174,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                       onClick={() => setLocalFilters(prev => ({ ...prev, lookingFor: gender }))}
                       className={`py-2 text-[13px] font-semibold rounded-xl transition-all cursor-pointer ${
                         localFilters.lookingFor === gender
-                          ? 'bg-white text-[var(--infyn-ink,#1A1A2E)] shadow-sm'
+                          ? 'bg-infyn-surface text-[var(--infyn-ink,#1A1A2E)] shadow-sm'
                           : 'text-[var(--infyn-ink,#1A1A2E)]/50 hover:text-[var(--infyn-ink,#1A1A2E)]'
                       }`}
                     >
@@ -250,7 +250,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* 4. Verified Profiles Only Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white border border-[var(--infyn-ink,#1A1A2E)]/[0.06] shadow-sm">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-infyn-surface border border-[var(--infyn-ink,#1A1A2E)]/[0.06] shadow-sm">
                 <div>
                   <p className="text-[14px] font-bold text-[var(--infyn-ink,#1A1A2E)]">Verified Profiles Only</p>
                   <p className="text-[12px] text-[var(--infyn-ink,#1A1A2E)]/50 mt-0.5">Only show photos with a blue checkmark badge</p>
@@ -263,7 +263,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-infyn-surface shadow ring-0 transition duration-200 ease-in-out ${
                       localFilters.verifiedOnly ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
@@ -285,7 +285,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
                         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-white shadow-sm scale-105'
-                            : 'bg-white border border-[var(--infyn-ink,#1A1A2E)]/10 text-[var(--infyn-ink,#1A1A2E)]/60 hover:border-[var(--infyn-ink,#1A1A2E)]/25'
+                            : 'bg-infyn-surface border border-[var(--infyn-ink,#1A1A2E)]/10 text-[var(--infyn-ink,#1A1A2E)]/60 hover:border-[var(--infyn-ink,#1A1A2E)]/25'
                         }`}
                       >
                         {interest}
@@ -298,10 +298,10 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Bottom Apply CTA */}
-            <div className="p-4 border-t border-[var(--infyn-ink,#1A1A2E)]/[0.06] bg-white">
+            <div className="p-4 border-t border-[var(--infyn-ink,#1A1A2E)]/[0.06] bg-infyn-surface">
               <button
                 onClick={handleApply}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-[15px] font-bold text-white shadow-[0_8px_24px_-6px_rgba(255,107,157,0.4)] active:scale-[0.985] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-[15px] font-bold text-white shadow-[0_8px_24px_-6px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer"
               >
                 Apply Preferences
               </button>

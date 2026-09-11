@@ -206,7 +206,7 @@ export default function VerifyOtpPage() {
 
   return (
     <main
-      className="h-[100svh] h-dvh relative flex flex-col items-center justify-between overflow-hidden bg-[#FAFAF7] text-[#1A1A2E] font-sans mx-auto max-w-[440px]"
+      className="h-[100svh] h-dvh relative flex flex-col items-center justify-between overflow-hidden bg-infyn-paper text-infyn-ink font-sans mx-auto max-w-[440px]"
       style={{
         paddingTop: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-top, 0px)))',
         paddingBottom: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-bottom, 0px)))',
@@ -216,9 +216,9 @@ export default function VerifyOtpPage() {
     >
       {/* Aurora background */}
       <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-12 -left-12 w-72 h-72 rounded-full bg-[#FF6B9D]/15 blur-[60px]" />
-        <div className="absolute top-1/3 -right-16 w-80 h-80 rounded-full bg-[#B76CFF]/12 blur-[60px]" />
-        <div className="absolute -bottom-10 left-1/4 w-72 h-72 rounded-full bg-[#7B68EE]/10 blur-[60px]" />
+        <div className="absolute -top-12 -left-12 w-72 h-72 rounded-full bg-infyn-rose/15 blur-[60px]" />
+        <div className="absolute top-1/3 -right-16 w-80 h-80 rounded-full bg-infyn-rose/12 blur-[60px]" />
+        <div className="absolute -bottom-10 left-1/4 w-72 h-72 rounded-full bg-infyn-rose/10 blur-[60px]" />
       </div>
 
       {/* Top bar */}
@@ -226,15 +226,15 @@ export default function VerifyOtpPage() {
         <button
           onClick={() => router.back()}
           aria-label="Go back"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.12)] backdrop-blur-xl active:scale-[0.92] transition-all cursor-pointer"
+          className="font-system flex h-11 w-11 items-center justify-center rounded-2xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.12)] backdrop-blur-xl active:scale-[0.92] transition-all cursor-pointer"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <div className="flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-3 py-1.5 backdrop-blur-xl shadow-sm">
+        <div className="flex items-center gap-1.5 rounded-full border border-infyn-border/60 bg-infyn-surface/70 px-3 py-1.5 backdrop-blur-xl shadow-sm">
           <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-[#1A1A2E]/60">Secure Verification</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-infyn-ink/60">Secure Verification</span>
         </div>
       </div>
 
@@ -242,15 +242,15 @@ export default function VerifyOtpPage() {
       <div className="w-full z-10 flex flex-col items-center my-auto py-4">
         <BrandLogo size={72} className="mb-5" />
 
-        <h1 className="text-[30px] sm:text-[36px] font-semibold tracking-[-0.03em] leading-[1.05] text-center mb-2 text-[#1A1A2E]">
+        <h1 className="text-[30px] sm:text-[36px] font-normal tracking-[-0.03em] leading-[1.05] text-center mb-2 text-infyn-ink font-display">
           Enter Code
         </h1>
-        <p className="text-[14.5px] leading-relaxed text-[#1A1A2E]/55 text-center mb-7 max-w-[280px]">
+        <p className="text-[14.5px] leading-relaxed text-infyn-ink/55 text-center mb-7 max-w-[280px]">
           We sent a 6-digit code to your registered mobile number.
         </p>
 
         {/* Glass card */}
-        <div className="w-full rounded-[28px] border border-white/60 bg-white/75 p-5 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(26,26,46,0.2)] flex flex-col items-center">
+        <div className="w-full rounded-[28px] border border-infyn-border/60 bg-infyn-surface/75 p-5 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(32,26,22,0.16)] flex flex-col items-center">
           <form onSubmit={handleVerify} className="w-full flex flex-col items-center">
             {/* OTP inputs — shake on wrong code */}
             <div
@@ -273,10 +273,10 @@ export default function VerifyOtpPage() {
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onPaste={index === 0 ? handlePaste : undefined}
                   aria-label={`Digit ${index + 1} of 6`}
-                  className={`h-14 w-full min-w-0 max-w-[48px] text-center text-[22px] font-bold rounded-2xl border-2 text-[#1A1A2E] transition-all duration-200 outline-none select-none ${
+                  className={`h-14 w-full min-w-0 max-w-[48px] text-center text-[22px] font-bold rounded-2xl border-2 text-infyn-ink transition-all duration-200 outline-none select-none ${
                     digit
-                      ? 'border-[#FF6B9D] bg-gradient-to-br from-[#FF6B9D]/[0.06] to-[#7B68EE]/[0.06] shadow-[0_0_0_3px_rgba(255,107,157,0.12)]'
-                      : 'border-[#1A1A2E]/10 bg-white/90 focus:border-[#FF6B9D] focus:shadow-[0_0_0_3px_rgba(255,107,157,0.12)]'
+                      ? 'border-infyn-rose bg-gradient-to-br from-infyn-rose/[0.06] to-infyn-rose/[0.06] shadow-[0_0_0_3px_rgba(32,26,22,0.12)]'
+                      : 'border-infyn-ink/10 bg-infyn-surface/90 focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(32,26,22,0.12)]'
                   }`}
                 />
               ))}
@@ -297,7 +297,7 @@ export default function VerifyOtpPage() {
             <button
               type="submit"
               disabled={loading || !allFilled}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white font-bold text-[15px] shadow-[0_12px_32px_-10px_rgba(123,104,238,0.6)] active:scale-[0.985] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[15px] shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 cursor-pointer flex items-center justify-center gap-2 min-h-[44px] font-system"
             >
               {loading ? (
                 <>
@@ -309,14 +309,14 @@ export default function VerifyOtpPage() {
               ) : 'Verify Code'}
             </button>
 
-            <div className="mt-5 flex items-center justify-center gap-2 text-[14px] text-[#1A1A2E]/55">
+            <div className="mt-5 flex items-center justify-center gap-2 text-[14px] text-infyn-ink/55">
               <span>Didn&apos;t receive it?</span>
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={cooldown > 0 || resending}
-                className="font-bold transition-all disabled:opacity-40 cursor-pointer min-h-[44px] inline-flex items-center"
-                style={{ color: cooldown > 0 ? undefined : '#FF6B9D' }}
+                className="font-system font-bold transition-all disabled:opacity-40 cursor-pointer min-h-[44px] inline-flex items-center"
+                style={{ color: cooldown > 0 ? undefined : 'var(--infyn-rose)' }}
               >
                 {resending ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend'}
               </button>
@@ -327,7 +327,7 @@ export default function VerifyOtpPage() {
 
       {/* Footer */}
       <div className="w-full text-center z-10">
-        <p className="text-[11.5px] uppercase tracking-wide font-medium text-[#1A1A2E]/35">
+        <p className="text-[11.5px] uppercase tracking-wide font-medium text-infyn-ink/35">
           {BRAND_NAME} · Secure Verification
         </p>
       </div>

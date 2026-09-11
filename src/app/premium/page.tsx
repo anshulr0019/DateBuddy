@@ -218,15 +218,15 @@ export default function PremiumPage() {
   const isGold = sub?.isActive === true;
 
   return (
-    <div className="h-dvh w-full bg-[#0d0914] flex justify-center overflow-hidden font-sans">
+    <div className="h-dvh w-full bg-infyn-dark flex justify-center overflow-hidden font-sans">
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <div className="relative h-full w-full max-w-[440px] flex flex-col overflow-hidden">
 
         {/* Deep background gradients */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-          <div className="pm-glow absolute -top-24 -left-24 h-80 w-80 rounded-full bg-[#FF6B9D]/25 blur-[80px]" />
-          <div className="pm-glow absolute -top-16 -right-16 h-72 w-72 rounded-full bg-[#7B68EE]/22 blur-[80px]" style={{ animationDelay: '1.5s' }} />
-          <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-[#FFB4D0]/10 blur-[60px]" />
+          <div className="pm-glow absolute -top-24 -left-24 h-80 w-80 rounded-full bg-infyn-rose/25 blur-[80px]" />
+          <div className="pm-glow absolute -top-16 -right-16 h-72 w-72 rounded-full bg-infyn-rose/22 blur-[80px]" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-infyn-blush/10 blur-[60px]" />
         </div>
 
         {/* HEADER */}
@@ -235,14 +235,14 @@ export default function PremiumPage() {
             <button
               onClick={() => router.back()}
               aria-label="Close"
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-white/70 active:scale-90 transition-all cursor-pointer backdrop-blur-md"
+              className="font-system flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface/10 text-white/70 active:scale-90 transition-all cursor-pointer backdrop-blur-md"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
             {isGold && (
-              <div className="flex items-center gap-1.5 rounded-full bg-white/10 border border-[#FFD700]/30 px-3 py-1 backdrop-blur-md">
+              <div className="flex items-center gap-1.5 rounded-full bg-infyn-surface/10 border border-[#FFD700]/30 px-3 py-1 backdrop-blur-md">
                 <span className="text-[#FFD700] text-[11px]">★</span>
                 <span className="text-[11px] font-bold text-white/80">Gold Active · {sub.daysLeft}d left</span>
               </div>
@@ -252,10 +252,10 @@ export default function PremiumPage() {
           {/* Brand mark */}
           <div className="text-center">
             <div className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 mb-4"
-              style={{ background: 'linear-gradient(135deg, #FF6B9D 0%, #E86AC7 50%, #7B68EE 100%)' }}>
+              style={{ background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 50%, var(--infyn-rose) 100%)' }}>
               <span className="text-[13px] font-black uppercase tracking-[0.1em] text-white">✦ Infyn Gold</span>
             </div>
-            <h1 className="text-[30px] font-black tracking-tight text-white leading-[1.15] mb-2">
+            <h1 className="text-[30px] font-normal tracking-tight text-white leading-[1.15] mb-2 font-display">
               {isGold ? 'You\'re a Gold Member ✨' : 'Unlock Unlimited\nConnections'}
             </h1>
             <p className="text-[14px] text-white/50">
@@ -271,8 +271,8 @@ export default function PremiumPage() {
 
           {/* Active Gold banner */}
           {isGold && !loadingStatus && (
-            <div className="pm-rise rounded-[22px] border border-[#FFD700]/30 bg-gradient-to-br from-[#FFD700]/10 to-[#FF6B9D]/10 p-4 flex items-center gap-3.5 backdrop-blur-md">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFD700] to-[#FF6B9D] shadow-[0_4px_16px_-6px_rgba(255,107,157,0.6)] flex-shrink-0 text-xl">
+            <div className="pm-rise rounded-[22px] border border-[#FFD700]/30 bg-gradient-to-br from-[#FFD700]/10 to-infyn-rose/10 p-4 flex items-center gap-3.5 backdrop-blur-md">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFD700] to-infyn-rose shadow-[0_4px_16px_-6px_rgba(32,26,22,0.16)] flex-shrink-0 text-xl">
                 ✦
               </div>
               <div>
@@ -295,19 +295,19 @@ export default function PremiumPage() {
                   <button
                     key={plan.id}
                     onClick={() => { hapticLight(); setSelected(plan.id); }}
-                    className={`relative flex-1 rounded-[20px] p-3.5 text-left transition-all duration-200 active:scale-[0.96] cursor-pointer border ${
+                    className={`font-system relative flex-1 rounded-[20px] p-3.5 text-left transition-all duration-200 active:scale-[0.96] cursor-pointer border ${
                       selected === plan.id
-                        ? 'bg-gradient-to-br from-[#FF6B9D]/20 to-[#7B68EE]/20 border-[#FF6B9D]/60 shadow-[0_0_24px_-8px_rgba(255,107,157,0.5)]'
-                        : 'bg-white/[0.06] border-white/10'
+                        ? 'bg-gradient-to-br from-infyn-rose/20 to-infyn-rose/20 border-infyn-rose/60 shadow-[0_0_24px_-8px_rgba(32,26,22,0.16)]'
+                        : 'bg-infyn-surface/[0.06] border-white/10'
                     }`}
                   >
                     {plan.popular && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-2.5 py-0.5 text-[9px] font-black text-white uppercase tracking-wider shadow-md">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose px-2.5 py-0.5 text-[9px] font-black text-white uppercase tracking-wider shadow-md">
                         Most Popular
                       </span>
                     )}
                     {plan.badge && !plan.popular && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/15 border border-white/20 px-2 py-0.5 text-[9px] font-bold text-white/70 uppercase tracking-wider">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-infyn-surface/15 border border-white/20 px-2 py-0.5 text-[9px] font-bold text-white/70 uppercase tracking-wider">
                         {plan.badge}
                       </span>
                     )}
@@ -320,7 +320,7 @@ export default function PremiumPage() {
                       </span>
                     )}
                     {selected === plan.id && (
-                      <div className="absolute top-2.5 right-2.5 h-4 w-4 rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] flex items-center justify-center shadow-sm">
+                      <div className="absolute top-2.5 right-2.5 h-4 w-4 rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose flex items-center justify-center shadow-sm">
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
@@ -334,13 +334,13 @@ export default function PremiumPage() {
 
           {/* Features comparison */}
           <div
-            className="pm-rise rounded-[22px] border border-white/[0.08] bg-white/[0.04] backdrop-blur-md overflow-hidden"
+            className="pm-rise rounded-[22px] border border-white/[0.08] bg-infyn-surface/[0.04] backdrop-blur-md overflow-hidden"
             style={{ animationDelay: '100ms' }}
           >
-            <div className="grid grid-cols-[1fr_60px_80px] items-center px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.03]">
+            <div className="grid grid-cols-[1fr_60px_80px] items-center px-4 py-2.5 border-b border-white/[0.06] bg-infyn-surface/[0.03]">
               <span className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/30">Feature</span>
               <span className="text-center text-[10.5px] font-bold text-white/30">Free</span>
-              <span className="text-center text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] bg-clip-text text-transparent">Gold ✦</span>
+              <span className="text-center text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">Gold ✦</span>
             </div>
             {FEATURES.map((f, i) => (
               <div
@@ -354,14 +354,14 @@ export default function PremiumPage() {
                 <span className="text-center text-[12px] font-medium text-white/25">
                   {f.free !== '—' ? f.free : <span className="text-rose-500/70 font-bold text-[10px]">✕</span>}
                 </span>
-                <span className="text-center text-[12px] font-bold text-[#FF6B9D]">{f.gold}</span>
+                <span className="text-center text-[12px] font-bold text-infyn-rose-light">{f.gold}</span>
               </div>
             ))}
           </div>
 
           {/* Trust badges */}
           <div
-            className="pm-rise rounded-[22px] border border-white/[0.06] bg-white/[0.03] p-4 flex items-center justify-around"
+            className="pm-rise rounded-[22px] border border-white/[0.06] bg-infyn-surface/[0.03] p-4 flex items-center justify-around"
             style={{ animationDelay: '150ms' }}
           >
             {[
@@ -383,7 +383,7 @@ export default function PremiumPage() {
         </div>
 
         {/* CTA FOOTER */}
-        <div className="flex-shrink-0 z-10 px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#0d0914] via-[#0d0914]/95 to-transparent border-t border-white/[0.06]">
+        <div className="flex-shrink-0 z-10 px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-dark via-infyn-dark/95 to-transparent border-t border-white/[0.06]">
           {notice && (
             <div
               role="status"
@@ -403,8 +403,8 @@ export default function PremiumPage() {
             <button
               onClick={handleSubscribe}
               disabled={paying || loadingStatus}
-              className="group relative w-full h-[58px] rounded-2xl overflow-hidden text-white text-[15px] font-bold shadow-[0_12px_36px_-10px_rgba(255,107,157,0.6)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg, #FF6B9D 0%, #E86AC7 50%, #7B68EE 100%)' }}
+              className="group relative w-full h-[58px] rounded-2xl overflow-hidden text-white text-[15px] font-bold shadow-[0_12px_36px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed font-system"
+              style={{ background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 50%, var(--infyn-rose) 100%)' }}
             >
               <div aria-hidden className="pm-sheen pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
               <span className="relative z-10 flex items-center gap-2">

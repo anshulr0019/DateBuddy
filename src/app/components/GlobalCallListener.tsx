@@ -253,7 +253,7 @@ export function GlobalCallListener() {
         }
       `}</style>
       <div
-        className="pointer-events-auto mx-4 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-[#141419]/95 backdrop-blur-2xl border border-white/10"
+        className="pointer-events-auto mx-4 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-infyn-dark-surface/95 backdrop-blur-2xl border border-white/10"
         style={{ animation: 'globalCallSlideDown 0.35s cubic-bezier(0.16,1,0.3,1) forwards' }}
       >
         <div className="flex items-center gap-3.5 px-4 py-3.5">

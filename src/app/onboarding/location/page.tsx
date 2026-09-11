@@ -83,22 +83,22 @@ export default function LocationPage() {
   };
 
   return (
-    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="min-h-screen h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-system">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         {/* Progress Bar Header */}
         <div className="flex-shrink-0 z-20 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-2">
           <div className="flex items-center gap-3.5">
             <button
               onClick={() => router.back()}
               aria-label="Go back"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B68EE]/40 cursor-pointer"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] hover:bg-infyn-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infyn-rose/40 cursor-pointer"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
             <div
-              className="flex-1 h-[6px] rounded-full bg-[#1A1A2E]/[0.06] overflow-hidden"
+              className="flex-1 h-[6px] rounded-full bg-infyn-ink/[0.06] overflow-hidden"
               role="progressbar"
               aria-valuenow={2}
               aria-valuemin={1}
@@ -106,11 +106,11 @@ export default function LocationPage() {
               aria-label="Onboarding progress: step 2 of 7"
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="h-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{ width: '28.6%' }}
               />
             </div>
-            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">2 of 7</span>
+            <span className="text-[12px] font-bold tabular-nums text-infyn-ink/45">2 of 7</span>
           </div>
         </div>
 
@@ -122,8 +122,8 @@ export default function LocationPage() {
             </div>
           )}
           <div className="mb-6">
-            <h1 className="text-[26px] font-black text-[#1A1A2E] tracking-tight">Where are you located?</h1>
-            <p className="text-[14px] text-[#1A1A2E]/60 mt-1">This helps us discover nearby matches for you</p>
+            <h1 className="text-[26px] font-black text-infyn-ink tracking-tight">Where are you located?</h1>
+            <p className="text-[14px] text-infyn-ink/60 mt-1">This helps us discover nearby matches for you</p>
           </div>
 
           <div className="space-y-4">
@@ -132,7 +132,7 @@ export default function LocationPage() {
               type="button"
               onClick={handleAutoDetect}
               disabled={detecting}
-              className="w-full h-13 rounded-2xl border border-[#FF6B9D]/30 bg-gradient-to-r from-[#FF6B9D]/10 to-[#7B68EE]/10 text-[#FF6B9D] text-[14px] font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B9D]/15 transition-all cursor-pointer shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-13 rounded-2xl border border-infyn-rose/30 bg-gradient-to-r from-infyn-rose/10 to-infyn-rose/10 text-infyn-rose text-[14px] font-bold flex items-center justify-center gap-2 hover:bg-infyn-rose/15 transition-all cursor-pointer shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {detecting ? (
                 <>
@@ -151,15 +151,15 @@ export default function LocationPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-2">
-              <div className="flex-1 h-px bg-[#1A1A2E]/10" />
-              <span className="text-[#1A1A2E]/40 text-[12px] font-semibold uppercase tracking-wider">or search city</span>
-              <div className="flex-1 h-px bg-[#1A1A2E]/10" />
+              <div className="flex-1 h-px bg-infyn-ink/10" />
+              <span className="text-infyn-ink/40 text-[12px] font-semibold uppercase tracking-wider">or search city</span>
+              <div className="flex-1 h-px bg-infyn-ink/10" />
             </div>
 
             {/* City Input */}
             <div className="relative">
-              <div className="rounded-[20px] border border-white/80 bg-white/80 p-4 shadow-[0_4px_20px_-10px_rgba(26,26,46,0.06)] backdrop-blur-md">
-                <label className="block text-[13px] font-bold text-[#1A1A2E] mb-2 uppercase tracking-wider">Select Your City</label>
+              <div className="rounded-[20px] border border-infyn-border/80 bg-infyn-surface/80 p-4 shadow-[0_4px_20px_-10px_rgba(32,26,22,0.06)] backdrop-blur-md">
+                <label className="block text-[13px] font-bold text-infyn-ink mb-2 uppercase tracking-wider">Select Your City</label>
                 <input
                   type="text"
                   value={city}
@@ -169,13 +169,13 @@ export default function LocationPage() {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Enter your city (e.g. Mumbai, Delhi)"
-                  className="w-full h-12 px-4 rounded-xl border border-[#1A1A2E]/10 bg-white/90 text-[#1A1A2E] text-[16px] font-medium focus:outline-none focus:border-[#FF6B9D] focus:ring-2 focus:ring-[#FF6B9D]/20 transition-all placeholder:text-[#1A1A2E]/35"
+                  className="w-full h-12 px-4 rounded-xl border border-infyn-ink/10 bg-infyn-surface/90 text-infyn-ink text-[16px] font-medium focus:outline-none focus:border-infyn-rose focus:ring-2 focus:ring-infyn-rose/20 transition-all placeholder:text-infyn-ink/35"
                 />
               </div>
 
               {/* Suggestions Dropdown */}
               {showSuggestions && (
-                <div className="absolute z-30 w-full mt-2 bg-white/95 rounded-[20px] border border-white/80 shadow-[0_12px_40px_-12px_rgba(26,26,46,0.15)] backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-none">
+                <div className="absolute z-30 w-full mt-2 bg-infyn-surface/95 rounded-[20px] border border-infyn-border/80 shadow-[0_12px_40px_-12px_rgba(32,26,22,0.15)] backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-none">
                   {filteredCities.map((cityName) => (
                     <button
                       key={cityName}
@@ -184,13 +184,13 @@ export default function LocationPage() {
                         setCity(cityName);
                         setShowSuggestions(false);
                       }}
-                      className="w-full text-left px-5 py-3 hover:bg-[#FF6B9D]/10 border-b border-[#1A1A2E]/5 last:border-b-0 text-[14px] font-medium text-[#1A1A2E] transition-colors"
+                      className="w-full text-left px-5 py-3 hover:bg-infyn-rose/10 border-b border-infyn-ink/5 last:border-b-0 text-[14px] font-medium text-infyn-ink transition-colors"
                     >
                       📍 {cityName}
                     </button>
                   ))}
                   {filteredCities.length === 0 && (
-                    <div className="px-5 py-4 text-[#1A1A2E]/50 text-[14px]">No cities found</div>
+                    <div className="px-5 py-4 text-infyn-ink/50 text-[14px]">No cities found</div>
                   )}
                 </div>
               )}
@@ -199,10 +199,10 @@ export default function LocationPage() {
         </div>
 
         {/* Footer Button */}
-        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/5">
+        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-paper via-infyn-paper/90 to-transparent border-t border-black/5">
           <button
             onClick={handleNext}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(255,107,157,0.5)] active:scale-[0.985] transition-all cursor-pointer"
+            className="w-full h-14 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[15px] font-bold shadow-[0_10px_25px_-5px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer"
           >
             Continue →
           </button>

@@ -1,21 +1,67 @@
 @import "tailwindcss";
 @source "../**/*.{js,ts,jsx,tsx}";
 
+/* Shared visual tokens. Screen geometry and interaction styles remain local. */
+@font-face { font-family: 'Infyn UI'; src: url('/fonts/dm-sans-regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Infyn UI'; src: url('/fonts/dm-sans-semibold.ttf') format('truetype'); font-weight: 500 900; font-display: swap; }
+@font-face { font-family: 'Infyn Display'; src: url('/fonts/pt-serif.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+
 @theme {
-  --color-pink: #FF6B9D;
-  --color-purple: #7B68EE;
-  --color-navy: #1A1A2E;
-  --color-lavender: #E6E6FA;
+  --font-sans: 'Infyn UI', ui-sans-serif, system-ui, sans-serif;
+  --font-system: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-display: 'Infyn Display', Georgia, serif;
+  --color-infyn-paper: #faf5eb;
+  --color-infyn-surface: #fffefa;
+  --color-infyn-surface-soft: #f5efe4;
+  --color-infyn-ink: #201a16;
+  --color-infyn-secondary: #665849;
+  --color-infyn-muted: #8a7a67;
+  --color-infyn-border: #e8ddc9;
+  --color-infyn-rose: #9e1b41;
+  --color-infyn-rose-hover: #861638;
+  --color-infyn-rose-light: #eab3c1;
+  --color-infyn-rose-line: #e8c4cc;
+  --color-infyn-blush: #f6e0e4;
+  --color-infyn-beige: #efe5d3;
+  --color-infyn-dark: #201a16;
+  --color-infyn-dark-surface: #2d2520;
+  --color-infyn-on-dark-muted: #c6b8aa;
+  --color-pink: var(--infyn-rose);
+  --color-purple: var(--infyn-rose);
+  --color-navy: var(--infyn-ink);
+  --color-lavender: var(--infyn-beige);
   --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 :root {
-  --bg-main: #FAFAF7;
-  --navy: #1A1A2E;
-  --pink: #FF6B9D;
-  --purple: #7B68EE;
-  --lavender: #E6E6FA;
+  --infyn-paper: var(--color-infyn-paper);
+  --infyn-surface: var(--color-infyn-surface);
+  --infyn-surface-soft: var(--color-infyn-surface-soft);
+  --infyn-ink: var(--color-infyn-ink);
+  --infyn-secondary: var(--color-infyn-secondary);
+  --infyn-muted: var(--color-infyn-muted);
+  --infyn-border: var(--color-infyn-border);
+  --infyn-rose: var(--color-infyn-rose);
+  --infyn-rose-hover: var(--color-infyn-rose-hover);
+  --infyn-rose-light: var(--color-infyn-rose-light);
+  --infyn-rose-line: var(--color-infyn-rose-line);
+  --infyn-blush: var(--color-infyn-blush);
+  --infyn-beige: var(--color-infyn-beige);
+  --infyn-dark: var(--color-infyn-dark);
+  --infyn-dark-surface: var(--color-infyn-dark-surface);
+  --infyn-on-dark-muted: var(--color-infyn-on-dark-muted);
+  --infyn-pink: var(--infyn-rose);
+  --infyn-purple: var(--infyn-rose);
+  --infyn-rose-rgb: 158, 27, 65;
+  --infyn-ink-rgb: 32, 26, 22;
+  --infyn-paper-rgb: 250, 245, 235;
+  --infyn-blush-rgb: 246, 224, 228;
+  --bg-main: var(--infyn-paper);
+  --navy: var(--infyn-ink);
+  --pink: var(--infyn-rose);
+  --purple: var(--infyn-rose);
+  --lavender: var(--infyn-beige);
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
@@ -40,7 +86,7 @@ html, body {
 body {
   background: var(--bg-main);
   color: var(--navy);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Momentum scrolling on iOS (legacy but still useful for older webviews) */
@@ -80,7 +126,7 @@ select {
 @media (min-width: 640px) {
   .mobile-container {
     max-width: 480px;
-    box-shadow: 0 0 0 1px rgba(26,26,46,0.05), 0 24px 64px rgba(26,26,46,0.10);
+    box-shadow: 0 0 0 1px rgba(var(--infyn-ink-rgb), 0.05), 0 24px 64px rgba(var(--infyn-ink-rgb), 0.10);
   }
 }
 
@@ -120,9 +166,9 @@ select {
 @media (min-width: 640px) {
   .page-shell {
     max-width: 480px;
-    box-shadow: 0 0 0 1px rgba(26,26,46,0.05), 0 24px 80px rgba(26,26,46,0.12);
-    border-left: 1px solid rgba(26,26,46,0.05);
-    border-right: 1px solid rgba(26,26,46,0.05);
+    box-shadow: 0 0 0 1px rgba(var(--infyn-ink-rgb), 0.05), 0 24px 80px rgba(var(--infyn-ink-rgb), 0.12);
+    border-left: 1px solid rgba(var(--infyn-ink-rgb), 0.05);
+    border-right: 1px solid rgba(var(--infyn-ink-rgb), 0.05);
   }
 }
 
@@ -145,11 +191,11 @@ select {
 .scroll-area::-webkit-scrollbar { display: none; }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%);
+  background: linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FF6B9D 0%, #7B68EE 100%);
+  background: linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%);
   color: white;
   border: none;
   border-radius: 16px;
@@ -171,9 +217,9 @@ select {
 }
 
 .card {
-  background: white;
+  background: var(--infyn-surface);
   border-radius: 16px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 2px 8px rgba(var(--infyn-ink-rgb), 0.06);
   padding: 16px;
 }
 
@@ -181,7 +227,8 @@ select {
   width: 100%;
   min-height: 44px;
   padding: 12px 16px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--infyn-border);
+  background: var(--infyn-surface);
   border-radius: 8px;
   font-size: 16px;
   color: var(--navy);
@@ -246,22 +293,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .aurora-blob-1 {
   width: 420px; height: 420px; left: -100px; top: 15%;
-  background: #ff6b9d; opacity: 0.12;
+  background: var(--infyn-beige); opacity: 0.12;
   animation: aurora-drift-1 8s ease-in-out infinite alternate;
 }
 .aurora-blob-2 {
   width: 440px; height: 440px; right: -120px; top: 10%;
-  background: #7b68ee; opacity: 0.10;
+  background: var(--infyn-beige); opacity: 0.10;
   animation: aurora-drift-2 10s ease-in-out infinite alternate;
 }
 .aurora-blob-3 {
   width: 460px; height: 460px; left: 50%; bottom: -140px;
-  background: #ffb4d0; opacity: 0.12;
+  background: var(--infyn-beige); opacity: 0.12;
   animation: aurora-drift-3 8s ease-in-out infinite alternate;
 }
 .aurora-blob-4 {
   width: 320px; height: 320px; left: 10%; top: -100px;
-  background: #b76cff; opacity: 0.08;
+  background: var(--infyn-beige); opacity: 0.08;
   animation: aurora-drift-4 11s ease-in-out infinite alternate;
 }
 
@@ -310,7 +357,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 ───────────────────────────────────────────────── */
 .splash-root {
   background:
-    radial-gradient(120% 85% at 50% 40%, #181129 0%, #0d0919 55%, #060410 100%);
+    radial-gradient(120% 85% at 50% 40%, var(--infyn-dark-surface) 0%, var(--infyn-dark) 55%, var(--infyn-dark) 100%);
   transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4, 0, 1, 1);
 }
 .splash-exit {
@@ -338,13 +385,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .splash-orb-1 {
   width: min(78vmax, 980px); height: min(78vmax, 980px);
   left: -28%; top: -18%;
-  background: radial-gradient(circle, rgba(255,107,157,0.16) 0%, rgba(255,107,157,0.07) 38%, transparent 66%);
+  background: radial-gradient(circle, rgba(var(--infyn-rose-rgb), 0.16) 0%, rgba(var(--infyn-rose-rgb), 0.07) 38%, transparent 66%);
   animation: splash-orb-drift-1 9s ease-in-out infinite alternate;
 }
 .splash-orb-2 {
   width: min(84vmax, 1060px); height: min(84vmax, 1060px);
   right: -34%; bottom: -24%;
-  background: radial-gradient(circle, rgba(123,104,238,0.15) 0%, rgba(123,104,238,0.06) 40%, transparent 66%);
+  background: radial-gradient(circle, rgba(var(--infyn-rose-rgb), 0.15) 0%, rgba(var(--infyn-rose-rgb), 0.06) 40%, transparent 66%);
   animation: splash-orb-drift-2 11s ease-in-out infinite alternate;
 }
 @keyframes splash-orb-drift-1 {
@@ -367,18 +414,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .splash-aurora-a {
   background: conic-gradient(from 40deg,
-    transparent 0%, rgba(255,107,157,0.20) 12%, transparent 30%,
-    rgba(123,104,238,0.18) 46%, transparent 62%,
-    rgba(255,71,126,0.14) 78%, transparent 95%);
+    transparent 0%, rgba(var(--infyn-rose-rgb), 0.20) 12%, transparent 30%,
+    rgba(var(--infyn-rose-rgb), 0.18) 46%, transparent 62%,
+    rgba(var(--infyn-rose-rgb), 0.14) 78%, transparent 95%);
   -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 26%, transparent 52%);
   mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 26%, transparent 52%);
   animation: splash-spin 18s linear infinite;
 }
 .splash-aurora-b {
   background: conic-gradient(from 210deg,
-    transparent 0%, rgba(123,104,238,0.15) 15%, transparent 34%,
-    rgba(255,107,157,0.12) 55%, transparent 72%,
-    rgba(183,108,255,0.12) 86%, transparent 100%);
+    transparent 0%, rgba(var(--infyn-rose-rgb), 0.15) 15%, transparent 34%,
+    rgba(var(--infyn-rose-rgb), 0.12) 55%, transparent 72%,
+    rgba(var(--infyn-rose-rgb), 0.12) 86%, transparent 100%);
   -webkit-mask-image: radial-gradient(circle, transparent 6%, rgba(0,0,0,0.7) 26%, transparent 50%);
   mask-image: radial-gradient(circle, transparent 6%, rgba(0,0,0,0.7) 26%, transparent 50%);
   animation: splash-spin-rev 26s linear infinite;
@@ -415,8 +462,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .splash-glow {
   opacity: 0;
   background: radial-gradient(circle,
-    rgba(255,107,157,0.30) 0%, rgba(255,107,157,0.16) 24%,
-    rgba(123,104,238,0.13) 44%, rgba(123,104,238,0.05) 60%, transparent 72%);
+    rgba(var(--infyn-rose-rgb), 0.30) 0%, rgba(var(--infyn-rose-rgb), 0.16) 24%,
+    rgba(var(--infyn-rose-rgb), 0.13) 44%, rgba(var(--infyn-rose-rgb), 0.05) 60%, transparent 72%);
   animation:
     splash-glow-in 1s ease-out 0.25s both,
     splash-glow-breathe 3.4s ease-in-out 1.4s infinite;
@@ -485,11 +532,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: transform, opacity;
 }
 .splash-ring-1 {
-  border: 1.5px solid rgba(255,107,157,0.5);
+  border: 1.5px solid rgba(var(--infyn-rose-rgb), 0.5);
   animation: splash-ring-out 1.3s cubic-bezier(0.22, 1, 0.36, 1) 1.58s forwards;
 }
 .splash-ring-2 {
-  border: 1px solid rgba(123,104,238,0.45);
+  border: 1px solid rgba(var(--infyn-rose-rgb), 0.45);
   animation: splash-ring-out 1.5s cubic-bezier(0.22, 1, 0.36, 1) 1.76s forwards;
 }
 @keyframes splash-ring-out {
@@ -543,12 +590,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .story-ring {
   padding: 2.5px;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #FF6B9D 0%, #B76CFF 50%, #7B68EE 100%);
+  background: linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 50%, var(--infyn-rose) 100%);
 }
 .story-ring-inner {
   padding: 2.5px;
   border-radius: 9999px;
-  background: #FAFAF7;
+  background: var(--infyn-paper);
 }
 
 /* Floating nav indicator spring */
@@ -562,7 +609,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 30px -8px rgba(26, 26, 46, 0.12);
+  box-shadow: 0 8px 30px -8px rgba(var(--infyn-ink-rgb), 0.12);
 }
 
 /* Card Swipe Physics */
@@ -799,7 +846,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .rc-sweep {
   border-radius: 9999px;
-  background: conic-gradient(from 0deg, rgba(244, 63, 94, 0) 0deg, rgba(244, 63, 94, 0.28) 60deg, rgba(123, 104, 238, 0) 130deg);
+  background: conic-gradient(from 0deg, rgba(var(--infyn-rose-rgb), 0) 0deg, rgba(var(--infyn-rose-rgb), 0.28) 60deg, rgba(var(--infyn-rose-rgb), 0) 130deg);
   animation: rc-sweep-rotate 3.4s linear infinite;
   will-change: transform;
 }
@@ -942,4 +989,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .animate-step-slide-in {
   animation: step-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
+}
+
+/* Messages navigation sits outside its page's token scope. */
+.infyn-nav-theme {
+  --paper: var(--infyn-paper);
+  --surface: var(--infyn-surface);
+  --border: var(--infyn-border);
+  --muted: var(--infyn-muted);
+  --rose: var(--infyn-rose);
 }

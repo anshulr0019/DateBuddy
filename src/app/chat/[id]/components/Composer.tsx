@@ -17,14 +17,14 @@ export function EmojiDrawer({ onPick }: { onPick: (emoji: string) => void }) {
     <div className={`${chatStyles.drawer} z-30 px-3.5 py-2.5 max-h-[200px] animate-popover-enter flex flex-col gap-2`}>
       <div className="flex-1 overflow-y-auto scrollbar-none space-y-2 pr-0.5">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Recent</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Recent</p>
           <div className="grid grid-cols-8 gap-1">
             {EMOJI_RECENT.map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => onPick(emoji)}
                 aria-label={`Insert ${emoji}`}
-                className="h-7 w-7 text-[18px] hover:scale-125 active:scale-95 transition-transform flex items-center justify-center cursor-pointer rounded-lg hover:bg-gray-100"
+                className="h-7 w-7 text-[18px] hover:scale-125 active:scale-95 transition-transform flex items-center justify-center cursor-pointer rounded-lg hover:bg-infyn-surface-soft"
               >
                 {emoji}
               </button>
@@ -33,14 +33,14 @@ export function EmojiDrawer({ onPick }: { onPick: (emoji: string) => void }) {
         </div>
 
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Smileys &amp; People</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Smileys &amp; People</p>
           <div className="grid grid-cols-8 gap-1">
             {EMOJI_SMILEYS.map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => onPick(emoji)}
                 aria-label={`Insert ${emoji}`}
-                className="h-7 w-7 text-[18px] hover:scale-125 active:scale-95 transition-transform flex items-center justify-center cursor-pointer rounded-lg hover:bg-gray-100"
+                className="h-7 w-7 text-[18px] hover:scale-125 active:scale-95 transition-transform flex items-center justify-center cursor-pointer rounded-lg hover:bg-infyn-surface-soft"
               >
                 {emoji}
               </button>
@@ -106,18 +106,18 @@ export function Composer({
       {replyingTo && (
         <div className={`${chatStyles.replyPreview} mb-2.5 flex items-center justify-between gap-2.5 rounded-2xl px-3.5 py-2 shadow-2xs animate-slide-down`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-1 self-stretch rounded-full bg-gradient-to-b from-[#F43F5E] to-[#7B68EE]" />
+            <div className="w-1 self-stretch rounded-full bg-gradient-to-b from-infyn-rose to-infyn-rose" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#F43F5E]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-infyn-rose">
                   <polyline points="9 17 4 12 9 7" />
                   <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
                 </svg>
-                <p className="text-[11.5px] font-bold text-[#F43F5E] truncate">
+                <p className="text-[11.5px] font-bold text-infyn-rose truncate">
                   Replying to {replyingTo.senderName}
                 </p>
               </div>
-              <p className="text-[12px] text-gray-600 truncate font-normal mt-0.5">
+              <p className="text-[12px] text-infyn-secondary truncate font-normal mt-0.5">
                 {replyingTo.type === 'photo'
                   ? '📷 Photo'
                   : replyingTo.type === 'gif'
@@ -134,7 +134,7 @@ export function Composer({
             type="button"
             onClick={onCancelReply}
             aria-label="Cancel reply"
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200/80 hover:bg-gray-300 text-gray-600 active:scale-95 transition-all flex-shrink-0 cursor-pointer text-xs font-bold"
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-infyn-surface-soft/80 hover:bg-infyn-surface-soft text-infyn-secondary active:scale-95 transition-all flex-shrink-0 cursor-pointer text-xs font-bold"
           >
             ✕
           </button>
@@ -173,14 +173,14 @@ export function Composer({
             aria-label="Message"
             enterKeyHint="send"
             autoComplete="off"
-            className={`${chatStyles.composerInput} w-full bg-transparent placeholder-gray-400 outline-none pr-7`}
+            className={`${chatStyles.composerInput} w-full bg-transparent placeholder-infyn-muted outline-none pr-7`}
           />
           <button
             onClick={onToggleEmoji}
             aria-label={emojiOpen ? 'Close emoji picker' : 'Open emoji picker'}
             aria-expanded={emojiOpen}
             className={`absolute right-3 p-1 hover:scale-110 active:scale-95 transition-transform duration-150 cursor-pointer ${
-              emojiOpen ? 'text-[#F43F5E]' : 'text-gray-400 hover:text-[#F43F5E]'
+              emojiOpen ? 'text-infyn-rose' : 'text-infyn-muted hover:text-infyn-rose'
             }`}
           >
             <Ic.Smiley className="w-5 h-5" />
@@ -194,8 +194,8 @@ export function Composer({
           aria-label="Send message"
             className={`${chatStyles.sendButton} transition-all duration-200 ${
             canSend
-              ? 'bg-[#F43F5E] text-white shadow-2xs hover:bg-[#E11D48] active:scale-90 hover:scale-105 cursor-pointer'
-              : 'bg-gray-100 text-gray-300 cursor-default'
+              ? 'bg-infyn-rose text-white shadow-2xs hover:bg-[#E11D48] active:scale-90 hover:scale-105 cursor-pointer'
+              : 'bg-infyn-surface-soft text-infyn-muted cursor-default'
           }`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

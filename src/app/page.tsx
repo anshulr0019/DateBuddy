@@ -22,17 +22,17 @@ const PARTICLES: Array<{
   drift: string; // horizontal drift over lifetime
   peak: number; // max opacity
 }> = [
-  { left: '14%', top: '78%', size: 3, color: 'rgba(255,107,157,0.9)', delay: 0.3, dur: 4.4, drift: '22px', peak: 0.6 },
+  { left: '14%', top: '78%', size: 3, color: 'rgba(var(--infyn-rose-rgb), 0.9)', delay: 0.3, dur: 4.4, drift: '22px', peak: 0.6 },
   { left: '26%', top: '88%', size: 2, color: 'rgba(255,255,255,0.85)', delay: 1.1, dur: 3.8, drift: '-14px', peak: 0.5 },
-  { left: '38%', top: '72%', size: 2, color: 'rgba(123,104,238,0.9)', delay: 0.6, dur: 4.8, drift: '10px', peak: 0.55 },
-  { left: '49%', top: '90%', size: 3, color: 'rgba(255,107,157,0.85)', delay: 1.5, dur: 4.1, drift: '-20px', peak: 0.6 },
+  { left: '38%', top: '72%', size: 2, color: 'rgba(var(--infyn-rose-rgb), 0.9)', delay: 0.6, dur: 4.8, drift: '10px', peak: 0.55 },
+  { left: '49%', top: '90%', size: 3, color: 'rgba(var(--infyn-rose-rgb), 0.85)', delay: 1.5, dur: 4.1, drift: '-20px', peak: 0.6 },
   { left: '60%', top: '76%', size: 2, color: 'rgba(255,255,255,0.8)', delay: 0.1, dur: 4.6, drift: '16px', peak: 0.45 },
-  { left: '71%', top: '86%', size: 3, color: 'rgba(183,108,255,0.9)', delay: 0.9, dur: 4.3, drift: '-12px', peak: 0.55 },
-  { left: '83%', top: '74%', size: 2, color: 'rgba(255,107,157,0.85)', delay: 1.3, dur: 3.9, drift: '18px', peak: 0.5 },
-  { left: '9%', top: '58%', size: 2, color: 'rgba(123,104,238,0.85)', delay: 0.5, dur: 5.0, drift: '14px', peak: 0.4 },
+  { left: '71%', top: '86%', size: 3, color: 'rgba(var(--infyn-rose-rgb), 0.9)', delay: 0.9, dur: 4.3, drift: '-12px', peak: 0.55 },
+  { left: '83%', top: '74%', size: 2, color: 'rgba(var(--infyn-rose-rgb), 0.85)', delay: 1.3, dur: 3.9, drift: '18px', peak: 0.5 },
+  { left: '9%', top: '58%', size: 2, color: 'rgba(var(--infyn-rose-rgb), 0.85)', delay: 0.5, dur: 5.0, drift: '14px', peak: 0.4 },
   { left: '90%', top: '56%', size: 2, color: 'rgba(255,255,255,0.75)', delay: 1.7, dur: 4.5, drift: '-16px', peak: 0.4 },
-  { left: '20%', top: '40%', size: 2, color: 'rgba(255,107,157,0.8)', delay: 0.8, dur: 5.2, drift: '-10px', peak: 0.35 },
-  { left: '78%', top: '38%', size: 2, color: 'rgba(183,108,255,0.8)', delay: 1.9, dur: 4.7, drift: '12px', peak: 0.35 },
+  { left: '20%', top: '40%', size: 2, color: 'rgba(var(--infyn-rose-rgb), 0.8)', delay: 0.8, dur: 5.2, drift: '-10px', peak: 0.35 },
+  { left: '78%', top: '38%', size: 2, color: 'rgba(var(--infyn-rose-rgb), 0.8)', delay: 1.9, dur: 4.7, drift: '12px', peak: 0.35 },
   { left: '55%', top: '60%', size: 1.5, color: 'rgba(255,255,255,0.9)', delay: 0.2, dur: 4.0, drift: '8px', peak: 0.45 },
 ];
 

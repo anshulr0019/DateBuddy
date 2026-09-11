@@ -140,7 +140,7 @@ export default function FloatingNav() {
   }
 
   if (pathname === '/messages') {
-    return <nav className={messagesStyles.nav} aria-label="Main navigation"><div className={messagesStyles.navInner}>
+    return <nav className={`${messagesStyles.nav} infyn-nav-theme`} aria-label="Main navigation"><div className={messagesStyles.navInner}>
       {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
         <span className={messagesStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
         {tab.id === 'messages' && unreadCount > 0 && <span className={messagesStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
@@ -150,11 +150,11 @@ export default function FloatingNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
-      <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-white/80 bg-white/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(26,26,46,0.15)] backdrop-blur-xl overflow-hidden">
+      <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-infyn-border/80 bg-infyn-surface/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl overflow-hidden">
 
         {/* Sliding indicator with spring animation */}
         <div
-          className="absolute top-1.5 h-[calc(100%-12px)] rounded-[20px] bg-gradient-to-r from-[#F43F5E] to-[#FB7185] opacity-15 shadow-2xs transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="absolute top-1.5 h-[calc(100%-12px)] rounded-[20px] bg-gradient-to-r from-infyn-rose to-infyn-rose opacity-15 shadow-2xs transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           style={{
             width: `calc((100% - 16px) / ${NAV_TABS.length})`,
             left: 8,
@@ -172,19 +172,19 @@ export default function FloatingNav() {
               aria-label={tab.label}
             >
               <span className={`transition-all duration-300 ${
-                isActive ? 'scale-110 text-[#F43F5E]' : 'scale-100 text-[#1A1A2E]/40'
+                isActive ? 'scale-110 text-infyn-rose' : 'scale-100 text-infyn-ink/40'
               }`}>
                 {tab.icon(isActive)}
               </span>
               <span className={`text-[10px] font-semibold tracking-tight transition-all duration-300 ${
-                isActive ? 'opacity-100 scale-100 text-[#F43F5E] mt-0.5' : 'opacity-0 scale-90 h-0 overflow-hidden'
+                isActive ? 'opacity-100 scale-100 text-infyn-rose mt-0.5' : 'opacity-0 scale-90 h-0 overflow-hidden'
               }`}>
                 {tab.label}
               </span>
 
               {/* Unread badge indicator */}
               {tab.id === 'messages' && !isActive && unreadCount > 0 && (
-                <div className="absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-[#F43F5E] ring-2 ring-white shadow-2xs" />
+                <div className="absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" />
               )}
             </button>
           );

@@ -103,7 +103,7 @@ export function VibeCheckBanner({
                 top: `${-5 - Math.random() * 10}%`,
                 width: `${4 + Math.random() * 4}px`,
                 height: `${4 + Math.random() * 4}px`,
-                backgroundColor: ['#F43F5E', '#7B68EE', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899'][i % 6],
+                backgroundColor: ['var(--infyn-rose)', 'var(--infyn-rose)', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899'][i % 6],
                 animationDelay: `${Math.random() * 0.6}s`,
                 animationDuration: `${1.5 + Math.random() * 1}s`,
               }}
@@ -112,7 +112,7 @@ export function VibeCheckBanner({
         </div>
       )}
 
-      <div className="relative z-0 rounded-2xl bg-gradient-to-r from-[#1E1B2E] to-[#1B1E2E] border border-white/[0.08] shadow-lg overflow-hidden">
+      <div className="relative z-0 rounded-2xl bg-gradient-to-r from-infyn-dark-surface to-[#1B1E2E] border border-infyn-border/[0.08] shadow-lg overflow-hidden">
         {/* Subtle shimmer overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-vibe-shimmer pointer-events-none" />
 
@@ -132,7 +132,7 @@ export function VibeCheckBanner({
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="h-6 w-6 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/40 hover:text-white/70 transition-colors cursor-pointer text-[10px]"
+                className="h-6 w-6 rounded-full bg-infyn-surface/[0.06] hover:bg-infyn-surface/[0.12] flex items-center justify-center text-white/40 hover:text-white/70 transition-colors cursor-pointer text-[10px]"
                 aria-label="Dismiss vibe check"
               >
                 ✕
@@ -152,7 +152,7 @@ export function VibeCheckBanner({
                     className={`py-3 rounded-xl border text-center transition-all cursor-pointer active:scale-95 ${
                       myRating === option.emoji
                         ? `${option.bgColor} ${option.borderColor} scale-[1.03] shadow-sm`
-                        : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                        : 'bg-infyn-surface/[0.03] border-infyn-border/[0.06] hover:bg-infyn-surface/[0.06]'
                     }`}
                   >
                     <span className="text-[24px] block">{option.emoji}</span>
@@ -170,7 +170,7 @@ export function VibeCheckBanner({
                 type="button"
                 onClick={handleSubmit}
                 disabled={!myRating}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B68EE] to-[#FF6B9D] text-white text-[12.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-sm"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[12.5px] font-bold cursor-pointer active:scale-[0.98] disabled:opacity-30 disabled:scale-100 transition-all shadow-sm"
               >
                 Send Vibe Check to {cleanName}
               </button>

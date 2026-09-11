@@ -86,7 +86,7 @@ export function Lightbox({ url, onClose }: { url: string; onClose: () => void })
       <button
         onClick={onClose}
         aria-label="Close photo viewer"
-        className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 border border-white/20 text-white hover:bg-white/30 cursor-pointer active:scale-90 transition-all backdrop-blur-md shadow-lg z-30"
+        className="absolute top-5 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-infyn-surface/15 border border-infyn-border/20 text-white hover:bg-infyn-surface/30 cursor-pointer active:scale-90 transition-all backdrop-blur-md shadow-lg z-30"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -95,7 +95,7 @@ export function Lightbox({ url, onClose }: { url: string; onClose: () => void })
           src={url}
           alt="Full size photo"
           onClick={onClose}
-          className="max-h-[75vh] max-w-full object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10"
+          className="max-h-[75vh] max-w-full object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-infyn-border/10"
         />
       </div>
     </div>
@@ -130,24 +130,24 @@ export function MessageActionSheet({
         <div
           className={`max-w-[90%] px-4 py-3 rounded-[22px] shadow-2xl border ${
             isMine
-              ? 'bg-[#FFF0F4] border-[#F9C0D0]/80 text-[#2D1B28] rounded-tr-[4px]'
-              : 'bg-white border-gray-200 text-[#1E293B] rounded-tl-[4px]'
+              ? 'bg-infyn-blush border-infyn-rose-line/80 text-infyn-ink rounded-tr-[4px]'
+              : 'bg-infyn-surface border-infyn-border text-infyn-ink rounded-tl-[4px]'
           }`}
         >
           <p className="text-[15px] leading-relaxed font-normal break-words">{message.content}</p>
         </div>
 
-        <div className="w-full rounded-2xl bg-white/95 backdrop-blur-2xl border border-gray-200/80 shadow-2xl divide-y divide-gray-100 overflow-hidden text-[14px] font-semibold text-[#1E293B]">
+        <div className="w-full rounded-2xl bg-infyn-surface/95 backdrop-blur-2xl border border-infyn-border/80 shadow-2xl divide-y divide-gray-100 overflow-hidden text-[14px] font-semibold text-infyn-ink">
           <button
             onClick={handleCopy}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
+            className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer"
           >
             <span>{copied ? 'Copied ✓' : 'Copy'}</span>
-            <Ic.Copy className="w-4 h-4 text-gray-500" />
+            <Ic.Copy className="w-4 h-4 text-infyn-secondary" />
           </button>
           <button
             onClick={onClose}
-            className="w-full px-4 py-3 flex items-center justify-center text-gray-500 hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
+            className="w-full px-4 py-3 flex items-center justify-center text-infyn-secondary hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -219,16 +219,16 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
 
   return (
     <Sheet label={`Safety options for ${partner.name}`} onClose={onClose}>
-      <div className="w-full rounded-2xl bg-white/95 backdrop-blur-2xl border border-gray-200/80 shadow-2xl overflow-hidden">
+      <div className="w-full rounded-2xl bg-infyn-surface/95 backdrop-blur-2xl border border-infyn-border/80 shadow-2xl overflow-hidden">
         {view === 'menu' && (
-          <div className="divide-y divide-gray-100 text-[14px] font-semibold text-[#1E293B]">
+          <div className="divide-y divide-gray-100 text-[14px] font-semibold text-infyn-ink">
             <div className="px-4 py-3 text-center">
               <p className="text-[15px] font-bold">{partner.name}</p>
-              <p className="text-[12px] font-medium text-gray-400 mt-0.5">Privacy &amp; Safety Controls</p>
+              <p className="text-[12px] font-medium text-infyn-muted mt-0.5">Privacy &amp; Safety Controls</p>
             </div>
             <button
               onClick={() => setView('encryption')}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer text-emerald-700"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer text-emerald-700"
             >
               <div className="flex items-center gap-2">
                 <span>🔒</span>
@@ -238,10 +238,10 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
             </button>
             <button
               onClick={() => setView('report')}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer"
             >
               <span>Report {partner.name}</span>
-              <Ic.Flag className="w-4 h-4 text-gray-500" />
+              <Ic.Flag className="w-4 h-4 text-infyn-secondary" />
             </button>
             <button
               onClick={() => setView('block')}
@@ -252,7 +252,7 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
             </button>
             <button
               onClick={onClose}
-              className="w-full px-4 py-3 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
+              className="w-full px-4 py-3 flex items-center justify-center text-infyn-secondary hover:bg-infyn-surface-soft transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -265,13 +265,13 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
               🔒
             </div>
             <div>
-              <h3 className="text-[16px] font-bold text-[#1E293B]">End-to-End Encrypted</h3>
-              <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">
+              <h3 className="text-[16px] font-bold text-infyn-ink">End-to-End Encrypted</h3>
+              <p className="text-[12px] text-infyn-secondary mt-1 leading-relaxed">
                 Messages, voice notes, photos, and live calls between you and {partner.name} are secured with 256-bit encryption.
               </p>
             </div>
-            <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 text-left space-y-1.5 text-[11.5px] text-gray-600">
-              <div className="flex items-center gap-1.5 font-bold text-gray-800">
+            <div className="p-3 rounded-xl bg-infyn-surface-soft border border-infyn-border/80 text-left space-y-1.5 text-[11.5px] text-infyn-secondary">
+              <div className="flex items-center gap-1.5 font-bold text-infyn-ink">
                 <span>🛡️</span>
                 <span>Anti-Harassment Shield</span>
               </div>
@@ -279,7 +279,7 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
             </div>
             <button
               onClick={() => setView('menu')}
-              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1E293B] font-bold text-[13px] transition-all cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-infyn-ink font-bold text-[13px] transition-all cursor-pointer"
             >
               Back to Options
             </button>
@@ -287,10 +287,10 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
         )}
 
         {view === 'report' && (
-          <div className="divide-y divide-gray-100 text-[14px] font-semibold text-[#1E293B]">
+          <div className="divide-y divide-gray-100 text-[14px] font-semibold text-infyn-ink">
             <div className="px-4 py-3 text-center">
               <p className="text-[15px] font-bold">Report {partner.name}</p>
-              <p className="text-[12px] font-medium text-gray-400 mt-0.5">
+              <p className="text-[12px] font-medium text-infyn-muted mt-0.5">
                 Why are you reporting them? This stays anonymous.
               </p>
               {error && (
@@ -302,14 +302,14 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
                 key={r.value}
                 onClick={() => submitReport(r.value)}
                 disabled={busy}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer disabled:opacity-50"
               >
                 <span>{r.label}</span>
               </button>
             ))}
             <button
               onClick={() => setView('menu')}
-              className="w-full px-4 py-3 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
+              className="w-full px-4 py-3 flex items-center justify-center text-infyn-secondary hover:bg-infyn-surface-soft transition-colors cursor-pointer"
             >
               Back
             </button>
@@ -319,20 +319,20 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
         {view === 'report-done' && (
           <div className="px-5 py-6 text-center">
             <p className="text-[28px] mb-2" aria-hidden>🛡️</p>
-            <p className="text-[15px] font-bold text-[#1E293B] mb-1">Thanks for letting us know</p>
-            <p className="text-[13px] text-gray-500 mb-4">
+            <p className="text-[15px] font-bold text-infyn-ink mb-1">Thanks for letting us know</p>
+            <p className="text-[13px] text-infyn-secondary mb-4">
               Our team will review your report. You can also block {partner.name} so they can&apos;t contact you.
             </p>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => setView('block')}
-                className="w-full py-2.5 rounded-xl bg-[#F43F5E] text-white text-[13px] font-bold hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-infyn-rose text-white text-[13px] font-bold hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer"
               >
                 Block {partner.name}
               </button>
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-xl text-gray-500 text-[13px] font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-xl text-infyn-secondary text-[13px] font-semibold hover:bg-infyn-surface-soft transition-colors cursor-pointer"
               >
                 Done
               </button>
@@ -343,8 +343,8 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
         {view === 'block' && (
           <div className="px-5 py-6 text-center">
             <p className="text-[28px] mb-2" aria-hidden>🚫</p>
-            <p className="text-[15px] font-bold text-[#1E293B] mb-1">Block {partner.name}?</p>
-            <p className="text-[13px] text-gray-500 mb-4">
+            <p className="text-[15px] font-bold text-infyn-ink mb-1">Block {partner.name}?</p>
+            <p className="text-[13px] text-infyn-secondary mb-4">
               They won&apos;t be able to message you, and this conversation will be closed. They won&apos;t be notified.
             </p>
             {error && (
@@ -361,7 +361,7 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
               <button
                 onClick={() => setView('menu')}
                 disabled={busy}
-                className="w-full py-2.5 rounded-xl text-gray-500 text-[13px] font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-xl text-infyn-secondary text-[13px] font-semibold hover:bg-infyn-surface-soft transition-colors cursor-pointer"
               >
                 Cancel
               </button>

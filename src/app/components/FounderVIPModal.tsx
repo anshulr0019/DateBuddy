@@ -55,7 +55,7 @@ export function FounderVIPModal({ isOpen, memberNumber, founderNumber, onClose }
         style={{
           width: '100%',
           maxWidth: 360,
-          background: '#0a0a0a',
+          background: 'var(--infyn-dark)',
           border: '1px solid rgba(255,255,255,0.09)',
           borderRadius: 28,
           padding: '36px 28px 28px',
@@ -164,7 +164,7 @@ export function FounderVIPModal({ isOpen, memberNumber, founderNumber, onClose }
               padding: '14px 0',
               borderRadius: 14,
               background: '#ffffff',
-              color: '#0a0a0a',
+              color: 'var(--infyn-dark)',
               fontSize: 14,
               fontWeight: 700,
               border: 'none',

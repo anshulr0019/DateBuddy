@@ -257,25 +257,25 @@ export default function HomePage() {
   };
 
   return (
-    <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-gray-200/60 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-infyn-paper flex justify-center overflow-hidden font-sans select-none">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-border/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 
-            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 flex items-center justify-between shadow-2xs">
+            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-surface/90 backdrop-blur-xl border-b border-infyn-border/50 flex items-center justify-between shadow-2xs">
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-[20px] font-extrabold tracking-tight text-[#1E293B]">
+                  <h1 className="text-[20px] font-extrabold tracking-tight text-infyn-ink font-system">
                     {activePersona.title}
                   </h1>
                   <button
                     onClick={() => setShowPersonaPicker(true)}
-                    className="px-2.5 py-0.5 rounded-full bg-[#1E293B]/08 border border-[#1E293B]/12 text-[#1E293B]/55 text-[10px] font-semibold uppercase tracking-wider hover:bg-[#1E293B]/12 transition-all duration-200 active:scale-95 cursor-pointer"
+                    className="font-system px-2.5 py-0.5 rounded-full bg-infyn-ink/08 border border-infyn-ink/12 text-infyn-ink/55 text-[10px] font-semibold uppercase tracking-wider hover:bg-infyn-ink/12 transition-all duration-200 active:scale-95 cursor-pointer"
                   >
                     Vibe
                   </button>
                 </div>
-                <p className="text-[12.5px] text-[#1E293B]/60 font-medium mt-0.5">
+                <p className="text-[12.5px] text-infyn-ink/60 font-medium mt-0.5">
                   &ldquo;{activePersona.subline}&rdquo;
                 </p>
               </div>
@@ -283,11 +283,11 @@ export default function HomePage() {
               <button
                 onClick={openNotifications}
                 aria-label="Open notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-gray-200/70 shadow-2xs hover:bg-gray-50 transition-all duration-200 active:scale-90 cursor-pointer"
+                className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface border border-infyn-border/70 shadow-2xs hover:bg-infyn-surface-soft transition-all duration-200 active:scale-90 cursor-pointer font-system"
               >
                 <Ic.Bell />
                 {unreadCount > 0 && (
-                  <div className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#F43F5E] ring-2 ring-white shadow-2xs" />
+                  <div className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" />
                 )}
               </button>
             </div>
@@ -297,8 +297,8 @@ export default function HomePage() {
               {/* TODAY'S PICKS */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-[#1E293B]/45">Today&apos;s Picks</h2>
-                  <button onClick={() => router.push('/discover')} className="text-[12px] font-bold text-[#F43F5E] hover:underline cursor-pointer">
+                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Today&apos;s Picks</h2>
+                  <button onClick={() => router.push('/discover')} className="font-system text-[12px] font-bold text-infyn-rose hover:underline cursor-pointer">
                     View All &rarr;
                   </button>
                 </div>
@@ -306,15 +306,15 @@ export default function HomePage() {
                 {loading && (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-24 rounded-3xl bg-white/60 animate-pulse" />
+                      <div key={i} className="h-24 rounded-3xl bg-infyn-surface/60 animate-pulse" />
                     ))}
                   </div>
                 )}
 
                 {!loading && picks.length === 0 && (
-                  <GlassCard className="p-5 text-center border border-gray-200/70">
-                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No new profiles right now</p>
-                    <p className="text-[12px] text-[#1E293B]/50 mt-1">Check back soon, or widen your filters in Discover.</p>
+                  <GlassCard className="p-5 text-center border border-infyn-border/70">
+                    <p className="text-[13.5px] font-bold text-infyn-ink/70">No new profiles right now</p>
+                    <p className="text-[12px] text-infyn-ink/50 mt-1">Check back soon, or widen your filters in Discover.</p>
                   </GlassCard>
                 )}
 
@@ -323,7 +323,7 @@ export default function HomePage() {
                     <GlassCard
                       key={person.id}
                       onClick={() => router.push('/discover')}
-                      className="animate-bubble-enter p-3.5 overflow-hidden border border-gray-200/70 hover:border-[#F43F5E]/30 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                      className="animate-bubble-enter p-3.5 overflow-hidden border border-infyn-border/70 hover:border-infyn-rose/30 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
                       style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                     >
                       <div className="flex items-center gap-3.5">
@@ -334,13 +334,13 @@ export default function HomePage() {
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="text-[15.5px] font-bold text-[#1E293B] truncate">
+                            <h3 className="text-[15.5px] font-bold text-infyn-ink truncate">
                               {person.name}{person.age ? `, ${person.age}` : ''}
                             </h3>
                             {person.verified && <VerifiedBadge />}
                           </div>
                           {(person.distance || person.city) && (
-                            <div className="flex items-center gap-1 text-[#1E293B]/45 text-[11px]">
+                            <div className="flex items-center gap-1 text-infyn-ink/45 text-[11px]">
                               <Ic.MapPin />
                               <span>{person.distance ?? person.city}</span>
                             </div>
@@ -352,7 +352,7 @@ export default function HomePage() {
                             e.stopPropagation();
                             router.push('/discover');
                           }}
-                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] hover:bg-[#F43F5E] hover:text-white transition-all duration-200 active:scale-90 cursor-pointer shadow-2xs"
+                          className="font-system flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose hover:bg-infyn-rose hover:text-white transition-all duration-200 active:scale-90 cursor-pointer shadow-2xs"
                           aria-label="Connect"
                         >
                           <Ic.Heart filled />
@@ -367,25 +367,25 @@ export default function HomePage() {
               <div>
                 <GlassCard
                   onClick={() => router.push('/random-chat')}
-                  className="animate-bubble-enter overflow-hidden border border-[#7B68EE]/25 bg-gradient-to-r from-[#7B68EE]/[0.06] via-[#FF6B9D]/[0.05] to-[#7B68EE]/[0.06] hover:border-[#7B68EE]/50 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99] relative"
+                  className="animate-bubble-enter overflow-hidden border border-infyn-rose/25 bg-gradient-to-r from-infyn-rose/[0.06] via-infyn-rose/[0.05] to-infyn-rose/[0.06] hover:border-infyn-rose/50 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99] relative"
                 >
-                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#7B68EE]/15 blur-2xl" />
-                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-[#FF6B9D]/15 blur-2xl" />
+                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-infyn-rose/15 blur-2xl" />
+                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-infyn-rose/15 blur-2xl" />
                   <div className="relative flex items-center gap-3.5 p-4">
                     <div className="relative h-14 w-14 flex-shrink-0">
-                      <div className="rc-pulse absolute inset-0 rounded-full bg-[#7B68EE]/30" />
-                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B68EE] to-[#FF6B9D] text-white text-2xl shadow-md">
+                      <div className="rc-pulse absolute inset-0 rounded-full bg-infyn-rose/30" />
+                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose to-infyn-rose text-white text-2xl shadow-md">
                         🎲
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-[15px] font-extrabold text-[#1E293B]">Anonymous Chat</h3>
-                        <span className="rounded-full bg-[#7B68EE] text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 shadow-2xs">
+                        <h3 className="text-[15px] font-extrabold text-infyn-ink">Anonymous Chat</h3>
+                        <span className="rounded-full bg-infyn-rose text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 shadow-2xs">
                           New
                         </span>
                       </div>
-                      <p className="text-[12px] text-[#1E293B]/60 font-medium mt-0.5 leading-snug">
+                      <p className="text-[12px] text-infyn-ink/60 font-medium mt-0.5 leading-snug">
                         Talk to a stranger about anything — stay anonymous until you&apos;re ready.
                       </p>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
@@ -394,21 +394,21 @@ export default function HomePage() {
                             <span className="inline-flex items-center gap-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#16A34A]">
                               <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] animate-pulse" /> {Math.max(0, randomChat.onlineCount)} online
                             </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#7B68EE]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-infyn-rose/10 border border-infyn-rose/25 px-2.5 py-0.5 text-[10.5px] font-bold text-infyn-rose">
                               💬 {Math.max(0, randomChat.chattingNow)} chatting
                             </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-[10.5px] font-bold text-gray-500">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-infyn-surface-soft border border-infyn-border px-2 py-0.5 text-[10.5px] font-bold text-infyn-secondary">
                               🎭 Anonymous
                             </span>
                           </>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#7B68EE]/10 border border-[#7B68EE]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#7B68EE]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-infyn-rose/10 border border-infyn-rose/25 px-2.5 py-0.5 text-[10.5px] font-bold text-infyn-rose">
                             ✨ Tap to join queue
                           </span>
                         )}
                       </div>
                     </div>
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-[#7B68EE]/10 text-[#7B68EE]">
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-infyn-rose/10 text-infyn-rose">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
@@ -421,12 +421,12 @@ export default function HomePage() {
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <div>
-                    <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-[#1E293B]/45">Gym &amp; Activity Squads</h2>
-                    <p className="text-[11.5px] text-[#1E293B]/55 font-medium">Find workout partners &amp; sports sessions nearby</p>
+                    <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Gym &amp; Activity Squads</h2>
+                    <p className="text-[11.5px] text-infyn-ink/55 font-medium">Find workout partners &amp; sports sessions nearby</p>
                   </div>
                   <button
                     onClick={() => setShowHostModal(true)}
-                    className="px-3 py-1.5 rounded-xl bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[#F43F5E] text-[12px] font-bold hover:bg-[#F43F5E] hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1"
+                    className="font-system px-3 py-1.5 rounded-xl bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose text-[12px] font-bold hover:bg-infyn-rose hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1"
                   >
                     <span>+ Host</span>
                   </button>
@@ -437,10 +437,10 @@ export default function HomePage() {
                     <button
                       key={cat}
                       onClick={() => { hapticLight(); setSquadFilter(cat); }}
-                      className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all duration-200 flex-shrink-0 cursor-pointer ${
+                      className={`font-system px-3 py-1 rounded-full text-[12px] font-bold transition-all duration-200 flex-shrink-0 cursor-pointer ${
                         squadFilter === cat
-                          ? 'bg-[#F43F5E] text-white shadow-2xs scale-105'
-                          : 'bg-white border border-gray-200/80 text-[#1E293B]/60 hover:text-[#1E293B] hover:bg-gray-50'
+                          ? 'bg-infyn-rose text-white shadow-2xs scale-105'
+                          : 'bg-infyn-surface border border-infyn-border/80 text-infyn-ink/60 hover:text-infyn-ink hover:bg-infyn-surface-soft'
                       }`}
                     >
                       {CATEGORY_EMOJI[cat] ?? ''}{cat}
@@ -449,9 +449,9 @@ export default function HomePage() {
                 </div>
 
                 {!loading && filteredMeetups.length === 0 && (
-                  <GlassCard className="p-5 text-center border border-gray-200/70">
-                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No sessions here yet</p>
-                    <p className="text-[12px] text-[#1E293B]/50 mt-1">Be the first — tap <span className="font-bold">+ Host</span> to start one.</p>
+                  <GlassCard className="p-5 text-center border border-infyn-border/70">
+                    <p className="text-[13.5px] font-bold text-infyn-ink/70">No sessions here yet</p>
+                    <p className="text-[12px] text-infyn-ink/50 mt-1">Be the first — tap <span className="font-bold">+ Host</span> to start one.</p>
                   </GlassCard>
                 )}
 
@@ -464,32 +464,32 @@ export default function HomePage() {
                       <GlassCard
                         key={m.id}
                         onClick={() => setSelectedDetail(m)}
-                        className="animate-bubble-enter p-4 border border-gray-200/70 hover:border-[#F43F5E]/30 transition-all flex flex-col justify-between cursor-pointer active:scale-[0.99] group"
+                        className="animate-bubble-enter p-4 border border-infyn-border/70 hover:border-infyn-rose/30 transition-all flex flex-col justify-between cursor-pointer active:scale-[0.99] group"
                         style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2.5">
                           <div>
-                            <p className="text-[14.5px] font-bold text-[#1E293B] leading-snug group-hover:text-[#F43F5E] transition-colors">{m.title}</p>
-                            <p className="text-[11.5px] text-[#1E293B]/55">Hosted by <span className="font-semibold text-[#1E293B]">{m.hostName}</span></p>
+                            <p className="text-[14.5px] font-bold text-infyn-ink leading-snug group-hover:text-infyn-rose transition-colors">{m.title}</p>
+                            <p className="text-[11.5px] text-infyn-ink/55">Hosted by <span className="font-semibold text-infyn-ink">{m.hostName}</span></p>
                           </div>
-                          <span className="px-2.5 py-0.5 rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 text-[10.5px] font-bold text-[#F43F5E] flex-shrink-0">
+                          <span className="px-2.5 py-0.5 rounded-full bg-infyn-blush border border-infyn-rose-line/60 text-[10.5px] font-bold text-infyn-rose flex-shrink-0">
                             {m.category}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 my-2 py-2 px-3 rounded-xl bg-gray-50/80 border border-gray-100 text-[12px] text-[#1E293B]/70">
+                        <div className="grid grid-cols-2 gap-2 my-2 py-2 px-3 rounded-xl bg-infyn-surface-soft/80 border border-infyn-border text-[12px] text-infyn-ink/70">
                           <div className="flex items-center gap-1.5 truncate">
-                            <Ic.MapPin className="w-3.5 h-3.5 text-[#F43F5E] flex-shrink-0" />
+                            <Ic.MapPin className="w-3.5 h-3.5 text-infyn-rose flex-shrink-0" />
                             <span className="truncate">{m.venueName ?? m.city ?? 'TBA'}</span>
                           </div>
                           <div className="flex items-center gap-1.5 truncate">
-                            <Ic.Clock className="w-3.5 h-3.5 text-[#F43F5E] flex-shrink-0" />
+                            <Ic.Clock className="w-3.5 h-3.5 text-infyn-rose flex-shrink-0" />
                             <span className="truncate">{formatWhen(m.date)}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                          <span className="text-[11.5px] font-bold text-[#1E293B]/65">
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-infyn-border">
+                          <span className="text-[11.5px] font-bold text-infyn-ink/65">
                             {m.attendeesCount} / {capacity} Joined
                           </span>
 
@@ -499,7 +499,7 @@ export default function HomePage() {
                               toggleJoin(m);
                             }}
                             disabled={busyId === m.id || (isFull && m.userJoinStatus !== 'going' && m.userJoinStatus !== 'pending') || m.userJoinStatus === 'kicked'}
-                            className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs disabled:opacity-60 ${
+                            className={`font-system px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs disabled:opacity-60 ${
                               m.userJoinStatus === 'going'
                                 ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
                                 : m.userJoinStatus === 'pending'
@@ -507,8 +507,8 @@ export default function HomePage() {
                                 : m.userJoinStatus === 'kicked'
                                 ? 'bg-red-50 border border-red-200 text-red-600'
                                 : isFull
-                                ? 'bg-gray-100 border border-gray-200 text-gray-500'
-                                : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
+                                ? 'bg-infyn-surface-soft border border-infyn-border text-infyn-secondary'
+                                : 'bg-infyn-rose text-white hover:bg-[#E11D48]'
                             }`}
                           >
                             {m.userJoinStatus === 'going'
@@ -533,15 +533,15 @@ export default function HomePage() {
               {/* EVENTS NEAR YOU */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-[#1E293B]/45">Events Near You</h2>
-                  <button onClick={() => router.push('/discover/meetups')} className="text-[12px] font-bold text-[#F43F5E] hover:underline cursor-pointer">
+                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Events Near You</h2>
+                  <button onClick={() => router.push('/discover/meetups')} className="font-system text-[12px] font-bold text-infyn-rose hover:underline cursor-pointer">
                     See All Events &rarr;
                   </button>
                 </div>
 
                 {!loading && meetups.length === 0 ? (
-                  <GlassCard className="p-5 text-center border border-gray-200/70">
-                    <p className="text-[13.5px] font-bold text-[#1E293B]/70">No upcoming events</p>
+                  <GlassCard className="p-5 text-center border border-infyn-border/70">
+                    <p className="text-[13.5px] font-bold text-infyn-ink/70">No upcoming events</p>
                   </GlassCard>
                 ) : (
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
@@ -549,20 +549,20 @@ export default function HomePage() {
                       <GlassCard
                         key={e.id}
                         onClick={() => router.push(`/meetups/${e.id}`)}
-                        className="animate-bubble-enter min-w-[250px] max-w-[270px] p-4 flex-shrink-0 snap-start border border-gray-200/70 hover:border-[#F43F5E]/30 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98]"
+                        className="animate-bubble-enter min-w-[250px] max-w-[270px] p-4 flex-shrink-0 snap-start border border-infyn-border/70 hover:border-infyn-rose/30 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98]"
                         style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
                       >
                         <div className="flex items-start justify-between gap-2 mb-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFF0F4] border border-[#F9C0D0]/60 shadow-2xs">
-                            <Ic.Compass className="w-5 h-5 text-[#F43F5E]" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line/60 shadow-2xs">
+                            <Ic.Compass className="w-5 h-5 text-infyn-rose" />
                           </div>
-                          <span className="rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-2.5 py-0.5 text-[10px] font-bold text-[#F43F5E]">
+                          <span className="rounded-full bg-infyn-blush border border-infyn-rose-line/60 px-2.5 py-0.5 text-[10px] font-bold text-infyn-rose">
                             {e.category}
                           </span>
                         </div>
                         <div>
-                          <p className="text-[14px] font-bold text-[#1E293B] leading-tight mb-1">{e.title}</p>
-                          <p className="text-[12px] text-[#1E293B]/55">{formatWhen(e.date)} · {e.attendeesCount} going</p>
+                          <p className="text-[14px] font-bold text-infyn-ink leading-tight mb-1">{e.title}</p>
+                          <p className="text-[12px] text-infyn-ink/55">{formatWhen(e.date)} · {e.attendeesCount} going</p>
                         </div>
                       </GlassCard>
                     ))}
@@ -583,21 +583,21 @@ export default function HomePage() {
             onClick={() => setShowPersonaPicker(false)}
             className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-sheet-up">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-sheet-up">
+            <div className="w-10 h-1 bg-infyn-surface-soft rounded-full mx-auto" />
+            <div className="flex items-center justify-between border-b border-infyn-border pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-[17px] font-extrabold text-[#1E293B]">Your Vibe</h3>
-                  <span className="rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5">
+                  <h3 className="text-[17px] font-extrabold text-infyn-ink">Your Vibe</h3>
+                  <span className="rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5">
                     🤖 AI Calculated
                   </span>
                 </div>
-                <p className="text-[12px] text-[#1E293B]/60 font-medium">Auto-updated based on your activity &amp; time of day</p>
+                <p className="text-[12px] text-infyn-ink/60 font-medium">Auto-updated based on your activity &amp; time of day</p>
               </div>
               <button
                 onClick={() => setShowPersonaPicker(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-700 cursor-pointer active:scale-90 transition-transform"
+                className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
               >
                 ✕
               </button>
@@ -608,18 +608,18 @@ export default function HomePage() {
                 <button
                   key={p.id}
                   onClick={() => selectPersona(p.id, p.title, p.sublines[0])}
-                  className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
+                  className={`font-system w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                     activePersona.personaId === p.id
-                      ? 'border-[#F43F5E] bg-[#FFF0F4] shadow-2xs'
-                      : 'border-gray-200/80 bg-gray-50/50 hover:bg-gray-100/60'
+                      ? 'border-infyn-rose bg-infyn-blush shadow-2xs'
+                      : 'border-infyn-border/80 bg-infyn-surface-soft/50 hover:bg-infyn-surface-soft/60'
                   }`}
                 >
                   <div>
-                    <p className="text-[14.5px] font-bold text-[#1E293B]">{p.title}</p>
-                    <p className="text-[12px] text-[#1E293B]/60 mt-0.5">&ldquo;{p.sublines[0]}&rdquo;</p>
+                    <p className="text-[14.5px] font-bold text-infyn-ink">{p.title}</p>
+                    <p className="text-[12px] text-infyn-ink/60 mt-0.5">&ldquo;{p.sublines[0]}&rdquo;</p>
                   </div>
                   {activePersona.personaId === p.id && (
-                    <span className="text-[12px] font-bold text-[#F43F5E]">Active ✓</span>
+                    <span className="text-[12px] font-bold text-infyn-rose">Active ✓</span>
                   )}
                 </button>
               ))}
@@ -635,20 +635,20 @@ export default function HomePage() {
             onClick={() => setShowHostModal(false)}
             className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-sheet-up">
+          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-sheet-up">
             {/* handle */}
             <div className="pt-3 pb-0 flex-shrink-0 flex justify-center">
-              <div className="h-1 w-10 bg-gray-300 rounded-full" />
+              <div className="h-1 w-10 bg-infyn-surface-soft rounded-full" />
             </div>
             {/* header */}
-            <div className="flex items-center justify-between px-5 pt-3 pb-3 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 pt-3 pb-3 border-b border-infyn-border flex-shrink-0">
               <div>
-                <h3 className="text-[17px] font-extrabold text-[#1E293B]">Host a Squad Session</h3>
-                <p className="text-[12px] text-[#1E293B]/50">Find gym partners &amp; activity teammates</p>
+                <h3 className="text-[17px] font-extrabold text-infyn-ink">Host a Squad Session</h3>
+                <p className="text-[12px] text-infyn-ink/50">Find gym partners &amp; activity teammates</p>
               </div>
               <button
                 onClick={() => setShowHostModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-700 cursor-pointer active:scale-90 transition-transform"
+                className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
               >
                 ✕
               </button>
@@ -657,17 +657,17 @@ export default function HomePage() {
             {/* scrollable fields */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 scrollbar-none text-[13px] min-h-0">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Activity Category</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Activity Category</label>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setHostCategory(cat)}
-                      className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
+                      className={`font-system px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
                         hostCategory === cat
-                          ? 'bg-[#F43F5E] text-white shadow-2xs'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-infyn-rose text-white shadow-2xs'
+                          : 'bg-infyn-surface-soft text-infyn-secondary hover:bg-infyn-surface-soft'
                       }`}
                     >
                       {CATEGORY_EMOJI[cat]}{cat}
@@ -677,23 +677,23 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Session Title</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Session Title</label>
                 <input
                   type="text"
                   value={hostTitle}
                   onChange={(e) => setHostTitle(e.target.value)}
                   placeholder="e.g. Leg Day & Heavy Squats 🏋️"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px]"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400">Venue / Location</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted">Venue / Location</label>
                   <button
                     type="button"
                     onClick={() => setShowVenuePicker(true)}
-                    className="text-[11px] font-bold text-[#F43F5E] hover:underline cursor-pointer flex items-center gap-1"
+                    className="font-system text-[11px] font-bold text-infyn-rose hover:underline cursor-pointer flex items-center gap-1"
                   >
                     📍 Pick {hostCategory} venue →
                   </button>
@@ -705,31 +705,31 @@ export default function HomePage() {
                     onFocus={() => setShowVenuePicker(true)}
                     onChange={(e) => setHostVenue(e.target.value)}
                     placeholder={`Tap to select ${hostCategory} venue or area...`}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px] cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px] cursor-pointer"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Date &amp; Time</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Date &amp; Time</label>
                 <input
                   type="datetime-local"
                   value={hostDate}
                   onChange={(e) => setHostDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-[#F43F5E] focus:bg-white text-[16px]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Partner Slots</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Partner Slots</label>
                 <div className="flex gap-2">
                   {[2, 4, 6, 8, 10].map((num) => (
                     <button
                       key={num}
                       type="button"
                       onClick={() => setHostSlots(num)}
-                      className={`flex-1 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
-                        hostSlots === num ? 'bg-[#F43F5E] text-white shadow-2xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      className={`font-system flex-1 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
+                        hostSlots === num ? 'bg-infyn-rose text-white shadow-2xs' : 'bg-infyn-surface-soft text-infyn-secondary hover:bg-infyn-surface-soft'
                       }`}
                     >
                       {num}
@@ -739,15 +739,15 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Host Admin Control</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Host Admin Control</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setHostRequireApproval(false)}
-                    className={`py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
+                    className={`font-system py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
                       !hostRequireApproval
-                        ? 'bg-[#F43F5E] text-white border-transparent shadow-2xs'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-infyn-rose text-white border-transparent shadow-2xs'
+                        : 'bg-infyn-surface-soft border-infyn-border text-infyn-secondary hover:bg-infyn-surface-soft'
                     }`}
                   >
                     ⚡ Instant Join
@@ -755,16 +755,16 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setHostRequireApproval(true)}
-                    className={`py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
+                    className={`font-system py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
                       hostRequireApproval
-                        ? 'bg-[#F43F5E] text-white border-transparent shadow-2xs'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-infyn-rose text-white border-transparent shadow-2xs'
+                        : 'bg-infyn-surface-soft border-infyn-border text-infyn-secondary hover:bg-infyn-surface-soft'
                     }`}
                   >
                     🔒 Require Approval
                   </button>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1">
+                <p className="text-[11px] text-infyn-muted mt-1">
                   {hostRequireApproval
                     ? 'Interested users must be approved by you before joining.'
                     : 'Anyone can join your squad directly until slots fill up.'}
@@ -773,7 +773,7 @@ export default function HomePage() {
             </div>
 
             {/* sticky footer — elevated above floating nav bar */}
-            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100 bg-white rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
+            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-infyn-border bg-infyn-surface rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
               {hostError && (
                 <p className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[12px] font-semibold text-red-600">
                   {hostError}
@@ -782,7 +782,7 @@ export default function HomePage() {
               <button
                 onClick={publishSquad}
                 disabled={publishing}
-                className="w-full py-3.5 rounded-2xl bg-[#F43F5E] text-white font-extrabold text-[15px] shadow-lg hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+                className="w-full py-3.5 rounded-2xl bg-infyn-rose text-white font-extrabold text-[15px] shadow-lg hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60 font-system"
               >
                 {publishing ? 'Publishing…' : 'Publish Squad Session 🚀'}
               </button>
@@ -798,50 +798,50 @@ export default function HomePage() {
             onClick={() => setSelectedDetail(null)}
             className="absolute inset-0 bg-black/45 backdrop-blur-md transition-all duration-300"
           />
-          <div className="relative z-10 w-full max-w-[420px] bg-white rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[90dvh] flex flex-col shadow-2xl animate-sheet-up">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto" />
+          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[90dvh] flex flex-col shadow-2xl animate-sheet-up">
+            <div className="w-10 h-1 bg-infyn-surface-soft rounded-full mx-auto" />
 
-            <div className="flex items-start justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-start justify-between border-b border-infyn-border pb-3">
               <div>
-                <h3 className="text-[17px] font-extrabold text-[#1E293B] leading-tight">{selectedDetail.title}</h3>
-                <p className="text-[12px] text-[#1E293B]/60 font-medium">
-                  Hosted by <span className="font-bold text-[#1E293B]">{selectedDetail.hostName}</span>
+                <h3 className="text-[17px] font-extrabold text-infyn-ink leading-tight">{selectedDetail.title}</h3>
+                <p className="text-[12px] text-infyn-ink/60 font-medium">
+                  Hosted by <span className="font-bold text-infyn-ink">{selectedDetail.hostName}</span>
                 </p>
               </div>
               <button
                 onClick={() => setSelectedDetail(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-700 cursor-pointer active:scale-90 transition-transform"
+                className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
               >
                 ✕
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none text-[13px]">
-              <div className="rounded-2xl bg-gray-50/90 border border-gray-200/80 p-3.5 space-y-3">
+              <div className="rounded-2xl bg-infyn-surface-soft/90 border border-infyn-border/80 p-3.5 space-y-3">
                 {/* Venue */}
                 <div className="flex items-start gap-2.5 min-w-0">
                   <div className="h-8 w-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Ic.MapPin className="w-4 h-4 text-[#F43F5E]" />
+                    <Ic.MapPin className="w-4 h-4 text-infyn-rose" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Venue</p>
-                    <p className="text-[13px] font-bold text-[#1E293B] leading-snug break-words">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-infyn-muted">Venue</p>
+                    <p className="text-[13px] font-bold text-infyn-ink leading-snug break-words">
                       {selectedDetail.venueName ?? selectedDetail.city ?? 'TBA'}
                     </p>
                   </div>
                 </div>
 
                 {/* Divider */}
-                <div className="h-px w-full bg-gray-200/60" />
+                <div className="h-px w-full bg-infyn-surface-soft/60" />
 
                 {/* When */}
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="h-8 w-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center flex-shrink-0">
-                    <Ic.Clock className="w-4 h-4 text-[#7B68EE]" />
+                    <Ic.Clock className="w-4 h-4 text-infyn-rose" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">When</p>
-                    <p className="text-[13px] font-bold text-[#1E293B] leading-snug">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-infyn-muted">When</p>
+                    <p className="text-[13px] font-bold text-infyn-ink leading-snug">
                       {formatWhen(selectedDetail.date)}
                     </p>
                   </div>
@@ -849,7 +849,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center justify-between px-1">
-                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">
+                <p className="text-[12px] font-bold uppercase tracking-wider text-infyn-muted">
                   Attendees ({selectedDetail.attendeesCount} / {selectedDetail.maxAttendees ?? 10})
                 </p>
                 <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -863,17 +863,17 @@ export default function HomePage() {
                   setSelectedDetail(null);
                   router.push(`/meetups/${mId}`);
                 }}
-                className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1E293B] text-[13px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="font-system w-full py-2.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-infyn-ink text-[13px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <span>View Full Squad Page &amp; Members</span>
                 <span>→</span>
               </button>
 
-              <div className="pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-100">
+              <div className="pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-infyn-border">
                 <button
                   onClick={() => toggleJoin(selectedDetail)}
                   disabled={busyId === selectedDetail.id || (selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10) && selectedDetail.userJoinStatus !== 'going' && selectedDetail.userJoinStatus !== 'pending') || selectedDetail.userJoinStatus === 'kicked'}
-                  className={`w-full py-3.5 rounded-2xl text-[14.5px] font-extrabold transition-all cursor-pointer shadow-lg disabled:opacity-60 ${
+                  className={`font-system w-full py-3.5 rounded-2xl text-[14.5px] font-extrabold transition-all cursor-pointer shadow-lg disabled:opacity-60 ${
                     selectedDetail.userJoinStatus === 'going'
                       ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
                       : selectedDetail.userJoinStatus === 'pending'
@@ -881,8 +881,8 @@ export default function HomePage() {
                       : selectedDetail.userJoinStatus === 'kicked'
                       ? 'bg-red-50 border border-red-200 text-red-600'
                       : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
-                      ? 'bg-gray-100 border border-gray-200 text-gray-500'
-                      : 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
+                      ? 'bg-infyn-surface-soft border border-infyn-border text-infyn-secondary'
+                      : 'bg-infyn-rose text-white hover:bg-[#E11D48]'
                   }`}
                 >
                   {selectedDetail.userJoinStatus === 'going'
@@ -906,17 +906,17 @@ export default function HomePage() {
       {/* CONFIRM LEAVE */}
       {confirmLeaveId !== null && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-popover-enter">
-          <div className="w-full max-w-[340px] bg-white rounded-[28px] p-5 shadow-2xl space-y-4 text-center">
+          <div className="w-full max-w-[340px] bg-infyn-surface rounded-[28px] p-5 shadow-2xl space-y-4 text-center">
             <div className="h-12 w-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl font-bold">
               {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending' ? '⏳' : '👟'}
             </div>
             <div>
-              <h3 className="text-[17px] font-extrabold text-[#1E293B]">
+              <h3 className="text-[17px] font-extrabold text-infyn-ink">
                 {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending'
                   ? 'Cancel Join Request?'
                   : 'Leave Session?'}
               </h3>
-              <p className="text-[12.5px] text-gray-500 mt-1">
+              <p className="text-[12.5px] text-infyn-secondary mt-1">
                 {meetups.find((x) => x.id === confirmLeaveId)?.userJoinStatus === 'pending'
                   ? 'Your request to join this squad will be withdrawn.'
                   : 'Your spot will be re-opened for someone else to join.'}
@@ -925,13 +925,13 @@ export default function HomePage() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setConfirmLeaveId(null)}
-                className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-[13px] font-bold hover:bg-gray-200 transition-colors cursor-pointer"
+                className="font-system flex-1 py-2.5 rounded-xl bg-infyn-surface-soft text-infyn-secondary text-[13px] font-bold hover:bg-infyn-surface-soft transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => confirmLeave(confirmLeaveId)}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-bold hover:bg-red-700 transition-colors cursor-pointer shadow-2xs"
+                className="font-system flex-1 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-bold hover:bg-red-700 transition-colors cursor-pointer shadow-2xs"
               >
                 Yes, Leave
               </button>

@@ -122,8 +122,8 @@ function MinimalControlBtn({
           warning
             ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
             : active
-            ? 'bg-white text-neutral-900 border-white'
-            : 'bg-white/10 text-white/90 border-white/10 hover:bg-white/15'
+            ? 'bg-infyn-surface text-neutral-900 border-white'
+            : 'bg-infyn-surface/10 text-white/90 border-white/10 hover:bg-infyn-surface/15'
         }`}
       >
         {children}
@@ -538,7 +538,7 @@ export function CallModal({
       role="dialog"
       aria-modal="true"
       data-modal="true"
-      className="fixed inset-0 z-[99999] overflow-hidden bg-[#0A0A0C] font-sans select-none flex flex-col justify-between"
+      className="fixed inset-0 z-[99999] overflow-hidden bg-infyn-dark font-sans select-none flex flex-col justify-between"
     >
       {/* ── CLEAN MATTE DARK BACKDROP ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -548,7 +548,7 @@ export function CallModal({
             style={{ backgroundImage: `url(${partnerPhoto})` }}
           />
         )}
-        <div className="absolute inset-0 bg-[#0A0A0C]/90" />
+        <div className="absolute inset-0 bg-infyn-dark/90" />
       </div>
 
       {/* ── Hidden Remote Audio Element ── */}
@@ -580,7 +580,7 @@ export function CallModal({
         style={{ paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {/* Subtle Security Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-400 text-[11px] font-medium tracking-wide mb-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-infyn-surface/5 border border-white/10 text-neutral-400 text-[11px] font-medium tracking-wide mb-3">
           <LockIcon />
           <span>Infyn · End-to-End Encrypted</span>
         </div>
@@ -617,7 +617,7 @@ export function CallModal({
         {!isVideoActive && (
           <div className="relative flex flex-col items-center justify-center">
             {/* Clean Avatar Container */}
-            <div className="relative h-32 w-32 rounded-full p-1 bg-white/5 border border-white/10 ring-4 ring-white/5">
+            <div className="relative h-32 w-32 rounded-full p-1 bg-infyn-surface/5 border border-white/10 ring-4 ring-white/5">
               <div className="h-full w-full rounded-full overflow-hidden bg-neutral-900">
                 <SafeImage
                   src={partnerPhoto ?? undefined}
@@ -629,7 +629,7 @@ export function CallModal({
 
             {/* Subtle Audio Indicator (When Connected) */}
             {isAudioActive && (
-              <div className="mt-6 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+              <div className="mt-6 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-infyn-surface/5 border border-white/10">
                 <span className="w-1 h-3 rounded-full bg-neutral-400 animate-pulse" />
                 <span className="w-1 h-5 rounded-full bg-neutral-300 animate-pulse" style={{ animationDelay: '0.15s' }} />
                 <span className="w-1 h-4 rounded-full bg-neutral-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
@@ -738,10 +738,10 @@ export function CallModal({
 
         {/* 3. VIDEO CALL ACTIVE CONTROLS (Floating Minimal Dock) */}
         {isVideoActive && (
-          <div className="flex items-center gap-3.5 px-5 py-3 rounded-full bg-[#141419]/90 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-3.5 px-5 py-3 rounded-full bg-infyn-dark-surface/90 backdrop-blur-xl border border-white/10 shadow-2xl">
             <button
               onClick={flipCamera}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-infyn-surface/10 text-white hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer"
               aria-label="Flip Camera"
             >
               <FlipCameraIcon />
@@ -750,7 +750,7 @@ export function CallModal({
             <button
               onClick={toggleMute}
               className={`flex h-11 w-11 items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${
-                isMuted ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-white/10 text-white hover:bg-white/15'
+                isMuted ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-infyn-surface/10 text-white hover:bg-infyn-surface/15'
               }`}
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
@@ -760,7 +760,7 @@ export function CallModal({
             <button
               onClick={toggleVideo}
               className={`flex h-11 w-11 items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${
-                isVideoOff ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-white/10 text-white hover:bg-white/15'
+                isVideoOff ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-infyn-surface/10 text-white hover:bg-infyn-surface/15'
               }`}
               aria-label={isVideoOff ? 'Turn on Camera' : 'Turn off Camera'}
             >

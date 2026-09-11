@@ -191,24 +191,24 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
         style={{
           maxHeight: viewportHeight ? `${viewportHeight - 24}px` : '85dvh',
         }}
-        className="relative z-10 w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[28px] flex flex-col shadow-2xl animate-sheet-up overflow-hidden my-auto"
+        className="relative z-10 w-full max-w-[440px] bg-infyn-surface rounded-2xl sm:rounded-[28px] flex flex-col shadow-2xl animate-sheet-up overflow-hidden my-auto"
       >
 
         {/* Handle */}
         <div className="pt-2.5 pb-1 flex-shrink-0 flex justify-center">
-          <div className="h-1.5 w-10 bg-gray-300 rounded-full" />
+          <div className="h-1.5 w-10 bg-infyn-surface-soft rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="px-5 pt-2 pb-3 border-b border-gray-100 flex-shrink-0">
+        <div className="px-5 pt-2 pb-3 border-b border-infyn-border flex-shrink-0">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h3 className="text-[17px] font-extrabold text-[#1E293B]">Select Location</h3>
-              <p className="text-[12px] font-medium text-[#1E293B]/50">{categoryTitle}</p>
+              <h3 className="text-[17px] font-extrabold text-infyn-ink">Select Location</h3>
+              <p className="text-[12px] font-medium text-infyn-ink/50">{categoryTitle}</p>
             </div>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-700 cursor-pointer active:scale-90 transition-transform"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
             >
               ✕
             </button>
@@ -222,11 +222,11 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={`Search ${categoryNormalized}s, area or city (e.g. Janakpuri, Bandra...)...`}
               autoFocus
-              className="w-full h-11 pl-10 pr-9 rounded-2xl bg-gray-100/80 border border-gray-200 text-[14.5px] font-medium text-[#1E293B] placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#FF6B9D] transition-all"
+              className="w-full h-11 pl-10 pr-9 rounded-2xl bg-infyn-surface-soft/80 border border-infyn-border text-[14.5px] font-medium text-infyn-ink placeholder-infyn-muted focus:outline-none focus:bg-infyn-surface focus:border-infyn-rose transition-all"
             />
-            <span className="absolute left-3.5 top-3 text-gray-400 text-base">🔍</span>
+            <span className="absolute left-3.5 top-3 text-infyn-muted text-base">🔍</span>
             {isSearchingLive && (
-              <span className="absolute right-3 top-3.5 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#FF6B9D]" />
+              <span className="absolute right-3 top-3.5 h-4 w-4 animate-spin rounded-full border-2 border-infyn-border border-t-infyn-rose" />
             )}
           </div>
         </div>
@@ -241,23 +241,23 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
                 onSelect(searchQuery.trim(), 'Custom Location');
                 onClose();
               }}
-              className="w-full p-3 rounded-2xl border border-dashed border-[#FF6B9D] bg-[#FFF0F4] hover:bg-[#FFE4ED] transition-all flex items-center gap-3 cursor-pointer text-left shadow-2xs active:scale-[0.98]"
+              className="w-full p-3 rounded-2xl border border-dashed border-infyn-rose bg-infyn-blush hover:bg-infyn-blush transition-all flex items-center gap-3 cursor-pointer text-left shadow-2xs active:scale-[0.98]"
             >
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] text-white text-lg">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-infyn-rose to-infyn-rose text-white text-lg">
                 📍
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-bold text-[#FF6B9D] truncate">
+                <p className="text-[14px] font-bold text-infyn-rose truncate">
                   Use custom location: &ldquo;{searchQuery.trim()}&rdquo;
                 </p>
-                <p className="text-[11.5px] font-medium text-[#1E293B]/50">Tap to select custom venue</p>
+                <p className="text-[11.5px] font-medium text-infyn-ink/50">Tap to select custom venue</p>
               </div>
             </button>
           )}
 
           {/* Live Search Indicator */}
           {isSearchingLive && (
-            <div className="py-2 text-center text-xs font-semibold text-[#FF6B9D] animate-pulse">
+            <div className="py-2 text-center text-xs font-semibold text-infyn-rose animate-pulse">
               🔍 Searching live Google Maps & OpenStreetMap locations...
             </div>
           )}
@@ -271,30 +271,30 @@ export function VenuePickerModal({ isOpen, category, onSelect, onClose }: VenueP
                 onSelect(v.name, v.address);
                 onClose();
               }}
-              className="w-full p-3 rounded-2xl border border-gray-200/80 bg-gray-50/60 hover:bg-white hover:border-[#FF6B9D]/40 hover:shadow-md transition-all flex items-center justify-between gap-3 cursor-pointer text-left active:scale-[0.98]"
+              className="w-full p-3 rounded-2xl border border-infyn-border/80 bg-infyn-surface-soft/60 hover:bg-infyn-surface hover:border-infyn-rose/40 hover:shadow-md transition-all flex items-center justify-between gap-3 cursor-pointer text-left active:scale-[0.98]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white border border-gray-200 text-xl shadow-2xs">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-infyn-surface border border-infyn-border text-xl shadow-2xs">
                   {v.icon}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-[14.5px] font-bold text-[#1E293B] truncate">{v.name}</h4>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF6B9D] bg-[#FFF0F4] px-2 py-0.5 rounded-md flex-shrink-0 truncate max-w-[120px]">
+                    <h4 className="text-[14.5px] font-bold text-infyn-ink truncate">{v.name}</h4>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-infyn-rose bg-infyn-blush px-2 py-0.5 rounded-md flex-shrink-0 truncate max-w-[120px]">
                       {v.area}
                     </span>
                   </div>
-                  <p className="text-[12px] text-[#1E293B]/55 font-medium truncate mt-0.5">{v.address}</p>
+                  <p className="text-[12px] text-infyn-ink/55 font-medium truncate mt-0.5">{v.address}</p>
                 </div>
               </div>
 
-              <span className="text-gray-400 font-bold text-lg flex-shrink-0">›</span>
+              <span className="text-infyn-muted font-bold text-lg flex-shrink-0">›</span>
             </button>
           ))}
 
 
           {displayVenues.length === 0 && searchQuery.trim().length === 0 && (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-infyn-muted">
               <p className="text-[14px] font-bold">No venues found for this category</p>
             </div>
           )}

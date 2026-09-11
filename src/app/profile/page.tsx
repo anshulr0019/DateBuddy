@@ -319,8 +319,8 @@ export default function ProfilePage() {
   const subtitle = [profile.profession, profile.education].filter(Boolean).join(' · ');
 
   return (
-    <div className="h-dvh w-full min-h-screen bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="h-dvh w-full min-h-screen bg-infyn-paper flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             {status === 'loading' && <ProfileSkeleton />}
@@ -329,11 +329,11 @@ export default function ProfilePage() {
               <div className="flex h-full items-center justify-center px-6">
                 <GlassCard className="w-full p-8 text-center">
                   <p className="text-[40px] mb-3" aria-hidden>📡</p>
-                  <h1 className="text-[18px] font-semibold text-[#1A1A2E] mb-1.5">Couldn&apos;t load your profile</h1>
-                  <p className="text-[13px] text-[#1A1A2E]/60 mb-6">Check your connection and try again.</p>
+                  <h1 className="text-[18px] font-normal text-infyn-ink mb-1.5 font-display">Couldn&apos;t load your profile</h1>
+                  <p className="text-[13px] text-infyn-ink/60 mb-6">Check your connection and try again.</p>
                   <button
                     onClick={() => setReloadKey(k => k + 1)}
-                    className="h-12 w-full rounded-2xl bg-[#F43F5E] hover:bg-[#E11D48] text-[15px] font-semibold text-white transition-all duration-200 active:scale-95 cursor-pointer"
+                    className="h-12 w-full rounded-2xl bg-infyn-rose hover:bg-[#E11D48] text-[15px] font-semibold text-white transition-all duration-200 active:scale-95 cursor-pointer"
                   >
                     Retry
                   </button>
@@ -354,11 +354,11 @@ export default function ProfilePage() {
                   onKeyDown={e => { if (e.key === 'Enter') profile.photo && setPhotoLightboxOpen(true); }}
                 >
                   <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/10 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-infyn-paper via-infyn-paper/10 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
                   {/* Tap-to-expand hint */}
                   {profile.photo && (
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/15 transition-all duration-300 shadow-md">
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-infyn-border/15 transition-all duration-300 shadow-md">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 3h6m0 0v6m0-6-7 7M9 21H3m0 0v-6m0 6 7-7"/></svg>
                       <span className="text-[11px] font-semibold text-white">View</span>
                     </div>
@@ -367,7 +367,7 @@ export default function ProfilePage() {
                     <button
                       onClick={e => { e.stopPropagation(); router.push('/settings'); }}
                       aria-label="Settings"
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer active:scale-95"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-infyn-surface/20 backdrop-blur-md text-white hover:bg-infyn-surface/30 transition-all cursor-pointer active:scale-95"
                     >
                       <Ic.Settings />
                     </button>
@@ -376,7 +376,7 @@ export default function ProfilePage() {
                     <button
                       onClick={e => { e.stopPropagation(); openEditor(); }}
                       aria-label="Edit profile"
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all cursor-pointer active:scale-95"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-infyn-surface/20 backdrop-blur-md text-white hover:bg-infyn-surface/30 transition-all cursor-pointer active:scale-95"
                     >
                       <Ic.Edit />
                     </button>
@@ -386,8 +386,8 @@ export default function ProfilePage() {
                 {/* Profile info */}
                 <div className="relative -mt-16 px-4">
                   {isCached && (
-                    <div className="mb-3 flex items-center justify-center rounded-2xl border border-[#F9C0D0]/60 bg-[#FFF0F4]/90 px-4 py-2 backdrop-blur-md" role="status">
-                      <span className="text-[12px] font-medium text-[#1A1A2E]/70">Offline — showing your saved profile</span>
+                    <div className="mb-3 flex items-center justify-center rounded-2xl border border-infyn-rose-line/60 bg-infyn-blush/90 px-4 py-2 backdrop-blur-md" role="status">
+                      <span className="text-[12px] font-medium text-infyn-ink/70">Offline — showing your saved profile</span>
                     </div>
                   )}
 
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                     </button>
                     <button
                       onClick={openEditor}
-                      className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[#1A1A2E]/15 bg-white/80 px-4 py-2 text-[13px] font-medium text-[#1A1A2E] backdrop-blur-md hover:bg-white transition-all cursor-pointer active:scale-95 shadow-sm"
+                      className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-infyn-ink/15 bg-infyn-surface/80 px-4 py-2 text-[13px] font-medium text-infyn-ink backdrop-blur-md hover:bg-infyn-surface transition-all cursor-pointer active:scale-95 shadow-sm"
                     >
                       <Ic.Edit />
                       Edit Profile
@@ -417,7 +417,7 @@ export default function ProfilePage() {
                         <div
                           className="inline-flex items-center gap-1.5 mb-2.5"
                           style={{
-                            background: '#0a0a0a',
+                            background: 'var(--infyn-dark)',
                             border: '1px solid rgba(255,255,255,0.13)',
                             borderRadius: 100,
                             padding: '4px 12px 4px 9px',
@@ -445,7 +445,7 @@ export default function ProfilePage() {
                         </div>
                       )}
                       <div className="flex items-center gap-2 mb-1">
-                        <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[#1A1A2E]">
+                        <h1 className="text-[24px] font-normal tracking-[-0.02em] text-infyn-ink font-display">
                           {profile.name}
                           {profile.age !== null && `, ${profile.age}`}
                         </h1>
@@ -455,9 +455,9 @@ export default function ProfilePage() {
                           </span>
                         )}
                       </div>
-                      {subtitle && <p className="text-[14px] text-[#1A1A2E]/60 mb-1">{subtitle}</p>}
+                      {subtitle && <p className="text-[14px] text-infyn-ink/60 mb-1">{subtitle}</p>}
                       {profile.location && (
-                        <div className="flex items-center gap-1 text-[#1A1A2E]/60">
+                        <div className="flex items-center gap-1 text-infyn-ink/60">
                           <Ic.MapPin />
                           <span className="text-[13px]">{profile.location}</span>
                         </div>
@@ -466,7 +466,7 @@ export default function ProfilePage() {
 
                   {/* Stats — real data only */}
                   <GlassCard className="mb-4 p-4">
-                    <div className="grid grid-cols-3 divide-x divide-[#1A1A2E]/[0.06] text-center">
+                    <div className="grid grid-cols-3 divide-x divide-infyn-border/[0.06] text-center">
                       {[
                         [connections === null ? '—' : String(connections), 'Connections'],
                         [String(profile.photos.length), 'Photos'],
@@ -476,7 +476,7 @@ export default function ProfilePage() {
                           <p className="text-[20px] font-semibold tracking-[-0.02em]">
                             <GradientText>{n}</GradientText>
                           </p>
-                          <p className="text-[11px] text-[#1A1A2E]/65 mt-0.5">{l}</p>
+                          <p className="text-[11px] text-infyn-ink/65 mt-0.5">{l}</p>
                         </div>
                       ))}
                     </div>
@@ -485,11 +485,11 @@ export default function ProfilePage() {
                   {/* Bio & interests */}
                   <GlassCard className="mb-4 p-5">
                     {profile.bio ? (
-                      <p className="text-[14px] leading-relaxed text-[#1A1A2E]/75">{profile.bio}</p>
+                      <p className="text-[14px] leading-relaxed text-infyn-ink/75">{profile.bio}</p>
                     ) : (
                       <button
                         onClick={openEditor}
-                        className="flex min-h-[44px] w-full items-center gap-2 text-[14px] text-[#F43F5E] font-medium cursor-pointer"
+                        className="flex min-h-[44px] w-full items-center gap-2 text-[14px] text-infyn-rose font-medium cursor-pointer"
                       >
                         <Ic.Plus />
                         Write a bio — profiles with bios get more matches
@@ -497,14 +497,14 @@ export default function ProfilePage() {
                     )}
                     <div className="mt-4 flex flex-wrap gap-2">
                       {profile.interests.map(t => (
-                        <span key={t} className="rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-3 py-1 text-[12px] font-medium text-[#F43F5E]">
+                        <span key={t} className="rounded-full bg-infyn-blush border border-infyn-rose-line/60 px-3 py-1 text-[12px] font-medium text-infyn-rose">
                           {t}
                         </span>
                       ))}
                       <button
                         onClick={openEditor}
                         aria-label="Add interests"
-                        className="flex items-center gap-1 rounded-full border border-dashed border-[#1A1A2E]/25 px-3 py-1 text-[12px] font-medium text-[#1A1A2E]/60 hover:border-[#F43F5E]/50 hover:text-[#F43F5E] transition-all cursor-pointer"
+                        className="flex items-center gap-1 rounded-full border border-dashed border-infyn-ink/25 px-3 py-1 text-[12px] font-medium text-infyn-ink/60 hover:border-infyn-rose/50 hover:text-infyn-rose transition-all cursor-pointer"
                       >
                         <Ic.Plus />
                         {profile.interests.length === 0 ? 'Add interests' : 'Add'}
@@ -516,9 +516,9 @@ export default function ProfilePage() {
                   {profile.prompts.length > 0 && (
                     <div className="mb-4 space-y-3">
                       {profile.prompts.map((p, i) => (
-                        <GlassCard key={i} className="p-4 border border-[#FF6B9D]/15 bg-gradient-to-br from-white/90 to-[#FFF0F4]/40">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B9D] mb-1.5">{p.question}</p>
-                          <p className="text-[14px] font-medium text-[#1A1A2E] leading-snug">{p.answer}</p>
+                        <GlassCard key={i} className="p-4 border border-infyn-rose/15 bg-gradient-to-br from-white/90 to-infyn-blush/40">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose mb-1.5">{p.question}</p>
+                          <p className="text-[14px] font-medium text-infyn-ink leading-snug">{p.answer}</p>
                         </GlassCard>
                       ))}
                     </div>
@@ -527,11 +527,11 @@ export default function ProfilePage() {
                   {/* Profile completion — computed from real profile data */}
                   <button
                     onClick={() => (strength.route === 'edit' ? openEditor() : router.push(strength.route))}
-                    className="mb-4 block w-full rounded-[24px] border border-white/80 bg-white/80 p-5 text-left shadow-[0_10px_30px_-15px_rgba(26,26,46,0.08)] backdrop-blur-md cursor-pointer hover:border-[#F43F5E]/30 transition-all active:scale-[0.99]"
+                    className="mb-4 block w-full rounded-[24px] border border-infyn-border/80 bg-infyn-surface/80 p-5 text-left shadow-[0_10px_30px_-15px_rgba(32,26,22,0.08)] backdrop-blur-md cursor-pointer hover:border-infyn-rose/30 transition-all active:scale-[0.99]"
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[14px] font-semibold text-[#1A1A2E]">Profile Strength</span>
-                      <span className="text-[13px] font-semibold text-[#F43F5E]">{strength.percent}%</span>
+                      <span className="text-[14px] font-semibold text-infyn-ink">Profile Strength</span>
+                      <span className="text-[13px] font-semibold text-infyn-rose">{strength.percent}%</span>
                     </div>
                     <div
                       role="progressbar"
@@ -539,16 +539,16 @@ export default function ProfilePage() {
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label="Profile strength"
-                      className="h-1.5 w-full overflow-hidden rounded-full bg-[#1A1A2E]/[0.08]"
+                      className="h-1.5 w-full overflow-hidden rounded-full bg-infyn-ink/[0.08]"
                     >
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#F43F5E] to-[#FB7185] transition-all duration-500"
+                        className="h-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose transition-all duration-500"
                         style={{ width: `${strength.percent}%` }}
                       />
                     </div>
-                    <p className="mt-2 text-[12px] text-[#1A1A2E]/60">
+                    <p className="mt-2 text-[12px] text-infyn-ink/60">
                       {strength.hint}
-                      {strength.percent < 100 && <span className="text-[#F43F5E] font-medium"> →</span>}
+                      {strength.percent < 100 && <span className="text-infyn-rose font-medium"> →</span>}
                     </p>
                   </button>
 
@@ -557,11 +557,11 @@ export default function ProfilePage() {
                     role="tablist"
                     aria-label="Profile sections"
                     onKeyDown={handleTabKeyDown}
-                    className="relative mb-4 flex gap-1 rounded-2xl bg-white/70 p-1.5 backdrop-blur-xl border border-white/80 shadow-[0_8px_32px_rgba(31,38,135,0.07)] overflow-hidden"
+                    className="relative mb-4 flex gap-1 rounded-2xl bg-infyn-surface/70 p-1.5 backdrop-blur-xl border border-infyn-border/80 shadow-[0_8px_32px_rgba(31,38,135,0.07)] overflow-hidden"
                   >
                     <div
                       aria-hidden
-                      className="absolute top-1.5 h-[calc(100%-12px)] rounded-xl bg-white shadow-md border border-[#1A1A2E]/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                      className="absolute top-1.5 h-[calc(100%-12px)] rounded-xl bg-infyn-surface shadow-md border border-infyn-ink/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                       style={{
                         width: 'calc((100% - 12px) / 3)',
                         left: 6,
@@ -578,7 +578,7 @@ export default function ProfilePage() {
                         tabIndex={activeSection === t.id ? 0 : -1}
                         onClick={() => setActiveSection(t.id)}
                         className={`relative z-10 min-h-[44px] flex-1 rounded-xl py-2 text-[13px] font-bold transition-all duration-200 cursor-pointer active:scale-95 select-none ${
-                          activeSection === t.id ? 'text-[#F43F5E]' : 'text-[#1A1A2E]/60 hover:text-[#1A1A2E]'
+                          activeSection === t.id ? 'text-infyn-rose' : 'text-infyn-ink/60 hover:text-infyn-ink'
                         }`}
                       >
                         {t.label}
@@ -592,7 +592,7 @@ export default function ProfilePage() {
                       {profile.photos.length > 0 ? (
                         <div className="grid grid-cols-3 gap-2">
                           {profile.photos.map((src, i) => (
-                            <div key={`${src}-${i}`} className="aspect-square overflow-hidden rounded-2xl border border-[#1A1A2E]/10 shadow-2xs">
+                            <div key={`${src}-${i}`} className="aspect-square overflow-hidden rounded-2xl border border-infyn-ink/10 shadow-2xs">
                               <SafeImage src={src} alt={`Photo ${i + 1} of ${profile.photos.length}`} className="h-full w-full object-cover" />
                             </div>
                           ))}
@@ -600,7 +600,7 @@ export default function ProfilePage() {
                             <button
                               onClick={() => router.push('/onboarding/photos')}
                               aria-label="Add photo"
-                              className="flex aspect-square items-center justify-center rounded-2xl border border-dashed border-[#1A1A2E]/20 text-[#1A1A2E]/45 hover:border-[#F43F5E]/50 hover:text-[#F43F5E] transition-all cursor-pointer"
+                              className="flex aspect-square items-center justify-center rounded-2xl border border-dashed border-infyn-ink/20 text-infyn-ink/45 hover:border-infyn-rose/50 hover:text-infyn-rose transition-all cursor-pointer"
                             >
                               <Ic.Plus />
                             </button>
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                       {meetupsLoading ? (
                         <div className="space-y-3">
                           {[1, 2].map(i => (
-                            <div key={i} className="h-20 rounded-2xl bg-[#1A1A2E]/[0.04] animate-pulse" />
+                            <div key={i} className="h-20 rounded-2xl bg-infyn-ink/[0.04] animate-pulse" />
                           ))}
                         </div>
                       ) : myMeetups.length > 0 ? (
@@ -650,18 +650,18 @@ export default function ProfilePage() {
                               <button
                                 key={m.id}
                                 onClick={() => router.push(`/meetups/${m.id}`)}
-                                className="w-full text-left rounded-2xl border border-[#1A1A2E]/10 bg-white/80 backdrop-blur-md p-4 shadow-sm hover:border-[#F43F5E]/30 transition-all active:scale-[0.99] cursor-pointer"
+                                className="w-full text-left rounded-2xl border border-infyn-ink/10 bg-infyn-surface/80 backdrop-blur-md p-4 shadow-sm hover:border-infyn-rose/30 transition-all active:scale-[0.99] cursor-pointer"
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-[14px] font-semibold text-[#1A1A2E] truncate">{m.title}</p>
-                                    {m.venueName && <p className="text-[12px] text-[#1A1A2E]/55 truncate mt-0.5">{m.venueName}</p>}
-                                    <p className="text-[11px] text-[#1A1A2E]/45 mt-1">{when}</p>
+                                    <p className="text-[14px] font-semibold text-infyn-ink truncate">{m.title}</p>
+                                    {m.venueName && <p className="text-[12px] text-infyn-ink/55 truncate mt-0.5">{m.venueName}</p>}
+                                    <p className="text-[11px] text-infyn-ink/45 mt-1">{when}</p>
                                   </div>
                                   {isPending ? (
                                     <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[11px] font-bold text-amber-600">Pending ⏳</span>
                                   ) : (
-                                    <span className="shrink-0 rounded-full bg-[#FFF0F4] border border-[#F9C0D0]/60 px-2.5 py-1 text-[11px] font-bold text-[#F43F5E]">Going ✓</span>
+                                    <span className="shrink-0 rounded-full bg-infyn-blush border border-infyn-rose-line/60 px-2.5 py-1 text-[11px] font-bold text-infyn-rose">Going ✓</span>
                                   )}
                                 </div>
                               </button>
@@ -694,15 +694,15 @@ export default function ProfilePage() {
             >
               <div
                 onClick={e => e.stopPropagation()}
-                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-[#FAFAF7] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-sheet-up"
+                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-infyn-paper p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-sheet-up"
               >
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-[20px] font-bold tracking-tight text-[#1A1A2E]">Edit Profile</h2>
+                  <h2 className="text-[20px] font-bold tracking-tight text-infyn-ink">Edit Profile</h2>
                   <button
                     onClick={() => !isSaving && setIsEditing(false)}
                     disabled={isSaving}
                     aria-label="Close editor"
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1A1A2E]/8 text-[#1A1A2E]/60 hover:bg-[#1A1A2E]/15 transition-all active:scale-90 cursor-pointer disabled:opacity-40"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-infyn-ink/8 text-infyn-ink/60 hover:bg-infyn-ink/15 transition-all active:scale-90 cursor-pointer disabled:opacity-40"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
@@ -714,34 +714,34 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">Name</label>
+                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">Name</label>
                 <input
                   value={editDraft.name}
                   onChange={e => setEditDraft(d => ({ ...d, name: e.target.value }))}
                   maxLength={100}
-                  className="mb-4 w-full rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                  className="mb-4 w-full rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
                 />
 
-                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">City</label>
+                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">City</label>
                 <input
                   value={editDraft.city}
                   onChange={e => setEditDraft(d => ({ ...d, city: e.target.value }))}
                   maxLength={100}
-                  className="mb-4 w-full rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                  className="mb-4 w-full rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
                 />
 
-                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">
-                  Bio <span className="font-normal text-[#1A1A2E]/40">({editDraft.bio.length}/500)</span>
+                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">
+                  Bio <span className="font-normal text-infyn-ink/40">({editDraft.bio.length}/500)</span>
                 </label>
                 <textarea
                   value={editDraft.bio}
                   onChange={e => setEditDraft(d => ({ ...d, bio: e.target.value.slice(0, 500) }))}
                   rows={4}
-                  className="mb-4 w-full resize-none rounded-2xl border border-[#1A1A2E]/10 bg-white px-4 py-3 text-[14px] text-[#1A1A2E] outline-none focus:border-[#F43F5E]/50"
+                  className="mb-4 w-full resize-none rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
                 />
 
-                <label className="mb-1.5 block text-[13px] font-semibold text-[#1A1A2E]/70">
-                  Interests <span className="font-normal text-[#1A1A2E]/40">({editDraft.interests.length} selected)</span>
+                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">
+                  Interests <span className="font-normal text-infyn-ink/40">({editDraft.interests.length} selected)</span>
                 </label>
                 <div className="mb-6 flex flex-wrap gap-2">
                   {INTEREST_OPTIONS.map(opt => {
@@ -759,8 +759,8 @@ export default function ProfilePage() {
                         }
                         className={`rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-all cursor-pointer active:scale-95 ${
                           on
-                            ? 'border-transparent bg-[#F43F5E] text-white'
-                            : 'border-[#1A1A2E]/10 bg-white text-[#1A1A2E]/75 hover:border-[#1A1A2E]/25'
+                            ? 'border-transparent bg-infyn-rose text-white'
+                            : 'border-infyn-ink/10 bg-infyn-surface text-infyn-ink/75 hover:border-infyn-ink/25'
                         }`}
                       >
                         {opt}
@@ -773,14 +773,14 @@ export default function ProfilePage() {
                   <button
                     onClick={() => setIsEditing(false)}
                     disabled={isSaving}
-                    className="h-12 flex-1 rounded-2xl border border-[#1A1A2E]/15 bg-white text-[14px] font-semibold text-[#1A1A2E] transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                    className="h-12 flex-1 rounded-2xl border border-infyn-ink/15 bg-infyn-surface text-[14px] font-semibold text-infyn-ink transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={saveProfile}
                     disabled={isSaving}
-                    className="h-12 flex-1 rounded-2xl bg-[#F43F5E] text-[14px] font-bold text-white transition-all hover:bg-[#E11D48] active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="h-12 flex-1 rounded-2xl bg-infyn-rose text-[14px] font-bold text-white transition-all hover:bg-[#E11D48] active:scale-95 cursor-pointer disabled:opacity-60"
                   >
                     {isSaving ? 'Saving…' : 'Save Changes'}
                   </button>
@@ -807,7 +807,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => setPhotoLightboxOpen(false)}
                   aria-label="Close photo viewer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 border border-white/20 text-white hover:bg-white/30 transition-all active:scale-90 cursor-pointer backdrop-blur-md shadow-lg"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-infyn-surface/15 border border-infyn-border/20 text-white hover:bg-infyn-surface/30 transition-all active:scale-90 cursor-pointer backdrop-blur-md shadow-lg"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -822,7 +822,7 @@ export default function ProfilePage() {
                 <img
                   src={profile.photo}
                   alt={profile.name}
-                  className="w-full max-h-[66dvh] object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 select-none"
+                  className="w-full max-h-[66dvh] object-contain rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-infyn-border/10 select-none"
                   draggable={false}
                 />
               </div>
@@ -834,14 +834,14 @@ export default function ProfilePage() {
               >
                 <button
                   onClick={() => { setPhotoLightboxOpen(false); router.push('/onboarding/photos'); }}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] px-5 py-3.5 text-[14px] font-bold text-white shadow-xl hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose px-5 py-3.5 text-[14px] font-bold text-white shadow-xl hover:opacity-95 active:scale-95 transition-all cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Edit Photos
                 </button>
                 <button
                   onClick={() => setPhotoLightboxOpen(false)}
-                  className="px-6 py-3.5 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 text-[14px] font-bold text-white hover:bg-white/25 active:scale-95 transition-all cursor-pointer shadow-lg"
+                  className="px-6 py-3.5 rounded-2xl bg-infyn-surface/15 backdrop-blur-xl border border-infyn-border/25 text-[14px] font-bold text-white hover:bg-infyn-surface/25 active:scale-95 transition-all cursor-pointer shadow-lg"
                 >
                   Close
                 </button>
@@ -874,11 +874,11 @@ function EmptyState({
   return (
     <GlassCard className="p-8 text-center">
       <p className="text-[36px] mb-2" aria-hidden>{emoji}</p>
-      <p className="text-[15px] font-semibold text-[#1A1A2E] mb-1">{title}</p>
-      <p className="text-[13px] text-[#1A1A2E]/60 mb-5">{subtitle}</p>
+      <p className="text-[15px] font-semibold text-infyn-ink mb-1">{title}</p>
+      <p className="text-[13px] text-infyn-ink/60 mb-5">{subtitle}</p>
       <button
         onClick={onCta}
-        className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-[#F43F5E] hover:bg-[#E11D48] px-6 text-[14px] font-semibold text-white transition-all duration-200 active:scale-95 cursor-pointer"
+        className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-infyn-rose hover:bg-[#E11D48] px-6 text-[14px] font-semibold text-white transition-all duration-200 active:scale-95 cursor-pointer"
       >
         {cta}
       </button>

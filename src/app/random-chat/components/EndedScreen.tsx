@@ -20,7 +20,7 @@ export function EndedScreen({
   return (
     <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-6 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col items-center text-center">
       <div className="animate-bubble-enter w-full max-w-[320px]">
-        <div className="h-16 w-16 rounded-2xl bg-gray-100/90 text-gray-500 mx-auto flex items-center justify-center mb-5">
+        <div className="h-16 w-16 rounded-2xl bg-infyn-surface-soft/90 text-infyn-secondary mx-auto flex items-center justify-center mb-5">
           {endedByMe === true ? (
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6L6 18M6 6l12 12"/>
@@ -32,10 +32,10 @@ export function EndedScreen({
           )}
         </div>
 
-        <h1 className="text-[22px] font-extrabold text-[#1E293B] mb-1.5">
+        <h1 className="text-[22px] font-normal text-infyn-ink mb-1.5 font-display">
           {endedByMe === true ? 'Conversation ended' : 'Your partner left'}
         </h1>
-        <p className="text-[13px] text-[#1E293B]/55 font-medium leading-relaxed max-w-[260px] mx-auto">
+        <p className="text-[13px] text-infyn-ink/55 font-medium leading-relaxed max-w-[260px] mx-auto">
           {endedByMe === true
             ? 'You stepped out. When you&apos;re ready, jump back in and meet someone new.'
             : 'The conversation ended before it took off. Someone else is out there waiting to match your vibe.'}
@@ -45,7 +45,7 @@ export function EndedScreen({
           <button
             onClick={() => { hapticSuccess(); onFindSomeoneNew(); }}
             disabled={busy}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B9D] via-[#E86AC7] to-[#7B68EE] text-white text-[14.5px] font-extrabold shadow-[0_12px_32px_-10px_rgba(123,104,238,0.55)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white text-[14.5px] font-extrabold shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -56,7 +56,7 @@ export function EndedScreen({
           </button>
           <button
             onClick={onGoHome}
-            className="w-full py-2.5 rounded-2xl text-[13px] font-bold text-[#1E293B]/45 hover:text-[#1E293B]/70 hover:bg-gray-50 active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-2xl text-[13px] font-bold text-infyn-ink/45 hover:text-infyn-ink/70 hover:bg-infyn-surface-soft active:scale-[0.98] transition-all cursor-pointer"
           >
             Back to Home
           </button>

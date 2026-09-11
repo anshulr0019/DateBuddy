@@ -146,8 +146,8 @@ export default function AIWingman({
           }}
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11.5px] font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
             isOpen
-              ? 'bg-[#1A1A2E] text-white shadow-sm'
-              : 'bg-gradient-to-r from-[#FF6B9D]/10 via-[#7B68EE]/10 to-[#FF6B9D]/10 border border-[#FF6B9D]/20 text-[#1A1A2E]/80 hover:bg-[#FF6B9D]/15'
+              ? 'bg-infyn-ink text-white shadow-sm'
+              : 'bg-gradient-to-r from-infyn-rose/10 via-infyn-rose/10 to-infyn-rose/10 border border-infyn-rose/20 text-infyn-ink/80 hover:bg-infyn-rose/15'
           }`}
         >
           <span className="text-[12px]">✨</span>
@@ -161,7 +161,7 @@ export default function AIWingman({
           <button
             type="button"
             onClick={handleRefresh}
-            className="text-[11px] font-semibold text-[#7B68EE] hover:text-[#FF6B9D] flex items-center gap-1 cursor-pointer transition-colors active:scale-90"
+            className="text-[11px] font-semibold text-infyn-rose hover:text-infyn-rose flex items-center gap-1 cursor-pointer transition-colors active:scale-90"
           >
             <span>🔄</span>
             <span>New Suggestions</span>
@@ -171,9 +171,9 @@ export default function AIWingman({
 
       {/* Expanded Suggestions Panel */}
       {isOpen && (
-        <div className="mt-2 p-2.5 rounded-[22px] bg-white/90 backdrop-blur-xl border border-[#1A1A2E]/[0.08] shadow-[0_8px_30px_-6px_rgba(26,26,46,0.10)] space-y-2 animate-page-entry">
+        <div className="mt-2 p-2.5 rounded-[22px] bg-infyn-surface/90 backdrop-blur-xl border border-infyn-ink/[0.08] shadow-[0_8px_30px_-6px_rgba(32,26,22,0.1)] space-y-2 animate-page-entry">
           <div className="px-1 pt-0.5 flex items-center justify-between">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#1A1A2E]/40">
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-infyn-ink/40">
               Tap to use opener for {cleanName}:
             </p>
           </div>
@@ -184,18 +184,18 @@ export default function AIWingman({
                 key={idx}
                 type="button"
                 onClick={() => handleSelect(item.text)}
-                className="w-full text-left p-2.5 rounded-xl bg-white border border-[#1A1A2E]/[0.06] hover:border-[#7B68EE]/30 hover:bg-purple-50/30 transition-all duration-150 active:scale-[0.985] cursor-pointer group"
+                className="w-full text-left p-2.5 rounded-xl bg-infyn-surface border border-infyn-ink/[0.06] hover:border-infyn-rose/30 hover:bg-purple-50/30 transition-all duration-150 active:scale-[0.985] cursor-pointer group"
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${item.badgeColor}`}>
                     <span>{item.emoji}</span>
                     <span>{item.tag}</span>
                   </span>
-                  <span className="text-[10.5px] text-[#7B68EE] font-semibold opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                  <span className="text-[10.5px] text-infyn-rose font-semibold opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
                     Tap to insert &rarr;
                   </span>
                 </div>
-                <p className="text-[12.5px] text-[#1A1A2E] leading-snug font-medium line-clamp-2">
+                <p className="text-[12.5px] text-infyn-ink leading-snug font-medium line-clamp-2">
                   &ldquo;{item.text}&rdquo;
                 </p>
               </button>

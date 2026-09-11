@@ -50,13 +50,13 @@ export default function InterestsPage() {
   const ready = selected.length >= MIN_INTERESTS;
 
   return (
-    <div className="min-h-screen h-dvh w-full bg-[#FAFAF7] flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-[#FAFAF7] shadow-2xl sm:border-x sm:border-[#1A1A2E]/5 overflow-hidden">
+    <div className="min-h-screen h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-system">
+      <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
 
         {/* Ambient */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-          <div className="absolute -left-20 top-1/4 h-64 w-64 rounded-full bg-[#FF6B9D]/08 blur-[60px]" />
-          <div className="absolute -right-16 bottom-1/4 h-64 w-64 rounded-full bg-[#7B68EE]/07 blur-[60px]" />
+          <div className="absolute -left-20 top-1/4 h-64 w-64 rounded-full bg-infyn-rose/08 blur-[60px]" />
+          <div className="absolute -right-16 bottom-1/4 h-64 w-64 rounded-full bg-infyn-rose/07 blur-[60px]" />
         </div>
 
         {/* Header */}
@@ -65,12 +65,12 @@ export default function InterestsPage() {
             <button
               onClick={() => router.back()}
               aria-label="Go back"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#1A1A2E]/70 shadow-[0_4px_16px_-8px_rgba(26,26,46,0.12)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] cursor-pointer"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.12)] backdrop-blur-xl transition-all duration-200 active:scale-[0.92] cursor-pointer"
             >
               {BackChevron}
             </button>
             <div
-              className="flex-1 h-[6px] rounded-full bg-[#1A1A2E]/[0.06] overflow-hidden"
+              className="flex-1 h-[6px] rounded-full bg-infyn-ink/[0.06] overflow-hidden"
               role="progressbar"
               aria-valuenow={5}
               aria-valuemin={1}
@@ -78,11 +78,11 @@ export default function InterestsPage() {
               aria-label="Onboarding step 5 of 7"
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] shadow-[0_0_8px_rgba(255,107,157,0.5)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="h-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{ width: '71.4%' }}
               />
             </div>
-            <span className="text-[12px] font-bold tabular-nums text-[#1A1A2E]/45">5 of 7</span>
+            <span className="text-[12px] font-bold tabular-nums text-infyn-ink/45">5 of 7</span>
           </div>
         </div>
 
@@ -98,14 +98,14 @@ export default function InterestsPage() {
           )}
 
           <div className="mb-6">
-            <h1 className="text-[28px] font-black text-[#1A1A2E] tracking-tight leading-[1.1]">What are you into?</h1>
+            <h1 className="text-[28px] font-normal text-infyn-ink tracking-tight leading-[1.1] font-display">What are you into?</h1>
             <div className="flex items-center gap-2 mt-1.5">
-              <p className="text-[14.5px] text-[#1A1A2E]/55">Pick at least {MIN_INTERESTS}</p>
+              <p className="text-[14.5px] text-infyn-ink/55">Pick at least {MIN_INTERESTS}</p>
               {selected.length > 0 && (
                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold transition-all ${
                   ready
                     ? 'bg-[#22C55E]/15 text-[#16A34A] border border-[#22C55E]/25'
-                    : 'bg-[#FF6B9D]/12 text-[#FF6B9D] border border-[#FF6B9D]/25'
+                    : 'bg-infyn-rose/12 text-infyn-rose border border-infyn-rose/25'
                 }`}>
                   {ready ? (
                     <>
@@ -133,8 +133,8 @@ export default function InterestsPage() {
                   onClick={() => toggle(interest)}
                   className={`px-4 py-2.5 rounded-full border text-[13.5px] font-semibold transition-all duration-200 cursor-pointer active:scale-95 select-none ${
                     on
-                      ? 'border-transparent bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_4px_16px_-6px_rgba(255,107,157,0.45)]'
-                      : 'border-[#1A1A2E]/10 bg-white/80 text-[#1A1A2E]/75 hover:bg-white hover:border-[#1A1A2E]/20 backdrop-blur-md shadow-sm'
+                      ? 'border-transparent bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-[0_4px_16px_-6px_rgba(32,26,22,0.16)]'
+                      : 'border-infyn-ink/10 bg-infyn-surface/80 text-infyn-ink/75 hover:bg-infyn-surface hover:border-infyn-ink/20 backdrop-blur-md shadow-sm'
                   }`}
                 >
                   {interest}
@@ -145,11 +145,11 @@ export default function InterestsPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-[#FAFAF7] via-[#FAFAF7]/90 to-transparent border-t border-black/[0.04]">
+        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-paper via-infyn-paper/90 to-transparent border-t border-black/[0.04]">
           <button
             onClick={handleNext}
             disabled={!ready}
-            className="w-full h-14 rounded-2xl text-[15px] font-bold transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100 bg-gradient-to-r from-[#FF6B9D] to-[#7B68EE] text-white shadow-[0_10px_28px_-8px_rgba(255,107,157,0.5)] active:scale-[0.985]"
+            className="w-full h-14 rounded-2xl text-[15px] font-bold transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100 bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-[0_10px_28px_-8px_rgba(32,26,22,0.16)] active:scale-[0.985]"
           >
             Continue
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

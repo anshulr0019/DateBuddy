@@ -111,7 +111,7 @@ function FlagIcon() {
 
 function VerifiedBadge() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F43F5E" aria-label="Verified profile">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--infyn-rose)" aria-label="Verified profile">
       <path d="M12 2l2.4 2.4 3.3-.5.6 3.3 3 1.5-1.5 3 1.5 3-3 1.5-.6 3.3-3.3-.5L12 22l-2.4-2.4-3.3.5-.6-3.3-3-1.5 1.5-3-1.5-3 3-1.5.6-3.3 3.3.5z" />
       <path d="M9.5 12.2l1.8 1.8 3.6-3.8" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
@@ -271,7 +271,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
 
       {/* Sheet container */}
       <div
-        className={`relative w-full max-w-[440px] sm:max-w-lg rounded-t-[32px] bg-[#0D0D0D] shadow-[0_-25px_70px_rgba(0,0,0,0.9)] border-t border-white/10 flex flex-col overflow-hidden ${
+        className={`relative w-full max-w-[440px] sm:max-w-lg rounded-t-[32px] bg-infyn-dark shadow-[0_-25px_70px_rgba(0,0,0,0.9)] border-t border-white/10 flex flex-col overflow-hidden ${
           isOpen ? 'animate-sheet-slide-up' : 'animate-sheet-slide-down'
         }`}
         style={{
@@ -296,7 +296,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
 
           {/* Centered Floating Glass Drag Handle */}
           <div className="absolute top-3 inset-x-0 flex justify-center z-30 pointer-events-none" aria-hidden>
-            <div className="w-12 h-1.5 rounded-full bg-white/50 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+            <div className="w-12 h-1.5 rounded-full bg-infyn-surface/50 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
           </div>
 
           {/* Top Action Bar: Photo Counter & Close Button */}
@@ -333,7 +333,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 />
 
                 {/* Bottom Smooth Dark Shadow Overlay */}
-                <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/75 to-transparent pointer-events-none z-10" />
+                <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-infyn-dark via-infyn-dark/75 to-transparent pointer-events-none z-10" />
 
                 {/* Segmented Story Bars (Top) */}
                 {displayPhotos.length > 1 && (
@@ -376,8 +376,8 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 )}
               </>
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#1E1B4B] to-[#0D0D0D]">
-                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#7B68EE] flex items-center justify-center shadow-xl">
+              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#1E1B4B] to-infyn-dark">
+                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose flex items-center justify-center shadow-xl">
                   <span className="text-4xl font-black text-white">{displayName.charAt(0).toUpperCase()}</span>
                 </div>
               </div>
@@ -426,8 +426,8 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {/* Loading skeleton */}
             {loading && !profile && (
               <div className="space-y-3 py-3 animate-pulse">
-                <div className="h-4 bg-white/10 rounded-full w-3/4" />
-                <div className="h-4 bg-white/10 rounded-full w-1/2" />
+                <div className="h-4 bg-infyn-surface/10 rounded-full w-3/4" />
+                <div className="h-4 bg-infyn-surface/10 rounded-full w-1/2" />
               </div>
             )}
 
@@ -444,9 +444,9 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 {profile.prompts.map((p, i) => (
                   <div
                     key={i}
-                    className="rounded-[22px] bg-white/[0.06] border border-white/10 px-4 py-3.5 backdrop-blur-md shadow-xs"
+                    className="rounded-[22px] bg-infyn-surface/[0.06] border border-white/10 px-4 py-3.5 backdrop-blur-md shadow-xs"
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B9D] mb-1.5">{p.question}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose-light mb-1.5">{p.question}</p>
                     <p className="text-[14.5px] font-medium text-white/90 leading-snug">{p.answer}</p>
                   </div>
                 ))}
@@ -459,7 +459,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 {profile.instagramHandle && (
                   <button
                     onClick={handleInstagramTap}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/[0.07] border border-white/10 hover:bg-white/15 active:scale-95 transition-all cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface/[0.07] border border-white/10 hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer shadow-xs"
                     aria-label={`Instagram: @${profile.instagramHandle}`}
                   >
                     <InstagramIcon />
@@ -469,7 +469,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 {profile.snapchatHandle && (
                   <button
                     onClick={handleSnapchatTap}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/[0.07] border border-white/10 hover:bg-white/15 active:scale-95 transition-all cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface/[0.07] border border-white/10 hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer shadow-xs"
                     aria-label={`Snapchat: @${profile.snapchatHandle}`}
                   >
                     <SnapchatIcon />
@@ -485,7 +485,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 <p className="text-[11px] font-bold uppercase tracking-widest text-white/40 mb-2.5">Interests</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.interests.map((interest) => (
-                    <span key={interest} className="px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/10 text-[12px] font-semibold text-white/85 shadow-2xs">
+                    <span key={interest} className="px-3 py-1.5 rounded-full bg-infyn-surface/[0.08] border border-white/10 text-[12px] font-semibold text-white/85 shadow-2xs">
                       {interest}
                     </span>
                   ))}
@@ -494,29 +494,29 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             )}
 
             {/* Divider */}
-            <div className="h-px bg-white/10 mb-5" />
+            <div className="h-px bg-infyn-surface/10 mb-5" />
 
             {/* Action buttons */}
             <div className="grid grid-cols-3 gap-3 mb-5">
               <button
                 onClick={() => { onClose(); if (matchId) router.push(`/chat/${matchId}`); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-[#FF6B9D]/25 to-[#7B68EE]/25 border border-[#FF6B9D]/25 hover:from-[#FF6B9D]/35 hover:to-[#7B68EE]/35 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-infyn-rose/25 to-infyn-rose/25 border border-infyn-rose/25 hover:from-infyn-rose/35 hover:to-infyn-rose/35 active:scale-95 transition-all cursor-pointer shadow-sm"
                 aria-label="Open chat"
               >
-                <span className="text-[#FF6B9D]"><ChatIcon /></span>
+                <span className="text-infyn-rose-light"><ChatIcon /></span>
                 <span className="text-[11px] font-bold text-white/80">Message</span>
               </button>
               <button
                 onClick={() => { onClose(); onAudioCall?.(); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-[#7B68EE]/20 border border-[#7B68EE]/30 hover:bg-[#7B68EE]/30 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-infyn-rose/20 border border-infyn-rose/30 hover:bg-infyn-rose/30 active:scale-95 transition-all cursor-pointer shadow-sm"
                 aria-label="Start audio call"
               >
-                <span className="text-[#7B68EE]"><PhoneIcon /></span>
+                <span className="text-infyn-rose-light"><PhoneIcon /></span>
                 <span className="text-[11px] font-bold text-white/80">Audio</span>
               </button>
               <button
                 onClick={() => { onClose(); onVideoCall?.(); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-[#FF6B9D]/20 to-[#FF8C42]/20 border border-[#FF6B9D]/25 hover:from-[#FF6B9D]/30 hover:to-[#FF8C42]/30 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-infyn-rose/20 to-[#FF8C42]/20 border border-infyn-rose/25 hover:from-infyn-rose/30 hover:to-[#FF8C42]/30 active:scale-95 transition-all cursor-pointer shadow-sm"
                 aria-label="Start video call"
               >
                 <span className="text-[#FF8C42]"><VideoIcon /></span>
@@ -528,7 +528,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             <div className="flex gap-3">
               <button
                 onClick={() => setSafetyAction('block')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.05] border border-white/10 text-white/50 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 text-white/50 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
                 aria-label="Block user"
               >
                 <BlockIcon />
@@ -536,7 +536,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
               </button>
               <button
                 onClick={() => setSafetyAction('report')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.05] border border-white/10 text-white/50 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 text-white/50 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
                 aria-label="Report user"
               >
                 <FlagIcon />
@@ -546,7 +546,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
 
             {/* Inline Safety Modals */}
             {safetyAction === 'block' && (
-              <div className="mt-4 p-4 rounded-2xl bg-white/10 border border-white/15 text-center animate-scale-up">
+              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface/10 border border-white/15 text-center animate-scale-up">
                 <p className="text-[15px] font-bold text-white mb-1">Block {displayName}?</p>
                 <p className="text-[12px] text-white/60 mb-3">They won&apos;t be able to contact you, and this match will end.</p>
                 {safetyError && <p className="text-[12px] text-rose-400 font-semibold mb-2">{safetyError}</p>}
@@ -560,7 +560,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                   </button>
                   <button
                     onClick={() => setSafetyAction('none')}
-                    className="flex-1 py-2.5 rounded-xl bg-white/10 text-white/70 font-semibold text-[13px] hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-infyn-surface/10 text-white/70 font-semibold text-[13px] hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -569,7 +569,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             )}
 
             {safetyAction === 'report' && (
-              <div className="mt-4 p-4 rounded-2xl bg-white/10 border border-white/15 text-center animate-scale-up">
+              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface/10 border border-white/15 text-center animate-scale-up">
                 <p className="text-[15px] font-bold text-white mb-1">Report {displayName}</p>
                 <p className="text-[12px] text-white/60 mb-3">Select a reason (anonymous):</p>
                 {safetyError && <p className="text-[12px] text-rose-400 font-semibold mb-2">{safetyError}</p>}
@@ -585,7 +585,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                       key={r.key}
                       onClick={() => handleConfirmReport(r.key)}
                       disabled={safetyBusy}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[13px] text-white/90 font-medium text-left transition-all active:scale-[0.99] cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface/5 hover:bg-infyn-surface/10 text-[13px] text-white/90 font-medium text-left transition-all active:scale-[0.99] cursor-pointer"
                     >
                       {r.label}
                     </button>
@@ -593,7 +593,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 </div>
                 <button
                   onClick={() => setSafetyAction('none')}
-                  className="w-full py-2 rounded-xl bg-white/5 text-white/60 font-semibold text-[12px] hover:bg-white/10 cursor-pointer"
+                  className="w-full py-2 rounded-xl bg-infyn-surface/5 text-white/60 font-semibold text-[12px] hover:bg-infyn-surface/10 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -606,7 +606,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 <p className="text-[12px] text-white/70 mb-3">Thank you for helping keep Infyn safe.</p>
                 <button
                   onClick={() => setSafetyAction('none')}
-                  className="px-4 py-1.5 rounded-xl bg-white/10 text-white text-[12px] font-bold hover:bg-white/20 cursor-pointer"
+                  className="px-4 py-1.5 rounded-xl bg-infyn-surface/10 text-white text-[12px] font-bold hover:bg-infyn-surface/20 cursor-pointer"
                 >
                   Done
                 </button>

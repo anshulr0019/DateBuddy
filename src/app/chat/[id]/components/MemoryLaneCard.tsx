@@ -146,13 +146,13 @@ export function MemoryLaneCard({
     <div className="mx-4 mb-3 animate-vibe-slide-in">
       <div className="relative rounded-2xl overflow-hidden shadow-lg">
         {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#7B68EE]/90 via-[#9B5DE5]/85 to-[#FF6B9D]/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-infyn-rose/90 via-infyn-rose/85 to-infyn-rose/90" />
         {/* Soft particle dots */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: 8 }).map((_, i) => (
             <span
               key={i}
-              className="absolute rounded-full bg-white/10 animate-memory-float"
+              className="absolute rounded-full bg-infyn-surface/10 animate-memory-float"
               style={{
                 width: `${6 + Math.random() * 10}px`,
                 height: `${6 + Math.random() * 10}px`,
@@ -180,7 +180,7 @@ export function MemoryLaneCard({
             <button
               type="button"
               onClick={handleDismiss}
-              className="h-6 w-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer text-[10px]"
+              className="h-6 w-6 rounded-full bg-infyn-surface/10 hover:bg-infyn-surface/20 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer text-[10px]"
               aria-label="Dismiss memory lane"
             >
               ✕
@@ -189,15 +189,15 @@ export function MemoryLaneCard({
 
           {/* Stats Grid */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-white/10 backdrop-blur-sm p-2.5 text-center border border-white/10">
+            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
               <p className="text-[20px] font-black text-white">{stats.daysSinceFirst}</p>
               <p className="text-[9.5px] font-bold text-white/60 uppercase tracking-wider">Days</p>
             </div>
-            <div className="rounded-xl bg-white/10 backdrop-blur-sm p-2.5 text-center border border-white/10">
+            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
               <p className="text-[20px] font-black text-white">{stats.totalMessages}</p>
               <p className="text-[9.5px] font-bold text-white/60 uppercase tracking-wider">Messages</p>
             </div>
-            <div className="rounded-xl bg-white/10 backdrop-blur-sm p-2.5 text-center border border-white/10">
+            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
               <p className="text-[20px] font-black text-white">
                 {stats.longestStreak}<span className="text-[12px]">🔥</span>
               </p>
@@ -208,7 +208,7 @@ export function MemoryLaneCard({
           {/* Fun facts */}
           <div className="space-y-1.5">
             {stats.myTopEmojis.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/8 border border-white/10">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
                 <span className="text-[12px]">😄</span>
                 <p className="text-[11.5px] text-white/80 font-medium">
                   Your fav emojis: {stats.myTopEmojis.join(' ')}
@@ -216,14 +216,14 @@ export function MemoryLaneCard({
               </div>
             )}
             {stats.theirTopEmojis.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/8 border border-white/10">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
                 <span className="text-[12px]">💬</span>
                 <p className="text-[11.5px] text-white/80 font-medium">
                   {cleanName}&apos;s fav: {stats.theirTopEmojis.join(' ')}
                 </p>
               </div>
             )}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/8 border border-white/10">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
               <span className="text-[12px]">📊</span>
               <p className="text-[11.5px] text-white/80 font-medium">
                 {stats.whoTextsMore === 'you' ? 'You text' : `${cleanName} texts`} more often
@@ -236,7 +236,7 @@ export function MemoryLaneCard({
             <button
               type="button"
               onClick={handleShare}
-              className="w-full py-2.5 rounded-xl bg-white text-[#7B68EE] text-[12.5px] font-bold cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:shadow-md"
+              className="w-full py-2.5 rounded-xl bg-infyn-surface text-infyn-rose text-[12.5px] font-bold cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:shadow-md"
             >
               Share Memory in Chat 💕
             </button>

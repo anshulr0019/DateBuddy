@@ -23,9 +23,9 @@ export default function GlobalError({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#FAFAF7',
+          background: '#faf5eb',
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: '#1A1A2E',
+          color: '#201a16',
           padding: '24px',
         }}
       >
@@ -44,7 +44,7 @@ export default function GlobalError({
               height: '48px',
               borderRadius: '16px',
               border: 'none',
-              background: '#F43F5E',
+              background: '#9e1b41',
               color: '#fff',
               fontSize: '14px',
               fontWeight: 700,

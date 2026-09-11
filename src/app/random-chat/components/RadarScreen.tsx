@@ -58,12 +58,12 @@ export function RadarScreen({
     <div className="flex-1 min-h-0 flex flex-col items-center justify-between px-6 pt-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
       {/* Top Header info */}
       <div className="text-center">
-        <h1 className="text-[22px] font-extrabold text-[#1E293B] mb-1">Looking for your vibe…</h1>
-        <p className="text-[13px] text-[#1E293B]/55 font-medium max-w-[280px] mx-auto leading-relaxed">
+        <h1 className="text-[22px] font-normal text-infyn-ink mb-1 font-display">Looking for your vibe…</h1>
+        <p className="text-[13px] text-infyn-ink/55 font-medium max-w-[280px] mx-auto leading-relaxed">
           {vibe ? (
             <>
               Matching you with someone in the{' '}
-              <span className="font-bold text-[#F43F5E] capitalize">{vibe}</span> mood.
+              <span className="font-bold text-infyn-rose capitalize">{vibe}</span> mood.
             </>
           ) : (
             'Scanning for someone who wants to chat right now.'
@@ -76,26 +76,26 @@ export function RadarScreen({
 
       {/* Rotating Insights Card — Clean & Premium */}
       <div className="w-full max-w-[340px] flex flex-col items-center">
-        <div className="w-full bg-white/90 backdrop-blur-md border border-[#FF6B9D]/20 rounded-2xl p-3.5 shadow-sm min-h-[92px] flex flex-col justify-center transition-all duration-300">
+        <div className="w-full bg-infyn-surface/90 backdrop-blur-md border border-infyn-rose/20 rounded-2xl p-3.5 shadow-sm min-h-[92px] flex flex-col justify-center transition-all duration-300">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FFF0F4] text-[#F43F5E]">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-infyn-blush text-infyn-rose">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
               </svg>
             </span>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-[#F43F5E] bg-[#FFF0F4] px-2 py-0.5 rounded-full">
+            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-infyn-rose bg-infyn-blush px-2 py-0.5 rounded-full">
               {currentInsight.tag}
             </span>
           </div>
           <p
             key={insightIndex}
-            className="text-[12.5px] font-medium text-[#1E293B]/80 leading-snug animate-fade-in"
+            className="text-[12.5px] font-medium text-infyn-ink/80 leading-snug animate-fade-in"
           >
             {currentInsight.insight}
           </p>
         </div>
 
-        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-gray-200/80 px-3.5 py-1 text-[11.5px] font-semibold text-[#1E293B]/60 shadow-2xs">
+        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-infyn-surface/80 border border-infyn-border/80 px-3.5 py-1 text-[11.5px] font-semibold text-infyn-ink/60 shadow-2xs">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           {onlineCount > 0 ? `${onlineCount} people looking right now` : 'Scanning active members nearby'}
         </p>
@@ -108,7 +108,7 @@ export function RadarScreen({
           onCancel();
         }}
         disabled={busy}
-        className="mt-2 rounded-full bg-white border border-gray-200 text-[#1E293B]/70 px-8 py-2.5 text-[13.5px] font-bold hover:bg-gray-50 active:scale-95 transition-all cursor-pointer disabled:opacity-60 shadow-2xs"
+        className="mt-2 rounded-full bg-infyn-surface border border-infyn-border text-infyn-ink/70 px-8 py-2.5 text-[13.5px] font-bold hover:bg-infyn-surface-soft active:scale-95 transition-all cursor-pointer disabled:opacity-60 shadow-2xs"
       >
         Cancel
       </button>
