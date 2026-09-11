@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Ic } from './icons';
-import discoverStyles from '../discover/discover.module.css';
 import messagesStyles from '../messages/messages.module.css';
 import { useNotifications } from '../context/NotificationContext';
 import { prefetchFeed } from '../lib/feedCache';
@@ -130,15 +129,6 @@ export default function FloatingNav() {
   const active = getActiveTab();
   const activeIndex = NAV_TABS.findIndex(t => t.id === active);
 
-  if (pathname === '/discover') {
-    return <nav className={discoverStyles.nav} aria-label="Main navigation"><div className={discoverStyles.navInner}>
-      {NAV_TABS.map(tab => <button key={tab.id} className={discoverStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
-        <span className={discoverStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
-        {tab.id === 'messages' && unreadCount > 0 && <span className={discoverStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
-      </button>)}
-    </div></nav>;
-  }
-
   if (pathname === '/messages') {
     return <nav className={`${messagesStyles.nav} infyn-nav-theme`} aria-label="Main navigation"><div className={messagesStyles.navInner}>
       {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
@@ -149,7 +139,7 @@ export default function FloatingNav() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
       <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-infyn-border/80 bg-infyn-surface/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl overflow-hidden">
 
         {/* Sliding indicator with spring animation */}
@@ -170,6 +160,7 @@ export default function FloatingNav() {
               onClick={() => router.push(tab.path)}
               className="relative z-10 flex min-h-[48px] flex-1 flex-col items-center justify-center py-1.5 transition-all duration-300 active:scale-90 cursor-pointer select-none"
               aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
             >
               <span className={`transition-all duration-300 ${
                 isActive ? 'scale-110 text-infyn-rose' : 'scale-100 text-infyn-ink/40'
@@ -184,12 +175,12 @@ export default function FloatingNav() {
 
               {/* Unread badge indicator */}
               {tab.id === 'messages' && !isActive && unreadCount > 0 && (
-                <div className="absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" />
+                <div className="absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" aria-label={`${unreadCount} unread messages`} />
               )}
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
