@@ -46,7 +46,8 @@ async function seed() {
     }
 
     // 3. Seed Users
-    const seedUsersData = [
+    // Demo profiles are opt-in so a production seed run cannot recreate them.
+    const seedUsersData = process.env.INFYN_ALLOW_DEMO_SEED === 'true' ? [
       {
         phoneNumber: '+919868595497',
         name: 'Priya Sharma',
@@ -163,7 +164,7 @@ async function seed() {
           { promptId: 3, answer: 'Urdu poetry and neural embeddings — not that different.' },
         ],
       },
-    ];
+    ] : [];
 
     console.log('Inserting seed users & profiles...');
     const createdUserIds: number[] = [];
@@ -277,7 +278,8 @@ async function seed() {
       ]).catch(() => {});
     }
 
-    // 5. Seed Community Meetups / Squads
+    // 5. Seed Community Meetups / Squads only alongside explicitly enabled demo users.
+    if (createdUserIds.length > 0) {
     console.log('Inserting community squads & meetups...');
     const now = new Date();
     const futureDate1 = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days ahead
@@ -345,6 +347,7 @@ async function seed() {
       } catch (err) {
         console.warn('Could not insert sample meetup:', err);
       }
+    }
     }
 
     console.log('✅ Database seeding finished successfully!');

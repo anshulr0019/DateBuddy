@@ -2,7 +2,8 @@ import { db } from './index';
 import { users, photos, preferences, subscriptions } from './schema';
 import { eq } from 'drizzle-orm';
 
-const INITIAL_PROFILES = [
+// Demo profiles are opt-in so a production seed run cannot recreate them.
+const INITIAL_PROFILES = process.env.INFYN_ALLOW_DEMO_SEED === 'true' ? [
   {
     name: 'Ananya Gupta',
     phoneNumber: '+919876543211',
@@ -55,7 +56,7 @@ const INITIAL_PROFILES = [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80'
     ]
   }
-];
+] : [];
 
 export async function seed() {
   console.log('🌱 Seeding database...');
