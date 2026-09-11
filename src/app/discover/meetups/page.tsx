@@ -81,11 +81,11 @@ export default function DiscoverMeetupsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose">Community Squads</span>
-                  <h1 className="text-[24px] font-normal tracking-tight text-infyn-ink font-display">Discover Meetups</h1>
+                  <h1 className="text-[24px] font-extrabold tracking-tight text-infyn-ink font-system">Discover Meetups</h1>
                 </div>
                 <button
                   onClick={() => router.push('/meetups/create')}
-                  className="h-10 px-4 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[13px] shadow-md shadow-infyn-ink/25 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="font-system h-10 px-4 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[13px] shadow-md shadow-infyn-ink/25 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <span>+ Host Squad</span>
                 </button>
@@ -145,7 +145,7 @@ export default function DiscoverMeetupsPage() {
                   </p>
                   <button
                     onClick={() => router.push('/meetups/create')}
-                    className="mt-2 inline-flex h-11 px-5 rounded-2xl bg-infyn-rose text-white text-[13px] font-bold shadow-md shadow-infyn-ink/30 active:scale-95 transition-all cursor-pointer"
+                    className="font-system mt-2 inline-flex h-11 px-5 rounded-2xl bg-infyn-rose text-white text-[13px] font-bold shadow-md shadow-infyn-ink/30 active:scale-95 transition-all cursor-pointer"
                   >
                     + Host a Squad
                   </button>

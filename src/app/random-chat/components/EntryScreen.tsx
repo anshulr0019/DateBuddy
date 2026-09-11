@@ -148,7 +148,7 @@ export function EntryScreen({
         </div>
 
         {/* Dual Stepper Control */}
-        <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+        <div className="font-system grid grid-cols-2 gap-2.5 pt-0.5">
           <div className="flex items-center justify-between bg-infyn-surface-soft/80 rounded-xl px-2.5 py-1.5 border border-infyn-border">
             <span className="text-[11px] font-bold uppercase text-infyn-ink/40">Min</span>
             <div className="flex items-center gap-2">

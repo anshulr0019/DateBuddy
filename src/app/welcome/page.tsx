@@ -240,7 +240,7 @@ export default function WelcomePage() {
                     : "border-infyn-ink/10"
                 }`}
               >
-                <div className="flex items-center gap-1.5 rounded-xl bg-infyn-ink/[0.04] px-3 text-[15px] font-medium text-infyn-ink">
+                <div className="font-system flex items-center gap-1.5 rounded-xl bg-infyn-ink/[0.04] px-3 text-[15px] font-medium text-infyn-ink">
                   <span className="text-base leading-none">🇮🇳</span>
                   <span>+91</span>
                 </div>

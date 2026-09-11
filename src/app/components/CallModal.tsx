@@ -120,10 +120,10 @@ function MinimalControlBtn({
       <div
         className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-150 active:scale-95 border ${
           warning
-            ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+            ? 'bg-[#ba1a1a]/20 text-[#ff8dab] border-[#ba1a1a]/40'
             : active
-            ? 'bg-infyn-surface text-neutral-900 border-white'
-            : 'bg-infyn-surface/10 text-white/90 border-white/10 hover:bg-infyn-surface/15'
+            ? 'bg-[#7d1d3f] text-white border-[#ffb1c3]/30'
+            : 'bg-white/10 text-white/90 border-white/10 hover:bg-white/20'
         }`}
       >
         {children}
@@ -538,17 +538,24 @@ export function CallModal({
       role="dialog"
       aria-modal="true"
       data-modal="true"
-      className="fixed inset-0 z-[99999] overflow-hidden bg-infyn-dark font-sans select-none flex flex-col justify-between"
+      className="fixed inset-0 z-[99999] overflow-hidden font-sans select-none flex flex-col justify-between"
+      style={{ background: 'radial-gradient(circle at 50% 40%, rgb(62, 18, 39) 0%, rgb(36, 12, 25) 50%, rgb(17, 5, 13) 100%)' }}
     >
-      {/* ── CLEAN MATTE DARK BACKDROP ── */}
+      {/* ── DEEP BURGUNDY ATMOSPHERIC BACKDROP ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {partnerPhoto && !isVideoActive && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-10 scale-105 filter blur-2xl"
+            className="absolute inset-0 bg-cover bg-center opacity-8 scale-105 filter blur-2xl"
             style={{ backgroundImage: `url(${partnerPhoto})` }}
           />
         )}
-        <div className="absolute inset-0 bg-infyn-dark/90" />
+        {/* Burgundy ambient glow - top */}
+        <div className="absolute rounded-full opacity-25 blur-3xl pointer-events-none" style={{ background: '#7d1d3f', width: '20rem', height: '20rem', top: '-4rem', left: '50%', transform: 'translateX(-50%)' }} />
+        {/* Burgundy ambient glow - bottom */}
+        <div className="absolute rounded-full opacity-10 blur-3xl pointer-events-none" style={{ background: '#a1395a', width: '24rem', height: '18rem', bottom: '7rem', left: '50%', transform: 'translateX(-50%)' }} />
+        {/* Gradient overlays for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#7d1d3f]/20 via-transparent to-transparent" />
       </div>
 
       {/* ── Hidden Remote Audio Element ── */}
@@ -566,11 +573,12 @@ export function CallModal({
         />
       )}
 
-      {/* Subtle Dark Gradients for Controls Contrast */}
+      {/* Dark Burgundy Gradients for Controls Contrast */}
       {isVideoActive && (
         <>
           <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/70 to-transparent pointer-events-none z-10" />
           <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
+          <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#7d1d3f]/25 to-transparent pointer-events-none z-10" />
         </>
       )}
 
@@ -579,27 +587,33 @@ export function CallModal({
         className="relative z-20 flex flex-col items-center text-center px-6"
         style={{ paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))' }}
       >
-        {/* Subtle Security Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-infyn-surface/5 border border-white/10 text-neutral-400 text-[11px] font-medium tracking-wide mb-3">
+        {/* Security & Quality Badge */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#49423e]/30 backdrop-blur-md text-[#ffb1c3] text-[11px] font-bold tracking-widest uppercase mb-3">
           <LockIcon />
-          <span>Infyn · End-to-End Encrypted</span>
+          <span>{callType === 'audio' ? 'HD Audio · Encrypted' : 'Infyn · End-to-End Encrypted'}</span>
         </div>
 
         {/* Remote Caller Name */}
         <h1
-          className={`font-bold tracking-tight text-white ${
-            isVideoActive ? 'text-[20px] drop-shadow-md' : 'text-[28px]'
+          className={`font-bold tracking-wide ${
+            isVideoActive ? 'text-[20px] drop-shadow-md text-white' : 'text-[28px] text-[#ffd9e0]'
           }`}
+          style={!isVideoActive ? { fontFamily: "'Playfair Display', Georgia, serif" } : undefined}
         >
           {partnerName}
         </h1>
 
         {/* Live Call State / Duration Counter */}
         <div className="flex items-center gap-2 mt-1">
-          {callStatus === 'connected' && <span className="flex h-2 w-2 rounded-full bg-emerald-400" />}
+          {callStatus === 'connected' && (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+          )}
           <p
-            className={`font-medium tracking-wide ${
-              callStatus === 'connected' ? 'text-emerald-400 text-[13px]' : 'text-neutral-400 text-[14px]'
+            className={`font-medium tracking-wider ${
+              callStatus === 'connected' ? 'text-[#ffb1c3] text-[13px] tabular-nums' : 'text-[#ffb1c3]/70 text-[14px]'
             }`}
           >
             {callStatus === 'calling' && 'Calling…'}
@@ -616,9 +630,31 @@ export function CallModal({
         {/* Audio Mode Hero: Clean Centered Avatar */}
         {!isVideoActive && (
           <div className="relative flex flex-col items-center justify-center">
-            {/* Clean Avatar Container */}
-            <div className="relative h-32 w-32 rounded-full p-1 bg-infyn-surface/5 border border-white/10 ring-4 ring-white/5">
-              <div className="h-full w-full rounded-full overflow-hidden bg-neutral-900">
+            {/* Large Pulsing Avatar with Concentric Waves */}
+            <div className="relative flex items-center justify-center w-56 h-56">
+              {/* Wave Layer 3 - outer ping */}
+              <div
+                className="absolute inset-0 rounded-full opacity-10 animate-ping pointer-events-none"
+                style={{ background: '#ffb1c3', animationDuration: '3.2s' }}
+              />
+              {/* Wave Layer 2 - mid pulse */}
+              <div
+                className="absolute inset-5 rounded-full opacity-30 animate-pulse pointer-events-none"
+                style={{ background: '#7d1d3f', animationDuration: '2.1s' }}
+              />
+              {/* Wave Layer 1 - inner aura */}
+              <div
+                className="absolute inset-10 rounded-full opacity-20 blur-md pointer-events-none"
+                style={{ background: '#ffb1c3' }}
+              />
+              {/* Velvet Plum Core Avatar Disc */}
+              <div
+                className="relative z-10 w-32 h-32 rounded-full shadow-2xl flex items-center justify-center overflow-hidden"
+                style={{
+                  background: 'radial-gradient(circle at 35% 30%, #5f0129 0%, #2f0014 80%)',
+                  boxShadow: '0 12px 36px -4px rgba(13, 1, 7, 0.7), inset 0 0 0 1.5px rgba(255, 177, 195, 0.35)',
+                }}
+              >
                 <SafeImage
                   src={partnerPhoto ?? undefined}
                   name={partnerName}
@@ -627,13 +663,24 @@ export function CallModal({
               </div>
             </div>
 
-            {/* Subtle Audio Indicator (When Connected) */}
+            {/* Voice State Indicator with Equalizer Bars */}
             {isAudioActive && (
-              <div className="mt-6 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-infyn-surface/5 border border-white/10">
-                <span className="w-1 h-3 rounded-full bg-neutral-400 animate-pulse" />
-                <span className="w-1 h-5 rounded-full bg-neutral-300 animate-pulse" style={{ animationDelay: '0.15s' }} />
-                <span className="w-1 h-4 rounded-full bg-neutral-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                <span className="w-1 h-2 rounded-full bg-neutral-500 animate-pulse" style={{ animationDelay: '0.45s' }} />
+              <div className="flex flex-col items-center gap-2 mt-3">
+                <span className="text-[14px] text-[#ffd9e0] font-semibold tracking-wide">Speaking</span>
+                {/* Equalizer Visualizer Bars */}
+                <div className="flex items-center gap-1 h-5 px-3 py-1 rounded-full" style={{ background: 'rgba(73, 66, 62, 0.35)', backdropFilter: 'blur(8px)' }}>
+                  <span className="w-1 rounded-full bg-[#ffb1c3] inline-block animate-pulse" style={{ height: '14px', animationDuration: '0.6s' }} />
+                  <span className="w-1 rounded-full bg-[#ffd9e0] inline-block animate-pulse" style={{ height: '18px', animationDuration: '0.45s' }} />
+                  <span className="w-1 rounded-full bg-[#ffd9e0] inline-block animate-pulse" style={{ height: '11px', animationDuration: '0.7s' }} />
+                  <span className="w-1 rounded-full bg-[#ffb1c3] inline-block animate-pulse" style={{ height: '16px', animationDuration: '0.5s' }} />
+                  <span className="w-1 rounded-full bg-[#ffb1c3] inline-block animate-pulse" style={{ height: '8px', animationDuration: '0.65s' }} />
+                </div>
+              </div>
+            )}
+            {!isAudioActive && !isVideoActive && (
+              <div className="mt-5 flex items-center gap-2 px-3 py-1 rounded-full" style={{ background: 'rgba(73, 66, 62, 0.35)', backdropFilter: 'blur(8px)' }}>
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="text-[12px] text-[#ffb1c3] font-medium tracking-wide">Camera Off • Audio Active</span>
               </div>
             )}
           </div>
@@ -641,7 +688,7 @@ export function CallModal({
 
         {/* Video Mode Self-Preview PiP (Top-Right Sleek Capsule) */}
         {callType === 'video' && (
-          <div className="absolute top-2 right-5 h-44 w-32 rounded-2xl overflow-hidden bg-neutral-900 border border-white/15 shadow-2xl transition-all duration-300">
+          <div className="absolute top-2 right-5 h-44 w-32 rounded-2xl overflow-hidden bg-black/60 border border-white/20 shadow-2xl transition-all duration-300">
             <video
               ref={localVideoRef}
               autoPlay
@@ -649,6 +696,10 @@ export function CallModal({
               muted
               className="h-full w-full object-cover scale-x-[-1]"
             />
+            {/* "You" label badge */}
+            <div className="absolute top-1.5 right-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-black/50 text-[9px] font-bold text-white uppercase tracking-wider">You</span>
+            </div>
             {/* Quick Flip Action */}
             <button
               onClick={flipCamera}
@@ -678,12 +729,12 @@ export function CallModal({
               <button
                 type="button"
                 onClick={handleDeclineCall}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-500 text-white active:scale-95 hover:bg-rose-600 transition-all cursor-pointer shadow-lg"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ba1a1a] text-white active:scale-95 hover:bg-red-700 transition-all cursor-pointer shadow-lg shadow-[#ba1a1a]/40"
                 aria-label="Decline Call"
               >
                 <PhoneEndIcon />
               </button>
-              <span className="text-[12px] font-medium text-neutral-400">Decline</span>
+              <span className="text-[12px] font-medium text-[#ffb1c3]/60">Decline</span>
             </div>
 
             {/* Accept Button */}
@@ -701,47 +752,60 @@ export function CallModal({
           </div>
         )}
 
-        {/* 2. AUDIO CALL ACTIVE CONTROLS */}
+        {/* 2. AUDIO CALL ACTIVE CONTROLS (Stitch Frosted Pill Dock) */}
         {isAudioActive && (
-          <div className="w-full max-w-xs flex flex-col items-center gap-6">
-            <div className="flex items-center justify-center gap-8">
-              <MinimalControlBtn
-                label={isMuted ? 'Muted' : 'Mute'}
-                active={isMuted}
-                warning={isMuted}
-                onClick={toggleMute}
+          <div className="w-full max-w-xs flex flex-col items-center gap-4">
+            <div
+              className="w-full rounded-full p-2.5 shadow-2xl flex items-center justify-around gap-3"
+              style={{ background: 'rgba(73, 66, 62, 0.50)', backdropFilter: 'blur(24px)' }}
+            >
+              {/* Mic Button */}
+              <button
+                type="button"
+                onClick={() => { hapticLight(); toggleMute(); }}
+                className={`flex h-14 w-14 items-center justify-center rounded-full active:scale-95 transition-all cursor-pointer ${
+                  isMuted
+                    ? 'bg-[#ffdad6] text-[#93000a]'
+                    : 'bg-[#49423e]/60 text-[#ffd9e0] hover:bg-[#49423e]'
+                }`}
+                aria-label={isMuted ? 'Unmute' : 'Mute'}
               >
                 <MicIcon slashed={isMuted} />
-              </MinimalControlBtn>
+              </button>
 
-              <MinimalControlBtn
-                label={isSpeaker ? 'Speaker On' : 'Speaker'}
-                active={isSpeaker}
-                onClick={() => setIsSpeaker((p) => !p)}
+              {/* Speaker Button */}
+              <button
+                type="button"
+                onClick={() => { hapticLight(); setIsSpeaker((p) => !p); }}
+                className={`flex h-14 w-14 items-center justify-center rounded-full active:scale-95 transition-all cursor-pointer ${
+                  isSpeaker
+                    ? 'bg-[#ffd9e0] text-[#3f0019]'
+                    : 'bg-[#49423e]/60 text-[#ffd9e0] hover:bg-[#49423e]'
+                }`}
+                aria-label={isSpeaker ? 'Switch to earpiece' : 'Switch to speaker'}
               >
                 <SpeakerIcon active={isSpeaker} />
-              </MinimalControlBtn>
-            </div>
+              </button>
 
-            {/* End Call Button */}
-            <button
-              type="button"
-              onClick={handleEndCall}
-              className="flex h-14 px-8 items-center justify-center gap-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-[14px] active:scale-95 transition-all cursor-pointer shadow-lg"
-              aria-label="End Call"
-            >
-              <PhoneEndIcon />
-              <span>End Call</span>
-            </button>
+              {/* End Call Button */}
+              <button
+                type="button"
+                onClick={handleEndCall}
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ba1a1a] text-white hover:bg-[#ba1a1a]/90 active:scale-95 shadow-lg transition-transform cursor-pointer"
+                aria-label="End Call"
+              >
+                <PhoneEndIcon />
+              </button>
+            </div>
           </div>
         )}
 
         {/* 3. VIDEO CALL ACTIVE CONTROLS (Floating Minimal Dock) */}
         {isVideoActive && (
-          <div className="flex items-center gap-3.5 px-5 py-3 rounded-full bg-infyn-dark-surface/90 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-3.5 px-5 py-3 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl">
             <button
               onClick={flipCamera}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-infyn-surface/10 text-white hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-90 transition-all cursor-pointer"
               aria-label="Flip Camera"
             >
               <FlipCameraIcon />
@@ -749,8 +813,8 @@ export function CallModal({
 
             <button
               onClick={toggleMute}
-              className={`flex h-11 w-11 items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${
-                isMuted ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-infyn-surface/10 text-white hover:bg-infyn-surface/15'
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 cursor-pointer ${
+                isMuted ? 'bg-[#ba1a1a] text-white' : 'bg-white/10 text-white hover:bg-white/20'
               }`}
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
@@ -759,8 +823,8 @@ export function CallModal({
 
             <button
               onClick={toggleVideo}
-              className={`flex h-11 w-11 items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${
-                isVideoOff ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-infyn-surface/10 text-white hover:bg-infyn-surface/15'
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 cursor-pointer ${
+                isVideoOff ? 'bg-[#7d1d3f] text-white' : 'bg-white/10 text-white hover:bg-white/20'
               }`}
               aria-label={isVideoOff ? 'Turn on Camera' : 'Turn off Camera'}
             >
@@ -769,7 +833,7 @@ export function CallModal({
 
             <button
               onClick={handleEndCall}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-rose-500 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer shadow-md"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#ba1a1a] text-white hover:bg-red-700 active:scale-95 transition-all cursor-pointer shadow-lg shadow-[#ba1a1a]/40"
               aria-label="End Call"
             >
               <PhoneEndIcon />
@@ -783,12 +847,12 @@ export function CallModal({
             <button
               type="button"
               onClick={handleEndCall}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-500 text-white active:scale-95 hover:bg-rose-600 transition-all cursor-pointer shadow-lg"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ba1a1a] text-white active:scale-95 hover:bg-red-700 transition-all cursor-pointer shadow-lg shadow-[#ba1a1a]/40"
               aria-label="Cancel Call"
             >
               <PhoneEndIcon />
             </button>
-            <span className="text-[12px] font-medium text-neutral-400">Cancel</span>
+            <span className="text-[12px] font-medium text-[#ffb1c3]/60">Cancel</span>
           </div>
         )}
       </footer>
