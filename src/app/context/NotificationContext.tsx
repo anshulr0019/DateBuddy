@@ -42,6 +42,7 @@ const defaultContext: NotificationContextType = {
 };
 
 const NotificationContext = createContext<NotificationContextType>(defaultContext);
+const NOTIFICATION_POLL_MS = 60_000;
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -63,9 +64,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 25000);
-    return () => clearInterval(interval);
+    const refreshWhenActive = () => {
+      if (document.hidden || !navigator.onLine) return;
+      void fetchNotifications();
+    };
+
+    refreshWhenActive();
+    const interval = setInterval(refreshWhenActive, NOTIFICATION_POLL_MS);
+    document.addEventListener('visibilitychange', refreshWhenActive);
+    window.addEventListener('online', refreshWhenActive);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshWhenActive);
+      window.removeEventListener('online', refreshWhenActive);
+    };
   }, [fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;

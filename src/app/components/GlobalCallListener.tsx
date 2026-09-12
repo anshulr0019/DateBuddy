@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useCurrentUser } from '../lib/useCurrentUser';
 import { getPusherClient } from '@/lib/pusher-client';
 import { hapticSuccess, hapticMedium } from '../lib/haptics';
 import { SafeImage } from './shared';
-import { CallModal } from './CallModal';
+
+const CallModal = dynamic(() => import('./CallModal').then((mod) => mod.CallModal), {
+  ssr: false,
+});
 
 interface IncomingCall {
   matchId: number;
@@ -150,6 +154,8 @@ export function GlobalCallListener() {
     channel?.bind('signal', handleOffer);
 
     const interval = setInterval(async () => {
+      if (document.hidden || !navigator.onLine) return;
+      if (pusher?.connection.state === 'connected') return;
       try {
         const res = await fetch('/api/calls/incoming');
         const data = await res.json();
@@ -157,7 +163,7 @@ export function GlobalCallListener() {
           for (const sig of data.signals) handleOffer(sig);
         }
       } catch {}
-    }, 2500);
+    }, 5000);
 
     return () => {
       channel?.unbind('signal', handleOffer);

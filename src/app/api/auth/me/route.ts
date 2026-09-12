@@ -16,7 +16,10 @@ export async function GET() {
       );
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, session.userId));
+    const [[user], userPhotos] = await Promise.all([
+      db.select().from(users).where(eq(users.id, session.userId)),
+      db.select().from(photos).where(eq(photos.userId, session.userId)),
+    ]);
 
     if (!user) {
       // Session points at a deleted account — force a re-login.
@@ -26,7 +29,6 @@ export async function GET() {
       );
     }
 
-    const userPhotos = await db.select().from(photos).where(eq(photos.userId, user.id));
     // Sort by order field and return URL strings
     const photoUrls = userPhotos
       .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))

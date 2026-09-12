@@ -2,14 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Ic } from '../components/icons';
 import { SafeImage } from '../components/shared';
 import styles from './messages.module.css';
 import { useNotifications } from '../context/NotificationContext';
 import { formatListTime } from '../lib/time';
-import { PartnerProfileSheet } from '../components/PartnerProfileSheet';
 import { useCurrentUser } from '../lib/useCurrentUser';
 import { getPusherClient } from '@/lib/pusher-client';
+
+const PartnerProfileSheet = dynamic(
+  () => import('../components/PartnerProfileSheet').then((mod) => mod.PartnerProfileSheet),
+  { ssr: false }
+);
 
 interface Conversation {
   id: number;
@@ -25,7 +30,7 @@ interface Conversation {
 type LoadPhase = 'loading' | 'ready' | 'error';
 type Filter = 'all' | 'unread' | 'active';
 
-const POLL_INTERVAL_MS = 10_000;
+const POLL_INTERVAL_MS = 30_000;
 let cachedConversations: Conversation[] | null = null;
 
 function isThisWeek(timestamp: string) {
@@ -311,15 +316,17 @@ export default function MessagesPage() {
         </main>
       </div>
 
-      <PartnerProfileSheet
-        isOpen={Boolean(selectedConv)}
-        partnerId={selectedConv?.partnerId ?? null}
-        matchId={selectedConv?.id ?? null}
-        initialData={selectedConv ? { name: selectedConv.name, photo: selectedConv.photo } : undefined}
-        onClose={() => setSelectedConv(null)}
-        onAudioCall={() => { if (selectedConv) router.push(`/chat/${selectedConv.id}?call=audio`); }}
-        onVideoCall={() => { if (selectedConv) router.push(`/chat/${selectedConv.id}?call=video`); }}
-      />
+      {selectedConv && (
+        <PartnerProfileSheet
+          isOpen
+          partnerId={selectedConv.partnerId}
+          matchId={selectedConv.id}
+          initialData={{ name: selectedConv.name, photo: selectedConv.photo }}
+          onClose={() => setSelectedConv(null)}
+          onAudioCall={() => router.push(`/chat/${selectedConv.id}?call=audio`)}
+          onVideoCall={() => router.push(`/chat/${selectedConv.id}?call=video`)}
+        />
+      )}
     </div>
   );
 }

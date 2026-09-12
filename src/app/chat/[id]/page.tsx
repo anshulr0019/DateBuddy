@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { SafeImage } from '../../components/shared';
 import chatStyles from './chat.module.css';
 import { Ic } from '../../components/icons';
@@ -12,17 +13,32 @@ import { useChat } from './useChat';
 import type { ChatMessage, ReplyTarget } from './chatTypes';
 import { MessageBubble } from './components/MessageBubble';
 import { Composer } from './components/Composer';
-import { MediaDrawer, type DrawerTab } from './components/MediaDrawer';
-import { Lightbox, SafetySheet } from './components/Overlays';
-import { MessageReactionsOverlay } from './components/MessageReactionsOverlay';
-import { CallModal } from '../../components/CallModal';
-import { PartnerProfileSheet } from '../../components/PartnerProfileSheet';
-import { MiniGamesDrawer } from './components/MiniGamesDrawer';
+import type { DrawerTab } from './components/MediaDrawer';
 import { VibeCheckBanner } from './components/VibeCheckBanner';
 import { MemoryLaneCard } from './components/MemoryLaneCard';
-import { DatePlannerDrawer } from './components/DatePlannerDrawer';
 import AIWingman from '../../components/AIWingman';
 import { getPusherClient } from '@/lib/pusher-client';
+
+const MediaDrawer = dynamic(() => import('./components/MediaDrawer').then((mod) => mod.MediaDrawer), { ssr: false });
+const Lightbox = dynamic(() => import('./components/Overlays').then((mod) => mod.Lightbox), { ssr: false });
+const SafetySheet = dynamic(() => import('./components/Overlays').then((mod) => mod.SafetySheet), { ssr: false });
+const MessageReactionsOverlay = dynamic(
+  () => import('./components/MessageReactionsOverlay').then((mod) => mod.MessageReactionsOverlay),
+  { ssr: false }
+);
+const CallModal = dynamic(() => import('../../components/CallModal').then((mod) => mod.CallModal), { ssr: false });
+const PartnerProfileSheet = dynamic(
+  () => import('../../components/PartnerProfileSheet').then((mod) => mod.PartnerProfileSheet),
+  { ssr: false }
+);
+const MiniGamesDrawer = dynamic(
+  () => import('./components/MiniGamesDrawer').then((mod) => mod.MiniGamesDrawer),
+  { ssr: false }
+);
+const DatePlannerDrawer = dynamic(
+  () => import('./components/DatePlannerDrawer').then((mod) => mod.DatePlannerDrawer),
+  { ssr: false }
+);
 
 const ICEBREAKERS = [
   'Hey! Great to match with you ✨',
@@ -145,6 +161,8 @@ function ChatContent() {
 
     // 2. Polling fallback
     const interval = setInterval(async () => {
+      if (document.hidden || !navigator.onLine) return;
+      if (pusher?.connection.state === 'connected') return;
       try {
         const res = await fetch(`/api/calls/signal?matchId=${validMatchId}`);
         const data = await res.json();
@@ -164,7 +182,7 @@ function ChatContent() {
       } catch {
         /* silent polling */
       }
-    }, 2000);
+    }, 5000);
 
     return () => {
       channel?.unbind('signal', onPusherSignal);
@@ -677,9 +695,9 @@ function ChatContent() {
         />
       )}
       {/* Partner Profile Sheet — opens when tapping the partner avatar in the header */}
-      {partner && (
+      {partner && profileSheetOpen && (
         <PartnerProfileSheet
-          isOpen={profileSheetOpen}
+          isOpen
           partnerId={partner.partnerId}
           matchId={validMatchId}
           initialData={{ name: partner.name, photo: partner.photo, verified: partner.verified }}

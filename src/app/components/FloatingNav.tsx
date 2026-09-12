@@ -111,8 +111,6 @@ export default function FloatingNav() {
     observer.observe(document.body, {
       childList: true,
       subtree: true,
-      attributes: true,
-      attributeFilter: ['role', 'data-modal', 'aria-modal', 'class'],
     });
     return () => observer.disconnect();
   }, [isStandalonePage]);

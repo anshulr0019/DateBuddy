@@ -1,40 +1,86 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export type AuthState =
   | { status: 'loading' }
   | { status: 'unauthenticated' }
   | { status: 'authenticated'; userId: number; name: string | null };
 
-/* Resolves the logged-in user from the session cookie via /api/auth/me. */
+const AUTH_CACHE_MS = 5 * 60 * 1000;
+
+let cachedAuth: AuthState | null = null;
+let cachedAt = 0;
+let authRequest: Promise<AuthState> | null = null;
+const subscribers = new Set<(auth: AuthState) => void>();
+
+function publish(auth: AuthState) {
+  cachedAuth = auth;
+  cachedAt = Date.now();
+  subscribers.forEach((subscriber) => subscriber(auth));
+}
+
+function loadCurrentUser(): Promise<AuthState> {
+  const cacheIsFresh =
+    cachedAuth?.status === 'authenticated' && Date.now() - cachedAt < AUTH_CACHE_MS;
+  if (cacheIsFresh) return Promise.resolve(cachedAuth!);
+  if (authRequest) return authRequest;
+
+  authRequest = fetch('/api/auth/me', { cache: 'no-store' })
+    .then(async (res): Promise<AuthState> => {
+      if (res.status === 401) return { status: 'unauthenticated' };
+      const data = await res.json();
+      if (res.ok && data.success && data.user?.id) {
+        return {
+          status: 'authenticated',
+          userId: data.user.id,
+          name: data.user.name ?? null,
+        };
+      }
+      return { status: 'unauthenticated' };
+    })
+    .catch((): AuthState => ({ status: 'unauthenticated' }))
+    .then((auth) => {
+      publish(auth);
+      return auth;
+    })
+    .finally(() => {
+      authRequest = null;
+    });
+
+  return authRequest;
+}
+
+/*
+ * Resolves the logged-in user once and shares the result across every mounted
+ * consumer. Route changes retry an unauthenticated result so a client-side
+ * login immediately wakes root listeners without duplicating requests.
+ */
 export function useCurrentUser(): AuthState {
-  const [auth, setAuth] = useState<AuthState>({ status: 'loading' });
+  const pathname = usePathname();
+  const [auth, setAuth] = useState<AuthState>(() => cachedAuth ?? { status: 'loading' });
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
+    const handleAuth = (next: AuthState) => {
+      if (active) setAuth(next);
+    };
+    subscribers.add(handleAuth);
 
-    async function load() {
-      try {
-        const res = await fetch('/api/auth/me', { signal: controller.signal });
-        if (res.status === 401) {
-          setAuth({ status: 'unauthenticated' });
-          return;
-        }
-        const data = await res.json();
-        if (res.ok && data.success && data.user?.id) {
-          setAuth({ status: 'authenticated', userId: data.user.id, name: data.user.name ?? null });
-        } else {
-          setAuth({ status: 'unauthenticated' });
-        }
-      } catch (err) {
-        if (!controller.signal.aborted) setAuth({ status: 'unauthenticated' });
-      }
+    const cacheIsFresh =
+      cachedAuth?.status === 'authenticated' && Date.now() - cachedAt < AUTH_CACHE_MS;
+    if (cacheIsFresh) {
+      setAuth(cachedAuth!);
+    } else {
+      void loadCurrentUser();
     }
 
-    load();
-    return () => controller.abort();
-  }, []);
+    return () => {
+      active = false;
+      subscribers.delete(handleAuth);
+    };
+  }, [pathname]);
 
   return auth;
 }
