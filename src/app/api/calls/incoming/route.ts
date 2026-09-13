@@ -7,15 +7,13 @@ export const dynamic = 'force-dynamic';
 const SIGNAL_TTL = 90;
 
 function userInboxKey(userId: number) {
-  return `call:inbox:${userId}`;
+  return `call:inbox:v2:${userId}`;
 }
 
 async function getAndClear(key: string): Promise<any> {
   if (redis) {
     try {
-      const raw = await redis.get<any>(key);
-      if (raw !== null) await redis.del(key);
-      return raw;
+      return await redis.lpop<any>(key, 100);
     } catch { /* fall through */ }
   }
   const raw = await fallbackRedis.get<any>(key);
@@ -25,8 +23,8 @@ async function getAndClear(key: string): Promise<any> {
 
 /**
  * GET /api/calls/incoming
- * Returns all pending 'offer' signals for the authenticated user regardless of matchId.
- * Used by GlobalCallListener to detect incoming calls from any page of the app.
+ * Returns pending global call signals for the authenticated user regardless of matchId.
+ * Offers display incoming calls; end/decline signals dismiss stale ringing UI.
  */
 export async function GET(_request: NextRequest) {
   const session = await getAuthSession();
@@ -53,7 +51,6 @@ export async function GET(_request: NextRequest) {
     }
   }
 
-  // Surface only offer signals (incoming calls)
-  const offerSignals = signals.filter((s) => s.type === 'offer');
-  return NextResponse.json({ success: true, signals: offerSignals });
+  const globalSignals = signals.filter((s) => ['offer', 'end', 'decline'].includes(s.type));
+  return NextResponse.json({ success: true, signals: globalSignals });
 }

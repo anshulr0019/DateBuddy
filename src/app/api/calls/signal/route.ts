@@ -5,25 +5,24 @@ import { triggerCallSignal, triggerGlobalCallSignal } from '@/lib/pusher-server'
 import { db } from '@/db';
 import { users, photos } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { pushNotifyUser } from '@/lib/push-notify';
 
 export const dynamic = 'force-dynamic';
 
 const SIGNAL_TTL = 90; // seconds — signals expire if not consumed
 
 function signalKey(matchId: number, receiverId: number) {
-  return `call:signals:${matchId}:${receiverId}`;
+  return `call:signals:v2:${matchId}:${receiverId}`;
 }
 
 function userInboxKey(userId: number) {
-  return `call:inbox:${userId}`;
+  return `call:inbox:v2:${userId}`;
 }
 
 async function getAndClear(key: string): Promise<any> {
   if (redis) {
     try {
-      const raw = await redis.get<any>(key);
-      if (raw !== null) await redis.del(key);
-      return raw;
+      return await redis.lpop<any>(key, 100);
     } catch { /* fall through */ }
   }
   const raw = await fallbackRedis.get<any>(key);
@@ -34,16 +33,8 @@ async function getAndClear(key: string): Promise<any> {
 async function appendSignal(key: string, signal: object): Promise<void> {
   if (redis) {
     try {
-      const existing = await redis.get<any>(key);
-      const list = Array.isArray(existing)
-        ? existing
-        : typeof existing === 'string'
-        ? JSON.parse(existing)
-        : existing
-        ? [existing]
-        : [];
-      list.push(signal);
-      await redis.set(key, JSON.stringify(list), { ex: SIGNAL_TTL });
+      await redis.rpush(key, signal);
+      await redis.expire(key, SIGNAL_TTL);
       return;
     } catch { /* fall through */ }
   }
@@ -100,7 +91,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { matchId, receiverId, type, callType = 'video', data } = body;
+    const { matchId, receiverId, type, callType = 'video', data, callSessionId } = body;
 
     if (!matchId || !receiverId || !type) {
       return NextResponse.json({ success: false, message: 'Invalid payload' }, { status: 400 });
@@ -140,6 +131,9 @@ export async function POST(request: NextRequest) {
       type,
       callType,
       data,
+      callSessionId: typeof callSessionId === 'string' && callSessionId.trim()
+        ? callSessionId.slice(0, 160)
+        : undefined,
       ...(type === 'offer' && {
         callerName,
         callerPhoto,
@@ -150,9 +144,11 @@ export async function POST(request: NextRequest) {
     const key = signalKey(Number(matchId), Number(receiverId));
     await appendSignal(key, signal);
 
-    // 2. If this is an offer, also write to the global user inbox
-    //    (consumed by GlobalCallListener polling from any page)
-    if (type === 'offer') {
+    // 2. Keep the global listener informed while a call is ringing. End and
+    //    decline signals let it dismiss a pending banner instead of showing a
+    //    stale call after the caller has already hung up.
+    const isGlobalSignal = type === 'offer' || type === 'end' || type === 'decline';
+    if (isGlobalSignal) {
       await appendSignal(userInboxKey(Number(receiverId)), signal);
     }
 
@@ -163,12 +159,23 @@ export async function POST(request: NextRequest) {
       /* Fallback to polling */
     }
 
-    if (type === 'offer') {
+    if (isGlobalSignal) {
       try {
         await triggerGlobalCallSignal(Number(receiverId), signal);
       } catch {
         /* Fallback to polling */
       }
+    }
+
+    if (type === 'offer') {
+      await pushNotifyUser(Number(receiverId), {
+        title: callType === 'audio' ? 'Incoming Audio Call' : 'Incoming Video Call',
+        body: `${callerName || 'Someone'} is calling you`,
+        url: `/chat/${Number(matchId)}`,
+        tag: `incoming-${signal.callSessionId || signal.id}`,
+        matchId: Number(matchId),
+        silentWhenVisible: true,
+      });
     }
 
     return NextResponse.json({ success: true, signalId: signal.id });

@@ -19,6 +19,7 @@ interface IncomingCall {
   callType: 'audio' | 'video';
   offerData: any;
   signalId: string;
+  callSessionId: string;
 }
 
 /* ── Minimalist Phone Icons ── */
@@ -51,6 +52,9 @@ export function GlobalCallListener() {
   const processedRef = useRef<Set<string>>(new Set());
   const audioCtxRef = useRef<AudioContext | null>(null);
   const ringIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const missedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCallRef = useRef<IncomingCall | null>(null);
+  const callAcceptedRef = useRef(false);
 
   /* ── Ringtone ── */
   const startRingtone = useCallback(() => {
@@ -88,21 +92,42 @@ export function GlobalCallListener() {
 
   const stopRingtone = useCallback(() => {
     if (ringIntervalRef.current) clearInterval(ringIntervalRef.current);
+    ringIntervalRef.current = null;
     audioCtxRef.current?.close().catch(() => {});
     audioCtxRef.current = null;
   }, []);
 
-  /* ── Handle incoming offer signal ── */
-  const handleOffer = useCallback(
+  const clearMissedTimeout = useCallback(() => {
+    if (missedTimeoutRef.current) clearTimeout(missedTimeoutRef.current);
+    missedTimeoutRef.current = null;
+  }, []);
+
+  /* ── Handle global call signals ── */
+  const handleSignal = useCallback(
     (sig: any) => {
-      if (!sig || sig.type !== 'offer') return;
+      if (!sig || !sig.type) return;
       if (!sig.id) return;
       if (processedRef.current.has(sig.id)) return;
       processedRef.current.add(sig.id);
 
-      // If user is already on this specific chat page, let the chat page handle it
-      const path = window.location.pathname;
-      if (path.includes(`/chat/${sig.matchId}`)) return;
+      if (sig.type === 'end' || sig.type === 'decline') {
+        const current = pendingCallRef.current;
+        const matchesCurrentCall = current && (
+          sig.callSessionId
+            ? sig.callSessionId === current.callSessionId
+            : sig.matchId === current.matchId && sig.senderId === current.partnerId
+        );
+        if (matchesCurrentCall && !callAcceptedRef.current) {
+          stopRingtone();
+          clearMissedTimeout();
+          pendingCallRef.current = null;
+          setPendingCall(null);
+          setCallAccepted(false);
+        }
+        return;
+      }
+
+      if (sig.type !== 'offer') return;
 
       hapticSuccess();
       const incoming: IncomingCall = {
@@ -113,36 +138,50 @@ export function GlobalCallListener() {
         callType: sig.callType || 'video',
         offerData: sig.data,
         signalId: sig.id,
+        callSessionId: sig.callSessionId || sig.id,
       };
 
+      callAcceptedRef.current = false;
+      pendingCallRef.current = incoming;
+      setCallAccepted(false);
       setPendingCall(incoming);
       startRingtone();
 
       // Auto-dismiss after 45 s (call timeout) & record as missed
-      setTimeout(() => {
-        setPendingCall((cur) => {
-          if (cur?.signalId === sig.id) {
-            stopRingtone();
-            // Log missed call in chat
-            fetch('/api/calls/log', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                matchId: incoming.matchId,
-                partnerId: incoming.partnerId,
-                callType: incoming.callType,
-                status: 'missed',
-                duration: 0,
-                callSessionId: incoming.signalId,
-              }),
-            }).catch(() => {});
-            return null;
-          }
-          return cur;
-        });
+      clearMissedTimeout();
+      missedTimeoutRef.current = setTimeout(() => {
+        const current = pendingCallRef.current;
+        if (current?.callSessionId === incoming.callSessionId && !callAcceptedRef.current) {
+          stopRingtone();
+          pendingCallRef.current = null;
+          setPendingCall(null);
+          fetch('/api/calls/signal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              matchId: incoming.matchId,
+              receiverId: incoming.partnerId,
+              type: 'end',
+              callType: incoming.callType,
+              callSessionId: incoming.callSessionId,
+            }),
+          }).catch(() => {});
+          fetch('/api/calls/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              matchId: incoming.matchId,
+              partnerId: incoming.partnerId,
+              callType: incoming.callType,
+              status: 'missed',
+              duration: 0,
+              callSessionId: incoming.callSessionId,
+            }),
+          }).catch(() => {});
+        }
       }, 45_000);
     },
-    [startRingtone, stopRingtone]
+    [clearMissedTimeout, startRingtone, stopRingtone]
   );
 
   /* ── Pusher + polling subscription ── */
@@ -151,32 +190,53 @@ export function GlobalCallListener() {
 
     const pusher = getPusherClient();
     const channel = pusher?.subscribe(`call-signal-global-${myId}`);
-    channel?.bind('signal', handleOffer);
+    channel?.bind('signal', handleSignal);
 
-    const interval = setInterval(async () => {
+    let polling = false;
+    const pollIncoming = async () => {
       if (document.hidden || !navigator.onLine) return;
-      if (pusher?.connection.state === 'connected') return;
+      if (polling) return;
+      polling = true;
       try {
         const res = await fetch('/api/calls/incoming');
         const data = await res.json();
         if (res.ok && data.success && Array.isArray(data.signals)) {
-          for (const sig of data.signals) handleOffer(sig);
+          for (const sig of data.signals) handleSignal(sig);
         }
-      } catch {}
-    }, 5000);
+      } catch {
+        /* Retry on the next safety poll. */
+      } finally {
+        polling = false;
+      }
+    };
+
+    const onSubscribed = () => { void pollIncoming(); };
+    const onVisible = () => { if (!document.hidden) void pollIncoming(); };
+    channel?.bind('pusher:subscription_succeeded', onSubscribed);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onVisible);
+
+    // Catch an offer stored before this listener finished subscribing. The
+    // slower safety poll also covers a rare server-side realtime failure.
+    void pollIncoming();
+    const interval = setInterval(pollIncoming, 10_000);
 
     return () => {
-      channel?.unbind('signal', handleOffer);
+      channel?.unbind('signal', handleSignal);
+      channel?.unbind('pusher:subscription_succeeded', onSubscribed);
       pusher?.unsubscribe(`call-signal-global-${myId}`);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onVisible);
       clearInterval(interval);
     };
-  }, [myId, handleOffer]);
+  }, [myId, handleSignal]);
 
   /* ── Decline ── */
   const handleDecline = useCallback(async () => {
     if (!pendingCall) return;
     hapticMedium();
     stopRingtone();
+    clearMissedTimeout();
 
     try {
       await fetch('/api/calls/signal', {
@@ -187,6 +247,7 @@ export function GlobalCallListener() {
           receiverId: pendingCall.partnerId,
           type: 'decline',
           callType: pendingCall.callType,
+          callSessionId: pendingCall.callSessionId,
         }),
       });
 
@@ -200,28 +261,41 @@ export function GlobalCallListener() {
           callType: pendingCall.callType,
           status: 'declined',
           duration: 0,
-          callSessionId: pendingCall.signalId,
+          callSessionId: pendingCall.callSessionId,
         }),
       });
     } catch {}
 
+    pendingCallRef.current = null;
+    callAcceptedRef.current = false;
     setPendingCall(null);
     setCallAccepted(false);
-  }, [pendingCall, stopRingtone]);
+  }, [clearMissedTimeout, pendingCall, stopRingtone]);
 
   /* ── Accept — open CallModal directly (no navigation!) ── */
   const handleAccept = useCallback(() => {
     if (!pendingCall) return;
     hapticSuccess();
     stopRingtone();
+    clearMissedTimeout();
+    callAcceptedRef.current = true;
     setCallAccepted(true);
-  }, [pendingCall, stopRingtone]);
+  }, [clearMissedTimeout, pendingCall, stopRingtone]);
 
   /* ── Close after call ends ── */
   const handleCallClose = useCallback(() => {
+    stopRingtone();
+    clearMissedTimeout();
+    pendingCallRef.current = null;
+    callAcceptedRef.current = false;
     setPendingCall(null);
     setCallAccepted(false);
-  }, []);
+  }, [clearMissedTimeout, stopRingtone]);
+
+  useEffect(() => () => {
+    stopRingtone();
+    clearMissedTimeout();
+  }, [clearMissedTimeout, stopRingtone]);
 
   if (!pendingCall) return null;
 
@@ -239,6 +313,7 @@ export function GlobalCallListener() {
         initialCallType={pendingCall.callType}
         initialMode="incoming"
         incomingOfferData={pendingCall.offerData}
+        initialCallSessionId={pendingCall.callSessionId}
         onClose={handleCallClose}
       />
     );

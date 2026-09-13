@@ -17,7 +17,6 @@ import type { DrawerTab } from './components/MediaDrawer';
 import { VibeCheckBanner } from './components/VibeCheckBanner';
 import { MemoryLaneCard } from './components/MemoryLaneCard';
 import AIWingman from '../../components/AIWingman';
-import { getPusherClient } from '@/lib/pusher-client';
 import { hapticLight } from '../../lib/haptics';
 
 const MediaDrawer = dynamic(() => import('./components/MediaDrawer').then((mod) => mod.MediaDrawer), { ssr: false });
@@ -130,6 +129,20 @@ function ChatContent() {
   const nearBottomRef = useRef(true);
   const didInitialScrollRef = useRef(false);
   const restoreScrollRef = useRef<number | null>(null);
+  const handledCallIntentRef = useRef<string | null>(null);
+
+  /* Calls launched from the Messages profile sheet arrive as a query intent. */
+  useEffect(() => {
+    const requestedCall = searchParams?.get('call');
+    if (!partner || !validMatchId || callState.isOpen) return;
+    if (requestedCall !== 'audio' && requestedCall !== 'video') return;
+
+    const intentKey = `${validMatchId}:${requestedCall}`;
+    if (handledCallIntentRef.current === intentKey) return;
+    handledCallIntentRef.current = intentKey;
+    setCallState({ isOpen: true, callType: requestedCall, mode: 'outgoing' });
+    router.replace(`/chat/${validMatchId}`, { scroll: false });
+  }, [callState.isOpen, partner, router, searchParams, validMatchId]);
 
   /* Composer validation errors dismiss themselves. */
   useEffect(() => {
@@ -137,60 +150,6 @@ function ChatContent() {
     const t = setTimeout(clearComposerError, 4000);
     return () => clearTimeout(t);
   }, [composerError, clearComposerError]);
-
-  /* Listen for incoming WebRTC video/audio call signals */
-  useEffect(() => {
-    if (!validMatchId || callState.isOpen || !myId) return;
-
-    // 1. Instant realtime Pusher notification for incoming call
-    const pusher = getPusherClient();
-    const channelName = `call-signal-${validMatchId}-${myId}`;
-    const channel = pusher?.subscribe(channelName);
-
-    const onPusherSignal = (sig: any) => {
-      if (sig?.type === 'offer') {
-        setCallState({
-          isOpen: true,
-          callType: sig.callType || 'video',
-          mode: 'incoming',
-          incomingOfferData: sig.data,
-        });
-      }
-    };
-
-    channel?.bind('signal', onPusherSignal);
-
-    // 2. Polling fallback
-    const interval = setInterval(async () => {
-      if (document.hidden || !navigator.onLine) return;
-      if (pusher?.connection.state === 'connected') return;
-      try {
-        const res = await fetch(`/api/calls/signal?matchId=${validMatchId}`);
-        const data = await res.json();
-        if (res.ok && data.success && Array.isArray(data.signals)) {
-          for (const sig of data.signals) {
-            if (sig.type === 'offer') {
-              setCallState({
-                isOpen: true,
-                callType: sig.callType || 'video',
-                mode: 'incoming',
-                incomingOfferData: sig.data,
-              });
-              break;
-            }
-          }
-        }
-      } catch {
-        /* silent polling */
-      }
-    }, 5000);
-
-    return () => {
-      channel?.unbind('signal', onPusherSignal);
-      pusher?.unsubscribe(channelName);
-      clearInterval(interval);
-    };
-  }, [validMatchId, callState.isOpen, myId]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const feed = feedRef.current;

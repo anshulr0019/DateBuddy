@@ -23,6 +23,7 @@ interface CallModalProps {
   initialCallType?: 'audio' | 'video';
   initialMode?: 'outgoing' | 'incoming';
   incomingOfferData?: any;
+  initialCallSessionId?: string;
   onClose: () => void;
 }
 
@@ -145,6 +146,7 @@ export function CallModal({
   initialCallType = 'video',
   initialMode = 'outgoing',
   incomingOfferData = null,
+  initialCallSessionId,
   onClose,
 }: CallModalProps) {
   const [callStatus, setCallStatus] = useState<'calling' | 'incoming' | 'connected' | 'ended'>(
@@ -176,7 +178,7 @@ export function CallModal({
   const outgoingStartedRef = useRef(false);
 
   // Call session identifier for chat history logging & deduplication
-  const callSessionIdRef = useRef<string>(`call-${matchId}-${Date.now()}`);
+  const callSessionIdRef = useRef<string>(initialCallSessionId || `call-${matchId}-${Date.now()}`);
   const hasLoggedRef = useRef(false);
   const durationRef = useRef(0);
   durationRef.current = callDuration;
@@ -215,13 +217,23 @@ export function CallModal({
   const sendSignal = useCallback(
     async (type: string, data?: any) => {
       try {
-        await fetch('/api/calls/signal', {
+        const response = await fetch('/api/calls/signal', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ matchId, receiverId: partnerId, type, callType, data }),
+          body: JSON.stringify({
+            matchId,
+            receiverId: partnerId,
+            type,
+            callType,
+            data,
+            callSessionId: callSessionIdRef.current,
+          }),
         });
+        if (!response.ok) throw new Error(`Signal request failed (${response.status})`);
+        return true;
       } catch (err) {
         console.warn('Failed to send signal:', err);
+        return false;
       }
     },
     [matchId, partnerId, callType]
@@ -307,6 +319,7 @@ export function CallModal({
   const handleIncomingSignal = useCallback(
     async (sig: any) => {
       if (!sig || !sig.type) return;
+      if (sig.callSessionId && sig.callSessionId !== callSessionIdRef.current) return;
       if (sig.id) {
         if (processedSignalIdsRef.current.has(sig.id)) return;
         processedSignalIdsRef.current.add(sig.id);
@@ -390,7 +403,19 @@ export function CallModal({
 
     channel?.bind('signal', onPusherSignal);
 
-    const pollInterval = setInterval(async () => {
+    let polling = false;
+    let connectedTicks = 0;
+    const pollSignals = async () => {
+      if (document.hidden || !navigator.onLine || polling) return;
+      const realtimeReady = pusher?.connection.state === 'connected' && Boolean(channel?.subscribed);
+      if (realtimeReady) {
+        connectedTicks += 1;
+        if (connectedTicks < 5) return;
+        connectedTicks = 0;
+      } else {
+        connectedTicks = 0;
+      }
+      polling = true;
       try {
         const res = await fetch(`/api/calls/signal?matchId=${matchId}`);
         const data = await res.json();
@@ -399,12 +424,34 @@ export function CallModal({
             handleIncomingSignal(s);
           }
         }
-      } catch {}
-    }, 1000);
+      } catch {
+        /* Retry while the call is open. */
+      } finally {
+        polling = false;
+      }
+    };
+
+    const onSubscribed = () => {
+      connectedTicks = 4;
+      void pollSignals();
+    };
+    const onVisible = () => {
+      connectedTicks = 4;
+      void pollSignals();
+    };
+
+    channel?.bind('pusher:subscription_succeeded', onSubscribed);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onVisible);
+    void pollSignals();
+    const pollInterval = setInterval(pollSignals, 1000);
 
     return () => {
       channel?.unbind('signal', onPusherSignal);
+      channel?.unbind('pusher:subscription_succeeded', onSubscribed);
       pusher?.unsubscribe(channelName);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onVisible);
       clearInterval(pollInterval);
     };
   }, [isOpen, matchId, myId, handleIncomingSignal]);
@@ -430,7 +477,8 @@ export function CallModal({
       stream.getTracks().forEach((t) => pc.addTrack(t, stream));
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      await sendSignal('offer', offer);
+      const sent = await sendSignal('offer', offer);
+      if (!sent) throw new Error('Could not reach the other user');
     } catch (err) {
       console.error('Error starting outgoing call:', err);
       endCallCleanup('cancelled');
@@ -484,6 +532,21 @@ export function CallModal({
       startOutgoingCall();
     }
   }, [isOpen, callStatus, startOutgoingCall]);
+
+  useEffect(() => {
+    if (!isOpen || callStatus !== 'calling') return;
+    const timeout = setTimeout(() => {
+      void sendSignal('end');
+      endCallCleanup('missed');
+    }, 45_000);
+    return () => clearTimeout(timeout);
+  }, [callStatus, endCallCleanup, isOpen, sendSignal]);
+
+  useEffect(() => () => {
+    if (durationTimerRef.current) clearInterval(durationTimerRef.current);
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    pcRef.current?.close();
+  }, []);
 
   const toggleMute = () => {
     if (!localStreamRef.current) return;

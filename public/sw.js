@@ -39,7 +39,13 @@ self.addEventListener('push', (event) => {
     actions: payload.actions || [],
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil((async () => {
+    if (payload.silentWhenVisible) {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      if (windows.some((client) => client.visibilityState === 'visible')) return;
+    }
+    await self.registration.showNotification(title, options);
+  })());
 });
 
 /* ── Notification Click — open / focus the app tab ── */

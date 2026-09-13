@@ -17,6 +17,7 @@ export interface PushPayload {
   tag?: string;
   matchId?: number;
   icon?: string;
+  silentWhenVisible?: boolean;
 }
 
 /**
