@@ -18,6 +18,7 @@ import { VibeCheckBanner } from './components/VibeCheckBanner';
 import { MemoryLaneCard } from './components/MemoryLaneCard';
 import AIWingman from '../../components/AIWingman';
 import { getPusherClient } from '@/lib/pusher-client';
+import { hapticLight } from '../../lib/haptics';
 
 const MediaDrawer = dynamic(() => import('./components/MediaDrawer').then((mod) => mod.MediaDrawer), { ssr: false });
 const Lightbox = dynamic(() => import('./components/Overlays').then((mod) => mod.Lightbox), { ssr: false });
@@ -289,7 +290,7 @@ function ChatContent() {
             <div className={chatStyles.header}>
               <div className={chatStyles.headerIdentity}>
                 <button
-                  onClick={() => router.back()}
+                  onClick={() => { hapticLight(); router.back(); }}
                   className={chatStyles.headerBack}
                   aria-label="Back to chats"
                 >
@@ -300,7 +301,7 @@ function ChatContent() {
 
                 {partner ? (
                   <button
-                    onClick={() => setProfileSheetOpen(true)}
+                    onClick={() => { hapticLight(); setProfileSheetOpen(true); }}
                     className={chatStyles.partnerButton}
                     aria-label={`View ${partner.name}'s profile`}
                   >
@@ -320,9 +321,10 @@ function ChatContent() {
                       {(() => {
                         if (isPartnerTyping) {
                           return (
-                            <p className={`${chatStyles.presence} text-[#7D1D3F] animate-pulse`}>
-                              <span className="transition-all duration-300">
-                                {isLongTyping ? 'writing a long message...' : 'typing...'}
+                            <p className={`${chatStyles.presence} ${chatStyles.typingPresence}`} aria-live="polite">
+                              <span>{isLongTyping ? 'writing a long message' : 'typing'}</span>
+                              <span className={chatStyles.typingDots} aria-hidden="true">
+                                <span /><span /><span />
                               </span>
                             </p>
                           );
@@ -356,7 +358,7 @@ function ChatContent() {
                 <div className={chatStyles.headerActions}>
                   {/* Minimalist Games Button */}
                   <button
-                    onClick={() => setGamesOpen(true)}
+                    onClick={() => { hapticLight(); setGamesOpen(true); }}
                     className={`${chatStyles.headerAction}`}
                     title="Mini Games"
                     aria-label="Play mini games"
@@ -372,7 +374,7 @@ function ChatContent() {
 
                   {/* Date Planner Button */}
                   <button
-                    onClick={() => setDatePlannerOpen(true)}
+                    onClick={() => { hapticLight(); setDatePlannerOpen(true); }}
                     className={`${chatStyles.headerAction}`}
                     title="Plan a Date"
                     aria-label="Plan a date"
@@ -387,7 +389,7 @@ function ChatContent() {
 
                   {/* Audio Call */}
                   <button
-                    onClick={() => setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' })}
+                    onClick={() => { hapticLight(); setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' }); }}
                     className={`${chatStyles.headerAction}`}
                     title="Audio Call"
                     aria-label="Start audio call"
@@ -398,7 +400,7 @@ function ChatContent() {
                   </button>
                   {/* Video Call */}
                   <button
-                    onClick={() => setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' })}
+                    onClick={() => { hapticLight(); setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' }); }}
                     className={`${chatStyles.headerAction} ${chatStyles.headerActionVideo}`}
                     title="Video Call"
                     aria-label="Start video call"
@@ -409,7 +411,7 @@ function ChatContent() {
                     </svg>
                   </button>
                   <button
-                    onClick={() => setSafetyOpen(true)}
+                    onClick={() => { hapticLight(); setSafetyOpen(true); }}
                     aria-label="Conversation options: report or block"
                     className={`${chatStyles.headerAction}`}
                   >
@@ -446,7 +448,7 @@ function ChatContent() {
                   The match may have ended, or the link is wrong.
                 </p>
                 <button
-                  onClick={() => router.replace('/messages')}
+                  onClick={() => { hapticLight(); router.replace('/messages'); }}
                   className={chatStyles.stateButton}
                 >
                   Back to Chats
@@ -462,7 +464,7 @@ function ChatContent() {
                   Check your connection and try again.
                 </p>
                 <button
-                  onClick={chat.reload}
+                  onClick={() => { hapticLight(); chat.reload(); }}
                   className={chatStyles.stateButton}
                 >
                   Try again
@@ -492,6 +494,7 @@ function ChatContent() {
                         <button
                           key={line}
                           onClick={() => {
+                            hapticLight();
                             setInputText(line);
                             inputRef.current?.focus();
                           }}

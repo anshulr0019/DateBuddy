@@ -658,6 +658,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
 }
 
+/* Shared interaction feedback for clickable cards. The scale is deliberately
+   small so it reads as a tactile press without shifting surrounding content. */
+.infyn-card-press {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.infyn-card-press:active {
+  transform: scale(0.992);
+}
+
+/* Presence ring used by shared online indicators across the app. */
+.active-user-ring {
+  animation: active-user-ring-pulse 2.4s ease-in-out infinite;
+}
+@keyframes active-user-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.36); }
+  50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
 /* Skeleton Loading — shimmer sweep (LinkedIn/Telegram-style).
    GPU-only: the shimmer is a translated gradient overlay on top
    of a static base colour, so no opacity flicker on the content. */
@@ -874,7 +894,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .rc-ring, .rc-sweep, .rc-blip, .rc-pulse {
     animation: none !important;
   }
-  .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow,
+  .aurora-blob, .animate-float-in, .animate-page-enter, .pulse-glow, .active-user-ring,
   .nav-indicator-spring, .animate-card-swipe-right, .animate-card-swipe-left,
   .animate-card-swipe-up, .animate-card-depth-enter, .animate-popover-enter,
   .animate-bubble-enter, .animate-sheet-up, .animate-msg-mine,
@@ -885,6 +905,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 1 !important;
     transform: none !important;
   }
+
+  .infyn-card-press { transition: none !important; }
 
   /* Splash: static composition — mark + glow, no motion */
   .splash-atmosphere, .splash-orb, .splash-aurora, .splash-mark,

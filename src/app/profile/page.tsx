@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, VerifiedBadge, GradientText, SafeImage, Skeleton } from '../components/shared';
+import { hapticLight } from '../lib/haptics';
 
 /* ─────────────────────────────────────────────────
    Types & helpers
@@ -576,7 +577,7 @@ export default function ProfilePage() {
                         aria-selected={activeSection === t.id}
                         aria-controls={`profile-panel-${t.id}`}
                         tabIndex={activeSection === t.id ? 0 : -1}
-                        onClick={() => setActiveSection(t.id)}
+                        onClick={() => { hapticLight(); setActiveSection(t.id); }}
                         className={`relative z-10 min-h-[44px] flex-1 rounded-xl py-2 text-[13px] font-bold transition-all duration-200 cursor-pointer active:scale-95 select-none ${
                           activeSection === t.id ? 'text-infyn-rose' : 'text-infyn-ink/60 hover:text-infyn-ink'
                         }`}

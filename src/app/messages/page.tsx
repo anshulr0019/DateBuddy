@@ -10,6 +10,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { formatListTime } from '../lib/time';
 import { useCurrentUser } from '../lib/useCurrentUser';
 import { getPusherClient } from '@/lib/pusher-client';
+import { hapticLight } from '../lib/haptics';
 
 const PartnerProfileSheet = dynamic(
   () => import('../components/PartnerProfileSheet').then((mod) => mod.PartnerProfileSheet),
@@ -175,12 +176,12 @@ export default function MessagesPage() {
       key={conversation.id}
       role="listitem"
       className={`${styles.conversation} ${conversation.unread > 0 ? styles.conversationUnread : ''}`}
-      onClick={() => router.push(`/chat/${conversation.id}`)}
+      onClick={() => { hapticLight(); router.push(`/chat/${conversation.id}`); }}
     >
       <button
         type="button"
         className={styles.avatarButton}
-        onClick={(event) => { event.stopPropagation(); setSelectedConv(conversation); }}
+        onClick={(event) => { event.stopPropagation(); hapticLight(); setSelectedConv(conversation); }}
         aria-label={`View ${conversation.name}'s profile`}
       >
         <span className={`${styles.avatar} ${styles.avatarSmall}`}>
@@ -218,7 +219,7 @@ export default function MessagesPage() {
               <button
                 type="button"
                 className={styles.iconButton}
-                onClick={openNotifications}
+                onClick={() => { hapticLight(); openNotifications(); }}
                 aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
               >
                 <Ic.Bell />
@@ -251,7 +252,7 @@ export default function MessagesPage() {
                 role="tab"
                 aria-selected={filter === value}
                 className={`${styles.filterChip} ${filter === value ? styles.filterChipActive : ''}`}
-                onClick={() => setFilter(value)}
+                onClick={() => { hapticLight(); setFilter(value); }}
               >
                 {label}
               </button>
@@ -291,8 +292,8 @@ export default function MessagesPage() {
                   <h2 id="active-heading" className={styles.sectionLabel}>ACTIVE NOW</h2>
                   <div className={styles.activeRow}>
                     {activePeople.map((person) => (
-                      <button key={person.id} type="button" className={styles.activePerson} onClick={() => router.push(`/chat/${person.id}`)} aria-label={`Message ${person.name}`}>
-                        <span className={styles.avatar}>
+                      <button key={person.id} type="button" className={styles.activePerson} onClick={() => { hapticLight(); router.push(`/chat/${person.id}`); }} aria-label={`Message ${person.name}`}>
+                        <span className={`${styles.avatar} ${styles.activeAvatar}`}>
                           <SafeImage src={person.photo} name={person.name} alt={person.name} className={styles.avatarImage} />
                           <span className={styles.onlineDot} aria-hidden />
                         </span>

@@ -103,7 +103,7 @@ export function AuroraBackground({ subtle = false, children, className = '' }: {
 
 export function GlassCard({ children, className = '', style, onClick }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void }) {
   return (
-    <div onClick={onClick} className={`rounded-[24px] border border-infyn-border/80 bg-infyn-surface/85 shadow-[0_12px_36px_-18px_rgba(32,26,22,0.12)] backdrop-blur-md ${className}`} style={style}>
+    <div onClick={onClick} className={`rounded-[24px] border border-infyn-border/80 bg-infyn-surface/85 shadow-[0_12px_36px_-18px_rgba(32,26,22,0.12)] backdrop-blur-md ${onClick ? 'infyn-card-press' : ''} ${className}`} style={style}>
       {children}
     </div>
   );
@@ -122,7 +122,7 @@ export function PrimaryButton({ children, onClick, className = '' }: { children:
 }
 
 export function OnlineDot({ className = '' }: { className?: string }) {
-  return <div className={`rounded-full border-2 border-infyn-paper bg-[#22C55E] pulse-glow ${className}`} />;
+  return <div className={`active-user-ring rounded-full border-2 border-infyn-paper bg-[#22C55E] ${className}`} />;
 }
 
 export function VerifiedBadge() {

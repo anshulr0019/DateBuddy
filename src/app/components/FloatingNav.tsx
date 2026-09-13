@@ -6,6 +6,7 @@ import { Ic } from './icons';
 import messagesStyles from '../messages/messages.module.css';
 import { useNotifications } from '../context/NotificationContext';
 import { prefetchFeed } from '../lib/feedCache';
+import { hapticLight } from '../lib/haptics';
 
 type NavTab = 'discover' | 'home' | 'connections' | 'messages' | 'profile';
 
@@ -83,8 +84,10 @@ export default function FloatingNav() {
       // Left-edge + swipe right → go to the previous tab (navigate left).
       // Right-edge + swipe left → go to the next tab (navigate right).
       if (startEdge === 'left' && dx > 0 && idx > 0) {
+        hapticLight();
         router.push(TAB_PATHS[idx - 1]);
       } else if (startEdge === 'right' && dx < 0 && idx < TAB_PATHS.length - 1) {
+        hapticLight();
         router.push(TAB_PATHS[idx + 1]);
       }
     };
@@ -135,7 +138,7 @@ export default function FloatingNav() {
 
   if (pathname === '/messages') {
     return <nav className={`${messagesStyles.nav} infyn-nav-theme`} aria-label="Main navigation"><div className={messagesStyles.navInner}>
-      {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => router.push(tab.path)} aria-current={tab.id === active ? 'page' : undefined}>
+      {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => { hapticLight(); router.push(tab.path); }} aria-current={tab.id === active ? 'page' : undefined}>
         <span className={messagesStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
         {tab.id === 'messages' && unreadCount > 0 && <span className={messagesStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
       </button>)}
@@ -161,7 +164,7 @@ export default function FloatingNav() {
           return (
             <button
               key={tab.id}
-              onClick={() => router.push(tab.path)}
+              onClick={() => { hapticLight(); router.push(tab.path); }}
               className="relative z-10 flex min-h-[48px] flex-1 flex-col items-center justify-center py-1.5 transition-all duration-300 active:scale-90 cursor-pointer select-none"
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}

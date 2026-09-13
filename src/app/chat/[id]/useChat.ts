@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getPusherClient } from '@/lib/pusher-client';
 import { compressImageForUpload } from '@/lib/image-compress';
 import type { ChatMessage, Partner, SendStatus, ReplyTarget } from './chatTypes';
+import { hapticLight, hapticWarning } from '@/app/lib/haptics';
 
 const FALLBACK_POLL_INTERVAL_MS = 5_000;
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -356,6 +357,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         console.error('[CHAT] Send failed:', err);
         const offline = typeof navigator !== 'undefined' && !navigator.onLine;
         setPendingStatus(msg.id, offline ? 'queued' : 'failed');
+        hapticWarning();
       } finally {
         sendsInFlightRef.current -= 1;
       }
@@ -378,6 +380,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         status: online ? 'sending' : 'queued',
       };
       setPending((prev) => [...prev, msg]);
+      hapticLight();
       if (online) doSend(msg);
     },
     [myId, doSend]
@@ -411,6 +414,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         status: online ? 'sending' : 'queued',
       };
       setPending((prev) => [...prev, msg]);
+      hapticLight();
       if (online) doSend(msg);
     },
     [myId, doSend]
@@ -421,6 +425,7 @@ export function useChat(matchId: number | null, myId: number | null) {
       const msg = pendingRef.current.find((p) => p.id === id);
       if (!msg) return;
       setPendingStatus(id, 'sending');
+      hapticLight();
       doSend({ ...msg, status: 'sending' });
     },
     [doSend, setPendingStatus]
@@ -485,6 +490,7 @@ export function useChat(matchId: number | null, myId: number | null) {
         status: online ? 'sending' : 'queued',
       };
       setPending((prev) => [...prev, msg]);
+      hapticLight();
       if (online) doSend(msg);
     },
     [myId, doSend]

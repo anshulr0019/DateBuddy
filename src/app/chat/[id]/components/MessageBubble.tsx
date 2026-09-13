@@ -39,14 +39,18 @@ function StatusIndicator({ status }: { status: ChatMessage['status'] }) {
   if (status === 'sending' || status === 'queued') {
     return (
       <>
-        <Ic.Clock className="w-3 h-3 text-infyn-muted" />
+        <span className={chatStyles.sendingStatus}>
+          <Ic.Clock className="w-3 h-3 text-infyn-muted" />
+        </span>
         <span className="sr-only">{status === 'queued' ? 'Waiting to send' : 'Sending'}</span>
       </>
     );
   }
   return (
     <>
-      <WhatsAppTicks status={status} />
+      <span className={chatStyles.sentStatus}>
+        <WhatsAppTicks status={status} />
+      </span>
       <span className="sr-only">{status === 'seen' ? 'Seen' : 'Sent'}</span>
     </>
   );

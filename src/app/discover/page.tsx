@@ -480,7 +480,7 @@ export default function DiscoverPage() {
         <div className={styles.skeletonPhoto} /><div className={styles.skeletonLine} /><div className={styles.skeletonExcerpt} />
         <span className={styles.srOnly}>Finding people for you…</span>
       </div> : unavailable ? <div className={styles.state}>
-        <div className={styles.stateIcon}><Ic.Heart /></div>
+        <div className={`${styles.stateIcon} ${!failed ? styles.emptyStateIcon : ''}`}><Ic.Heart /></div>
         <p className={styles.eyebrow}>{failed ? 'A little interruption' : 'Room for a new connection'}</p>
         <h2>{failed ? 'Couldn’t load profiles' : 'You’re all caught up'}</h2>
         <p>{failed ? 'Check your connection and try again. We’ll be here.' : 'No more profiles to show right now. Try adjusting your age or verification preferences, or check back later.'}</p>

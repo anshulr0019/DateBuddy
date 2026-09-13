@@ -259,7 +259,10 @@
   gap: 0.35rem;
   color: var(--secondary);
   font-size: 0.68rem;
+  transition: transform 180ms ease;
 }
+
+.activePerson:active { transform: scale(0.96); }
 
 .avatar {
   position: relative;
@@ -279,6 +282,15 @@
   width: 2.9rem;
 }
 
+.activeAvatar {
+  animation: active-avatar-ring 2.8s ease-in-out infinite;
+}
+
+@keyframes active-avatar-ring {
+  0%, 100% { box-shadow: 0 3px 10px rgba(32, 26, 22, 0.12), 0 0 0 0 rgba(79, 158, 113, 0.28); }
+  50% { box-shadow: 0 3px 10px rgba(32, 26, 22, 0.12), 0 0 0 4px rgba(79, 158, 113, 0); }
+}
+
 .onlineDot {
   position: absolute;
   right: -0.05rem;
@@ -288,6 +300,12 @@
   border: 2px solid var(--paper);
   border-radius: 999px;
   background: #4f9e71;
+  animation: active-user-ring 2.4s ease-in-out infinite;
+}
+
+@keyframes active-user-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 158, 113, 0.42); }
+  50% { box-shadow: 0 0 0 3px rgba(79, 158, 113, 0); }
 }
 
 .activeName {
@@ -321,7 +339,7 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 180ms ease;
+  transition: background 180ms ease, transform 180ms ease;
 }
 
 .conversation:last-child {
@@ -331,6 +349,8 @@
 .conversation:hover {
   background: rgba(239, 229, 211, 0.38);
 }
+
+.conversation:active { transform: scale(0.992); }
 
 .conversationUnread {
   background: rgba(246, 224, 228, 0.72);
@@ -449,6 +469,14 @@
   border-radius: 1.2rem;
   background: var(--surface);
   color: var(--rose);
+}
+
+.empty:not(.error) .emptyIcon { animation: empty-state-breathe 3.6s ease-in-out 1 both; }
+
+@keyframes empty-state-breathe {
+  0% { opacity: 0.72; transform: scale(0.94); }
+  55% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .emptyTitle {
@@ -607,6 +635,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .iconButton, .clearButton, .filterChip, .conversation, .primaryButton, .navTab,
-  .avatarImage { transition: none; }
-  .skeleton { animation: none; }
+  .avatarImage, .activePerson { transition: none; }
+  .skeleton, .activeAvatar, .onlineDot, .empty:not(.error) .emptyIcon { animation: none; }
 }

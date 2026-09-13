@@ -172,6 +172,29 @@
 .presenceOnline { color: #237b55; }
 .presenceDot { height: 0.38rem; width: 0.38rem; flex-shrink: 0; border-radius: 999px; background: #10b981; }
 
+.typingPresence { color: var(--wine); }
+.typingDots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.16rem;
+  margin-left: 0.08rem;
+}
+.typingDots span {
+  height: 0.25rem;
+  width: 0.25rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: typing-dot 1.15s ease-in-out infinite;
+}
+.typingDots span:nth-child(2) { animation-delay: 0.14s; }
+.typingDots span:nth-child(3) { animation-delay: 0.28s; }
+
+@keyframes typing-dot {
+  0%, 60%, 100% { opacity: 0.35; transform: translateY(0) scale(0.85); }
+  30% { opacity: 1; transform: translateY(-1px) scale(1); }
+}
+
 .headerActions {
   display: flex;
   flex-shrink: 0;
@@ -460,6 +483,26 @@
 .bubbleTheirs { border-color: var(--line) !important; background: var(--surface) !important; color: var(--ink) !important; border-top-left-radius: 0.25rem !important; }
 .messageText { color: var(--ink) !important; font-size: 0.88rem !important; line-height: 1.5 !important; }
 .messageMeta { color: var(--stone) !important; font-size: 0.63rem !important; }
+.sendingStatus {
+  display: inline-flex;
+  align-items: center;
+  animation: send-pending 1.2s ease-in-out infinite;
+}
+.sentStatus {
+  display: inline-flex;
+  align-items: center;
+  animation: send-confirm 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes send-pending {
+  0%, 100% { opacity: 0.55; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes send-confirm {
+  from { opacity: 0.35; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 @media (max-width: 370px) {
   .header { padding-right: 0.42rem; padding-left: 0.42rem; }
@@ -470,5 +513,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .headerBack, .headerAction, .stateButton, .composerButton, .sendButton { transition: none; }
-  .loading :global(div) { animation: none; }
+  .loading :global(div), .typingDots span, .sendingStatus, .sentStatus { animation: none; }
 }
