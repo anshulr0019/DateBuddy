@@ -205,7 +205,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               <div className="flex items-center gap-2">
                 <h3 className="text-[17px] font-extrabold text-infyn-ink">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-infyn-rose text-white text-[10px] font-black">
+                  <span key={unreadCount} className="animate-attention-pop px-2 py-0.5 rounded-full bg-infyn-rose text-white text-[10px] font-black">
                     {unreadCount} new
                   </span>
                 )}
@@ -231,13 +231,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-2.5">
               {notifications.length === 0 ? (
-                <div className="py-12 text-center text-infyn-ink/40 text-[13px]">
+                <div className="animate-soft-arrive py-12 text-center text-infyn-ink/40 text-[13px]">
                   <p className="text-3xl mb-2">🔔</p>
                   <p className="font-semibold">No notifications yet</p>
                   <p className="text-[11.5px] mt-1">Likes, matches, and messages will appear here</p>
                 </div>
               ) : (
-                notifications.map((notif) => {
+                notifications.map((notif, index) => {
                   const isUnread = !notif.read && !notif.isRead;
                   const isLike = notif.type === 'like' || notif.title.toLowerCase().includes('liked');
                   const isMatch = notif.type === 'match' || notif.title.toLowerCase().includes('match');
@@ -246,11 +246,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     <div
                       key={notif.id}
                       onClick={() => handleNotificationClick(notif)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
+                      className={`animate-soft-arrive p-3.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
                         isUnread
                           ? 'bg-infyn-surface border-infyn-rose/30 shadow-xs ring-1 ring-infyn-rose/15'
                           : 'bg-infyn-surface/60 border-infyn-border/60'
                       }`}
+                      style={{ animationDelay: `${Math.min(index, 6) * 45}ms` }}
                     >
                       <div className="flex items-start gap-3">
                         <div
@@ -270,7 +271,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                               {notif.title}
                             </p>
                             {isUnread && (
-                              <span className="h-2 w-2 rounded-full bg-infyn-rose flex-shrink-0" />
+                              <span className="animate-attention-pop h-2 w-2 rounded-full bg-infyn-rose flex-shrink-0" />
                             )}
                           </div>
                           <p className="text-[12px] text-infyn-ink/60 leading-snug mt-0.5 line-clamp-2">

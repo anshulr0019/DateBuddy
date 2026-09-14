@@ -140,7 +140,7 @@ export default function FloatingNav() {
     return <nav className={`${messagesStyles.nav} infyn-nav-theme`} aria-label="Main navigation"><div className={messagesStyles.navInner}>
       {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => { hapticLight(); router.push(tab.path); }} aria-current={tab.id === active ? 'page' : undefined}>
         <span className={messagesStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
-        {tab.id === 'messages' && unreadCount > 0 && <span className={messagesStyles.navUnread} aria-label={`${unreadCount} unread messages`} />}
+        {tab.id === 'messages' && unreadCount > 0 && <span key={unreadCount} className={`${messagesStyles.navUnread} animate-attention-pop`} aria-label={`${unreadCount} unread messages`} />}
       </button>)}
     </div></nav>;
   }
@@ -182,7 +182,7 @@ export default function FloatingNav() {
 
               {/* Unread badge indicator */}
               {tab.id === 'messages' && !isActive && unreadCount > 0 && (
-                <div className="absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" aria-label={`${unreadCount} unread messages`} />
+                <div key={unreadCount} className="animate-attention-pop absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" aria-label={`${unreadCount} unread messages`} />
               )}
             </button>
           );

@@ -213,7 +213,7 @@ export default function MessagesPage() {
           <div className={styles.titleRow}>
             <div className={styles.titleCluster}>
               <h1 className={styles.title}>Messages</h1>
-              {unreadTotal > 0 && <span className={styles.countBadge}>{unreadTotal > 99 ? '99+' : unreadTotal}</span>}
+              {unreadTotal > 0 && <span key={unreadTotal} className={`${styles.countBadge} animate-attention-pop`}>{unreadTotal > 99 ? '99+' : unreadTotal}</span>}
             </div>
             <div className={styles.headerActions}>
               <button
@@ -223,7 +223,7 @@ export default function MessagesPage() {
                 aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
               >
                 <Ic.Bell />
-                {unreadCount > 0 && <span className={styles.navUnread} aria-hidden />}
+                {unreadCount > 0 && <span key={unreadCount} className={`${styles.navUnread} animate-attention-pop`} aria-hidden />}
               </button>
             </div>
           </div>

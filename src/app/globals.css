@@ -846,6 +846,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: pulse-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* One-shot attention feedback for newly mounted unread badges. */
+@keyframes attention-pop {
+  0%   { opacity: 0; transform: scale(0.55); }
+  55%  { opacity: 1; transform: scale(1.24); }
+  78%  { transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-attention-pop {
+  animation: attention-pop 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Calm staggered reveal for short lists and contextual empty states. */
+@keyframes soft-arrive {
+  0%   { opacity: 0; transform: translateY(7px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-soft-arrive {
+  animation: soft-arrive 0.34s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  will-change: transform, opacity;
+}
+
 /* ─────────────────────────────────────────────────
    Anonymous Chat — radar matchmaking animations
    Transform/opacity only (compositor-friendly).
@@ -899,6 +921,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .animate-card-swipe-up, .animate-card-depth-enter, .animate-popover-enter,
   .animate-bubble-enter, .animate-sheet-up, .animate-msg-mine,
   .animate-msg-theirs, .animate-shake, .animate-scale-pop, .animate-pulse-ring,
+  .animate-attention-pop, .animate-soft-arrive,
   .animate-skeleton::after {
     animation: none !important;
     transition: none !important;

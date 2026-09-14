@@ -168,7 +168,8 @@ export function MatchScreen({
 
           {/* Glowing Center Heart */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-[var(--infyn-pink,#FF6B9D)] via-[#F43F5E] to-[#FF8C42] text-white shadow-[0_0_25px_rgba(244,63,94,0.8)] border-2 border-white transform hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            {theme === 'editorial' && <span className={discoverStyles.matchConnectionPulse} aria-hidden />}
+            <svg className="relative z-10" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </div>

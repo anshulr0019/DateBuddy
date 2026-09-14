@@ -641,8 +641,8 @@ function TopBar() {
   return <header className={styles.header}>
     <div className={styles.brand}><span className={styles.brandMark} aria-hidden="true" /><div><span className={styles.wordmark}>Infyn</span><h1>Discover</h1></div></div>
     <div className={styles.headerActions}>
-      <button className={styles.filterButton} onClick={openFilters} aria-label={`Open discovery filters${count ? `, ${count} active` : ''}`}><Ic.Filter /><span>Filters</span>{count > 0 && <span className={styles.count}>{count}</span>}</button>
-      <button className={styles.iconButton} onClick={openNotifications} aria-label={`Open notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}><Ic.Bell />{unreadCount > 0 && <span className={styles.unread} />}</button>
+      <button className={styles.filterButton} onClick={openFilters} aria-label={`Open discovery filters${count ? `, ${count} active` : ''}`}><Ic.Filter /><span>Filters</span>{count > 0 && <span key={count} className={`${styles.count} animate-attention-pop`}>{count}</span>}</button>
+      <button className={styles.iconButton} onClick={openNotifications} aria-label={`Open notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}><Ic.Bell />{unreadCount > 0 && <span key={unreadCount} className={`${styles.unread} animate-attention-pop`} />}</button>
     </div>
   </header>;
 }

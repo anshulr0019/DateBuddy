@@ -116,14 +116,14 @@ export default function ConnectionsPage() {
               {loading && (
                 <div className="grid grid-cols-2 gap-3">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-44 rounded-3xl bg-infyn-surface/60 animate-pulse" />
+                    <div key={i} className="h-44 rounded-3xl animate-skeleton" />
                   ))}
                 </div>
               )}
 
               {!loading && error && (
-                <div className="text-center py-16 px-6">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-infyn-rose mb-4 mx-auto shadow-sm">
+                <div className="animate-soft-arrive text-center py-16 px-6">
+                  <div className="animate-scale-pop flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-infyn-rose mb-4 mx-auto shadow-sm">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
@@ -142,9 +142,9 @@ export default function ConnectionsPage() {
               )}
 
               {!loading && !error && matches.length === 0 && (
-                <div className="text-center py-16 px-6">
+                <div className="animate-soft-arrive text-center py-16 px-6">
                   <div className="relative mb-6">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-infyn-rose/25 mx-auto shadow-sm">
+                    <div className="animate-scale-pop flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-infyn-rose/25 mx-auto shadow-sm">
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                       </svg>
