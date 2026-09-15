@@ -44,7 +44,7 @@ export default function MessagesPage() {
   const router = useRouter();
   const auth = useCurrentUser();
   const myId = auth.status === 'authenticated' ? auth.userId : null;
-  const { openNotifications, unreadCount } = useNotifications();
+  const { openNotifications } = useNotifications();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -220,10 +220,9 @@ export default function MessagesPage() {
                 type="button"
                 className={styles.iconButton}
                 onClick={() => { hapticLight(); openNotifications(); }}
-                aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
+                aria-label="Open notifications"
               >
                 <Ic.Bell />
-                {unreadCount > 0 && <span key={unreadCount} className={`${styles.navUnread} animate-attention-pop`} aria-hidden />}
               </button>
             </div>
           </div>

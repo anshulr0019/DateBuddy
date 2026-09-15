@@ -5,6 +5,7 @@ import { Ic, WhatsAppTicks } from '../../../components/icons';
 import { formatClock } from '../../../lib/time';
 import type { ChatMessage } from '../chatTypes';
 import chatStyles from '../chat.module.css';
+import { VoiceMessagePlayer } from './VoiceMessagePlayer';
 
 const LONG_PRESS_MS = 450;
 
@@ -30,6 +31,33 @@ function parseCallEvent(content: string): CallEventData | null {
   } catch {
     return null;
   }
+}
+
+interface DatePlanData {
+  activity: string;
+  when: string;
+  time: string;
+  note?: string;
+}
+
+function parseDatePlan(content: string): DatePlanData | null {
+  const lines = content.split('\n').map((line) => line.trim()).filter(Boolean);
+  if (!lines[0]?.match(/^📅\s*Date Plan$/i)) return null;
+
+  const valueAfter = (label: string) => {
+    const line = lines.find((item) => item.includes(`${label}:`));
+    if (!line) return '';
+    return line.slice(line.indexOf(`${label}:`) + label.length + 1).trim();
+  };
+
+  const activity = valueAfter('Activity');
+  const when = valueAfter('When');
+  const time = valueAfter('Time');
+  if (!activity || !when || !time) return null;
+
+  const noteLine = lines.find((line) => line.startsWith('💬'));
+  const note = noteLine?.replace(/^💬\s*/, '').replace(/^"|"$/g, '').trim();
+  return { activity, when, time, note: note || undefined };
 }
 
 /* Honest status indicator: clock while sending/queued, single tick once the
@@ -65,6 +93,45 @@ function MetaRow({ message }: { message: ChatMessage }) {
   );
 }
 
+function DatePlanMessage({ data, message }: { data: DatePlanData; message: ChatMessage }) {
+  const details = [
+    { label: 'Activity', value: data.activity, icon: <Ic.Star className="h-4 w-4" /> },
+    { label: 'When', value: data.when, icon: <Ic.Calendar className="h-4 w-4" /> },
+    { label: 'Time', value: data.time, icon: <Ic.Clock className="h-4 w-4" /> },
+  ];
+
+  return (
+    <div className={chatStyles.datePlanCard}>
+      <div className={chatStyles.datePlanHeader}>
+        <div className={chatStyles.datePlanTitle}>
+          <span className={chatStyles.datePlanHeaderIcon}><Ic.Calendar className="h-4 w-4" /></span>
+          <span>Date Plan</span>
+        </div>
+        <span className={chatStyles.datePlanBadge}>Proposal</span>
+      </div>
+      <div className={chatStyles.datePlanDetails}>
+        {details.map((detail) => (
+          <div className={chatStyles.datePlanRow} key={detail.label}>
+            <span className={chatStyles.datePlanRowIcon}>{detail.icon}</span>
+            <p><strong>{detail.label}:</strong> {detail.value}</p>
+          </div>
+        ))}
+        {data.note && (
+          <div className={`${chatStyles.datePlanRow} ${chatStyles.datePlanNote}`}>
+            <span className={chatStyles.datePlanRowIcon}><Ic.Chat /></span>
+            <p>&ldquo;{data.note}&rdquo;</p>
+          </div>
+        )}
+      </div>
+      <div className={chatStyles.datePlanFooter}>
+        <span>Let&apos;s make it happen</span>
+        <Ic.Heart filled />
+      </div>
+      <MetaRow message={message} />
+    </div>
+  );
+}
+
 interface MessageBubbleProps {
   message: ChatMessage;
   isMine: boolean;
@@ -89,6 +156,7 @@ function MessageBubbleInner({
   const longPressFiredRef = useRef(false);
 
   const callEvent = parseCallEvent(message.content);
+  const datePlan = message.type === 'text' ? parseDatePlan(message.content) : null;
   const canHaveActions = !callEvent;
 
   const startPress = () => {
@@ -221,7 +289,7 @@ function MessageBubbleInner({
             ? `Message from ${isMine ? 'you' : partnerName}: ${message.content}. Press Enter for options.`
             : undefined
         }
-        className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} relative max-w-[84%] sm:max-w-[78%] transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D1D3F]/35 ${
+        className={`${chatStyles.bubble} ${isMine ? chatStyles.bubbleMine : chatStyles.bubbleTheirs} ${datePlan ? chatStyles.datePlanBubble : ''} relative ${datePlan ? 'max-w-[92%] sm:max-w-[86%]' : 'max-w-[84%] sm:max-w-[78%]'} transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D1D3F]/35 ${
           isMine
             ? 'bg-infyn-blush border border-infyn-rose-line/60 text-infyn-ink rounded-tr-[4px]'
             : 'bg-infyn-surface border border-infyn-border/70 text-infyn-ink rounded-tl-[4px]'
@@ -265,12 +333,16 @@ function MessageBubbleInner({
         )}
         {/* Text */}
         {message.type === 'text' && (
-          <div className="flex flex-col">
-            <p className={`${chatStyles.messageText} leading-relaxed font-normal select-text whitespace-pre-wrap break-words`}>
-              {message.content}
-            </p>
-            <MetaRow message={message} />
-          </div>
+          datePlan ? (
+            <DatePlanMessage data={datePlan} message={message} />
+          ) : (
+            <div className="flex flex-col">
+              <p className={`${chatStyles.messageText} leading-relaxed font-normal select-text whitespace-pre-wrap break-words`}>
+                {message.content}
+              </p>
+              <MetaRow message={message} />
+            </div>
+          )
         )}
 
         {/* Photo */}
@@ -358,16 +430,8 @@ function MessageBubbleInner({
 
         {/* Voice */}
         {message.type === 'voice' && (
-          <div className="flex flex-col gap-1.5 min-w-[190px]">
-            <div className="flex items-center gap-2.5 py-1">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted">
-                <Ic.Mic className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-infyn-ink">Voice note</p>
-                <p className="text-[11px] text-infyn-muted">Playback isn&apos;t supported here yet</p>
-              </div>
-            </div>
+          <div className="flex min-w-[225px] flex-col gap-1">
+            <VoiceMessagePlayer audioUrl={message.content} isMine={isMine} />
             <MetaRow message={message} />
           </div>
         )}

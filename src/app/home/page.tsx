@@ -72,7 +72,7 @@ function formatWhen(iso: string): string {
 
 export default function HomePage() {
   const router = useRouter();
-  const { openNotifications, unreadCount, addNotification } = useNotifications();
+  const { openNotifications, addNotification } = useNotifications();
 
   const [picks, setPicks] = useState<Pick[]>(cachedPicks ?? []);
   const [meetups, setMeetups] = useState<Meetup[]>(cachedMeetups ?? []);
@@ -306,9 +306,6 @@ export default function HomePage() {
                 className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface border border-infyn-border/70 shadow-2xs hover:bg-infyn-surface-soft transition-all duration-200 active:scale-90 cursor-pointer font-system"
               >
                 <Ic.Bell />
-                {unreadCount > 0 && (
-                  <div key={unreadCount} className="animate-attention-pop absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" />
-                )}
               </button>
             </div>
 

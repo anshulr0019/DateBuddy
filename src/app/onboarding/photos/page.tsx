@@ -140,7 +140,7 @@ export default function PhotosPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6">
+        <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y scrollbar-none pb-8 [-webkit-overflow-scrolling:touch]">
           {error && (
             <div role="alert" className="mb-4 flex items-start gap-2 rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-rose-600 text-[13px] font-semibold leading-snug">
               <svg className="flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -246,16 +246,22 @@ export default function PhotosPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 z-20 px-6 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-paper via-infyn-paper/90 to-transparent border-t border-black/[0.04]">
+        <div className="flex-shrink-0 z-20 px-6 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-infyn-paper/95 backdrop-blur-xl border-t border-infyn-border/70">
           <button
             onClick={handleNext}
             disabled={validCount < 2}
-            className="w-full h-14 rounded-2xl text-[15px] font-bold transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100 bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-[0_10px_28px_-8px_rgba(32,26,22,0.16)] active:scale-[0.985]"
+            className={`w-full h-14 rounded-2xl text-[15px] font-bold transition-all flex items-center justify-center gap-2 disabled:active:scale-100 ${
+              validCount < 2
+                ? 'border border-infyn-border bg-infyn-surface-soft text-infyn-secondary shadow-none cursor-default'
+                : 'bg-infyn-rose text-white shadow-[0_10px_28px_-8px_rgba(32,26,22,0.16)] active:scale-[0.985] cursor-pointer'
+            }`}
           >
-            Continue
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-            </svg>
+            {validCount < 2 ? `Add ${2 - validCount} more photo${2 - validCount === 1 ? '' : 's'} to continue` : 'Continue'}
+            {validCount >= 2 && (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

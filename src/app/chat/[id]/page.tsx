@@ -84,6 +84,24 @@ function ChatContent() {
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [replyingTo, setReplyingTo] = useState<ReplyTarget | null>(null);
   const [safetyOpen, setSafetyOpen] = useState(false);
+  const [callMenuOpen, setCallMenuOpen] = useState(false);
+  const callMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!callMenuOpen) return;
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!callMenuRef.current?.contains(event.target as Node)) setCallMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setCallMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutsidePress);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePress);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [callMenuOpen]);
 
   /* Enhanced typing indicator — track how long partner has been typing */
   const typingStartedAtRef = useRef<number | null>(null);
@@ -317,7 +335,7 @@ function ChatContent() {
                 <div className={chatStyles.headerActions}>
                   {/* Minimalist Games Button */}
                   <button
-                    onClick={() => { hapticLight(); setGamesOpen(true); }}
+                    onClick={() => { hapticLight(); setCallMenuOpen(false); setGamesOpen(true); }}
                     className={`${chatStyles.headerAction}`}
                     title="Mini Games"
                     aria-label="Play mini games"
@@ -333,7 +351,7 @@ function ChatContent() {
 
                   {/* Date Planner Button */}
                   <button
-                    onClick={() => { hapticLight(); setDatePlannerOpen(true); }}
+                    onClick={() => { hapticLight(); setCallMenuOpen(false); setDatePlannerOpen(true); }}
                     className={`${chatStyles.headerAction}`}
                     title="Plan a Date"
                     aria-label="Plan a date"
@@ -346,31 +364,51 @@ function ChatContent() {
                     </svg>
                   </button>
 
-                  {/* Audio Call */}
+                  {/* One compact call control reveals the existing audio/video actions. */}
+                  <div className={chatStyles.callMenu} ref={callMenuRef}>
+                    <button
+                      onClick={() => { hapticLight(); setCallMenuOpen((open) => !open); }}
+                      className={`${chatStyles.headerAction} ${callMenuOpen ? chatStyles.headerActionActive : ''}`}
+                      title="Call"
+                      aria-label="Call options"
+                      aria-haspopup="menu"
+                      aria-expanded={callMenuOpen}
+                    >
+                      <Ic.Phone className="h-[17px] w-[17px]" />
+                    </button>
+                    {callMenuOpen && (
+                      <div className={chatStyles.callMenuPopover} role="menu" aria-label="Choose call type">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            hapticLight();
+                            setCallMenuOpen(false);
+                            setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' });
+                          }}
+                          className={chatStyles.callMenuOption}
+                        >
+                          <span className={chatStyles.callMenuOptionIcon}><Ic.Phone className="h-4 w-4" /></span>
+                          <span>Audio</span>
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            hapticLight();
+                            setCallMenuOpen(false);
+                            setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' });
+                          }}
+                          className={chatStyles.callMenuOption}
+                        >
+                          <span className={`${chatStyles.callMenuOptionIcon} ${chatStyles.callMenuVideoIcon}`}><Ic.Video className="h-4 w-4" /></span>
+                          <span>Video</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <button
-                    onClick={() => { hapticLight(); setCallState({ isOpen: true, callType: 'audio', mode: 'outgoing' }); }}
-                    className={`${chatStyles.headerAction}`}
-                    title="Audio Call"
-                    aria-label="Start audio call"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
-                    </svg>
-                  </button>
-                  {/* Video Call */}
-                  <button
-                    onClick={() => { hapticLight(); setCallState({ isOpen: true, callType: 'video', mode: 'outgoing' }); }}
-                    className={`${chatStyles.headerAction} ${chatStyles.headerActionVideo}`}
-                    title="Video Call"
-                    aria-label="Start video call"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <polygon points="23 7 16 12 23 17 23 7" />
-                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => { hapticLight(); setSafetyOpen(true); }}
+                    onClick={() => { hapticLight(); setCallMenuOpen(false); setSafetyOpen(true); }}
                     aria-label="Conversation options: report or block"
                     className={`${chatStyles.headerAction}`}
                   >

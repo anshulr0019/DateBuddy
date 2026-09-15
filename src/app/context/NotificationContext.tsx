@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { hapticLight, hapticSuccess } from '../lib/haptics';
+import { Ic } from '../components/icons';
 
 export interface AppNotification {
   id: number;
@@ -232,7 +233,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-2.5">
               {notifications.length === 0 ? (
                 <div className="animate-soft-arrive py-12 text-center text-infyn-ink/40 text-[13px]">
-                  <p className="text-3xl mb-2">🔔</p>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-infyn-rose-line/70 bg-infyn-blush text-infyn-rose">
+                    <Ic.Bell />
+                  </div>
                   <p className="font-semibold">No notifications yet</p>
                   <p className="text-[11.5px] mt-1">Likes, matches, and messages will appear here</p>
                 </div>
@@ -241,6 +244,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   const isUnread = !notif.read && !notif.isRead;
                   const isLike = notif.type === 'like' || notif.title.toLowerCase().includes('liked');
                   const isMatch = notif.type === 'match' || notif.title.toLowerCase().includes('match');
+                  const isCall = notif.type === 'call';
+                  const isEvent = notif.type === 'event' || notif.type === 'event_request' || notif.type === 'meetup';
 
                   return (
                     <div
@@ -255,15 +260,25 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg ${
+                          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border ${
                             isMatch
-                              ? 'bg-gradient-to-tr from-infyn-rose to-infyn-rose text-white shadow-xs'
+                              ? 'border-infyn-rose bg-infyn-rose text-white shadow-xs'
                               : isLike
-                              ? 'bg-gradient-to-tr from-rose-500 to-amber-500 text-white shadow-xs'
-                              : 'bg-gradient-to-tr from-infyn-rose to-[#A855F7] text-white shadow-xs'
+                              ? 'border-infyn-rose-line bg-infyn-blush text-infyn-rose'
+                              : 'border-infyn-border bg-infyn-surface-soft text-infyn-secondary'
                           }`}
                         >
-                          {isMatch ? '💕' : isLike ? '✨' : '💬'}
+                          {isMatch || isLike ? (
+                            <Ic.Heart filled={isMatch} />
+                          ) : isCall ? (
+                            <Ic.Phone className="h-5 w-5" />
+                          ) : isEvent ? (
+                            <Ic.Calendar className="h-5 w-5" />
+                          ) : notif.type === 'message' ? (
+                            <Ic.Chat />
+                          ) : (
+                            <Ic.Bell />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">

@@ -103,19 +103,16 @@ export default function AIWingman({
     return [
       {
         tag: 'Playful',
-        emoji: '😏',
         badgeColor: 'bg-rose-500/10 text-rose-600 border-rose-500/20',
         text: playful,
       },
       {
         tag: interest ? `Hook (${interest})` : 'Curious',
-        emoji: '🎯',
         badgeColor: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
         text: promptHook,
       },
       {
         tag: 'Activity Vibe',
-        emoji: '☕',
         badgeColor: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
         text: casual,
       },
@@ -135,35 +132,45 @@ export default function AIWingman({
   };
 
   return (
-    <div className="w-full select-none mb-1">
-      {/* Pill Toggle Button */}
-      <div className="flex items-center justify-between px-1">
+    <div className="w-full select-none">
+      <div className="flex min-h-8 items-center justify-between gap-2">
         <button
           type="button"
           onClick={() => {
             triggerHaptic('light');
             setIsOpen(prev => !prev);
           }}
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11.5px] font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+          aria-expanded={isOpen}
+          className={`inline-flex min-h-8 items-center gap-2 rounded-xl border px-2.5 py-1 text-[11.5px] font-bold transition-all duration-200 cursor-pointer active:scale-[0.97] ${
             isOpen
-              ? 'bg-infyn-ink text-white shadow-sm'
-              : 'bg-gradient-to-r from-infyn-rose/10 via-infyn-rose/10 to-infyn-rose/10 border border-infyn-rose/20 text-infyn-ink/80 hover:bg-infyn-rose/15'
+              ? 'border-infyn-rose-line bg-infyn-blush text-infyn-rose shadow-2xs'
+              : 'border-transparent bg-transparent text-infyn-secondary hover:border-infyn-border hover:bg-infyn-surface'
           }`}
         >
-          <span className="text-[12px]">✨</span>
-          <span>AI Wingman</span>
-          <span className="text-[10px] opacity-60">
-            {isOpen ? '▲ Hide' : '▼ Icebreakers'}
+          <span className="grid h-5 w-5 place-items-center rounded-lg bg-infyn-blush text-infyn-rose">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 3l1.35 4.15L17.5 8.5l-4.15 1.35L12 14l-1.35-4.15L6.5 8.5l4.15-1.35L12 3z" />
+              <path d="M18.5 14l.75 2.25L21.5 17l-2.25.75L18.5 20l-.75-2.25L15.5 17l2.25-.75L18.5 14z" />
+            </svg>
           </span>
+          <span>AI Wingman</span>
+          <svg className={`h-3 w-3 text-infyn-muted transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
 
         {isOpen && (
           <button
             type="button"
             onClick={handleRefresh}
-            className="text-[11px] font-semibold text-infyn-rose hover:text-infyn-rose flex items-center gap-1 cursor-pointer transition-colors active:scale-90"
+            aria-label="Generate new Wingman suggestions"
+            className="flex min-h-8 items-center gap-1.5 rounded-xl px-2 text-[10.5px] font-semibold text-infyn-secondary transition-all hover:bg-infyn-surface hover:text-infyn-rose active:scale-95 cursor-pointer"
           >
-            <span>🔄</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15" />
+            </svg>
             <span>New Suggestions</span>
           </button>
         )}
@@ -171,10 +178,10 @@ export default function AIWingman({
 
       {/* Expanded Suggestions Panel */}
       {isOpen && (
-        <div className="mt-2 p-2.5 rounded-[22px] bg-infyn-surface/90 backdrop-blur-xl border border-infyn-ink/[0.08] shadow-[0_8px_30px_-6px_rgba(32,26,22,0.1)] space-y-2 animate-page-entry">
+        <div className="mt-1.5 space-y-2 rounded-2xl border border-infyn-border/80 bg-infyn-surface/95 p-2.5 shadow-[0_8px_24px_-12px_rgba(32,26,22,0.14)] backdrop-blur-xl animate-popover-enter">
           <div className="px-1 pt-0.5 flex items-center justify-between">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-infyn-ink/40">
-              Tap to use opener for {cleanName}:
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-infyn-muted">
+              Suggested for {cleanName}
             </p>
           </div>
 
@@ -184,18 +191,18 @@ export default function AIWingman({
                 key={idx}
                 type="button"
                 onClick={() => handleSelect(item.text)}
-                className="w-full text-left p-2.5 rounded-xl bg-infyn-surface border border-infyn-ink/[0.06] hover:border-infyn-rose/30 hover:bg-purple-50/30 transition-all duration-150 active:scale-[0.985] cursor-pointer group"
+                className="group w-full rounded-xl border border-infyn-border/70 bg-infyn-paper/45 p-2.5 text-left transition-all duration-150 hover:border-infyn-rose/30 hover:bg-infyn-blush/25 active:scale-[0.985] cursor-pointer"
               >
                 <div className="flex items-center gap-1.5 mb-1">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${item.badgeColor}`}>
-                    <span>{item.emoji}</span>
+                  <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[9.5px] font-bold ${item.badgeColor}`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
                     <span>{item.tag}</span>
                   </span>
-                  <span className="text-[10.5px] text-infyn-rose font-semibold opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
-                    Tap to insert &rarr;
+                  <span className="ml-auto flex items-center gap-0.5 text-[10px] font-semibold text-infyn-rose opacity-70 transition-opacity group-hover:opacity-100">
+                    Use <span aria-hidden>→</span>
                   </span>
                 </div>
-                <p className="text-[12.5px] text-infyn-ink leading-snug font-medium line-clamp-2">
+                <p className="line-clamp-2 text-[12.5px] font-medium leading-snug text-infyn-ink/85">
                   &ldquo;{item.text}&rdquo;
                 </p>
               </button>

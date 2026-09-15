@@ -3,8 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Ic } from './icons';
-import messagesStyles from '../messages/messages.module.css';
-import { useNotifications } from '../context/NotificationContext';
 import { prefetchFeed } from '../lib/feedCache';
 import { hapticLight } from '../lib/haptics';
 
@@ -28,7 +26,6 @@ const HIDDEN_PREFIXES = ['/onboarding', '/chat', '/meetups', '/verify-otp', '/ve
 export default function FloatingNav() {
   const router = useRouter();
   const pathname = usePathname();
-  const { unreadCount } = useNotifications();
   const isStandalonePage = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix)) || pathname === '/';
   // Keep a ref to pathname so the touch handler always has the latest value
   // without being re-registered on every navigation.
@@ -136,15 +133,6 @@ export default function FloatingNav() {
   const active = getActiveTab();
   const activeIndex = NAV_TABS.findIndex(t => t.id === active);
 
-  if (pathname === '/messages') {
-    return <nav className={`${messagesStyles.nav} infyn-nav-theme`} aria-label="Main navigation"><div className={messagesStyles.navInner}>
-      {NAV_TABS.map(tab => <button key={tab.id} className={messagesStyles.navTab} onClick={() => { hapticLight(); router.push(tab.path); }} aria-current={tab.id === active ? 'page' : undefined}>
-        <span className={messagesStyles.navIcon}>{tab.icon(tab.id === active)}</span><span>{tab.label}</span>
-        {tab.id === 'messages' && unreadCount > 0 && <span key={unreadCount} className={`${messagesStyles.navUnread} animate-attention-pop`} aria-label={`${unreadCount} unread messages`} />}
-      </button>)}
-    </div></nav>;
-  }
-
   return (
     <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
       <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-infyn-border/80 bg-infyn-surface/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl overflow-hidden">
@@ -180,10 +168,6 @@ export default function FloatingNav() {
                 {tab.label}
               </span>
 
-              {/* Unread badge indicator */}
-              {tab.id === 'messages' && !isActive && unreadCount > 0 && (
-                <div key={unreadCount} className="animate-attention-pop absolute right-3.5 top-2.5 h-2 w-2 rounded-full bg-infyn-rose ring-2 ring-white shadow-2xs" aria-label={`${unreadCount} unread messages`} />
-              )}
             </button>
           );
         })}
