@@ -129,6 +129,8 @@ export function GlobalCallListener() {
 
       if (sig.type !== 'offer') return;
 
+      // Release the microphone and keep an unsent draft before call UI opens.
+      window.dispatchEvent(new Event('infyn:call-interruption'));
       hapticSuccess();
       const incoming: IncomingCall = {
         matchId: sig.matchId,

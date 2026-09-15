@@ -431,7 +431,7 @@ function MessageBubbleInner({
         {/* Voice */}
         {message.type === 'voice' && (
           <div className="flex min-w-[225px] flex-col gap-1">
-            <VoiceMessagePlayer audioUrl={message.content} isMine={isMine} />
+            <VoiceMessagePlayer audioUrl={message.content} isMine={isMine} durationSec={message.metadata?.durationSec} />
             <MetaRow message={message} />
           </div>
         )}

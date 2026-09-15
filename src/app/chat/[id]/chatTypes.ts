@@ -16,12 +16,13 @@ export interface ChatMessage {
   id: string;
   senderId: number;
   type: MessageKind;
-  /* Text body for 'text', image URL for 'photo'/'gif', place text for 'location'. */
+  /* Text body, image/audio URL for media, or place text for 'location'. */
   content: string;
   createdAt: string;
   /* Only present on the current user's own messages. */
   status?: SendStatus;
   metadata?: {
+    durationSec?: number;
     reactions?: Record<string, string>;
     replyTo?: ReplyTarget;
     [key: string]: any;

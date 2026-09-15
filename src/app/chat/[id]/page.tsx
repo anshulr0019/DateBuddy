@@ -142,6 +142,10 @@ function ChatContent() {
     mode: 'outgoing',
   });
 
+  useEffect(() => {
+    if (callState.isOpen) window.dispatchEvent(new Event('infyn:call-interruption'));
+  }, [callState.isOpen]);
+
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const nearBottomRef = useRef(true);
@@ -606,12 +610,19 @@ function ChatContent() {
                   />
                 </div>
                 <Composer
+                  key={validMatchId}
                   value={inputText}
                   onChange={(val) => {
                     setInputText(val);
                     if (val.trim()) notifyTyping();
                   }}
                   onSend={handleSend}
+                  onSendVoice={(file, durationSec) => {
+                    const accepted = chat.sendVoice(file, durationSec, replyingTo);
+                    if (accepted) { setReplyingTo(null); setDrawerTab(null); }
+                    return accepted;
+                  }}
+                  recordingBlocked={callState.isOpen}
                   onPickFile={handlePickFile}
                   replyingTo={replyingTo}
                   onCancelReply={() => setReplyingTo(null)}

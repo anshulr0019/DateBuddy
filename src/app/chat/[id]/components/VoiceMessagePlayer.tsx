@@ -5,14 +5,16 @@ import React, { useState, useRef, useEffect } from 'react';
 interface VoiceMessagePlayerProps {
   audioUrl: string;
   isMine: boolean;
+  durationSec?: number;
 }
 
-export function VoiceMessagePlayer({ audioUrl, isMine }: VoiceMessagePlayerProps) {
+export function VoiceMessagePlayer({ audioUrl, isMine, durationSec }: VoiceMessagePlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isUnavailable, setIsUnavailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -21,51 +23,71 @@ export function VoiceMessagePlayer({ audioUrl, isMine }: VoiceMessagePlayerProps
     setIsPlaying(false);
     setProgress(0);
     setCurrentTime(0);
-    setDuration(0);
+    const knownDuration = typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec > 0 ? durationSec : 0;
+    setDuration(knownDuration);
+    setIsLoading(false);
     setIsUnavailable(!looksPlayable);
     if (!looksPlayable) return;
 
     const audio = new Audio(audioUrl);
+    audio.preload = 'metadata';
     audioRef.current = audio;
 
     audio.onloadedmetadata = () => {
-      if (audio.duration && !isNaN(audio.duration)) {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
         setDuration(audio.duration);
       }
     };
 
     audio.ontimeupdate = () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
-        setCurrentTime(audio.currentTime);
-      }
+      const total = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : knownDuration;
+      setProgress(total ? Math.min(100, (audio.currentTime / total) * 100) : 0);
+      setCurrentTime(audio.currentTime);
     };
 
     audio.onended = () => {
       setIsPlaying(false);
+      setIsLoading(false);
       setProgress(0);
       setCurrentTime(0);
     };
     audio.onerror = () => {
       setIsPlaying(false);
+      setIsLoading(false);
       setIsUnavailable(true);
     };
+    audio.onplaying = () => { setIsLoading(false); setIsPlaying(true); setIsUnavailable(false); };
+    audio.onpause = () => { setIsPlaying(false); setIsLoading(false); };
+    const pause = () => audio.pause();
+    const pauseOther = (event: Event) => { if ((event as CustomEvent).detail !== audio) pause(); };
+    window.addEventListener('infyn:voice-play', pauseOther);
+    window.addEventListener('infyn:call-interruption', pause);
 
     return () => {
+      window.removeEventListener('infyn:voice-play', pauseOther);
+      window.removeEventListener('infyn:call-interruption', pause);
+      audio.onloadedmetadata = audio.ontimeupdate = audio.onended = audio.onerror = audio.onplaying = audio.onpause = null;
       audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
       audioRef.current = null;
     };
-  }, [audioUrl]);
+  }, [audioUrl, durationSec]);
 
   const togglePlay = () => {
-    if (!audioRef.current || isUnavailable) return;
+    const audio = audioRef.current;
+    if (!audio) return;
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsUnavailable(true));
+      window.dispatchEvent(new CustomEvent('infyn:voice-play', { detail: audio }));
+      setIsLoading(true);
+      if (isUnavailable) audio.load();
+      audio.play().catch(() => {
+        if (audioRef.current !== audio) return;
+        setIsPlaying(false); setIsLoading(false); setIsUnavailable(true);
+      });
     }
   };
 
@@ -76,16 +98,18 @@ export function VoiceMessagePlayer({ audioUrl, isMine }: VoiceMessagePlayerProps
   };
 
   return (
-    <div className="flex min-w-[215px] items-center gap-3 py-0.5 select-none">
+    <div className="flex w-full min-w-0 items-center gap-3 py-0.5 select-none">
       {/* Play/Pause Circle Button */}
       <button
         type="button"
+        onPointerDown={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
         onClick={togglePlay}
-        disabled={isUnavailable}
-        aria-label={isUnavailable ? 'Audio note unavailable' : isPlaying ? 'Pause audio note' : 'Play audio note'}
-        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-all active:scale-90 shadow-xs ${
+        disabled={isLoading || !/^(https?:|blob:|data:audio|\/)/i.test(audioUrl)}
+        aria-label={isLoading ? 'Loading audio note' : isUnavailable ? 'Retry audio note' : isPlaying ? 'Pause audio note' : 'Play audio note'}
+        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border transition-all active:scale-90 shadow-xs ${
           isUnavailable
-            ? 'border-infyn-border bg-infyn-surface-soft text-infyn-muted cursor-default'
+            ? 'border-infyn-border bg-infyn-surface-soft text-infyn-muted cursor-pointer'
             :
           isMine
             ? 'border-infyn-rose-line bg-infyn-surface text-infyn-rose cursor-pointer'
@@ -115,7 +139,7 @@ export function VoiceMessagePlayer({ audioUrl, isMine }: VoiceMessagePlayerProps
             return (
               <span
                 key={i}
-                className={`w-[3px] flex-shrink-0 rounded-full transition-colors ${isFilled ? 'bg-infyn-rose' : 'bg-infyn-rose/20'}`}
+                className={`min-w-0 flex-1 rounded-full transition-colors ${isFilled ? 'bg-infyn-rose' : 'bg-infyn-rose/20'}`}
                 style={{ height: `${barH}px` }}
               />
             );
@@ -123,7 +147,7 @@ export function VoiceMessagePlayer({ audioUrl, isMine }: VoiceMessagePlayerProps
         </div>
 
         <div className="flex justify-between text-[10px] font-medium leading-none text-infyn-muted">
-          <span>{isUnavailable ? 'Audio unavailable' : formatSecs(currentTime)}</span>
+          <span>{isLoading ? 'Loading…' : isUnavailable ? 'Tap to retry' : formatSecs(currentTime)}</span>
           {!isUnavailable && <span>{formatSecs(duration || 0)}</span>}
         </div>
       </div>

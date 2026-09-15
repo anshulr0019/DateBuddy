@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getPusherClient } from '@/lib/pusher-client';
 import { compressImageForUpload } from '@/lib/image-compress';
+import { MAX_VOICE_BYTES, MAX_VOICE_SECONDS, MIN_VOICE_SECONDS, VOICE_MIME_TYPES, voiceMimeType } from '@/lib/voice-notes';
 import type { ChatMessage, Partner, SendStatus, ReplyTarget } from './chatTypes';
 import { hapticLight, hapticWarning } from '@/app/lib/haptics';
 
@@ -58,6 +59,7 @@ export function useChat(matchId: number | null, myId: number | null) {
   const objectUrlsRef = useRef<Map<string, string>>(new Map());
   const uploadedUrlsRef = useRef<Map<string, string>>(new Map());
   const sendsInFlightRef = useRef(0);
+  const activeSendsRef = useRef(new Set<string>());
   const pendingRef = useRef<ChatMessage[]>([]);
   pendingRef.current = pending;
   const loadAbortRef = useRef<AbortController | null>(null);
@@ -306,17 +308,18 @@ export function useChat(matchId: number | null, myId: number | null) {
 
   const doSend = useCallback(
     async (msg: ChatMessage) => {
-      if (!matchId || myId === null) return;
+      if (!matchId || myId === null || activeSendsRef.current.has(msg.id)) return;
+      activeSendsRef.current.add(msg.id);
       sendsInFlightRef.current += 1;
       try {
         let content = msg.content;
 
-        // Photos upload first
+        // Media uploads first; never send a device-local blob URL to a partner.
         const rawFile = filesRef.current.get(msg.id);
-        if (msg.type === 'photo' && rawFile) {
+        if ((msg.type === 'photo' || msg.type === 'voice') && rawFile) {
           let url = uploadedUrlsRef.current.get(msg.id);
           if (!url) {
-            const file = await compressImageForUpload(rawFile);
+            const file = msg.type === 'photo' ? await compressImageForUpload(rawFile) : rawFile;
             const fd = new FormData();
             fd.append('file', file);
             const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
@@ -328,6 +331,9 @@ export function useChat(matchId: number | null, myId: number | null) {
             uploadedUrlsRef.current.set(msg.id, url);
           }
           content = url;
+        }
+        if (msg.type === 'voice' && !content.startsWith('https://')) {
+          throw new Error('Voice note has not finished uploading. Please retry.');
         }
 
         const res = await fetch('/api/messages', {
@@ -357,8 +363,10 @@ export function useChat(matchId: number | null, myId: number | null) {
         console.error('[CHAT] Send failed:', err);
         const offline = typeof navigator !== 'undefined' && !navigator.onLine;
         setPendingStatus(msg.id, offline ? 'queued' : 'failed');
+        if (msg.type === 'voice') setComposerError(offline ? 'Voice note queued. Keep this chat open to send when you reconnect.' : 'Voice note could not be sent. Tap Retry on the message to try again.');
         hapticWarning();
       } finally {
+        activeSendsRef.current.delete(msg.id);
         sendsInFlightRef.current -= 1;
       }
     },
@@ -418,6 +426,33 @@ export function useChat(matchId: number | null, myId: number | null) {
       if (online) doSend(msg);
     },
     [myId, doSend]
+  );
+
+  const sendVoice = useCallback(
+    (file: File, durationSec: number, replyTo?: ReplyTarget | null): boolean => {
+      if (myId === null || !matchId || phase !== 'ready') return false;
+      if (!VOICE_MIME_TYPES.includes(voiceMimeType(file.type)) || !file.size || file.size > MAX_VOICE_BYTES ||
+          !Number.isFinite(durationSec) || durationSec < MIN_VOICE_SECONDS || durationSec > MAX_VOICE_SECONDS) {
+        setComposerError('Please record a voice note under 2 minutes and 3MB.');
+        return false;
+      }
+      const id = makeClientId();
+      const objectUrl = URL.createObjectURL(file);
+      filesRef.current.set(id, file);
+      objectUrlsRef.current.set(id, objectUrl);
+      const online = typeof navigator === 'undefined' || navigator.onLine;
+      const msg: ChatMessage = {
+        id, senderId: myId, type: 'voice', content: objectUrl,
+        createdAt: new Date().toISOString(),
+        metadata: { durationSec, ...(replyTo ? { replyTo } : {}) },
+        status: online ? 'sending' : 'queued',
+      };
+      setComposerError(online ? null : 'Voice note queued. Keep this chat open to send when you reconnect.');
+      setPending((prev) => [...prev, msg]);
+      hapticLight();
+      if (online) doSend(msg);
+      return true;
+    }, [myId, matchId, phase, doSend]
   );
 
   const retry = useCallback(
@@ -553,6 +588,7 @@ export function useChat(matchId: number | null, myId: number | null) {
     loadOlder,
     sendText,
     sendPhoto,
+    sendVoice,
     sendGif,
     notifyTyping,
     retry,

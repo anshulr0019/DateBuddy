@@ -3,6 +3,7 @@ import { getAuthSession } from '@/lib/auth';
 import { v2 as cloudinary } from 'cloudinary';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { MAX_VOICE_BYTES, VOICE_MIME_TYPES, voiceMimeType } from '@/lib/voice-notes';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,29 @@ export async function POST(request: NextRequest) {
         { success: false, message: 'No image file provided' },
         { status: 400 }
       );
+    }
+
+    // Audio must be stored remotely. Image disk/data-URL fallbacks cannot make
+    // a voice recording reliably playable on another user's device.
+    if (VOICE_MIME_TYPES.includes(voiceMimeType(file.type))) {
+      if (!file.size || file.size > MAX_VOICE_BYTES) {
+        return NextResponse.json({ success: false, message: 'Voice note must be between 1 byte and 3MB' }, { status: 413 });
+      }
+      if (!cloudName || !apiKey || !apiSecret) {
+        return NextResponse.json({ success: false, message: 'Voice uploads are temporarily unavailable. Please try again later.' }, { status: 503 });
+      }
+      try {
+        const audio = Buffer.from(await file.arrayBuffer());
+        const result = await cloudinary.uploader.upload(`data:${voiceMimeType(file.type)};base64,${audio.toString('base64')}`, {
+          resource_type: 'video', // Cloudinary stores audio under this resource type.
+          folder: `infyn/users/${session.userId}/voice`,
+          format: 'mp3', // Consistent playback across browsers, regardless of recorder format.
+        });
+        if (!result.secure_url?.startsWith('https://')) throw new Error('No remote audio URL');
+        return NextResponse.json({ success: true, url: result.secure_url });
+      } catch {
+        return NextResponse.json({ success: false, message: 'Voice upload failed. Please retry.' }, { status: 502 });
+      }
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {

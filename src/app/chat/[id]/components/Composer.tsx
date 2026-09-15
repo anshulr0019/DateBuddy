@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Ic } from '../../../components/icons';
 import type { ReplyTarget } from '../chatTypes';
 import chatStyles from '../chat.module.css';
+import { VoiceRecorder } from './VoiceRecorder';
 
 const EMOJI_RECENT = ['❤️', '🥰', '😂', '🤗', '😅', '🔥', '✨', '☕'];
 const EMOJI_SMILEYS = [
@@ -56,6 +57,8 @@ interface ComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onSendVoice: (file: File, durationSec: number) => boolean;
+  recordingBlocked?: boolean;
   onPickFile: (file: File) => void;
   emojiOpen: boolean;
   onToggleEmoji: () => void;
@@ -72,6 +75,8 @@ export function Composer({
   value,
   onChange,
   onSend,
+  onSendVoice,
+  recordingBlocked,
   onPickFile,
   emojiOpen,
   onToggleEmoji,
@@ -84,6 +89,7 @@ export function Composer({
   onCancelReply,
 }: ComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [voiceBusy, setVoiceBusy] = useState(false);
   const canSend = value.trim().length > 0;
 
   return (
@@ -152,6 +158,7 @@ export function Composer({
         {/* Camera */}
         <button
           onClick={() => fileInputRef.current?.click()}
+          disabled={voiceBusy}
           aria-label="Attach a photo"
           className={chatStyles.composerButton}
         >
@@ -163,6 +170,7 @@ export function Composer({
           <input
             ref={inputRef}
             type="text"
+            disabled={voiceBusy}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onFocus={onFocusInput}
@@ -177,6 +185,7 @@ export function Composer({
           />
           <button
             onClick={onToggleEmoji}
+            disabled={voiceBusy}
             aria-label={emojiOpen ? 'Close emoji picker' : 'Open emoji picker'}
             aria-expanded={emojiOpen}
             className={`absolute right-3 p-1 hover:scale-110 active:scale-95 transition-transform duration-150 cursor-pointer ${
@@ -187,7 +196,8 @@ export function Composer({
           </button>
         </div>
 
-        {/* Send */}
+        {/* Keep the recorder mounted until its gesture/draft is complete. */}
+        {canSend && !voiceBusy ? (
         <button
           onClick={onSend}
           disabled={!canSend}
@@ -203,6 +213,14 @@ export function Composer({
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
         </button>
+        ) : (
+          <VoiceRecorder
+            onSendVoice={onSendVoice}
+            onBusyChange={setVoiceBusy}
+            onBeforeRecord={() => { inputRef.current?.blur(); onFocusInput(); }}
+            blocked={recordingBlocked}
+          />
+        )}
       </div>
     </div>
   );
