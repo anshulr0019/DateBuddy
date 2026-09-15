@@ -363,7 +363,14 @@ export function useChat(matchId: number | null, myId: number | null) {
         console.error('[CHAT] Send failed:', err);
         const offline = typeof navigator !== 'undefined' && !navigator.onLine;
         setPendingStatus(msg.id, offline ? 'queued' : 'failed');
-        if (msg.type === 'voice') setComposerError(offline ? 'Voice note queued. Keep this chat open to send when you reconnect.' : 'Voice note could not be sent. Tap Retry on the message to try again.');
+        if (msg.type === 'voice') {
+          const reason = err instanceof Error && err.message && err.message !== 'Upload failed'
+            ? err.message
+            : 'Voice note could not be uploaded.';
+          setComposerError(offline
+            ? 'Voice note queued. Keep this chat open to send when you reconnect.'
+            : `${reason} Tap Retry on the message to try again.`);
+        }
         hapticWarning();
       } finally {
         activeSendsRef.current.delete(msg.id);

@@ -59,7 +59,7 @@ try {
   await page.context().route('https://infyn.test/**', async route => {
     const request = route.request(); const u = new URL(request.url());
     if(u.pathname === '/voice.mp3') return route.fulfill({contentType:'audio/wav',body:wav});
-    if(u.pathname === '/api/upload') { requests.push('upload'); return route.fulfill({status:failUpload?502:200,json:failUpload?{success:false}:{success:true,url:'https://infyn.test/voice.mp3'}}); }
+    if(u.pathname === '/api/upload') { requests.push('upload'); return route.fulfill({status:failUpload?502:200,json:failUpload?{success:false,message:'Voice upload failed. Please retry.'}:{success:true,url:'https://infyn.test/voice.mp3'}}); }
     if(u.pathname === '/api/messages' && request.method() === 'POST') {
       const body = request.postDataJSON(); requests.push(body);
       if(failSend) return route.fulfill({status:500,json:{success:false}});
@@ -118,7 +118,7 @@ try {
   await reset();await lock();await page.evaluate(()=>voiceHarness.setBlocked(true));await page.getByRole('button',{name:'Play audio note',exact:true}).waitFor();assert.equal(requests.length,0);
   await reset();await hold();await page.evaluate(()=>voiceHarness.setShow(false));await page.mouse.up();assert(await page.evaluate(()=>micTest.stops)>0);assert.equal(requests.length,0);
   console.log('PASS: permission-release race, permission denial, incoming/outgoing call interruptions, unmount cleanup');
-  await reset();failUpload=true;await hold();await page.mouse.up();await page.locator('[data-message-status="failed"]').waitFor();assert.deepEqual(requests,['upload']);failUpload=false;await page.getByRole('button',{name:'Retry',exact:true}).click();await page.locator('[data-message-status="sent"]').waitFor();assert.equal(requests.at(-1).type,'voice');
+  await reset();failUpload=true;await hold();await page.mouse.up();await page.locator('[data-message-status="failed"]').waitFor();await page.getByRole('alert').filter({hasText:'Voice upload failed. Please retry.'}).waitFor();assert.deepEqual(requests,['upload']);failUpload=false;await page.getByRole('button',{name:'Retry',exact:true}).click();await page.locator('[data-message-status="sent"]').waitFor();assert.equal(requests.at(-1).type,'voice');
   await reset();failSend=true;await hold();await page.mouse.up();await page.locator('[data-message-status="failed"]').waitFor();failSend=false;await page.getByRole('button',{name:'Retry',exact:true}).click();await page.locator('[data-message-status="sent"]').waitFor();assert.equal(requests.filter(r=>r==='upload').length,1);
   console.log('PASS: upload failure cannot post a blob URL, retry preserves audio, message retry reuses uploaded URL');
   await reset();failUpload=true;await hold();await page.mouse.up();await page.locator('[data-message-status="failed"]').waitFor();failUpload=false;
