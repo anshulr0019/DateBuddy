@@ -125,26 +125,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Guaranteed Local Disk Write Fallback to public/uploads/
-    try {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadsDir, { recursive: true });
+    // Local disk is useful while developing, but serverless production storage is
+    // temporary and cannot produce a durable URL for another device.
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        await mkdir(uploadsDir, { recursive: true });
 
-      const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
-      const filename = `chat-${session.userId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const filePath = path.join(uploadsDir, filename);
+        const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+        const filename = `chat-${session.userId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const filePath = path.join(uploadsDir, filename);
 
-      await writeFile(filePath, buffer);
-      const localUrl = `/uploads/${filename}`;
-      return NextResponse.json({ success: true, url: localUrl });
-    } catch (diskErr) {
-      console.warn('[UPLOAD] Disk write failed, using dataUrl fallback:', diskErr);
+        await writeFile(filePath, buffer);
+        return NextResponse.json({ success: true, url: `/uploads/${filename}` });
+      } catch (diskErr) {
+        console.warn('[UPLOAD] Development disk fallback failed:', diskErr);
+      }
     }
 
-    // 4. Data URL Fallback
-    const base64 = buffer.toString('base64');
-    const dataUrl = `data:${file.type};base64,${base64}`;
-    return NextResponse.json({ success: true, url: dataUrl });
+    // Never persist a base64 data URL as a photo. A single inline image can add
+    // over a megabyte to every profile, Discover, match, or conversation response.
+    return NextResponse.json(
+      { success: false, message: 'Photo upload is temporarily unavailable. Please try again.' },
+      { status: 502 }
+    );
   } catch (error) {
     console.error('Error handling upload:', error);
     return NextResponse.json({ success: false, message: 'Failed to upload photo' }, { status: 500 });

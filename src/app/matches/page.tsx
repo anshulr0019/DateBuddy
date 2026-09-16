@@ -173,7 +173,7 @@ export default function ConnectionsPage() {
                     >
                       <div className="flex flex-col items-center w-full">
                         <div className="relative mx-auto mb-2.5 h-20 w-20 overflow-hidden rounded-full shadow-2xs">
-                          <SafeImage src={p.photo} name={p.name} alt={p.name} className="h-full w-full object-cover" />
+                          <SafeImage src={p.photo} name={p.name} alt={p.name} width={240} className="h-full w-full object-cover" />
                           {p.online && <OnlineDot className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5" />}
                           {p.verified && (
                             <div className="absolute top-0 right-0">

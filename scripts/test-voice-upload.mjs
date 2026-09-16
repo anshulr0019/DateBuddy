@@ -64,3 +64,11 @@ test('existing photo uploads retain their image transformations', async () => {
   assert.equal(options.resource_type, undefined);
   assert.deepEqual(options.transformation, [{ quality: 'auto:good', fetch_format: 'auto' }, { width: 1200, crop: 'limit' }]);
 });
+test('failed photo storage returns an honest error instead of an inline data URL', async () => {
+  fixture.fail = true;
+  const response = await upload('image/jpeg');
+  const data = await response.json();
+  assert.equal(response.status, 502);
+  assert.equal(data.success, false);
+  assert.equal(data.url, undefined);
+});

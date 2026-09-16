@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, VerifiedBadge, GradientText, SafeImage, Skeleton } from '../components/shared';
 import { hapticLight } from '../lib/haptics';
+import {
+  type CachedUserProfile,
+  getCachedUserProfile,
+  invalidateUserProfileCache,
+  loadUserProfile,
+  UserProfileRequestError,
+} from '../lib/userProfileCache';
 
 /* ─────────────────────────────────────────────────
    Types & helpers
@@ -47,6 +54,27 @@ function calcAge(dob: unknown): number | null {
   const m = now.getMonth() - d.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
   return age > 0 && age < 120 ? age : null;
+}
+
+function profileFromUser(u: CachedUserProfile): Profile {
+  const sortedPhotos = Array.isArray(u.photos)
+    ? u.photos.filter((url): url is string => typeof url === 'string' && url.length > 0)
+    : [];
+  return {
+    name: u.name || '',
+    age: calcAge(u.dateOfBirth),
+    photo: sortedPhotos[0] || '',
+    photos: sortedPhotos,
+    bio: typeof u.bio === 'string' ? u.bio : '',
+    location: typeof u.city === 'string' ? u.city : '',
+    interests: Array.isArray(u.interests)
+      ? Array.from(new Set(u.interests.filter((interest): interest is string => typeof interest === 'string')))
+      : [],
+    prompts: Array.isArray(u.prompts) ? u.prompts : [],
+    profession: typeof u.profession === 'string' ? u.profession : '',
+    education: typeof u.education === 'string' ? u.education : '',
+    verified: u.isVerified ?? false,
+  };
 }
 
 interface StrengthResult {
@@ -104,17 +132,20 @@ type TabId = (typeof TABS)[number]['id'];
    Page
 ───────────────────────────────────────────────── */
 
-// Module-level in-memory cache for 0ms instant display when navigating to profile
-let cachedProfile: Profile | null = null;
 let cachedConnections: number | null = null;
 let cachedIsGold = false;
 
 export default function ProfilePage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<TabId>('photos');
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(cachedProfile ? 'ready' : 'loading');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(() =>
+    getCachedUserProfile() ? 'ready' : 'loading'
+  );
   const [isCached, setIsCached] = useState(false);
-  const [profile, setProfile] = useState<Profile>(cachedProfile || EMPTY_PROFILE);
+  const [profile, setProfile] = useState<Profile>(() => {
+    const cached = getCachedUserProfile();
+    return cached ? profileFromUser(cached) : EMPTY_PROFILE;
+  });
   const [connections, setConnections] = useState<number | null>(cachedConnections);
   const [reloadKey, setReloadKey] = useState(0);
   const [myMeetups, setMyMeetups] = useState<{ id: number; title: string; category: string; date: string; venueName: string | null; userJoinStatus: string | null }[]>([]);
@@ -169,6 +200,7 @@ export default function ProfilePage() {
         setEditError(data.message || 'Could not save your changes');
         return;
       }
+      invalidateUserProfileCache();
       setIsEditing(false);
       setReloadKey(k => k + 1);
     } catch {
@@ -202,49 +234,22 @@ export default function ProfilePage() {
       .catch(() => {});
 
     async function loadProfile() {
-      if (!cachedProfile) setStatus('loading');
-      setIsCached(false);
+      const cached = getCachedUserProfile();
+      if (!cached) setStatus('loading');
+      setIsCached(Boolean(cached));
       try {
-        const res = await fetch('/api/users/me', { signal });
-
-        if (res.status === 401) {
-          // Session expired or account deleted — never show stale local data.
-          // ?switch=true stops the middleware bouncing the stale cookie back to /discover.
+        const user = await loadUserProfile({ force: reloadKey > 0 });
+        if (signal.aborted) return;
+        setProfile(profileFromUser(user));
+        setIsCached(false);
+        setStatus('ready');
+        return;
+      } catch (error) {
+        if (signal.aborted) return;
+        if (error instanceof UserProfileRequestError && error.status === 401) {
           router.replace('/welcome?switch=true');
           return;
         }
-
-        const data = await res.json();
-        if (!res.ok || !data.success || !data.user) {
-          throw new Error(data?.message || `Request failed (${res.status})`);
-        }
-
-        const u = data.user;
-        const sortedPhotos: string[] = Array.isArray(u.photos)
-          ? (u.photos as string[]).filter((url): url is string => typeof url === 'string' && url.length > 0)
-          : [];
-
-        const newProf: Profile = {
-          name: u.name || '',
-          age: calcAge(u.dateOfBirth),
-          photo: sortedPhotos[0] || '',
-          photos: sortedPhotos,
-          bio: u.bio || '',
-          location: u.city || '',
-          interests: Array.isArray(u.interests)
-            ? Array.from(new Set(u.interests.filter((i: unknown) => typeof i === 'string')))
-            : [],
-          prompts: Array.isArray(u.prompts) ? u.prompts : [],
-          profession: u.profession || '',
-          education: u.education || '',
-          verified: u.isVerified ?? false,
-        };
-        cachedProfile = newProf;
-        setProfile(newProf);
-        setStatus('ready');
-        return;
-      } catch {
-        if (signal.aborted) return;
       }
 
       // Network failure only: fall back to locally saved onboarding data, labeled as cached

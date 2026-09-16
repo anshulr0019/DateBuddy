@@ -20,6 +20,7 @@ import {
 } from '../lib/feedCache';
 import { hapticLight, hapticMedium, hapticWarning } from '../lib/haptics';
 import { useFilters } from '../context/FilterContext';
+import { getCachedUserProfile, loadUserProfile } from '../lib/userProfileCache';
 
 const SWIPE_ANIMATION_MS = 260;
 const REDUCED_EXIT_MS = 160;
@@ -75,8 +76,8 @@ export default function DiscoverPage() {
   const [undoBusy, setUndoBusy] = useState(false);
 
   const [matchedUser, setMatchedUser] = useState<MatchedUser | null>(null);
-  const [myPhoto, setMyPhoto] = useState<string | null>(null);
-  const [myName, setMyName] = useState<string>('You');
+  const [myPhoto, setMyPhoto] = useState<string | null>(() => getCachedUserProfile()?.photos?.[0] ?? null);
+  const [myName, setMyName] = useState<string>(() => getCachedUserProfile()?.name ?? 'You');
 
   const [likedPrompts, setLikedPrompts] = useState<Record<string, boolean>>({});
   const [actionError, setActionError] = useState<string | null>(null);
@@ -176,12 +177,10 @@ export default function DiscoverPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/auth/me');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (cancelled || !data.success) return;
-        setMyPhoto(data.user?.photos?.[0]?.url ?? null);
-        setMyName(data.user?.name ?? 'You');
+        const user = await loadUserProfile();
+        if (cancelled) return;
+        setMyPhoto(user.photos?.[0] ?? null);
+        setMyName(user.name ?? 'You');
       } catch {
         /* non-critical — the avatar falls back to initials */
       }

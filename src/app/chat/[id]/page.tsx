@@ -287,7 +287,7 @@ function ChatContent() {
                     aria-label={`View ${partner.name}'s profile`}
                   >
                     <div className={chatStyles.partnerAvatar}>
-                      <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" className="h-full w-full object-cover" />
+                      <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" width={160} className="h-full w-full object-cover" />
                     </div>
                     <div className={chatStyles.partnerCopy}>
                       <h1 className={chatStyles.partnerName}>
@@ -484,7 +484,7 @@ function ChatContent() {
                   /* New match — honest empty state with icebreakers */
                   <div className={`${chatStyles.state} ${chatStyles.newMatch}`}>
                     <div className={`${chatStyles.newMatchAvatar} mb-4`}>
-                      <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" className="h-full w-full object-cover" />
+                      <SafeImage src={partner.photo ?? undefined} name={partner.name} alt="" width={240} className="h-full w-full object-cover" />
                     </div>
                     <h2 className={chatStyles.stateTitle}>You matched with {partner.name}!</h2>
                     <p className={chatStyles.stateText}>

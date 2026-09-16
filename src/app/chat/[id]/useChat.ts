@@ -6,6 +6,8 @@ import { compressImageForUpload } from '@/lib/image-compress';
 import { MAX_VOICE_BYTES, MAX_VOICE_SECONDS, MIN_VOICE_SECONDS, VOICE_MIME_TYPES, voiceMimeType } from '@/lib/voice-notes';
 import type { ChatMessage, Partner, SendStatus, ReplyTarget } from './chatTypes';
 import { hapticLight, hapticWarning } from '@/app/lib/haptics';
+import { deleteCachedChat, getCachedChat, setCachedChat } from '@/app/lib/chatCache';
+import { markConversationRead, updateConversationPreview } from '@/app/lib/conversationCache';
 
 const FALLBACK_POLL_INTERVAL_MS = 5_000;
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -41,6 +43,25 @@ function mapServerMessage(m: ServerMessage, myId: number): ChatMessage {
   };
 }
 
+function messagePreview(message: ChatMessage): string {
+  if (message.type === 'photo') return '📷 Photo';
+  if (message.type === 'voice') return '🎙️ Voice Note';
+  if (message.type === 'location') return '📍 Location';
+  if (message.type === 'gif') return '🎬 GIF';
+  if (message.content.startsWith('CALL_EVENT:')) {
+    try {
+      const call = JSON.parse(message.content.slice('CALL_EVENT:'.length));
+      const video = call.callType === 'video';
+      const missed = ['missed', 'declined', 'cancelled'].includes(call.status);
+      if (missed) return video ? '📹 Missed video call' : '📞 Missed audio call';
+      return video ? '📹 Video call' : '📞 Audio call';
+    } catch {
+      return '📞 Call';
+    }
+  }
+  return message.content;
+}
+
 export function useChat(matchId: number | null, myId: number | null) {
   const [phase, setPhase] = useState<ChatPhase>('loading');
   const [partner, setPartner] = useState<Partner | null>(null);
@@ -68,6 +89,7 @@ export function useChat(matchId: number | null, myId: number | null) {
 
   const markRead = useCallback(() => {
     if (!matchId) return;
+    markConversationRead(matchId);
     fetch('/api/messages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -154,7 +176,19 @@ export function useChat(matchId: number | null, myId: number | null) {
       return;
     }
 
-    setPhase('loading');
+    const cached = getCachedChat(matchId, myId);
+    if (cached) {
+      setPartner(cached.partner);
+      setServerMessages(cached.messages);
+      setHasMore(cached.hasMore);
+      setPhase('ready');
+      markConversationRead(matchId);
+    } else {
+      setPartner(null);
+      setServerMessages([]);
+      setHasMore(false);
+      setPhase('loading');
+    }
     loadAbortRef.current?.abort();
     const controller = new AbortController();
     loadAbortRef.current = controller;
@@ -164,18 +198,19 @@ export function useChat(matchId: number | null, myId: number | null) {
       const msgResult = await fetchMessages({ signal, initial: true });
       if (signal.aborted) return;
       if (msgResult === 'notfound') {
+        deleteCachedChat(matchId);
         setPhase('notfound');
         return;
       }
       if (msgResult === 'error') {
-        setPhase('error');
+        setPhase(cached ? 'ready' : 'error');
         return;
       }
 
       setPhase('ready');
     } catch {
       if (signal.aborted) return;
-      setPhase('error');
+      setPhase(cached ? 'ready' : 'error');
     }
   }, [matchId, myId, fetchMessages]);
 
@@ -205,6 +240,9 @@ export function useChat(matchId: number | null, myId: number | null) {
       setServerMessages((prev) => {
         if (prev.some((s) => s.id === confirmed.id)) return prev;
         return [...prev, confirmed];
+      });
+      updateConversationPreview(matchId, messagePreview(confirmed), confirmed.createdAt, {
+        markRead: true,
       });
       if (confirmed.senderId !== myId) {
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -265,6 +303,16 @@ export function useChat(matchId: number | null, myId: number | null) {
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, [matchId, myId, markRead]);
+
+  useEffect(() => {
+    if (!matchId || myId === null || phase !== 'ready' || !partner) return;
+    setCachedChat(matchId, {
+      viewerId: myId,
+      partner,
+      messages: serverMessages,
+      hasMore,
+    });
+  }, [matchId, myId, phase, partner, serverMessages, hasMore]);
 
   /* Immediate sync on window focus / tab visibility */
   useEffect(() => {
@@ -351,6 +399,9 @@ export function useChat(matchId: number | null, myId: number | null) {
         setServerMessages((prev) =>
           prev.some((s) => s.id === confirmed.id) ? prev : [...prev, confirmed]
         );
+        updateConversationPreview(matchId, messagePreview(confirmed), confirmed.createdAt, {
+          markRead: true,
+        });
 
         filesRef.current.delete(msg.id);
         uploadedUrlsRef.current.delete(msg.id);

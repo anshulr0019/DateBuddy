@@ -11,28 +11,25 @@ import { formatListTime } from '../lib/time';
 import { useCurrentUser } from '../lib/useCurrentUser';
 import { getPusherClient } from '@/lib/pusher-client';
 import { hapticLight } from '../lib/haptics';
+import {
+  type ConversationSummary,
+  getCachedConversations,
+  setCachedConversations,
+  subscribeConversationCache,
+  updateConversationPreview,
+} from '../lib/conversationCache';
 
 const PartnerProfileSheet = dynamic(
   () => import('../components/PartnerProfileSheet').then((mod) => mod.PartnerProfileSheet),
   { ssr: false }
 );
 
-interface Conversation {
-  id: number;
-  partnerId: number;
-  name: string;
-  photo: string | null;
-  lastMsg: string;
-  time: string;
-  unread: number;
-  online?: boolean;
-}
+type Conversation = ConversationSummary;
 
 type LoadPhase = 'loading' | 'ready' | 'error';
 type Filter = 'all' | 'unread' | 'active';
 
 const POLL_INTERVAL_MS = 30_000;
-let cachedConversations: Conversation[] | null = null;
 
 function isThisWeek(timestamp: string) {
   const time = new Date(timestamp).getTime();
@@ -48,8 +45,8 @@ export default function MessagesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>(cachedConversations || []);
-  const [phase, setPhase] = useState<LoadPhase>(cachedConversations ? 'ready' : 'loading');
+  const [conversations, setConversations] = useState<Conversation[]>(() => getCachedConversations() || []);
+  const [phase, setPhase] = useState<LoadPhase>(() => getCachedConversations() ? 'ready' : 'loading');
   const abortRef = useRef<AbortController | null>(null);
   // Subscription membership changes only when chats are added or removed,
   // not whenever a preview, unread count, or polling timestamp changes.
@@ -66,7 +63,7 @@ export default function MessagesPage() {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    if (isRetry && !cachedConversations) setPhase('loading');
+    if (isRetry && !getCachedConversations()) setPhase('loading');
 
     try {
       const res = await fetch('/api/conversations', { signal: controller.signal });
@@ -81,14 +78,18 @@ export default function MessagesPage() {
       const sorted = [...data.conversations].sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
-      cachedConversations = sorted;
-      setConversations(sorted);
+      setCachedConversations(sorted);
       setPhase('ready');
     } catch {
       if (controller.signal.aborted) return;
-      setPhase((prev) => (prev === 'ready' || cachedConversations ? 'ready' : 'error'));
+      setPhase((prev) => (prev === 'ready' || getCachedConversations() ? 'ready' : 'error'));
     }
   }, [router]);
+
+  useEffect(() => subscribeConversationCache((items) => {
+    setConversations(items);
+    setPhase('ready');
+  }), []);
 
   useEffect(() => {
     loadConversations();
@@ -114,39 +115,26 @@ export default function MessagesPage() {
       const channel = pusher.subscribe(channelName);
 
       channel.bind('new-message', (data: any) => {
-        setConversations((prev) => {
-          const foundIdx = prev.findIndex((c) => c.id === id);
-          if (foundIdx === -1) return prev;
-          const target = prev[foundIdx];
-          let displayMsg = data.content;
-          if (typeof data.content === 'string' && data.content.startsWith('CALL_EVENT:')) {
-            try {
-              const parsed = JSON.parse(data.content.replace('CALL_EVENT:', ''));
-              const isVideo = parsed.callType === 'video';
-              const isMissed = ['missed', 'declined', 'cancelled'].includes(parsed.status);
-              displayMsg = isMissed
-                ? isVideo ? '📹 Missed video call' : '📞 Missed audio call'
-                : isVideo ? '📹 Video call' : '📞 Audio call';
-            } catch {
-              displayMsg = '📞 Call';
-            }
-          } else {
-            const byType: Record<string, string> = {
-              photo: '📷 Photo', voice: '🎙️ Voice Note', location: '📍 Location', gif: '🎬 GIF',
-            };
-            displayMsg = byType[data.type] ?? data.content;
+        let displayMsg = data.content;
+        if (typeof data.content === 'string' && data.content.startsWith('CALL_EVENT:')) {
+          try {
+            const parsed = JSON.parse(data.content.replace('CALL_EVENT:', ''));
+            const isVideo = parsed.callType === 'video';
+            const isMissed = ['missed', 'declined', 'cancelled'].includes(parsed.status);
+            displayMsg = isMissed
+              ? isVideo ? '📹 Missed video call' : '📞 Missed audio call'
+              : isVideo ? '📹 Video call' : '📞 Audio call';
+          } catch {
+            displayMsg = '📞 Call';
           }
-
-          const isIncoming = data.senderId !== myId;
-          const updated: Conversation = {
-            ...target,
-            lastMsg: displayMsg,
-            time: data.createdAt || new Date().toISOString(),
-            unread: isIncoming ? target.unread + 1 : target.unread,
+        } else {
+          const byType: Record<string, string> = {
+            photo: '📷 Photo', voice: '🎙️ Voice Note', location: '📍 Location', gif: '🎬 GIF',
           };
-          const next = [updated, ...prev.filter((c) => c.id !== id)];
-          cachedConversations = next;
-          return next;
+          displayMsg = byType[data.type] ?? data.content;
+        }
+        updateConversationPreview(id, displayMsg, data.createdAt || new Date().toISOString(), {
+          incrementUnread: data.senderId !== myId,
         });
       });
     });
@@ -185,7 +173,7 @@ export default function MessagesPage() {
         aria-label={`View ${conversation.name}'s profile`}
       >
         <span className={`${styles.avatar} ${styles.avatarSmall}`}>
-          <SafeImage src={conversation.photo} name={conversation.name} alt={conversation.name} className={styles.avatarImage} />
+          <SafeImage src={conversation.photo} name={conversation.name} alt={conversation.name} width={160} className={styles.avatarImage} />
           {conversation.online && <span className={styles.onlineDot} aria-label="Online now" />}
         </span>
       </button>
@@ -293,7 +281,7 @@ export default function MessagesPage() {
                     {activePeople.map((person) => (
                       <button key={person.id} type="button" className={styles.activePerson} onClick={() => { hapticLight(); router.push(`/chat/${person.id}`); }} aria-label={`Message ${person.name}`}>
                         <span className={`${styles.avatar} ${styles.activeAvatar}`}>
-                          <SafeImage src={person.photo} name={person.name} alt={person.name} className={styles.avatarImage} />
+                          <SafeImage src={person.photo} name={person.name} alt={person.name} width={160} className={styles.avatarImage} />
                           <span className={styles.onlineDot} aria-hidden />
                         </span>
                         <span className={styles.activeName}>{person.name}</span>

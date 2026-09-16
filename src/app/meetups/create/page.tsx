@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { VenuePickerModal } from '@/app/components/VenuePickerModal';
 import { getCategoryCoverImage, PRESET_IMAGE_OPTIONS } from '@/app/lib/meetup-media';
+import { getCachedUserProfile, loadUserProfile } from '@/app/lib/userProfileCache';
 
 const CATEGORIES = [
   { id: 'sports', icon: '⚽', label: 'Sports & Fitness', desc: 'Gym, badminton, football & running' },
@@ -24,14 +25,13 @@ export default function CreateMeetupPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
-  const [userCity, setUserCity] = useState('Mumbai');
+  const [userCity, setUserCity] = useState(() => getCachedUserProfile()?.city || 'Mumbai');
   const [showVenuePicker, setShowVenuePicker] = useState(false);
 
   // Fetch user's city for meetup location
   useEffect(() => {
-    fetch('/api/users/me')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success && data.user?.city) setUserCity(data.user.city); })
+    loadUserProfile()
+      .then(user => { if (user.city) setUserCity(user.city); })
       .catch(() => {});
   }, []);
 

@@ -346,6 +346,7 @@ export function GlobalCallListener() {
               <SafeImage
                 src={pendingCall.partnerPhoto ?? undefined}
                 name={pendingCall.partnerName}
+                width={160}
                 className="w-full h-full object-cover"
               />
             </div>

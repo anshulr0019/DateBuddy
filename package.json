@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "db:backup": "tsx scripts/backup-db.ts",
     "db:restore": "tsx scripts/restore-db.ts",
+    "db:migrate-photos": "node scripts/migrate-inline-photos.cjs",
     "db:remove-demo": "node scripts/remove-demo-accounts.cjs"
   },
   "dependencies": {

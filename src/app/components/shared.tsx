@@ -15,8 +15,9 @@ export function optimizeImageUrl(
   if (!src.includes('res.cloudinary.com') || !src.includes('/image/upload/')) {
     return src;
   }
-  // Skip if transformation is already present
-  if (src.includes('/image/upload/f_') || src.includes('/image/upload/q_') || src.includes('/image/upload/w_')) {
+  // Keep an existing explicit width. Other transformations (such as q_auto)
+  // should not prevent small avatars from receiving a small delivery size.
+  if (/\/image\/upload\/[^/]*w_\d+/.test(src)) {
     return src;
   }
   const width = options.width || 800;

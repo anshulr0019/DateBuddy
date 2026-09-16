@@ -4,6 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
 import { AuroraBackground, GlassCard, VerifiedBadge, SafeImage } from '../components/shared';
+import {
+  clearUserProfileCache,
+  getCachedUserProfile,
+  loadUserProfile,
+  updateCachedUserProfile,
+} from '../lib/userProfileCache';
+import { clearChatCache } from '../lib/chatCache';
+import { clearConversationCache } from '../lib/conversationCache';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -13,12 +21,15 @@ export default function SettingsPage() {
   const [maxDistance, setMaxDistance] = useState<number>(filters?.maxDistance ?? 50);
   const [onlyVerified, setOnlyVerified] = useState<boolean>(filters?.verifiedOnly ?? false);
 
-  const [userInfo, setUserInfo] = useState({
-    name: 'You',
-    email: '',
-    phoneNumber: '',
-    verified: false,
-    photo: '' as string,
+  const [userInfo, setUserInfo] = useState(() => {
+    const cached = getCachedUserProfile();
+    return {
+      name: cached?.name || 'You',
+      email: cached?.email || '',
+      phoneNumber: cached?.phoneNumber || '',
+      verified: cached?.isVerified ?? false,
+      photo: cached?.photos?.[0] || '',
+    };
   });
 
   const [notifications, setNotifications] = useState({
@@ -51,8 +62,8 @@ export default function SettingsPage() {
   const [unblockingId, setUnblockingId] = useState<number | null>(null);
 
   // Social links
-  const [instagramHandle, setInstagramHandle] = useState('');
-  const [snapchatHandle, setSnapchatHandle] = useState('');
+  const [instagramHandle, setInstagramHandle] = useState(() => getCachedUserProfile()?.instagramHandle ?? '');
+  const [snapchatHandle, setSnapchatHandle] = useState(() => getCachedUserProfile()?.snapchatHandle ?? '');
   const [socialSaving, setSocialSaving] = useState(false);
   const [socialSaved, setSocialSaved] = useState(false);
 
@@ -109,31 +120,19 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadUserInfo() {
-      // Try API first
       try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-        if (data.success && data.user) {
-          const u = data.user;
-          setUserInfo(prev => ({
-            ...prev,
-            name: u.name || prev.name,
-            email: u.email || prev.email,
-            phoneNumber: u.phoneNumber || u.phone || prev.phoneNumber,
-            verified: u.isVerified ?? prev.verified,
-            photo: Array.isArray(u.photos) && u.photos.length > 0 ? u.photos[0] : prev.photo,
-          }));
-          // Load social handles from /api/users/me
-          try {
-            const meRes = await fetch('/api/users/me');
-            const meData = await meRes.json();
-            if (meData.success && meData.user) {
-              setInstagramHandle(meData.user.instagramHandle ?? '');
-              setSnapchatHandle(meData.user.snapchatHandle ?? '');
-            }
-          } catch { /* ignore */ }
-          return;
-        }
+        const user = await loadUserProfile();
+        setUserInfo(prev => ({
+          ...prev,
+          name: user.name || prev.name,
+          email: user.email || prev.email,
+          phoneNumber: user.phoneNumber || prev.phoneNumber,
+          verified: user.isVerified ?? prev.verified,
+          photo: user.photos?.[0] || prev.photo,
+        }));
+        setInstagramHandle(user.instagramHandle ?? '');
+        setSnapchatHandle(user.snapchatHandle ?? '');
+        return;
       } catch {
         /* fall through to localStorage */
       }
@@ -212,6 +211,9 @@ export default function SettingsPage() {
       await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
       localStorage.clear();
       sessionStorage.clear();
+      clearUserProfileCache();
+      clearChatCache();
+      clearConversationCache();
       document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
       window.location.href = '/welcome?switch=true';
     } catch {
@@ -232,6 +234,9 @@ export default function SettingsPage() {
       }
       localStorage.clear();
       sessionStorage.clear();
+      clearUserProfileCache();
+      clearChatCache();
+      clearConversationCache();
       document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
       window.location.href = '/welcome?switch=true';
     } catch {
@@ -270,6 +275,7 @@ export default function SettingsPage() {
                       name={userInfo.name}
                       alt="Your profile photo"
                       eager
+                      width={160}
                       className="h-full w-full object-cover"
                     />
                   </div>
@@ -363,7 +369,10 @@ export default function SettingsPage() {
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ instagramHandle, snapchatHandle }),
                         });
-                        if (res.ok) setSocialSaved(true);
+                        if (res.ok) {
+                          updateCachedUserProfile({ instagramHandle, snapchatHandle });
+                          setSocialSaved(true);
+                        }
                       } catch { /* ignore */ } finally {
                         setSocialSaving(false);
                       }
@@ -701,7 +710,7 @@ export default function SettingsPage() {
                 {blockedUsers.map((u) => (
                   <div key={u.id} className="flex items-center gap-3 rounded-2xl border border-infyn-border bg-infyn-surface-soft px-3 py-2.5">
                     <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden border border-infyn-border">
-                      <SafeImage src={u.photo} name={u.name} alt={u.name} className="h-full w-full object-cover" />
+                      <SafeImage src={u.photo} name={u.name} alt={u.name} width={128} className="h-full w-full object-cover" />
                     </div>
                     <span className="flex-1 text-[14px] font-semibold text-infyn-ink truncate">{u.name}</span>
                     <button
