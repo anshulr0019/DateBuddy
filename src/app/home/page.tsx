@@ -296,7 +296,7 @@ export default function HomePage() {
 
   return (
     <div className="h-dvh w-full min-h-screen bg-infyn-paper flex justify-center overflow-hidden font-sans select-none">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-border/60 overflow-hidden">
+      <div className="infyn-screen-arrive relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-border/60 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 

@@ -586,6 +586,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
+/* A light arrival for primary screens. The screen stays usable immediately. */
+@keyframes infyn-screen-arrive {
+  from { opacity: 0.92; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.infyn-screen-arrive {
+  animation: infyn-screen-arrive 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Gradient story ring — Instagram-style */
 .story-ring {
   padding: 2.5px;
@@ -913,6 +922,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Reduced motion — disable all motion except instant show */
 @media (prefers-reduced-motion: reduce) {
+  .infyn-screen-arrive { animation: none !important; }
   .rc-ring, .rc-sweep, .rc-blip, .rc-pulse {
     animation: none !important;
   }

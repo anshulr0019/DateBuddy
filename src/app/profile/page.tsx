@@ -326,7 +326,7 @@ export default function ProfilePage() {
 
   return (
     <div className="h-dvh w-full min-h-screen bg-infyn-paper flex justify-center overflow-hidden font-sans">
-      <div className="relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
+      <div className="infyn-screen-arrive relative h-full w-full max-w-[440px] sm:max-w-[480px] md:max-w-[540px] flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         <AuroraBackground subtle>
           <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
             {status === 'loading' && <ProfileSkeleton />}

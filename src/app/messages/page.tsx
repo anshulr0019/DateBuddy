@@ -219,7 +219,7 @@ export default function MessagesPage() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.shell}>
+      <div className={`${styles.shell} infyn-screen-arrive`}>
         <header className={styles.header}>
           <div className={styles.titleRow}>
             <div className={styles.titleCluster}>

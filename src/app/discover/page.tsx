@@ -630,7 +630,7 @@ export default function DiscoverPage() {
    SHELL — shared page frame across every state
 ───────────────────────────────────────────────── */
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className={styles.root}><div className={styles.shell}>{children}</div></div>;
+  return <div className={styles.root}><div className={`${styles.shell} infyn-screen-arrive`}>{children}</div></div>;
 }
 
 function TopBar() {

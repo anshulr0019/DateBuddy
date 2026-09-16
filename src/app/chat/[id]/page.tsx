@@ -264,7 +264,7 @@ function ChatContent() {
 
   return (
     <div className={chatStyles.root} style={{ paddingBottom: keyboardInset }}>
-      <div className={chatStyles.shell}>
+      <div className={`${chatStyles.shell} infyn-screen-arrive`}>
         <div className={chatStyles.content}>
 
             {/* ── HEADER ── */}
