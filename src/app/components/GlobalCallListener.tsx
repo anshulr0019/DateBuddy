@@ -195,10 +195,12 @@ export function GlobalCallListener() {
     channel?.bind('signal', handleSignal);
 
     let polling = false;
+    let lastSafetyPollAt = 0;
     const pollIncoming = async () => {
       if (document.hidden || !navigator.onLine) return;
       if (polling) return;
       polling = true;
+      lastSafetyPollAt = Date.now();
       try {
         const res = await fetch('/api/calls/incoming');
         const data = await res.json();
@@ -221,7 +223,12 @@ export function GlobalCallListener() {
     // Catch an offer stored before this listener finished subscribing. The
     // slower safety poll also covers a rare server-side realtime failure.
     void pollIncoming();
-    const interval = setInterval(pollIncoming, 10_000);
+    const interval = setInterval(() => {
+      // Pusher delivers the live ring. While connected, retain a safety check
+      // within the 45-second call window without hitting the API every 10s.
+      if (pusher?.connection.state === 'connected' && Date.now() - lastSafetyPollAt < 20_000) return;
+      void pollIncoming();
+    }, 10_000);
 
     return () => {
       channel?.unbind('signal', handleSignal);

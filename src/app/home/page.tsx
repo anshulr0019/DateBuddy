@@ -128,20 +128,38 @@ export default function HomePage() {
       setLoading(false);
     });
 
-    loadMeetups(signal).catch(() => {}).finally(() => {
-      if (!signal.aborted) setLoadingMeetups(false);
-    });
+    const refreshMeetups = () => {
+      loadMeetups(signal).catch(() => {}).finally(() => {
+        if (!signal.aborted) setLoadingMeetups(false);
+      });
+    };
 
-    fetch('/api/random-chat/overview', { signal })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (!signal.aborted && data?.success) {
-          cachedRandomChat = data;
-          setRandomChat(data);
-        }
-      }).catch(() => {});
+    const refreshRandomChat = () => {
+      fetch('/api/random-chat/overview', { signal })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (!signal.aborted && data?.success) {
+            cachedRandomChat = data;
+            setRandomChat(data);
+          }
+        }).catch(() => {});
+    };
 
-    return () => controller.abort();
+    // On a return visit, the cached cards are already visible. Give the feed
+    // and route transition a brief head start before these secondary requests.
+    const delaySecondary = cachedMeetups !== null || cachedRandomChat !== null;
+    const refreshTimer = delaySecondary
+      ? window.setTimeout(() => { refreshMeetups(); refreshRandomChat(); }, 300)
+      : null;
+    if (refreshTimer === null) {
+      refreshMeetups();
+      refreshRandomChat();
+    }
+
+    return () => {
+      if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+      controller.abort();
+    };
   }, [loadMeetups]);
 
   useEffect(() => {

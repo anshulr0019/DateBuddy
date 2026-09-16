@@ -63,14 +63,15 @@ function messagePreview(message: ChatMessage): string {
 }
 
 export function useChat(matchId: number | null, myId: number | null) {
-  const [phase, setPhase] = useState<ChatPhase>('loading');
-  const [partner, setPartner] = useState<Partner | null>(null);
+  const initialCacheRef = useRef(matchId && myId !== null ? getCachedChat(matchId, myId) : null);
+  const [phase, setPhase] = useState<ChatPhase>(() => initialCacheRef.current ? 'ready' : 'loading');
+  const [partner, setPartner] = useState<Partner | null>(() => initialCacheRef.current?.partner ?? null);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
-  const [serverMessages, setServerMessages] = useState<ChatMessage[]>([]);
+  const [serverMessages, setServerMessages] = useState<ChatMessage[]>(() => initialCacheRef.current?.messages ?? []);
   const [pending, setPending] = useState<ChatMessage[]>([]);
   const [isOnline, setIsOnline] = useState(true);
   const [composerError, setComposerError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(() => initialCacheRef.current?.hasMore ?? false);
   const [loadingOlder, setLoadingOlder] = useState(false);
 
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

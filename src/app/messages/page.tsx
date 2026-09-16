@@ -30,6 +30,7 @@ type LoadPhase = 'loading' | 'ready' | 'error';
 type Filter = 'all' | 'unread' | 'active';
 
 const POLL_INTERVAL_MS = 30_000;
+const CONNECTED_SAFETY_INTERVAL_MS = 90_000;
 
 function isThisWeek(timestamp: string) {
   const time = new Date(timestamp).getTime();
@@ -48,6 +49,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>(() => getCachedConversations() || []);
   const [phase, setPhase] = useState<LoadPhase>(() => getCachedConversations() ? 'ready' : 'loading');
   const abortRef = useRef<AbortController | null>(null);
+  const lastLoadedAtRef = useRef(0);
   // Subscription membership changes only when chats are added or removed,
   // not whenever a preview, unread count, or polling timestamp changes.
   const conversationIds = useMemo(() => conversations.map(c => c.id).sort((a, b) => a - b).join(','), [conversations]);
@@ -79,6 +81,7 @@ export default function MessagesPage() {
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
       setCachedConversations(sorted);
+      lastLoadedAtRef.current = Date.now();
       setPhase('ready');
     } catch {
       if (controller.signal.aborted) return;
@@ -93,15 +96,35 @@ export default function MessagesPage() {
 
   useEffect(() => {
     loadConversations();
+    const refreshOnVisible = () => {
+      if (!document.hidden && navigator.onLine) loadConversations();
+    };
+    document.addEventListener('visibilitychange', refreshOnVisible);
+    window.addEventListener('online', refreshOnVisible);
     const timer = setInterval(() => {
       if (document.hidden || !navigator.onLine) return;
+      const pusher = getPusherClient();
+      if (pusher?.connection.state === 'connected' &&
+          Date.now() - lastLoadedAtRef.current < CONNECTED_SAFETY_INTERVAL_MS) return;
       loadConversations();
     }, POLL_INTERVAL_MS);
     return () => {
       clearInterval(timer);
+      document.removeEventListener('visibilitychange', refreshOnVisible);
+      window.removeEventListener('online', refreshOnVisible);
       abortRef.current?.abort();
     };
   }, [loadConversations]);
+
+  useEffect(() => {
+    if (!myId) return;
+    const pusher = getPusherClient();
+    if (!pusher) return;
+    const channel = pusher.subscribe(`user-${myId}`);
+    const refreshOnMatch = () => { void loadConversations(); };
+    channel.bind('new-match', refreshOnMatch);
+    return () => { channel.unbind('new-match', refreshOnMatch); };
+  }, [myId, loadConversations]);
 
   useEffect(() => {
     if (!conversationIds) return;

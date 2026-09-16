@@ -1,20 +1,31 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { matches, users, photos, messages } from '@/db/schema';
-import { eq, or, desc, inArray, and, sql } from 'drizzle-orm';
+import { eq, or, desc, inArray, and, count } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getAuthSession();
     if (!session) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
     const currentUserId = session.userId;
+
+    if (request.nextUrl.searchParams.get('countOnly') === 'true') {
+      const [result] = await db
+        .select({ count: count() })
+        .from(matches)
+        .where(and(
+          eq(matches.isActive, true),
+          or(eq(matches.user1Id, currentUserId), eq(matches.user2Id, currentUserId))
+        ));
+      return NextResponse.json({ success: true, count: Number(result?.count ?? 0) });
+    }
 
     const userMatches = await db
       .select()

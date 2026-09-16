@@ -32,16 +32,22 @@ export default function FloatingNav() {
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
 
-  // Warm the primary route bundles before a tab is tapped.
+  // Let the current screen finish its first paint and critical requests before
+  // warming the other tabs in the background.
   useEffect(() => {
-    NAV_TABS.forEach((tab) => {
-      router.prefetch(tab.path);
-    });
-  }, [router]);
+    if (isStandalonePage) return;
+    const warmTabs = () => NAV_TABS.forEach((tab) => router.prefetch(tab.path));
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(warmTabs, { timeout: 1_500 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const timer = setTimeout(warmTabs, 900);
+    return () => clearTimeout(timer);
+  }, [router, isStandalonePage]);
 
   useEffect(() => {
-    if (!pathname.startsWith('/discover')) prefetchFeed();
-  }, [pathname]);
+    if (!isStandalonePage && !pathname.startsWith('/discover')) prefetchFeed();
+  }, [pathname, isStandalonePage]);
 
   // Edge-swipe tab navigation — only fires when the touch started within
   // EDGE_PX pixels of the left or right screen edge, so it never interferes
@@ -102,17 +108,28 @@ export default function FloatingNav() {
   useEffect(() => {
     // Hidden navigation need not scan chat messages or standalone screens.
     if (isStandalonePage) return;
+    let frame = 0;
     const checkModal = () => {
       const modal = document.querySelector('[role="dialog"], [data-modal="true"], [aria-modal="true"], .animate-sheet-up');
-      setHasModal(Boolean(modal));
+      setHasModal((current) => current === Boolean(modal) ? current : Boolean(modal));
     };
-    checkModal();
-    const observer = new MutationObserver(checkModal);
+    const scheduleCheck = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        checkModal();
+      });
+    };
+    scheduleCheck();
+    const observer = new MutationObserver(scheduleCheck);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [isStandalonePage]);
 
 
@@ -135,11 +152,11 @@ export default function FloatingNav() {
 
   return (
     <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] pt-1">
-      <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-infyn-border/80 bg-infyn-surface/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(32,26,22,0.15)] backdrop-blur-xl overflow-hidden">
+      <div className="pointer-events-auto relative flex w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] items-center justify-between rounded-[24px] border border-infyn-border/80 bg-infyn-surface/90 px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(32,26,22,0.15)] backdrop-blur-md overflow-hidden">
 
         {/* Sliding indicator with spring animation */}
         <div
-          className="absolute top-1.5 h-[calc(100%-12px)] rounded-[20px] bg-gradient-to-r from-infyn-rose to-infyn-rose opacity-15 shadow-2xs transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="absolute top-1.5 h-[calc(100%-12px)] rounded-[20px] bg-gradient-to-r from-infyn-rose to-infyn-rose opacity-15 shadow-2xs transition-transform duration-[220ms] ease-out"
           style={{
             width: `calc((100% - 16px) / ${NAV_TABS.length})`,
             left: 8,
@@ -153,16 +170,16 @@ export default function FloatingNav() {
             <button
               key={tab.id}
               onClick={() => { hapticLight(); router.push(tab.path); }}
-              className="relative z-10 flex min-h-[48px] flex-1 flex-col items-center justify-center py-1.5 transition-all duration-300 active:scale-90 cursor-pointer select-none"
+              className="relative z-10 flex min-h-[48px] flex-1 flex-col items-center justify-center py-1.5 transition-all duration-[180ms] active:scale-95 cursor-pointer select-none"
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
             >
-              <span className={`transition-all duration-300 ${
+              <span className={`transition-all duration-[180ms] ${
                 isActive ? 'scale-110 text-infyn-rose' : 'scale-100 text-infyn-ink/40'
               }`}>
                 {tab.icon(isActive)}
               </span>
-              <span className={`text-[10px] font-semibold tracking-tight transition-all duration-300 ${
+              <span className={`text-[10px] font-semibold tracking-tight transition-all duration-[180ms] ${
                 isActive ? 'opacity-100 scale-100 text-infyn-rose mt-0.5' : 'opacity-0 scale-90 h-0 overflow-hidden'
               }`}>
                 {tab.label}

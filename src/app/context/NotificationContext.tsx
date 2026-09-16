@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { hapticLight, hapticSuccess } from '../lib/haptics';
 import { Ic } from '../components/icons';
+import { useCurrentUser } from '../lib/useCurrentUser';
+import { getPusherClient } from '@/lib/pusher-client';
 
 export interface AppNotification {
   id: number;
@@ -44,11 +46,15 @@ const defaultContext: NotificationContextType = {
 
 const NotificationContext = createContext<NotificationContextType>(defaultContext);
 const NOTIFICATION_POLL_MS = 60_000;
+const CONNECTED_SAFETY_INTERVAL_MS = 2 * 60_000;
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const auth = useCurrentUser();
+  const myId = auth.status === 'authenticated' ? auth.userId : null;
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const lastFetchedAtRef = React.useRef(0);
 
   // Fetch real notifications from API
   const fetchNotifications = useCallback(async () => {
@@ -58,6 +64,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const data = await res.json();
       if (data.success && Array.isArray(data.notifications)) {
         setNotifications(data.notifications);
+        lastFetchedAtRef.current = Date.now();
       }
     } catch {
       /* Non-critical */
@@ -65,13 +72,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
+    if (!myId) return;
     const refreshWhenActive = () => {
       if (document.hidden || !navigator.onLine) return;
       void fetchNotifications();
     };
 
     refreshWhenActive();
-    const interval = setInterval(refreshWhenActive, NOTIFICATION_POLL_MS);
+    const interval = setInterval(() => {
+      const pusher = getPusherClient();
+      if (pusher?.connection.state === 'connected' &&
+          Date.now() - lastFetchedAtRef.current < CONNECTED_SAFETY_INTERVAL_MS) return;
+      refreshWhenActive();
+    }, NOTIFICATION_POLL_MS);
     document.addEventListener('visibilitychange', refreshWhenActive);
     window.addEventListener('online', refreshWhenActive);
     return () => {
@@ -79,7 +92,22 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       document.removeEventListener('visibilitychange', refreshWhenActive);
       window.removeEventListener('online', refreshWhenActive);
     };
-  }, [fetchNotifications]);
+  }, [fetchNotifications, myId]);
+
+  useEffect(() => {
+    if (!myId) return;
+    const pusher = getPusherClient();
+    if (!pusher) return;
+    const channel = pusher.subscribe(`user-${myId}`);
+    const onNotification = () => { void fetchNotifications(); };
+    channel.bind('notification', onNotification);
+    channel.bind('new-match', onNotification);
+    return () => {
+      channel.unbind('notification', onNotification);
+      channel.unbind('new-match', onNotification);
+      pusher.unsubscribe(`user-${myId}`);
+    };
+  }, [myId, fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
 

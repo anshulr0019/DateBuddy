@@ -215,11 +215,11 @@ export default function ProfilePage() {
     const { signal } = controller;
 
     // Connections count loads independently — a failure here never blocks the page
-    fetch('/api/matches', { signal })
+    fetch('/api/matches?countOnly=true', { signal })
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
-        if (data?.matches && Array.isArray(data.matches)) {
-          cachedConnections = data.matches.length; setConnections(data.matches.length);
+        if (data?.success && typeof data.count === 'number') {
+          cachedConnections = data.count; setConnections(data.count);
         }
       })
       .catch(() => {});

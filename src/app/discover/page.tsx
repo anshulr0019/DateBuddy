@@ -43,7 +43,7 @@ type Status = 'loading' | 'ready' | 'error';
 
 type SwipeAction = 'like' | 'pass' | 'super_like';
 type ExitDir = 'left' | 'right' | 'up';
-type SwipeResponse = { unauthorized?: boolean; limitReached?: boolean; message?: string; isMatch?: boolean; matchedUser?: MatchedUser | null };
+type SwipeResponse = { unauthorized?: boolean; limitReached?: boolean; message?: string; isMatch?: boolean; swipeId?: number; matchedUser?: MatchedUser | null };
 type LastSwipe = { profile: Profile; action: SwipeAction; promise: Promise<SwipeResponse> };
 
 export default function DiscoverPage() {
@@ -421,7 +421,7 @@ export default function DiscoverPage() {
       const res = await fetch('/api/swipes', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ swipedUserId: record.profile.id }),
+        body: JSON.stringify({ swipedUserId: record.profile.id, swipeId: original.swipeId, action: record.action }),
       });
       if (res.status === 401) {
         router.replace('/welcome');
