@@ -15,7 +15,7 @@ const VIBE_INSIGHTS = [
   },
   {
     tag: 'Icebreaker',
-    insight: 'Skip the generic "hey" — asking about recent music or food discoveries gets 4x better replies.',
+    insight: 'Try asking about a recent music or food discovery to give your conversation an easy starting point.',
   },
   {
     tag: 'Chemistry',
@@ -55,7 +55,7 @@ export function RadarScreen({
   const currentInsight = VIBE_INSIGHTS[insightIndex];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col items-center justify-between px-6 pt-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center gap-4 px-6 pt-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] [&>div]:shrink-0 [&>button]:shrink-0">
       {/* Top Header info */}
       <div className="text-center">
         <h1 className="text-[22px] font-normal text-infyn-ink mb-1 font-display">Looking for your vibe…</h1>
@@ -71,7 +71,7 @@ export function RadarScreen({
         </p>
       </div>
 
-      {/* 3D Holographic Matchmaking Globe */}
+      {/* Textured Earth; interaction is exploratory, not a location filter. */}
       <PremiumGlobe vibe={vibe} onlineCount={onlineCount} />
 
       {/* Rotating Insights Card — Clean & Premium */}
@@ -95,10 +95,6 @@ export function RadarScreen({
           </p>
         </div>
 
-        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-infyn-surface/80 border border-infyn-border/80 px-3.5 py-1 text-[11.5px] font-semibold text-infyn-ink/60 shadow-2xs">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          {onlineCount > 0 ? `${onlineCount} people looking right now` : 'Scanning active members nearby'}
-        </p>
       </div>
 
       {/* Cancel Button */}
