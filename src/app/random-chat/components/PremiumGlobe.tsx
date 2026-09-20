@@ -98,7 +98,7 @@ export function PremiumGlobe({ vibe, onlineCount }: { vibe: string | null; onlin
           className={styles.canvas}
           style={{ opacity: ready ? 1 : 0, pointerEvents: ready ? 'auto' : 'none' }}
           role="img"
-          aria-label="Rotating Earth with continents, oceans and clouds"
+          aria-label="Animated cartoon globe with mint continents, blue oceans and floating clouds"
           aria-describedby={helpId}
           onPointerDown={event => {
             if (!event.isPrimary || event.button !== 0) return;
@@ -131,7 +131,7 @@ export function PremiumGlobe({ vibe, onlineCount }: { vibe: string | null; onlin
       <figcaption className={styles.caption}>
         <p id={helpId}>{failed ? 'Earth preview · animation unavailable' : ready ? 'Drag to explore. Your location stays off the globe.' : 'Loading Earth…'}</p>
         <p className={styles.status}>{onlineCount > 0 ? `${onlineCount} people online` : 'Waiting for someone to join'}{vibe ? ` · ${vibe}` : ''}</p>
-        <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer">Earth imagery: Solar System Scope · CC BY 4.0</a>
+        <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer">Map data: Solar System Scope · CC BY 4.0</a>
       </figcaption>
     </figure>
   );
