@@ -9,7 +9,7 @@ export default function HelpPage() {
   const faqs = [
     { q: 'How does Infyn work?', a: 'Infyn is a dating and connections app designed for Gen Z. You can swipe profiles, host or join sports squads, and connect with people who share your vibe.' },
     { q: 'How do I complete phone verification?', a: 'Enter your 10-digit Indian phone number on the welcome screen, then enter the 6-digit code we text you. The code expires after 5 minutes.' },
-    { q: 'Is Infyn free to use?', a: 'Yes! Infyn is 100% free with unlimited likes, real database messaging, and profile customization.' },
+    { q: 'Is Infyn free to use?', a: 'Yes. Liking, matching and messaging are free, with no daily limit on likes.' },
     { q: 'How do I edit my profile photos?', a: 'Go to your Profile tab, click "Edit Profile" or gear icon to update your bio, interests, and photos.' },
   ];
 

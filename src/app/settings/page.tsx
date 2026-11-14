@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
 import { AuroraBackground, GlassCard, VerifiedBadge, SafeImage } from '../components/shared';
+import { Ic } from '../components/icons';
 import {
   clearUserProfileCache,
   getCachedUserProfile,
@@ -406,28 +407,31 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between p-3.5">
                     <div>
-                      <p className="text-[14px] font-medium text-infyn-ink">Google Email</p>
-                      <p className="text-[12px] text-infyn-ink/50">{userInfo.email}</p>
+                      <p className="text-[14px] font-medium text-infyn-ink">Google account</p>
+                      <p className="text-[12px] text-infyn-ink/50">{userInfo.email || 'Sign in with Google to link one'}</p>
                     </div>
-                    <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                      Connected
-                    </span>
+                    {userInfo.email ? (
+                      <span className="text-[12px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Connected</span>
+                    ) : (
+                      <span className="text-[12px] font-semibold text-infyn-secondary bg-infyn-surface-soft px-2.5 py-1 rounded-full">Not connected</span>
+                    )}
                   </div>
 
-                  <div
+                  <button
+                    type="button"
                     onClick={() => router.push('/verification')}
-                    className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-infyn-surface-soft transition-all"
+                    className="w-full text-left flex items-center justify-between p-3.5 cursor-pointer active:bg-infyn-surface-soft transition-colors"
                   >
                     <div>
-                      <p className="text-[14px] font-medium text-infyn-ink">Identity Verification</p>
+                      <p className="text-[14px] font-medium text-infyn-ink">Identity verification</p>
                       {userInfo.verified ? (
-                        <p className="text-[12px] text-emerald-600 font-semibold">✓ Blue Tick Verified</p>
+                        <p className="text-[12px] text-emerald-700 font-semibold">Verified</p>
                       ) : (
-                        <p className="text-[12px] text-infyn-rose font-semibold">Tap to get verified →</p>
+                        <p className="text-[12px] text-infyn-rose font-semibold">Get verified</p>
                       )}
                     </div>
-                    <span className="text-[14px] text-infyn-ink/40">›</span>
-                  </div>
+                    <span className="text-infyn-muted -rotate-90" aria-hidden><Ic.ChevDown /></span>
+                  </button>
                 </GlassCard>
               </div>
 
@@ -542,23 +546,9 @@ export default function SettingsPage() {
               {/* Privacy Controls */}
               <div className="space-y-1">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-infyn-ink/40 px-2 mb-1.5">
-                  Privacy &amp; Safety Shield
+                  Privacy &amp; safety
                 </p>
                 <GlassCard className="divide-y divide-infyn-border/[0.06]">
-                  {/* E2E Encryption Status Card */}
-                  <div className="flex items-center justify-between p-3.5 bg-emerald-500/[0.04]">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-[14px] font-bold text-infyn-ink">End-to-End Encryption</p>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 text-[10px] font-extrabold">
-                          Always Active
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-infyn-ink/50">Chats, photos &amp; calls are 256-bit encrypted</p>
-                    </div>
-                    <span className="text-emerald-600 text-lg">🔒</span>
-                  </div>
-
                   <div className="flex items-center justify-between p-3.5">
                     <div>
                       <p className="text-[14px] font-medium text-infyn-ink">Incognito Mode</p>
