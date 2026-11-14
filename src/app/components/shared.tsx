@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ic } from './icons';
 
 /* ─────────────────────────────────────────────────
@@ -35,8 +35,11 @@ export function SafeImage({
   onClick,
   eager = false,
   width = 800,
+  fallbackSrcs,
 }: {
   src?: string | null;
+  /* Tried in order if `src` fails to load, before falling back to initials. */
+  fallbackSrcs?: Array<string | null | undefined>;
   alt?: string;
   name?: string;
   className?: string;
@@ -46,8 +49,13 @@ export function SafeImage({
   eager?: boolean;
   width?: number;
 }) {
-  const [error, setError] = useState(false);
+  const candidates = [src, ...(fallbackSrcs ?? [])].filter((u): u is string => Boolean(u));
+  const candidateKey = candidates.join('|');
+  const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  useEffect(() => { setAttempt(0); setLoaded(false); }, [candidateKey]);
+  const current = candidates[attempt];
+  const error = !current;
 
   const getInitials = (str: string) => {
     if (!str) return 'IN';
@@ -58,7 +66,7 @@ export function SafeImage({
     return str.substring(0, 2).toUpperCase();
   };
 
-  if (error || !src) {
+  if (error) {
     return (
       <div
         onClick={onClick}
@@ -70,7 +78,7 @@ export function SafeImage({
     );
   }
 
-  const finalSrc = optimizeImageUrl(src, { width }) || src;
+  const finalSrc = optimizeImageUrl(current, { width }) || current;
 
   return (
     <img
@@ -80,7 +88,7 @@ export function SafeImage({
       fetchPriority={eager ? 'high' : undefined}
       decoding="async"
       onLoad={() => setLoaded(true)}
-      onError={() => setError(true)}
+      onError={() => { setLoaded(false); setAttempt((a) => a + 1); }}
       onClick={onClick}
       className={`transition-opacity duration-300 ease-out ${loaded || eager ? 'opacity-100' : 'opacity-0'} ${className}`}
       style={style}
@@ -91,12 +99,6 @@ export function SafeImage({
 export function AuroraBackground({ subtle = false, children, className = '' }: { subtle?: boolean; children: React.ReactNode; className?: string }) {
   return (
     <div className={`relative h-full w-full overflow-hidden bg-infyn-paper text-infyn-ink flex flex-col flex-1 min-h-0 ${subtle ? 'aurora-subtle' : ''} ${className}`}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        <div className="aurora-blob aurora-blob-1" />
-        <div className="aurora-blob aurora-blob-2" />
-        <div className="aurora-blob aurora-blob-3" />
-        <div className="aurora-blob aurora-blob-4" />
-      </div>
       <div className="relative z-10 flex-1 min-h-0 flex flex-col">{children}</div>
     </div>
   );

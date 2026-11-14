@@ -357,34 +357,18 @@ export default function ProfilePage() {
                   role="button"
                   tabIndex={0}
                   aria-label="View your photo"
-                  onKeyDown={e => { if (e.key === 'Enter') profile.photo && setPhotoLightboxOpen(true); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (profile.photo) setPhotoLightboxOpen(true); } }}
                 >
-                  <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]" />
+                  <SafeImage src={profile.photo} fallbackSrcs={profile.photos?.slice(1)} name={profile.name} alt="" eager className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-infyn-paper via-infyn-paper/10 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
-                  {/* Tap-to-expand hint */}
-                  {profile.photo && (
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-infyn-border/15 transition-all duration-300 shadow-md">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 3h6m0 0v6m0-6-7 7M9 21H3m0 0v-6m0 6 7-7"/></svg>
-                      <span className="text-[11px] font-semibold text-white">View</span>
-                    </div>
-                  )}
-                  <div className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
+                  <div className="absolute right-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
                     <button
                       onClick={e => { e.stopPropagation(); router.push('/settings'); }}
                       aria-label="Settings"
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-infyn-surface/20 backdrop-blur-md text-white hover:bg-infyn-surface/30 transition-all cursor-pointer active:scale-95"
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-infyn-ink/35 text-white active:scale-95 transition-transform cursor-pointer"
                     >
                       <Ic.Settings />
-                    </button>
-                  </div>
-                  <div className="absolute right-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
-                    <button
-                      onClick={e => { e.stopPropagation(); openEditor(); }}
-                      aria-label="Edit profile"
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-infyn-surface/20 backdrop-blur-md text-white hover:bg-infyn-surface/30 transition-all cursor-pointer active:scale-95"
-                    >
-                      <Ic.Edit />
                     </button>
                   </div>
                 </div>
@@ -405,15 +389,15 @@ export default function ProfilePage() {
                       className="story-ring h-[88px] w-[88px] cursor-pointer active:scale-[0.97] transition-all duration-300"
                     >
                       <div className="story-ring-inner h-full w-full overflow-hidden rounded-full shadow-lg">
-                        <SafeImage src={profile.photo} name={profile.name} alt="" eager className="h-full w-full rounded-full object-cover" />
+                        <SafeImage src={profile.photo} fallbackSrcs={profile.photos?.slice(1)} name={profile.name} alt="" eager className="h-full w-full rounded-full object-cover" />
                       </div>
                     </button>
                     <button
                       onClick={openEditor}
-                      className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-infyn-ink/15 bg-infyn-surface/80 px-4 py-2 text-[13px] font-medium text-infyn-ink backdrop-blur-md hover:bg-infyn-surface transition-all cursor-pointer active:scale-95 shadow-sm"
+                      className="flex min-h-[44px] items-center gap-2 rounded-full border border-infyn-border bg-infyn-surface px-5 text-[14px] font-semibold text-infyn-ink active:scale-[0.97] transition-transform cursor-pointer"
                     >
                       <Ic.Edit />
-                      Edit Profile
+                      Edit profile
                     </button>
                   </div>
 
