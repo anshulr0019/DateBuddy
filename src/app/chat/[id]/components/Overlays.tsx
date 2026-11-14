@@ -12,7 +12,7 @@ function Sheet({
   label,
   onClose,
   children,
-  backdropClass = 'bg-slate-950/45 backdrop-blur-md',
+  backdropClass = 'bg-infyn-ink/50',
 }: {
   label: string;
   onClose: () => void;
@@ -168,9 +168,11 @@ const REPORT_REASONS: { value: string; label: string }[] = [
   { value: 'other', label: 'Something else' },
 ];
 
-type SafetyView = 'menu' | 'report' | 'report-done' | 'block' | 'encryption';
+type SafetyView = 'menu' | 'report' | 'report-done' | 'block';
 
-export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: () => void }) {
+export type ConversationAction = { label: string; icon: React.ReactNode; onSelect: () => void };
+
+export function SafetySheet({ partner, onClose, actions = [] }: { partner: Partner; onClose: () => void; actions?: ConversationAction[] }) {
   const router = useRouter();
   const [view, setView] = useState<SafetyView>('menu');
   const [busy, setBusy] = useState(false);
@@ -218,70 +220,42 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
   }, [partner.partnerId, router]);
 
   return (
-    <Sheet label={`Safety options for ${partner.name}`} onClose={onClose}>
+    <Sheet label={`Options for conversation with ${partner.name}`} onClose={onClose}>
       <div className="w-full rounded-2xl bg-infyn-surface/95 backdrop-blur-2xl border border-infyn-border/80 shadow-2xl overflow-hidden">
         {view === 'menu' && (
-          <div className="divide-y divide-gray-100 text-[14px] font-semibold text-infyn-ink">
-            <div className="px-4 py-3 text-center">
-              <p className="text-[15px] font-bold">{partner.name}</p>
-              <p className="text-[12px] font-medium text-infyn-muted mt-0.5">Privacy &amp; Safety Controls</p>
+          <div className="divide-y divide-infyn-border text-[15px] text-infyn-ink">
+            <div className="px-4 py-3.5 text-center">
+              <p className="font-display text-[19px]">{partner.name}</p>
             </div>
-            <button
-              onClick={() => setView('encryption')}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer text-emerald-700"
-            >
-              <div className="flex items-center gap-2">
-                <span>🔒</span>
-                <span>End-to-End Encryption</span>
-              </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Verified</span>
-            </button>
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                onClick={() => { onClose(); action.onSelect(); }}
+                className="w-full min-h-[52px] px-4 flex items-center gap-3 active:bg-infyn-surface-soft transition-colors cursor-pointer"
+              >
+                <span className="text-infyn-secondary [&_svg]:w-[18px] [&_svg]:h-[18px]" aria-hidden>{action.icon}</span>
+                <span>{action.label}</span>
+              </button>
+            ))}
             <button
               onClick={() => setView('report')}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-infyn-surface-soft active:bg-infyn-surface-soft transition-colors cursor-pointer"
+              className="w-full min-h-[52px] px-4 flex items-center gap-3 active:bg-infyn-surface-soft transition-colors cursor-pointer"
             >
+              <Ic.Flag className="w-[18px] h-[18px] text-infyn-secondary" />
               <span>Report {partner.name}</span>
-              <Ic.Flag className="w-4 h-4 text-infyn-secondary" />
             </button>
             <button
               onClick={() => setView('block')}
-              className="w-full px-4 py-3 flex items-center justify-between text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors cursor-pointer"
+              className="w-full min-h-[52px] px-4 flex items-center gap-3 text-infyn-rose font-semibold active:bg-infyn-blush transition-colors cursor-pointer"
             >
+              <Ic.Ban className="w-[18px] h-[18px]" />
               <span>Block {partner.name}</span>
-              <Ic.Ban className="w-4 h-4 text-red-600" />
             </button>
             <button
               onClick={onClose}
-              className="w-full px-4 py-3 flex items-center justify-center text-infyn-secondary hover:bg-infyn-surface-soft transition-colors cursor-pointer"
+              className="w-full min-h-[52px] px-4 flex items-center justify-center text-infyn-secondary font-semibold active:bg-infyn-surface-soft transition-colors cursor-pointer"
             >
               Cancel
-            </button>
-          </div>
-        )}
-
-        {view === 'encryption' && (
-          <div className="p-5 text-center space-y-3.5">
-            <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-2xl flex items-center justify-center mx-auto shadow-sm">
-              🔒
-            </div>
-            <div>
-              <h3 className="text-[16px] font-bold text-infyn-ink">End-to-End Encrypted</h3>
-              <p className="text-[12px] text-infyn-secondary mt-1 leading-relaxed">
-                Messages, voice notes, photos, and live calls between you and {partner.name} are secured with 256-bit encryption.
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-infyn-surface-soft border border-infyn-border/80 text-left space-y-1.5 text-[11.5px] text-infyn-secondary">
-              <div className="flex items-center gap-1.5 font-bold text-infyn-ink">
-                <span>🛡️</span>
-                <span>Anti-Harassment Shield</span>
-              </div>
-              <p className="text-[11px] leading-tight">Screenshots and sensitive media are strictly monitored. Your safety is our #1 priority.</p>
-            </div>
-            <button
-              onClick={() => setView('menu')}
-              className="w-full py-2.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-infyn-ink font-bold text-[13px] transition-all cursor-pointer"
-            >
-              Back to Options
             </button>
           </div>
         )}
@@ -318,8 +292,10 @@ export function SafetySheet({ partner, onClose }: { partner: Partner; onClose: (
 
         {view === 'report-done' && (
           <div className="px-5 py-6 text-center">
-            <p className="text-[28px] mb-2" aria-hidden>🛡️</p>
-            <p className="text-[15px] font-bold text-infyn-ink mb-1">Thanks for letting us know</p>
+            <span className="mx-auto mb-3 h-12 w-12 grid place-items-center rounded-full bg-infyn-blush text-infyn-rose" aria-hidden>
+              <Ic.Shield className="w-5 h-5" />
+            </span>
+            <p className="font-display text-[20px] text-infyn-ink mb-1">Thanks for letting us know</p>
             <p className="text-[13px] text-infyn-secondary mb-4">
               Our team will review your report. You can also block {partner.name} so they can&apos;t contact you.
             </p>

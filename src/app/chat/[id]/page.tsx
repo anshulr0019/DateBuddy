@@ -337,37 +337,6 @@ function ChatContent() {
 
               {partner && (
                 <div className={chatStyles.headerActions}>
-                  {/* Minimalist Games Button */}
-                  <button
-                    onClick={() => { hapticLight(); setCallMenuOpen(false); setGamesOpen(true); }}
-                    className={`${chatStyles.headerAction}`}
-                    title="Mini Games"
-                    aria-label="Play mini games"
-                  >
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="6" width="20" height="12" rx="3" />
-                      <line x1="6" y1="12" x2="10" y2="12" />
-                      <line x1="8" y1="10" x2="8" y2="14" />
-                      <circle cx="15" cy="12" r="1" fill="currentColor" />
-                      <circle cx="18" cy="10" r="1" fill="currentColor" />
-                    </svg>
-                  </button>
-
-                  {/* Date Planner Button */}
-                  <button
-                    onClick={() => { hapticLight(); setCallMenuOpen(false); setDatePlannerOpen(true); }}
-                    className={`${chatStyles.headerAction}`}
-                    title="Plan a Date"
-                    aria-label="Plan a date"
-                  >
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                  </button>
-
                   {/* One compact call control reveals the existing audio/video actions. */}
                   <div className={chatStyles.callMenu} ref={callMenuRef}>
                     <button
@@ -413,7 +382,7 @@ function ChatContent() {
                   </div>
                   <button
                     onClick={() => { hapticLight(); setCallMenuOpen(false); setSafetyOpen(true); }}
-                    aria-label="Conversation options: report or block"
+                    aria-label="More options: plan a date, games, report or block"
                     className={`${chatStyles.headerAction}`}
                   >
                     <Ic.Dots />
@@ -442,7 +411,7 @@ function ChatContent() {
             ) : chat.phase === 'notfound' || validMatchId === null ? (
               <div className={chatStyles.state}>
                 <div className={chatStyles.stateIcon} aria-hidden>
-                  💔
+                  <Ic.Chat />
                 </div>
                 <h2 className={chatStyles.stateTitle}>This conversation isn&apos;t available</h2>
                 <p className={chatStyles.stateText}>
@@ -458,7 +427,7 @@ function ChatContent() {
             ) : chat.phase === 'error' ? (
               <div className={chatStyles.state}>
                 <div className={chatStyles.stateIcon} aria-hidden>
-                  ⚠️
+                  <Ic.Alert className="w-6 h-6" />
                 </div>
                 <h2 className={chatStyles.stateTitle}>Couldn&apos;t load this chat</h2>
                 <p className={chatStyles.stateText}>
@@ -488,7 +457,7 @@ function ChatContent() {
                     </div>
                     <h2 className={chatStyles.stateTitle}>You matched with {partner.name}!</h2>
                     <p className={chatStyles.stateText}>
-                      Say hi and get the conversation going 👋
+                      Say hi — or start with one of these.
                     </p>
                     <div className="flex flex-col gap-2 w-full max-w-[280px]">
                       {ICEBREAKERS.map((line) => (
@@ -508,16 +477,6 @@ function ChatContent() {
                   </div>
                 ) : (
                   <>
-                    {/* End-to-End Encryption Notice */}
-                    <div className={chatStyles.encryption}>
-                      <div className={chatStyles.encryptionCard}>
-                        <span className="text-[14px]">🔒</span>
-                        <p>
-                          Messages &amp; calls are end-to-end encrypted. No one outside of this chat can read or listen to them.
-                        </p>
-                      </div>
-                    </div>
-
                     {/* Memory Lane — surfaces after 7+ days of chatting */}
                     {partner && validMatchId && myId && (
                       <MemoryLaneCard
@@ -670,7 +629,16 @@ function ChatContent() {
           onClose={() => setActionMessage(null)}
         />
       )}
-      {safetyOpen && partner && <SafetySheet partner={partner} onClose={() => setSafetyOpen(false)} />}
+      {safetyOpen && partner && (
+        <SafetySheet
+          partner={partner}
+          onClose={() => setSafetyOpen(false)}
+          actions={[
+            { label: 'Plan a date', icon: <Ic.Calendar />, onSelect: () => setDatePlannerOpen(true) },
+            { label: 'Play a game', icon: <Ic.Trophy />, onSelect: () => setGamesOpen(true) },
+          ]}
+        />
+      )}
       {gamesOpen && partner && validMatchId && (
         <MiniGamesDrawer
           isOpen={gamesOpen}

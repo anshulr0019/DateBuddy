@@ -38,13 +38,13 @@ const REPORT_REASONS = [
 
 type Profile = FeedProfile;
 
-type MatchedUser = { id: number; name: string; photo: string | null };
+type MatchedUser = { id: number; name: string; photo: string | null; matchId?: number };
 
 type Status = 'loading' | 'ready' | 'error';
 
 type SwipeAction = 'like' | 'pass' | 'super_like';
 type ExitDir = 'left' | 'right' | 'up';
-type SwipeResponse = { unauthorized?: boolean; limitReached?: boolean; message?: string; isMatch?: boolean; swipeId?: number; matchedUser?: MatchedUser | null };
+type SwipeResponse = { unauthorized?: boolean; limitReached?: boolean; message?: string; isMatch?: boolean; swipeId?: number; matchId?: number; matchedUser?: MatchedUser | null };
 type LastSwipe = { profile: Profile; action: SwipeAction; promise: Promise<SwipeResponse> };
 
 export default function DiscoverPage() {
@@ -297,9 +297,9 @@ export default function DiscoverPage() {
       if (data.isMatch && data.matchedUser) {
         matchedIdsRef.current.add(target.id);
         setLastSwipe(cur => cur?.profile.id === target.id ? null : cur);
-        setMatchedUser(data.matchedUser);
+        setMatchedUser({ ...data.matchedUser, matchId: data.matchId });
         const firstName = data.matchedUser.name?.split(' ')[0] ?? 'Someone';
-        addNotification({ type: 'match', title: "It's a Match! 🎉", message: `You and ${firstName} liked each other. Say hi! 💬`, avatar: data.matchedUser.photo ?? undefined, actionUrl: '/messages' });
+        addNotification({ type: 'match', title: "It's a Match! 🎉", message: `You and ${firstName} liked each other. Say hi! 💬`, avatar: data.matchedUser.photo ?? undefined, actionUrl: data.matchId ? `/chat/${data.matchId}` : '/messages' });
       }
     }).catch(() => {
       hapticWarning();
@@ -661,10 +661,11 @@ export default function DiscoverPage() {
         myName={myName}
         onClose={() => setMatchedUser(null)}
         onSendMessage={() => {
+          const matchId = matchedUser?.matchId;
           pushedOverlayRef.current = false;
           closingFromPopRef.current = true;
           setMatchedUser(null);
-          router.push('/messages');
+          router.push(matchId ? `/chat/${matchId}` : '/messages');
         }}
       />
     </Shell>

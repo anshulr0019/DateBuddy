@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Ic } from '../../../components/icons';
 
 interface MemoryLaneCardProps {
   matchId: number | null;
@@ -60,6 +61,7 @@ export function MemoryLaneCard({
     }
   });
   const [shared, setShared] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // Compute stats
   const stats = useMemo(() => {
@@ -142,112 +144,74 @@ export function MemoryLaneCard({
 
   if (dismissed || !stats) return null;
 
+  const facts = [
+    stats.myTopEmojis.length > 0 ? `Your favourite emojis: ${stats.myTopEmojis.join(' ')}` : null,
+    stats.theirTopEmojis.length > 0 ? `${cleanName}'s favourites: ${stats.theirTopEmojis.join(' ')}` : null,
+    `${stats.whoTextsMore === 'you' ? 'You text' : `${cleanName} texts`} a little more often`,
+  ].filter(Boolean) as string[];
+
   return (
-    <div className="mx-4 mb-3 animate-vibe-slide-in">
-      <div className="relative rounded-2xl overflow-hidden shadow-lg">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-infyn-rose/90 via-infyn-rose/85 to-infyn-rose/90" />
-        {/* Soft particle dots */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <span
-              key={i}
-              className="absolute rounded-full bg-infyn-surface/10 animate-memory-float"
-              style={{
-                width: `${6 + Math.random() * 10}px`,
-                height: `${6 + Math.random() * 10}px`,
-                left: `${10 + Math.random() * 80}%`,
-                top: `${10 + Math.random() * 80}%`,
-                animationDelay: `${i * 0.5}s`,
-                animationDuration: `${4 + Math.random() * 3}s`,
-              }}
-            />
-          ))}
-        </div>
+    <section className="mx-4 mb-3 rounded-2xl border border-infyn-border bg-infyn-surface" aria-label={`Memory Lane with ${cleanName}`}>
+      <div className="flex items-center">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="flex-1 min-w-0 min-h-[52px] pl-4 pr-2 flex items-center gap-3 text-left cursor-pointer"
+        >
+          <span className="h-8 w-8 shrink-0 grid place-items-center rounded-full bg-infyn-blush text-infyn-rose" aria-hidden>
+            <Ic.Sparkle className="w-4 h-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14px] font-semibold text-infyn-ink">Memory Lane</span>
+            <span className="block text-[13px] text-infyn-secondary truncate">
+              {stats.daysSinceFirst} days · {stats.totalMessages} messages with {cleanName}
+            </span>
+          </span>
+          <span className={`shrink-0 text-infyn-secondary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} aria-hidden>
+            <Ic.ChevDown />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="h-11 w-11 mr-1 shrink-0 grid place-items-center rounded-full text-infyn-muted active:bg-infyn-surface-soft cursor-pointer"
+          aria-label="Hide Memory Lane"
+        >
+          <Ic.X className="w-4 h-4" />
+        </button>
+      </div>
 
-        <div className="relative p-4 space-y-3">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[18px]">💫</span>
-              <div>
-                <p className="text-[14px] font-extrabold text-white leading-tight">Memory Lane</p>
-                <p className="text-[10.5px] text-white/60 font-medium">
-                  Your journey with {cleanName}
-                </p>
+      {expanded && (
+        <div className="px-4 pb-4 animate-soft-arrive">
+          <dl className="grid grid-cols-3 gap-2 border-t border-infyn-border pt-3">
+            {[
+              { label: 'Days', value: stats.daysSinceFirst },
+              { label: 'Messages', value: stats.totalMessages },
+              { label: 'Best streak', value: stats.longestStreak },
+            ].map((item) => (
+              <div key={item.label} className="text-center">
+                <dd className="font-display text-[24px] leading-tight text-infyn-ink tabular-nums">{item.value}</dd>
+                <dt className="text-[12px] text-infyn-secondary">{item.label}</dt>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleDismiss}
-              className="h-6 w-6 rounded-full bg-infyn-surface/10 hover:bg-infyn-surface/20 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer text-[10px]"
-              aria-label="Dismiss memory lane"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
-              <p className="text-[20px] font-black text-white">{stats.daysSinceFirst}</p>
-              <p className="text-[9.5px] font-bold text-white/60 uppercase tracking-wider">Days</p>
-            </div>
-            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
-              <p className="text-[20px] font-black text-white">{stats.totalMessages}</p>
-              <p className="text-[9.5px] font-bold text-white/60 uppercase tracking-wider">Messages</p>
-            </div>
-            <div className="rounded-xl bg-infyn-surface/10 backdrop-blur-sm p-2.5 text-center border border-infyn-border/10">
-              <p className="text-[20px] font-black text-white">
-                {stats.longestStreak}<span className="text-[12px]">🔥</span>
-              </p>
-              <p className="text-[9.5px] font-bold text-white/60 uppercase tracking-wider">Streak</p>
-            </div>
-          </div>
-
-          {/* Fun facts */}
-          <div className="space-y-1.5">
-            {stats.myTopEmojis.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
-                <span className="text-[12px]">😄</span>
-                <p className="text-[11.5px] text-white/80 font-medium">
-                  Your fav emojis: {stats.myTopEmojis.join(' ')}
-                </p>
-              </div>
-            )}
-            {stats.theirTopEmojis.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
-                <span className="text-[12px]">💬</span>
-                <p className="text-[11.5px] text-white/80 font-medium">
-                  {cleanName}&apos;s fav: {stats.theirTopEmojis.join(' ')}
-                </p>
-              </div>
-            )}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-infyn-surface/8 border border-infyn-border/10">
-              <span className="text-[12px]">📊</span>
-              <p className="text-[11.5px] text-white/80 font-medium">
-                {stats.whoTextsMore === 'you' ? 'You text' : `${cleanName} texts`} more often
-              </p>
-            </div>
-          </div>
-
-          {/* Actions */}
+            ))}
+          </dl>
+          <ul className="mt-3 space-y-1 text-[13px] text-infyn-secondary">
+            {facts.map((fact) => <li key={fact}>{fact}</li>)}
+          </ul>
           {!shared ? (
             <button
               type="button"
               onClick={handleShare}
-              className="w-full py-2.5 rounded-xl bg-infyn-surface text-infyn-rose text-[12.5px] font-bold cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:shadow-md"
+              className="mt-3 w-full min-h-[44px] rounded-full border border-infyn-rose-line text-infyn-rose text-[14px] font-semibold active:bg-infyn-blush transition-colors cursor-pointer"
             >
-              Share Memory in Chat 💕
+              Share in chat
             </button>
           ) : (
-            <div className="text-center py-2 animate-popover-enter">
-              <p className="text-[13px] font-bold text-white">Shared! 💕</p>
-              <p className="text-[10.5px] text-white/50">{cleanName} can see your memories now</p>
-            </div>
+            <p className="mt-3 text-center text-[13px] text-infyn-secondary" role="status">Added to your conversation.</p>
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </section>
   );
 }

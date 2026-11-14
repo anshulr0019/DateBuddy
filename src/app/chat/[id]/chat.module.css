@@ -204,20 +204,20 @@
 
 .headerAction {
   display: inline-flex !important;
-  height: 2.25rem !important;
-  width: 2.25rem !important;
+  height: 2.75rem !important;
+  width: 2.75rem !important;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--line) !important;
+  border: 0 !important;
   border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.52) !important;
+  background: transparent !important;
   color: var(--ink) !important;
   box-shadow: none !important;
   transition: background 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .headerAction:hover { background: var(--surface) !important; color: var(--wine) !important; }
-.headerAction:active { transform: scale(0.91); }
+.headerAction:active { transform: scale(0.94); background: var(--surface) !important; }
 .headerActionVideo { border-color: var(--rose-line) !important; background: var(--infyn-blush) !important; color: var(--wine) !important; }
 .headerActionActive { border-color: var(--rose-line) !important; background: var(--infyn-blush) !important; color: var(--wine) !important; }
 
@@ -589,7 +589,6 @@
 @media (max-width: 370px) {
   .header { padding-right: 0.35rem; padding-left: 0.35rem; }
   .headerActions { gap: 0.08rem; }
-  .headerAction { height: 2.1rem !important; width: 2.1rem !important; }
   .partnerName { font-size: 0.92rem; }
 }
 
