@@ -159,3 +159,44 @@ export function GradientText({ children, className = '' }: { children: React.Rea
 export function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`animate-skeleton rounded-2xl ${className}`} />;
 }
+
+/* One empty / error / offline layout for every screen: icon, serif title,
+   a short explanation and at most one primary and one secondary action. */
+export function EmptyState({
+  icon,
+  title,
+  body,
+  action,
+  secondary,
+  tone = 'neutral',
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body?: React.ReactNode;
+  action?: { label: string; onClick: () => void };
+  secondary?: { label: string; onClick: () => void };
+  tone?: 'neutral' | 'error';
+}) {
+  return (
+    <div className="animate-soft-arrive flex flex-col items-center text-center py-14 px-6" role={tone === 'error' ? 'alert' : undefined}>
+      <div className={`mb-5 grid h-16 w-16 place-items-center rounded-full [&_svg]:h-7 [&_svg]:w-7 ${tone === 'error' ? 'bg-infyn-blush text-infyn-rose' : 'bg-infyn-surface border border-infyn-border text-infyn-rose'}`} aria-hidden>
+        {icon}
+      </div>
+      <h2 className="font-display text-[26px] leading-tight tracking-tight text-infyn-ink">{title}</h2>
+      {body && <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-infyn-secondary">{body}</p>}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-6 min-h-[52px] px-8 rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
+        >
+          {action.label}
+        </button>
+      )}
+      {secondary && (
+        <button onClick={secondary.onClick} className="mt-1 min-h-[48px] px-6 text-[15px] font-semibold text-infyn-secondary cursor-pointer">
+          {secondary.label}
+        </button>
+      )}
+    </div>
+  );
+}

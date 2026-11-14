@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
-import { AuroraBackground, GlassCard, OnlineDot, VerifiedBadge, SafeImage } from '../components/shared';
+import { AuroraBackground, GlassCard, OnlineDot, VerifiedBadge, SafeImage, EmptyState } from '../components/shared';
 import { hapticLight } from '../lib/haptics';
 
 type Match = {
@@ -69,41 +69,35 @@ export default function ConnectionsPage() {
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 
-            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-surface/90 backdrop-blur-xl border-b border-infyn-border/50 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-[22px] font-normal tracking-tight text-infyn-ink font-display">Connections</h1>
-                  <p className="text-[12.5px] text-infyn-ink/60 font-medium">Your circle is growing 💫</p>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-infyn-border/70 bg-infyn-surface/80 px-3 py-1 backdrop-blur-md shadow-2xs">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
-                  <span className="text-[11px] font-bold uppercase tracking-wide text-infyn-ink/70">
-                    {matches.length} Connected
-                  </span>
-                </div>
-              </div>
+            <div className="flex-shrink-0 z-20 px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-2 bg-infyn-paper">
+              <h1 className="font-display text-[30px] leading-tight tracking-tight text-infyn-ink">Connections</h1>
+              {!loading && !error && (
+                <p className="text-[14px] text-infyn-secondary">
+                  {matches.length === 0 ? 'People you match with appear here' : `${matches.length} ${matches.length === 1 ? 'match' : 'matches'}`}
+                </p>
+              )}
             </div>
 
             {/* Who Liked You teaser row */}
             <button
               onClick={() => { hapticLight(); router.push('/likes'); }}
-              className="font-system flex-shrink-0 z-10 mx-4 mt-3 flex items-center justify-between rounded-2xl bg-gradient-to-r from-infyn-rose/10 to-infyn-rose/10 border border-infyn-rose-line/60 px-4 py-3 cursor-pointer active:scale-[0.98] transition-all hover:border-infyn-rose/40"
+              className="flex-shrink-0 z-10 mx-4 mt-2 flex min-h-[64px] items-center justify-between rounded-2xl bg-infyn-surface border border-infyn-border px-4 py-3 cursor-pointer active:bg-infyn-surface-soft transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose shadow-sm text-lg flex-shrink-0">
-                  💛
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-infyn-blush text-infyn-rose flex-shrink-0" aria-hidden>
+                  <Ic.Heart filled />
                 </div>
                 <div className="text-left">
-                  <p className="text-[13.5px] font-bold text-infyn-ink">
+                  <p className="text-[15px] font-semibold text-infyn-ink">
                     {likesCount === null ? 'Who Liked You' : likesCount > 0 ? `${likesCount} ${likesCount === 1 ? 'person' : 'people'} liked you` : 'Who Liked You'}
                   </p>
-                  <p className="text-[11.5px] text-infyn-ink/55 font-medium">
+                  <p className="text-[13px] text-infyn-secondary">
                     {likesCount !== null && likesCount > 0 ? 'Tap to see or upgrade to reveal' : 'See people who already liked you'}
                   </p>
                 </div>
               </div>
               {likesCount !== null && likesCount > 0 && (
-                <div className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-infyn-rose px-1.5 text-white text-[11px] font-black shadow-sm flex-shrink-0">
+                <div className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-infyn-rose px-1.5 text-white text-[12px] font-semibold flex-shrink-0">
                   {likesCount}
                 </div>
               )}
@@ -122,45 +116,22 @@ export default function ConnectionsPage() {
               )}
 
               {!loading && error && (
-                <div className="animate-soft-arrive text-center py-16 px-6">
-                  <div className="animate-scale-pop flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-infyn-rose mb-4 mx-auto shadow-sm">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                  </div>
-                  <h3 className="text-[18px] font-bold text-infyn-ink mb-2">Couldn&apos;t load your connections</h3>
-                  <p className="text-[14px] text-infyn-ink/55 max-w-[260px] mx-auto leading-relaxed mb-6">
-                    Check your connection and try again.
-                  </p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="font-system rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 hover:shadow-[0_8px_24px_-8px_rgba(32,26,22,0.16)] transition-all shadow-sm"
-                  >
-                    Try again
-                  </button>
-                </div>
+                <EmptyState
+                  tone="error"
+                  icon={<Ic.Alert />}
+                  title="Couldn’t load your connections"
+                  body="Check your connection and try again."
+                  action={{ label: 'Try again', onClick: () => window.location.reload() }}
+                />
               )}
 
               {!loading && !error && matches.length === 0 && (
-                <div className="animate-soft-arrive text-center py-16 px-6">
-                  <div className="relative mb-6">
-                    <div className="animate-scale-pop flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-infyn-rose/25 mx-auto shadow-sm">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 className="text-[20px] font-bold text-infyn-ink mb-2">No connections yet</h3>
-                  <p className="text-[14.5px] text-infyn-ink/55 max-w-[280px] mx-auto leading-relaxed mb-6">
-                    Start swiping to find your people. When you both like each other, you&apos;ll match and can start chatting! ✨
-                  </p>
-                  <button
-                    onClick={() => router.push('/discover')}
-                    className="font-system rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 hover:shadow-[0_8px_24px_-8px_rgba(32,26,22,0.16)] transition-all shadow-sm"
-                  >
-                    Start Discovering
-                  </button>
-                </div>
+                <EmptyState
+                  icon={<Ic.Heart />}
+                  title="No connections yet"
+                  body="When you and someone both like each other, you’ll match and can start chatting."
+                  action={{ label: 'Start discovering', onClick: () => router.push('/discover') }}
+                />
               )}
 
               {!loading && !error && matches.length > 0 && (
@@ -181,20 +152,21 @@ export default function ConnectionsPage() {
                             </div>
                           )}
                         </div>
-                        <h3 className="text-[14.5px] font-bold text-infyn-ink leading-tight truncate w-full">
+                        <h3 className="text-[15px] font-semibold text-infyn-ink leading-tight truncate w-full">
                           {p.name}{p.age ? `, ${p.age}` : ''}
                         </h3>
                         {p.city && (
-                          <div className="mt-1.5 flex items-center justify-center gap-1 text-infyn-ink/45">
+                          <div className="mt-1 flex items-center justify-center gap-1 text-infyn-secondary">
                             <Ic.MapPin />
-                            <span className="text-[11px] font-medium">{p.city}</span>
+                            <span className="text-[13px]">{p.city}</span>
                           </div>
                         )}
                       </div>
 
                       <button
                         onClick={() => router.push(`/chat/${p.id}`)}
-                        className="font-system mt-3.5 w-full rounded-full bg-infyn-blush border border-infyn-rose-line/60 py-1.5 text-[12px] font-bold text-infyn-rose hover:bg-infyn-rose hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs"
+                        className="mt-3.5 w-full min-h-[44px] rounded-full border border-infyn-rose-line text-[14px] font-semibold text-infyn-rose active:bg-infyn-blush transition-colors cursor-pointer"
+                        aria-label={`Message ${p.name}`}
                       >
                         Message
                       </button>

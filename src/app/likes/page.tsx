@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuroraBackground, GlassCard, SafeImage, VerifiedBadge } from '../components/shared';
+import { AuroraBackground, GlassCard, SafeImage, VerifiedBadge, EmptyState } from '../components/shared';
 import { Ic } from '../components/icons';
 import { hapticLight } from '../lib/haptics';
 
@@ -96,7 +96,7 @@ export default function LikesPage() {
                       }
                     }}
                     aria-label="Go back"
-                    className="font-system flex h-9 w-9 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-ink hover:bg-infyn-surface-soft active:scale-90 transition-all cursor-pointer flex-shrink-0"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-infyn-ink active:bg-infyn-surface-soft transition-colors cursor-pointer flex-shrink-0"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="15 18 9 12 15 6" />
@@ -105,26 +105,21 @@ export default function LikesPage() {
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <h1 className="text-[20px] font-normal tracking-tight text-infyn-ink font-display">Who Liked You</h1>
+                      <h1 className="font-display text-[24px] leading-tight tracking-tight text-infyn-ink">Who liked you</h1>
                       {isGold && (
                         <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[10px] font-black uppercase tracking-wider">
                           GOLD
                         </span>
                       )}
                     </div>
-                    <p className="text-[12px] text-infyn-ink/60 font-medium">
-                      {loading ? 'Loading…' : `${count} ${count === 1 ? 'person' : 'people'} liked your profile`}
-                    </p>
+                    {!loading && count > 0 && (
+                      <p className="text-[14px] text-infyn-secondary">
+                        {count} {count === 1 ? 'person' : 'people'} liked your profile
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <button
-                  onClick={() => router.push('/discover')}
-                  aria-label="Close"
-                  className="font-system flex h-9 w-9 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-secondary hover:bg-infyn-surface-soft hover:text-infyn-ink active:scale-90 transition-all cursor-pointer flex-shrink-0"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
               </div>
             </div>
 
@@ -141,19 +136,13 @@ export default function LikesPage() {
 
               {/* Error */}
               {!loading && error && (
-                <div className="animate-soft-arrive text-center py-16 px-6">
-                  <div className="animate-scale-pop flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-infyn-rose mb-4 mx-auto shadow-sm text-2xl">⚠️</div>
-                  <h3 className="text-[18px] font-bold text-infyn-ink mb-2">Couldn&apos;t load likes</h3>
-                  <p className="text-[14px] text-infyn-ink/55 max-w-[260px] mx-auto leading-relaxed mb-6">
-                    Check your connection and try again.
-                  </p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="font-system rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 transition-all"
-                  >
-                    Try again
-                  </button>
-                </div>
+                <EmptyState
+                  tone="error"
+                  icon={<Ic.Alert />}
+                  title="Couldn’t load likes"
+                  body="Check your connection and try again."
+                  action={{ label: 'Try again', onClick: () => window.location.reload() }}
+                />
               )}
 
               {/* Free tier — locked/blurred paywall state */}
@@ -175,7 +164,7 @@ export default function LikesPage() {
                         </div>
                         <div className="absolute inset-0 backdrop-blur-xl" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-[28px]">🔒</div>
+                          <span className="grid h-11 w-11 place-items-center rounded-full bg-infyn-surface/90 text-infyn-rose" aria-hidden><Ic.Heart filled /></span>
                         </div>
                       </div>
                     ))}
@@ -191,18 +180,17 @@ export default function LikesPage() {
 
                   {/* Upgrade CTA */}
                   <GlassCard className="p-5 text-center border border-infyn-rose-line/60 bg-gradient-to-br from-infyn-blush to-white">
-                    <div className="text-[36px] mb-2">👑</div>
-                    <h3 className="text-[17px] font-extrabold text-infyn-ink mb-1">
-                      {count} {count === 1 ? 'person' : 'people'} liked you!
+                    <h3 className="font-display text-[24px] leading-tight text-infyn-ink mb-1">
+                      {count} {count === 1 ? 'person' : 'people'} liked you
                     </h3>
-                    <p className="text-[13px] text-infyn-ink/60 mb-4 leading-relaxed">
+                    <p className="text-[14px] text-infyn-secondary mb-4 leading-relaxed">
                       Upgrade to Gold to see who they are and match with them instantly.
                     </p>
                     <button
                       onClick={() => { hapticLight(); router.push('/premium'); }}
-                      className="font-system w-full py-3 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                      className="w-full min-h-[52px] rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
                     >
-                      Unlock with Gold ✨
+                      See who with Gold
                     </button>
                   </GlassCard>
                 </div>
@@ -210,25 +198,13 @@ export default function LikesPage() {
 
               {/* Empty state — no likes yet */}
               {!loading && !error && count === 0 && (
-                <div className="animate-soft-arrive text-center py-16 px-6">
-                  <div className="relative mb-6">
-                    <div className="animate-scale-pop flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose/15 to-infyn-rose/15 border border-infyn-rose/25 mx-auto shadow-sm">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 className="text-[20px] font-bold text-infyn-ink mb-2">No likes yet</h3>
-                  <p className="text-[14.5px] text-infyn-ink/55 max-w-[280px] mx-auto leading-relaxed mb-6">
-                    Complete your profile and start swiping — the more you engage, the more people will find you! 💫
-                  </p>
-                  <button
-                    onClick={() => router.push('/discover')}
-                    className="font-system rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose px-6 py-3 text-[14px] font-bold text-white cursor-pointer active:scale-95 transition-all shadow-sm"
-                  >
-                    Start Discovering
-                  </button>
-                </div>
+                <EmptyState
+                  icon={<Ic.Heart />}
+                  title="No likes yet"
+                  body="A complete profile with a few photos and prompts gets noticed sooner."
+                  action={{ label: 'Start discovering', onClick: () => router.push('/discover') }}
+                  secondary={{ label: 'Edit my profile', onClick: () => router.push('/profile') }}
+                />
               )}
 
               {/* Gold — full profiles grid */}
