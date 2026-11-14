@@ -1,7 +1,7 @@
 @font-face { font-family: 'Infyn DM'; src: url('/fonts/dm-sans-regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Infyn DM'; src: url('/fonts/dm-sans-semibold.ttf') format('truetype'); font-weight: 500 700; font-display: swap; }
 @font-face { font-family: 'Infyn Serif'; src: url('/fonts/pt-serif.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-.root, .nav, .filterTheme, .matchTheme {
+.root, .nav, .filterTheme {
   --paper: #faf5eb; --surface: #fffefa; --ink: #201a16; --secondary: #665849; --border: #e8ddc9; --rose: #9e1b41;
   --infyn-ink: #201a16; --infyn-paper: #faf5eb; --infyn-pink: #9e1b41; --infyn-purple: #9e1b41;
   font-family: 'Infyn DM', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -126,25 +126,13 @@
 @keyframes empty-state-breathe { 0% { opacity: .72; transform: scale(.94); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
 @media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 8px; } .roundAction { width: 52px; height: 52px; } .roundSmall { width: 44px; height: 44px; } .like { min-height: 52px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }
 @media (max-height: 700px) { .header { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; }  .preview { padding-top: 8px; } .actionBar { padding-top: 8px; padding-bottom: 8px; } }
-@media (prefers-reduced-motion: reduce) { .root *, .nav *, .filterTheme *, .matchTheme * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .root *, .nav *, .filterTheme * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
 /* Shared overlays receive these hooks only while opened from Discover. */
 .filterTheme h2 { font-family: 'Infyn Serif', Georgia, serif; font-weight: 400; }
 .filterTheme button { min-height: 44px; }
 .filterTheme input[type='range'] { accent-color: var(--rose); min-height: 24px; }
 .filterTheme button[class*='bg-gradient'] { background: var(--rose); box-shadow: none; }
 .filterTheme button[aria-label='Close filters'] { min-width: 44px; }
-.matchTheme { background: #201a16ed; backdrop-filter: blur(6px); }
-.matchTheme > div[aria-hidden='true'] { display: none; }
-.matchTheme > div:last-of-type { background: #fffefa; border-color: #e8ddc9; box-shadow: 0 20px 70px #0003; }
-.matchTheme h1 { background: none; color: var(--rose); font-family: 'Infyn Serif', Georgia, serif; font-weight: 400; letter-spacing: -.03em; }
-.matchTheme p, .matchTheme p span { color: var(--ink); }
-.matchTheme button { min-height: 48px; }
-.matchTheme button:first-child { background: var(--rose); box-shadow: none; color: #fffefa; }
-.matchTheme button:last-child { color: var(--secondary); }
-.matchTheme [class*='animate-ping'], .matchTheme [class*='animate-pulse'] { display: none; }
-.matchTheme [class*='Glow'], .matchTheme [class*='uppercase'] { background: #f6e0e4; color: var(--rose); box-shadow: none; }
-.matchConnectionPulse { position: absolute; inset: -10px; border: 1.5px solid rgba(158, 27, 65, .56); border-radius: 50%; pointer-events: none; animation: connection-pulse 900ms cubic-bezier(.16, 1, .3, 1) both; }
-@keyframes connection-pulse { 0% { opacity: 0; transform: scale(.65); } 28% { opacity: .7; } 100% { opacity: 0; transform: scale(1.65); } }
 
 :global(html):has(.root), :global(body):has(.root) { scrollbar-gutter: auto; }
 

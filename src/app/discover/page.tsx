@@ -77,7 +77,7 @@ export default function DiscoverPage() {
   const [undoBusy, setUndoBusy] = useState(false);
 
   const [matchedUser, setMatchedUser] = useState<MatchedUser | null>(null);
-  const [myPhoto, setMyPhoto] = useState<string | null>(() => getCachedUserProfile()?.photos?.[0] ?? null);
+  const [myPhotos, setMyPhotos] = useState<string[]>(() => getCachedUserProfile()?.photos ?? []);
   const [myName, setMyName] = useState<string>(() => getCachedUserProfile()?.name ?? 'You');
 
   const [likedPrompts, setLikedPrompts] = useState<Record<string, boolean>>({});
@@ -184,7 +184,7 @@ export default function DiscoverPage() {
       try {
         const user = await loadUserProfile();
         if (cancelled) return;
-        setMyPhoto(user.photos?.[0] ?? null);
+        setMyPhotos(user.photos ?? []);
         setMyName(user.name ?? 'You');
       } catch {
         /* non-critical — the avatar falls back to initials */
@@ -654,10 +654,10 @@ export default function DiscoverPage() {
 
       {/* MATCH CELEBRATION */}
       <MatchScreen
-        theme="editorial"
         isOpen={Boolean(matchedUser)}
         matchedUser={matchedUser}
-        myPhoto={myPhoto}
+        myPhoto={myPhotos[0] ?? null}
+        myPhotoFallbacks={myPhotos.slice(1)}
         myName={myName}
         onClose={() => setMatchedUser(null)}
         onSendMessage={() => {
