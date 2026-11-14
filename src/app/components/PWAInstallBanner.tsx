@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import BrandLogo from './BrandLogo';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -43,6 +44,17 @@ export default function PWAInstallBanner() {
       /* localStorage unavailable/disabled */
     }
 
+    // Only ask returning users: count one visit per browser session.
+    let visits = 0;
+    try {
+      if (!sessionStorage.getItem('infyn_pwa_session')) {
+        sessionStorage.setItem('infyn_pwa_session', '1');
+        localStorage.setItem('infyn_pwa_visits', String(Number(localStorage.getItem('infyn_pwa_visits') || 0) + 1));
+      }
+      visits = Number(localStorage.getItem('infyn_pwa_visits') || 0);
+    } catch { /* storage unavailable */ }
+    if (visits < 2) return;
+
     // 4. Capture native Android / Chrome beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -70,11 +82,8 @@ export default function PWAInstallBanner() {
   const currentPath = pathname || '';
   // /discover, /chat and /random-chat keep their primary actions at the
   // bottom edge — the floating banner would sit on top of them.
-  const HIDDEN_PREFIXES = ['/onboarding', '/verification', '/verify-otp', '/welcome', '/discover', '/chat', '/random-chat'];
-  const isHiddenPage =
-    !currentPath ||
-    currentPath === '/' ||
-    HIDDEN_PREFIXES.some(prefix => currentPath.startsWith(prefix));
+  // Home is the only screen without a primary action at the bottom edge.
+  const isHiddenPage = currentPath !== '/home';
 
   if (isStandalone || !isVisible || isHiddenPage) return null;
 
@@ -108,56 +117,28 @@ export default function PWAInstallBanner() {
 
   return (
     <>
-      {/* Floating Glass Banner */}
-      <div className="fixed bottom-[calc(4.8rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 flex justify-center px-4 pointer-events-none animate-page-enter">
-        <div
-          className="pointer-events-auto relative w-full max-w-[390px] sm:max-w-[440px] md:max-w-[500px] flex items-center justify-between gap-3 rounded-[22px] p-3.5 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.45)] border border-white/15 backdrop-blur-xl select-none"
-          style={{
-            background: 'linear-gradient(135deg, rgba(18,18,24,0.92) 0%, rgba(26,20,32,0.95) 100%)',
-          }}
-        >
-          {/* Logo / App Mark */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div
-              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] text-white text-lg font-black shadow-sm"
-              style={{
-                background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%)',
-              }}
-            >
-              ✦
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-[13.5px] font-bold text-white leading-tight">Install Infyn</p>
-                <span className="rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose px-1.5 py-0.2 text-[9px] font-extrabold text-white">
-                  Fast
-                </span>
-              </div>
-              <p className="text-[11.5px] text-white/55 leading-tight truncate mt-0.5">
-                Full-screen app & instant notifications
-              </p>
-            </div>
+      {/* Install prompt — light card above the nav */}
+      <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 flex justify-center px-4 pointer-events-none animate-soft-arrive">
+        <div className="pointer-events-auto w-full max-w-[440px] flex items-center gap-3 rounded-2xl bg-infyn-surface border border-infyn-border p-2.5 pl-3 shadow-[0_12px_32px_-12px_rgba(32,26,22,0.28)]">
+          <span className="h-10 w-10 shrink-0 grid place-items-center rounded-xl bg-infyn-blush" aria-hidden>
+            <BrandLogo size={24} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-semibold text-infyn-ink leading-tight">Add Infyn to your home screen</p>
+            <p className="text-[12.5px] text-infyn-secondary leading-tight mt-0.5 truncate">Opens full screen, like an app</p>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button
-              onClick={handleDismiss}
-              aria-label="Dismiss banner"
-              className="px-2.5 py-2 text-[12px] font-semibold text-white/45 hover:text-white/70 active:scale-95 transition-all cursor-pointer"
-            >
-              Later
-            </button>
-            <button
-              onClick={handleInstallClick}
-              className="rounded-xl px-3.5 py-2 text-[12.5px] font-bold text-white shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-1"
-              style={{
-                background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 100%)',
-              }}
-            >
-              <span>Install</span>
-            </button>
-          </div>
+          <button
+            onClick={handleDismiss}
+            className="min-h-[44px] px-2 text-[13px] font-semibold text-infyn-secondary cursor-pointer"
+          >
+            Later
+          </button>
+          <button
+            onClick={handleInstallClick}
+            className="min-h-[40px] rounded-full bg-infyn-rose px-4 text-[13px] font-semibold text-[#fff8f0] active:scale-[0.97] transition-transform cursor-pointer"
+          >
+            Add
+          </button>
         </div>
       </div>
 
