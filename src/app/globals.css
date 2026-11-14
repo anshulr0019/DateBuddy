@@ -917,3 +917,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   --muted: var(--infyn-muted);
   --rose: var(--infyn-rose);
 }
+
+/* ─────────────────────────────────────────────────
+   Bottom sheet (components/BottomSheet.tsx)
+   Enter 280ms, exit 220ms; transform/opacity only.
+───────────────────────────────────────────────── */
+.infyn-sheet-root { position: fixed; inset: 0; z-index: 120; display: flex; align-items: flex-end; justify-content: center; }
+.infyn-sheet-backdrop { position: absolute; inset: 0; background: rgba(var(--infyn-ink-rgb), 0.5); animation: infyn-sheet-fade 280ms ease-out both; }
+.infyn-sheet {
+  position: relative; width: 100%; max-width: 480px; max-height: min(86dvh, 720px);
+  display: flex; flex-direction: column; outline: none;
+  background: var(--infyn-paper); border-radius: 28px 28px 0 0;
+  box-shadow: 0 -12px 40px -12px rgba(var(--infyn-ink-rgb), 0.25);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: infyn-sheet-in 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.infyn-sheet-grab { flex-shrink: 0; padding: 10px 24px 6px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.infyn-sheet-handle { display: block; width: 40px; height: 4px; margin: 0 auto 14px; border-radius: 99px; background: rgba(var(--infyn-ink-rgb), 0.18); }
+.infyn-sheet-title { font-family: var(--font-display); font-size: 24px; line-height: 1.2; color: var(--infyn-ink); }
+.infyn-sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 24px 16px; }
+.infyn-sheet-footer { flex-shrink: 0; padding: 12px 24px 16px; border-top: 1px solid var(--infyn-border); }
+.infyn-sheet-closing .infyn-sheet { animation: infyn-sheet-out 220ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+.infyn-sheet-closing .infyn-sheet-backdrop { animation: infyn-sheet-fade-out 220ms ease-in forwards; }
+@keyframes infyn-sheet-in { from { transform: translateY(100%); } }
+@keyframes infyn-sheet-out { to { transform: translateY(100%); } }
+@keyframes infyn-sheet-fade { from { opacity: 0; } }
+@keyframes infyn-sheet-fade-out { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .infyn-sheet, .infyn-sheet-backdrop { animation: none !important; transition: none !important; }
+}
+
+/* Anonymous Chat: globe size follows the space available. */
+.rc-globe-stage { --globe-size: clamp(190px, 36dvh, 300px); }
+/* Short phones: keep Start above the fold. */
+@media (max-height: 700px) {
+  .rc-globe-stage { --globe-size: 150px; }
+  .rc-title { font-size: 26px; }
+  .rc-summary { margin-top: 16px; }
+}

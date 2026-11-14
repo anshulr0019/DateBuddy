@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { hapticLight } from '@/app/lib/haptics';
-import { PremiumGlobe } from './PremiumGlobe';
 
 const VIBE_INSIGHTS = [
   {
@@ -33,12 +32,10 @@ const VIBE_INSIGHTS = [
 
 export function RadarScreen({
   vibe,
-  onlineCount,
   onCancel,
   busy,
 }: {
   vibe: string | null;
-  onlineCount: number;
   onCancel: () => void;
   busy: boolean;
 }) {
@@ -55,56 +52,33 @@ export function RadarScreen({
   const currentInsight = VIBE_INSIGHTS[insightIndex];
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center gap-4 px-6 pt-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] [&>div]:shrink-0 [&>button]:shrink-0">
-      {/* Top Header info */}
-      <div className="text-center">
-        <h1 className="text-[22px] font-normal text-infyn-ink mb-1 font-display">Looking for your vibe…</h1>
-        <p className="text-[13px] text-infyn-ink/55 font-medium max-w-[280px] mx-auto leading-relaxed">
-          {vibe ? (
-            <>
-              Matching you with someone in the{' '}
-              <span className="font-bold text-infyn-rose capitalize">{vibe}</span> mood.
-            </>
-          ) : (
-            'Scanning for someone who wants to chat right now.'
-          )}
+    <div className="w-full max-w-[400px] flex flex-col items-center px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+      <h2 className="rc-title font-display text-[30px] leading-[1.15] tracking-tight text-infyn-ink text-center">
+        Looking for your vibe…
+      </h2>
+      <p className="mt-2 text-[15px] leading-relaxed text-infyn-secondary text-center max-w-[300px]">
+        {vibe ? (
+          <>Matching you with someone in a <span className="text-infyn-ink font-semibold whitespace-nowrap">{vibe}</span> mood.</>
+        ) : (
+          'Looking for someone who wants to chat right now.'
+        )}
+      </p>
+
+      <div className="mt-6 w-full rounded-2xl bg-infyn-surface border border-infyn-border px-4 py-3.5 min-h-[96px]">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-infyn-rose">{currentInsight.tag}</p>
+        <p key={insightIndex} className="mt-1 text-[14px] leading-relaxed text-infyn-ink animate-soft-arrive">
+          {currentInsight.insight}
         </p>
       </div>
 
-      {/* Textured Earth; interaction is exploratory, not a location filter. */}
-      <PremiumGlobe vibe={vibe} onlineCount={onlineCount} />
-
-      {/* Rotating Insights Card — Clean & Premium */}
-      <div className="w-full max-w-[340px] flex flex-col items-center">
-        <div className="w-full bg-infyn-surface/90 backdrop-blur-md border border-infyn-rose/20 rounded-2xl p-3.5 shadow-sm min-h-[92px] flex flex-col justify-center transition-all duration-300">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-infyn-blush text-infyn-rose">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-              </svg>
-            </span>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-infyn-rose bg-infyn-blush px-2 py-0.5 rounded-full">
-              {currentInsight.tag}
-            </span>
-          </div>
-          <p
-            key={insightIndex}
-            className="text-[12.5px] font-medium text-infyn-ink/80 leading-snug animate-fade-in"
-          >
-            {currentInsight.insight}
-          </p>
-        </div>
-
-      </div>
-
-      {/* Cancel Button */}
       <button
+        type="button"
         onClick={() => {
           hapticLight();
           onCancel();
         }}
         disabled={busy}
-        className="mt-2 rounded-full bg-infyn-surface border border-infyn-border text-infyn-ink/70 px-8 py-2.5 text-[13.5px] font-bold hover:bg-infyn-surface-soft active:scale-95 transition-all cursor-pointer disabled:opacity-60 shadow-2xs"
+        className="mt-5 min-h-[48px] px-8 rounded-full bg-infyn-surface border border-infyn-border text-[15px] font-semibold text-infyn-ink active:bg-infyn-surface-soft transition-colors disabled:opacity-60 cursor-pointer"
       >
         Cancel
       </button>

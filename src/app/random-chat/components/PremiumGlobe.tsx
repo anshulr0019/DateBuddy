@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createEarthRenderer } from './earth-renderer';
 import styles from './PremiumGlobe.module.css';
 
-export function PremiumGlobe({ vibe, onlineCount }: { vibe: string | null; onlineCount: number }) {
+export function PremiumGlobe({ vibe, onlineCount, caption }: { vibe: string | null; onlineCount: number; caption?: string | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pose = useRef({ yaw: 1.3, pitch: -0.12 });
   const redraw = useRef<(() => void) | null>(null);
@@ -95,9 +95,11 @@ export function PremiumGlobe({ vibe, onlineCount }: { vibe: string | null; onlin
           aria-label="Animated cartoon globe with mint continents, blue oceans and floating clouds"
         />
       </div>
-      <figcaption className={styles.caption}>
-        <p className={styles.status}>{onlineCount > 0 ? `${onlineCount} people online` : 'Waiting for someone to join'}{vibe ? ` · ${vibe}` : ''}</p>
-      </figcaption>
+      {caption !== null && (
+        <figcaption className={styles.caption} aria-live="polite">
+          <p className={styles.status}>{caption ?? `${onlineCount > 0 ? `${onlineCount} people online` : 'Waiting for someone to join'}${vibe ? ` · ${vibe}` : ''}`}</p>
+        </figcaption>
+      )}
     </figure>
   );
 }

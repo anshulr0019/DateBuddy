@@ -1,16 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { PrimaryButton } from '@/app/components/shared';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Ic } from '@/app/components/icons';
+import { BottomSheet } from '@/app/components/BottomSheet';
 import { hapticLight } from '@/app/lib/haptics';
 import { RANDOM_CHAT_VIBES, GENDER_PREFS } from '@/lib/random-chat-config';
 import type { RandomChatOverview, RandomChatPrefs } from '../types';
 
-const SAFETY_POINTS = [
-  'Your identity stays hidden until you both agree to connect.',
-  'You can end the chat, report, or block anyone at any time.',
-  'Never share personal contact details until you feel safe.',
+const AGE_FLOOR = 18;
+const AGE_CEIL = 50;
+const AGE_PRESETS = [
+  { label: '18–24', min: 18, max: 24 },
+  { label: '21–28', min: 21, max: 28 },
+  { label: '25–35', min: 25, max: 35 },
+  { label: 'Any age', min: 18, max: 50 },
 ];
+
+const genderLabel = (g: RandomChatPrefs['genderPref']) => (g === 'men' ? 'Men' : g === 'women' ? 'Women' : 'Everyone');
 
 export function EntryScreen({
   overview,
@@ -28,318 +35,212 @@ export function EntryScreen({
   const [genderPref, setGenderPref] = useState<RandomChatPrefs['genderPref']>(
     (prefill?.lookingFor as RandomChatPrefs['genderPref']) ?? 'everyone'
   );
-  const [acknowledged, setAcknowledged] = useState(true);
+  const [touched, setTouched] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // The overview (with profile defaults) can land after first render.
+  useEffect(() => {
+    if (!prefill || touched) return;
+    setAgeMin(prefill.ageMin ?? 18);
+    setAgeMax(prefill.ageMax ?? 30);
+    if (prefill.lookingFor) setGenderPref(prefill.lookingFor as RandomChatPrefs['genderPref']);
+  }, [prefill, touched]);
 
   const interests = prefill?.interests ?? [];
+  const edit = (fn: () => void) => { setTouched(true); hapticLight(); fn(); };
 
   const start = () => {
-    onStart({
-      vibe,
-      ageMin,
-      ageMax,
-      genderPref,
-      interests,
-    });
+    if (busy) return;
+    hapticLight();
+    onStart({ vibe, ageMin, ageMax, genderPref, interests });
   };
 
-  const handlePreset = (min: number, max: number) => {
-    hapticLight();
-    setAgeMin(min);
-    setAgeMax(max);
-  };
+  const online = overview ? Math.max(0, overview.onlineCount) : null;
+  const chatting = overview ? Math.max(0, overview.chattingNow) : null;
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-3 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] space-y-4">
-      {/* 1. Live Stats — Unified Minimal Bar (Swiggy / Apple style) */}
-      <div className="flex items-center justify-between p-3 bg-infyn-surface/90 backdrop-blur-xl rounded-2xl border border-infyn-border shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-        {/* Online Now */}
-        <div className="flex items-center gap-2.5 flex-1 pl-1">
-          <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+    <div className="w-full max-w-[400px] flex flex-col px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+      <h2 className="rc-title font-display text-[30px] leading-[1.15] tracking-tight text-infyn-ink text-center">
+        Talk to someone new
+      </h2>
+      <p className="mt-2 text-[15px] leading-relaxed text-infyn-secondary text-center">
+        No names, no photos — just a conversation. You both decide whether to reveal profiles.
+      </p>
+
+      <p className="mt-3 flex items-center justify-center gap-2 text-[13px] text-infyn-secondary min-h-[20px]" aria-live="polite">
+        {online === null ? (
+          <span className="text-infyn-muted">Checking who’s around…</span>
+        ) : online > 0 ? (
+          <>
+            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            <span><strong className="font-semibold text-infyn-ink">{online}</strong> online · <strong className="font-semibold text-infyn-ink">{chatting}</strong> chatting now</span>
+          </>
+        ) : (
+          <span>It’s quiet right now — start and you’ll be first in line.</span>
+        )}
+      </p>
+
+      <button
+        type="button"
+        onClick={() => { hapticLight(); setSheetOpen(true); }}
+        className="rc-summary mt-6 w-full min-h-[60px] px-4 py-3 rounded-2xl bg-infyn-surface border border-infyn-border flex items-center gap-3 text-left active:bg-infyn-surface-soft transition-colors cursor-pointer"
+        aria-label={`Chat preferences: ${vibe} mood, ages ${ageMin} to ${ageMax}, ${genderLabel(genderPref)}. Edit`}
+      >
+        <span className="flex-1 min-w-0">
+          <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-infyn-muted">Matching</span>
+          <span className="block mt-0.5 text-[15px] text-infyn-ink truncate">
+            <span className="capitalize">{vibe}</span> · Ages {ageMin}–{ageMax} · {genderLabel(genderPref)}
           </span>
-          <div className="leading-tight">
-            <p className="text-[14px] font-extrabold text-infyn-ink tracking-tight">
-              {overview ? Math.max(0, overview.onlineCount) : '—'}{' '}
-              <span className="text-[12px] font-semibold text-infyn-ink/70">online</span>
-            </p>
-            <p className="text-[10.5px] font-medium text-infyn-ink/40">Active seekers nearby</p>
-          </div>
-        </div>
+        </span>
+        <span className="flex items-center gap-1 text-[14px] font-semibold text-infyn-rose shrink-0">
+          Edit <span className="-rotate-90"><Ic.ChevDown /></span>
+        </span>
+      </button>
 
-        {/* Hairline Divider */}
-        <div className="h-7 w-[1px] bg-infyn-surface-soft/60 mx-2" />
+      <button
+        type="button"
+        onClick={start}
+        disabled={busy}
+        className="mt-3 w-full min-h-[56px] rounded-full bg-infyn-rose text-[#fff8f0] text-[16px] font-semibold flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(158,27,65,0.15),0_10px_22px_-10px_rgba(158,27,65,0.6)] active:scale-[0.985] transition-transform disabled:opacity-60 cursor-pointer"
+      >
+        {busy ? 'Connecting…' : 'Start chatting'}
+      </button>
 
-        {/* Chatting Now */}
-        <div className="flex items-center gap-2.5 flex-1 pr-1">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--infyn-rose)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <div className="leading-tight">
-            <p className="text-[14px] font-extrabold text-infyn-ink tracking-tight">
-              {overview ? Math.max(0, overview.chattingNow) : '—'}{' '}
-              <span className="text-[12px] font-semibold text-infyn-ink/70">chatting</span>
-            </p>
-            <p className="text-[10.5px] font-medium text-infyn-ink/40">In live conversations</p>
-          </div>
-        </div>
+      <div className="mt-5 flex gap-2.5 text-[13px] leading-relaxed text-infyn-secondary">
+        <Ic.Shield className="w-4 h-4 mt-0.5 shrink-0 text-infyn-rose" />
+        <p>
+          You stay anonymous until you both choose to connect, and you can end, report or block anytime.
+          By starting, you agree to our{' '}
+          <Link href="/terms" className="text-infyn-ink underline underline-offset-2">community guidelines</Link>.
+        </p>
       </div>
 
-      {/* 2. Mood / Vibe Selection — Clean typographic chips */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-0.5">
-          <h2 className="text-[12px] font-bold uppercase tracking-wider text-infyn-ink/50">
-            Your mood tonight
-          </h2>
-          <span className="text-[11px] font-semibold text-infyn-rose bg-infyn-blush px-2.5 py-0.5 rounded-full capitalize">
-            {vibe}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {RANDOM_CHAT_VIBES.map((v) => {
-            const isSelected = vibe === v;
-            return (
-              <button
-                key={v}
-                onClick={() => {
-                  hapticLight();
-                  setVibe(v);
-                }}
-                className={`font-system inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all duration-200 cursor-pointer active:scale-95 capitalize ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-infyn-rose to-infyn-rose text-white shadow-[0_4px_12px_rgba(32,26,22,0.16)] ring-2 ring-infyn-rose/20 font-bold scale-[1.02]'
-                    : 'bg-infyn-surface/80 border border-infyn-border/70 text-infyn-ink/70 hover:bg-infyn-surface hover:border-infyn-border'
-                }`}
-              >
-                <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-infyn-surface' : 'bg-infyn-rose/60'}`} />
-                <span>{v}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. Age Range — Unified Minimal Card */}
-      <div className="bg-infyn-surface/90 backdrop-blur-xl rounded-2xl p-3.5 border border-infyn-border shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="leading-tight">
-            <h2 className="text-[12px] font-bold uppercase tracking-wider text-infyn-ink/50">
-              Age range
-            </h2>
-            <p className="text-[11px] text-infyn-ink/40 font-medium">Filter who you connect with</p>
-          </div>
-          <span className="text-[13px] font-extrabold text-infyn-rose bg-infyn-blush px-3 py-1 rounded-full border border-infyn-blush/70 tabular-nums">
-            {ageMin} – {ageMax} yrs
-          </span>
-        </div>
-
-        {/* Visual Range Bar */}
-        <div className="relative py-1">
-          <div className="h-2 w-full bg-infyn-surface-soft rounded-full overflow-hidden relative">
-            <div
-              className="absolute top-0 bottom-0 bg-gradient-to-r from-infyn-rose to-infyn-rose rounded-full transition-all duration-150"
-              style={{
-                left: `${Math.max(0, ((ageMin - 18) / (50 - 18)) * 100)}%`,
-                right: `${Math.max(0, 100 - ((ageMax - 18) / (50 - 18)) * 100)}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Dual Stepper Control */}
-        <div className="font-system grid grid-cols-2 gap-2.5 pt-0.5">
-          <div className="flex items-center justify-between bg-infyn-surface-soft/80 rounded-xl px-2.5 py-1.5 border border-infyn-border">
-            <span className="text-[11px] font-bold uppercase text-infyn-ink/40">Min</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  hapticLight();
-                  setAgeMin((prev) => Math.max(18, prev - 1));
-                }}
-                disabled={ageMin <= 18}
-                className="font-system h-6 w-6 rounded-lg bg-infyn-surface border border-infyn-border/80 text-infyn-ink text-[13px] font-bold hover:bg-infyn-surface-soft active:scale-90 transition-all flex items-center justify-center cursor-pointer disabled:opacity-30"
-                aria-label="Decrease minimum age"
-              >
-                −
-              </button>
-              <span className="text-[14px] font-extrabold text-infyn-ink w-6 text-center tabular-nums">
-                {ageMin}
-              </span>
-              <button
-                onClick={() => {
-                  hapticLight();
-                  setAgeMin((prev) => Math.min(ageMax, prev + 1));
-                }}
-                disabled={ageMin >= ageMax}
-                className="font-system h-6 w-6 rounded-lg bg-infyn-surface border border-infyn-border/80 text-infyn-ink text-[13px] font-bold hover:bg-infyn-surface-soft active:scale-90 transition-all flex items-center justify-center cursor-pointer disabled:opacity-30"
-                aria-label="Increase minimum age"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between bg-infyn-surface-soft/80 rounded-xl px-2.5 py-1.5 border border-infyn-border">
-            <span className="text-[11px] font-bold uppercase text-infyn-ink/40">Max</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  hapticLight();
-                  setAgeMax((prev) => Math.max(ageMin, prev - 1));
-                }}
-                disabled={ageMax <= ageMin}
-                className="font-system h-6 w-6 rounded-lg bg-infyn-surface border border-infyn-border/80 text-infyn-ink text-[13px] font-bold hover:bg-infyn-surface-soft active:scale-90 transition-all flex items-center justify-center cursor-pointer disabled:opacity-30"
-                aria-label="Decrease maximum age"
-              >
-                −
-              </button>
-              <span className="text-[14px] font-extrabold text-infyn-ink w-6 text-center tabular-nums">
-                {ageMax}
-              </span>
-              <button
-                onClick={() => {
-                  hapticLight();
-                  setAgeMax((prev) => Math.min(50, prev + 1));
-                }}
-                disabled={ageMax >= 50}
-                className="font-system h-6 w-6 rounded-lg bg-infyn-surface border border-infyn-border/80 text-infyn-ink text-[13px] font-bold hover:bg-infyn-surface-soft active:scale-90 transition-all flex items-center justify-center cursor-pointer disabled:opacity-30"
-                aria-label="Increase maximum age"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Age Presets */}
-        <div className="flex items-center gap-1.5 pt-0.5">
-          <span className="text-[10.5px] font-medium text-infyn-ink/40 mr-1">Quick:</span>
-          {[
-            { label: '18–24', min: 18, max: 24 },
-            { label: '21–28', min: 21, max: 28 },
-            { label: '25–35', min: 25, max: 35 },
-            { label: 'All (18–50)', min: 18, max: 50 },
-          ].map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => handlePreset(preset.min, preset.max)}
-              className={`font-system text-[11px] font-semibold px-2 py-0.5 rounded-md transition-all cursor-pointer ${
-                ageMin === preset.min && ageMax === preset.max
-                  ? 'bg-infyn-ink text-white'
-                  : 'bg-infyn-surface-soft/90 text-infyn-ink/60 hover:bg-infyn-surface-soft/80'
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. Gender Preference — Minimal Segmented Control */}
-      <div className="space-y-1.5">
-        <h2 className="text-[12px] font-bold uppercase tracking-wider text-infyn-ink/50 px-0.5">
-          Show me
-        </h2>
-        <div className="flex p-1 bg-infyn-surface-soft/90 rounded-2xl border border-infyn-border/50">
-          {GENDER_PREFS.map((g) => {
-            const isSelected = genderPref === g;
-            const label = g === 'men' ? 'Men' : g === 'women' ? 'Women' : 'Everyone';
-            return (
-              <button
-                key={g}
-                onClick={() => {
-                  hapticLight();
-                  setGenderPref(g);
-                }}
-                className={`font-system flex-1 py-2 rounded-xl text-[13px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
-                  isSelected
-                    ? 'bg-infyn-surface text-infyn-ink shadow-[0_2px_8px_rgba(0,0,0,0.06)] scale-[1.01]'
-                    : 'text-infyn-ink/60 hover:text-infyn-ink'
-                }`}
-              >
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 5. Shared On Profile (Interests) */}
-      {interests.length > 0 && (
-        <div className="space-y-1.5">
-          <h2 className="text-[12px] font-bold uppercase tracking-wider text-infyn-ink/50 px-0.5">
-            Shared on your profile
-          </h2>
-          <div className="flex flex-wrap gap-1.5">
-            {interests.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-infyn-surface/80 border border-infyn-border/60 text-[12px] font-semibold text-infyn-ink/75 shadow-2xs"
-              >
-                <span className="text-infyn-rose text-[11px]">#</span>
-                <span>{tag}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 6. Safety Card — Minimal & Discreet with SVG icon */}
-      <div className="bg-infyn-surface/80 backdrop-blur-md rounded-2xl p-3.5 border border-infyn-border shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-2.5">
-        <div className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          </span>
-          <h2 className="text-[12px] font-bold text-infyn-ink/70 tracking-tight">
-            Safe &amp; Anonymous Matching
-          </h2>
-        </div>
-
-        <ul className="space-y-1.5 pl-1">
-          {SAFETY_POINTS.map((point, i) => (
-            <li
-              key={i}
-              className="flex items-start gap-2 text-[12px] text-infyn-ink/65 font-medium leading-tight"
-            >
-              <span className="text-emerald-500 font-bold text-[11px] mt-0.5">✓</span>
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
-
-        <button
-          onClick={() => {
-            hapticLight();
-            setAcknowledged((prev) => !prev);
-          }}
-          className="font-system w-full flex items-center justify-center gap-2 pt-1 text-[11.5px] font-semibold text-infyn-ink/60 hover:text-infyn-ink cursor-pointer"
-          role="checkbox"
-          aria-checked={acknowledged}
-        >
-          <span
-            className={`h-4 w-4 flex items-center justify-center rounded-md border text-white text-[10px] font-bold transition-all ${
-              acknowledged ? 'bg-emerald-500 border-emerald-500' : 'border-infyn-border bg-infyn-surface'
-            }`}
+      <BottomSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Chat preferences"
+        footer={
+          <button
+            type="button"
+            onClick={() => setSheetOpen(false)}
+            className="w-full min-h-[52px] rounded-full bg-infyn-ink text-infyn-paper text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
           >
-            {acknowledged ? '✓' : ''}
-          </span>
-          <span>I agree to respectful dating community guidelines</span>
+            Done
+          </button>
+        }
+      >
+        <section>
+          <h3 className="text-[13px] font-semibold text-infyn-secondary mb-3">Your mood</h3>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Your mood">
+            {RANDOM_CHAT_VIBES.map((v) => {
+              const selected = vibe === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => edit(() => setVibe(v))}
+                  className={`min-h-[44px] px-4 rounded-full text-[14px] capitalize transition-colors cursor-pointer ${
+                    selected
+                      ? 'bg-infyn-rose text-[#fff8f0] font-semibold'
+                      : 'bg-infyn-surface border border-infyn-border text-infyn-ink active:bg-infyn-surface-soft'
+                  }`}
+                >
+                  {v}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-7">
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-[13px] font-semibold text-infyn-secondary">Age range</h3>
+            <span className="font-display text-[22px] text-infyn-ink tabular-nums" aria-live="polite">{ageMin}–{ageMax}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <AgeStepper label="Youngest" value={ageMin}
+              onDecrease={() => edit(() => setAgeMin((v) => Math.max(AGE_FLOOR, v - 1)))}
+              onIncrease={() => edit(() => setAgeMin((v) => Math.min(ageMax, v + 1)))}
+              canDecrease={ageMin > AGE_FLOOR} canIncrease={ageMin < ageMax} />
+            <AgeStepper label="Oldest" value={ageMax}
+              onDecrease={() => edit(() => setAgeMax((v) => Math.max(ageMin, v - 1)))}
+              onIncrease={() => edit(() => setAgeMax((v) => Math.min(AGE_CEIL, v + 1)))}
+              canDecrease={ageMax > ageMin} canIncrease={ageMax < AGE_CEIL} />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {AGE_PRESETS.map((p) => {
+              const selected = ageMin === p.min && ageMax === p.max;
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => edit(() => { setAgeMin(p.min); setAgeMax(p.max); })}
+                  className={`min-h-[40px] px-3.5 rounded-full text-[13px] transition-colors cursor-pointer ${
+                    selected ? 'bg-infyn-ink text-infyn-paper font-semibold' : 'bg-infyn-surface-soft text-infyn-secondary'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-7">
+          <h3 className="text-[13px] font-semibold text-infyn-secondary mb-3">Show me</h3>
+          <div className="flex p-1 rounded-2xl bg-infyn-surface-soft" role="radiogroup" aria-label="Show me">
+            {GENDER_PREFS.map((g) => {
+              const selected = genderPref === g;
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => edit(() => setGenderPref(g))}
+                  className={`flex-1 min-h-[44px] rounded-xl text-[14px] transition-colors cursor-pointer ${
+                    selected ? 'bg-infyn-surface text-infyn-ink font-semibold shadow-[0_1px_3px_rgba(32,26,22,0.1)]' : 'text-infyn-secondary'
+                  }`}
+                >
+                  {genderLabel(g)}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {interests.length > 0 && (
+          <p className="mt-7 text-[13px] leading-relaxed text-infyn-secondary">
+            We’ll also look for people who share your interests: {interests.join(', ')}.
+          </p>
+        )}
+      </BottomSheet>
+    </div>
+  );
+}
+
+function AgeStepper({ label, value, onDecrease, onIncrease, canDecrease, canIncrease }: {
+  label: string; value: number;
+  onDecrease: () => void; onIncrease: () => void;
+  canDecrease: boolean; canIncrease: boolean;
+}) {
+  return (
+    <div className="rounded-2xl bg-infyn-surface border border-infyn-border px-1.5 pt-2 pb-1.5">
+      <p className="px-2 text-[12px] text-infyn-secondary">{label}</p>
+      <div className="flex items-center justify-between">
+        <button type="button" onClick={onDecrease} disabled={!canDecrease} aria-label={`${label} age, decrease`}
+          className="h-11 w-11 grid place-items-center rounded-full text-infyn-ink active:bg-infyn-surface-soft disabled:opacity-30 cursor-pointer">
+          <Ic.Minus />
+        </button>
+        <span className="text-[18px] font-semibold text-infyn-ink tabular-nums">{value}</span>
+        <button type="button" onClick={onIncrease} disabled={!canIncrease} aria-label={`${label} age, increase`}
+          className="h-11 w-11 grid place-items-center rounded-full text-infyn-ink active:bg-infyn-surface-soft disabled:opacity-30 cursor-pointer">
+          <Ic.Plus />
         </button>
       </div>
-
-      {/* 7. Start Anonymous Chat CTA */}
-      <PrimaryButton onClick={start} className="mt-1 shadow-[0_8px_24px_-6px_rgba(32,26,22,0.16)] flex items-center justify-center gap-2">
-        <span>{busy ? 'Connecting to vibe radar…' : 'Start Anonymous Chat'}</span>
-        {!busy && (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
-        )}
-      </PrimaryButton>
     </div>
   );
 }

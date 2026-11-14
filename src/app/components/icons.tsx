@@ -185,6 +185,16 @@ export const Ic = {
       <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
     </svg>
   ),
+  Minus: ({ className = "w-4 h-4" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" className={className}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  Shield: ({ className = "w-4 h-4" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
   ChevDown: ({ className = "w-4 h-4" }: { className?: string }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <polyline points="6 9 12 15 18 9" />

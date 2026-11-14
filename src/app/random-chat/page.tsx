@@ -7,6 +7,8 @@ import { hapticLight, hapticSuccess } from '../lib/haptics';
 import { useRandomChat } from './useRandomChat';
 import { EntryScreen } from './components/EntryScreen';
 import { RadarScreen } from './components/RadarScreen';
+import { PremiumGlobe } from './components/PremiumGlobe';
+import { Ic } from '../components/icons';
 import { PreviewScreen } from './components/PreviewScreen';
 import { AnonymousChat } from './components/AnonymousChat';
 import { ConnectedScreen } from './components/ConnectedScreen';
@@ -137,17 +139,23 @@ export default function RandomChatPage() {
               </div>
             )}
 
-            {rc.phase === 'entry' && (
-              <EntryScreen overview={overview} onStart={handleJoin} busy={rc.busy} />
-            )}
-
-            {rc.phase === 'searching' && (
-              <RadarScreen
-                vibe={rc.searchingVibe}
-                onlineCount={overview?.onlineCount ?? 0}
-                onCancel={handleLeave}
-                busy={rc.busy}
-              />
+            {/* One globe for entry and searching, so it never reloads or jumps
+                between the two; only the content beneath it changes. */}
+            {(rc.phase === 'entry' || rc.phase === 'searching') && (
+              <div className="rc-globe-stage flex-1 min-h-0 overflow-y-auto scrollbar-none flex flex-col items-center pt-2">
+                <PremiumGlobe
+                  vibe={rc.phase === 'searching' ? rc.searchingVibe : null}
+                  onlineCount={overview?.onlineCount ?? 0}
+                  caption={rc.phase === 'entry' || !overview ? null : overview.onlineCount > 0 ? `${overview.onlineCount} online now` : 'No one else is waiting yet'}
+                />
+                <div key={rc.phase} className="w-full flex justify-center mt-3 animate-soft-arrive">
+                  {rc.phase === 'entry' ? (
+                    <EntryScreen overview={overview} onStart={handleJoin} busy={rc.busy} />
+                  ) : (
+                    <RadarScreen vibe={rc.searchingVibe} onCancel={handleLeave} busy={rc.busy} />
+                  )}
+                </div>
+              </div>
             )}
 
             {rc.phase === 'preview' && session && (
@@ -199,12 +207,12 @@ export default function RandomChatPage() {
 
             {rc.phase === 'error' && (
               <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
-                <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 mb-4 text-2xl">⚠️</div>
-                <h2 className="text-[18px] font-bold text-infyn-ink mb-1">Couldn&apos;t load anonymous chat</h2>
-                <p className="text-[13px] text-infyn-ink/55 max-w-[260px] leading-relaxed mb-6">{rc.error ?? 'Check your connection and try again.'}</p>
+                <div className="h-16 w-16 grid place-items-center rounded-full bg-infyn-blush text-infyn-rose mb-5"><Ic.Alert className="w-7 h-7" /></div>
+                <h2 className="font-display text-[26px] leading-tight text-infyn-ink mb-2">Couldn&apos;t load anonymous chat</h2>
+                <p className="text-[15px] text-infyn-secondary max-w-[280px] leading-relaxed mb-6">{rc.error ?? 'Check your connection and try again.'}</p>
                 <button
                   onClick={() => void rc.reload()}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[14px] font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+                  className="min-h-[52px] px-8 rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
                 >
                   Try again
                 </button>
