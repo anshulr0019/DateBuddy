@@ -956,3 +956,43 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .rc-title { font-size: 26px; }
   .rc-summary { margin-top: 16px; }
 }
+
+/* ─────────────────────────────────────────────────
+   Welcome — a first conversation drifting in.
+   Entrance is staggered once; the float is a slow,
+   small transform. Folds away while typing on short
+   phones so the keyboard never hides the form.
+───────────────────────────────────────────────── */
+.welcome-hero { display: grid; grid-template-rows: 1fr; flex: 1 0 auto; min-height: 0; transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease; }
+.welcome-hero-inner { min-height: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: center; gap: 10px; margin: 0 -16px; padding: 28px 20px 24px; }
+.welcome-bubble {
+  max-width: 78%; padding: 12px 16px; border-radius: 22px; font-size: 15px; line-height: 1.35;
+  opacity: 0; transform: translateY(14px) scale(0.96);
+  animation:
+    welcome-bubble-in 520ms cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms) forwards,
+    welcome-float var(--f, 7s) ease-in-out calc(var(--d, 0ms) + 600ms) infinite alternate;
+}
+.welcome-bubble-theirs { align-self: flex-start; background: var(--infyn-surface); color: var(--infyn-ink); border: 1px solid var(--infyn-border); border-bottom-left-radius: 8px; box-shadow: 0 8px 24px -14px rgba(var(--infyn-ink-rgb), 0.25); }
+.welcome-bubble-mine { align-self: flex-end; background: var(--infyn-rose); color: #fff8f0; border-bottom-right-radius: 8px; box-shadow: 0 10px 24px -12px rgba(var(--infyn-rose-rgb), 0.55); }
+.welcome-heart {
+  position: absolute; right: 20px; top: 4px; width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 9999px; background: var(--infyn-surface); border: 1px solid var(--infyn-border);
+  box-shadow: 0 8px 20px -12px rgba(var(--infyn-ink-rgb), 0.3);
+  opacity: 0; transform: scale(0.6);
+  animation: welcome-heart-in 600ms cubic-bezier(0.34, 1.4, 0.64, 1) var(--d, 0ms) forwards;
+}
+@keyframes welcome-bubble-in { to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes welcome-heart-in { to { opacity: 1; transform: scale(1); } }
+/* `translate` composes with the entrance's `transform` instead of overriding it. */
+@keyframes welcome-float { from { translate: 0 0; } to { translate: 0 -6px; } }
+@media (max-height: 760px) {
+  .welcome-typing .welcome-hero { grid-template-rows: 0fr; opacity: 0; }
+}
+@media (max-height: 600px) {
+  .welcome-bubble:nth-child(3), .welcome-heart { display: none; }
+  .welcome-hero-inner { padding-top: 12px; padding-bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-bubble, .welcome-heart { animation: none !important; opacity: 1; transform: none; }
+  .welcome-hero { transition: none; }
+}

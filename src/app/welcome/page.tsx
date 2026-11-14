@@ -10,66 +10,6 @@ import { sendFirebaseOTP } from '@/lib/firebase';
 /* ------------------------------------------------------------------ */
 /*  All animated-background CSS lives right here — no external file.  */
 /* ------------------------------------------------------------------ */
-const AURORA_CSS = `
-.aurora-stage {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 50% 112%, rgba(var(--infyn-rose-rgb), 0.55), transparent 38%),
-    radial-gradient(circle at 18% 88%, rgba(var(--infyn-blush-rgb), 0.48), transparent 35%),
-    radial-gradient(circle at 86% 82%, rgba(var(--infyn-rose-rgb), 0.42), transparent 38%),
-    linear-gradient(180deg, var(--infyn-blush) 0%, var(--infyn-beige) 50%, var(--infyn-beige) 100%);
-}
-.aurora-stage::before,
-.aurora-stage::after {
-  content:"";position:absolute;inset:-18%;pointer-events:none;
-  will-change:transform,opacity,background-position;
-}
-.aurora-stage::before {
-  background:
-    radial-gradient(circle at 22% 76%, rgba(var(--infyn-rose-rgb), 0.62), transparent 30%),
-    radial-gradient(circle at 72% 70%, rgba(var(--infyn-rose-rgb), 0.52), transparent 28%),
-    radial-gradient(circle at 50% 96%, rgba(var(--infyn-blush-rgb), 0.95), transparent 34%),
-    radial-gradient(circle at 84% 28%, rgba(var(--infyn-rose-rgb), 0.25), transparent 26%);
-  filter:blur(34px) saturate(1.2);opacity:.95;
-  animation:aurora-mesh-flow 7s ease-in-out infinite alternate;
-}
-.aurora-stage::after {
-  inset:auto -28% -30% -28%;height:60%;
-  background:conic-gradient(from 160deg at 50% 82%,
-    rgba(var(--infyn-rose-rgb), .05),rgba(var(--infyn-rose-rgb), .75),rgba(var(--infyn-rose-rgb), .66),
-    rgba(var(--infyn-rose-rgb), .58),rgba(var(--infyn-blush-rgb), .78),rgba(var(--infyn-rose-rgb), .05));
-  filter:blur(42px) saturate(1.35);opacity:.86;transform-origin:50% 100%;
-  animation:aurora-bottom-bloom 5.6s ease-in-out infinite alternate;
-}
-.aurora-blob{position:absolute;border-radius:9999px;filter:blur(54px) saturate(1.25);will-change:transform,opacity;}
-.aurora-blob-1{width:460px;height:460px;left:-120px;top:18%;background:var(--infyn-rose);opacity:.6;animation:aurora-drift-1 6.8s ease-in-out infinite alternate;}
-.aurora-blob-2{width:500px;height:500px;right:-160px;top:12%;background:var(--infyn-rose);opacity:.48;animation:aurora-drift-2 8s ease-in-out infinite alternate;}
-.aurora-blob-3{width:520px;height:520px;left:50%;bottom:-180px;background:var(--infyn-blush);opacity:.78;animation:aurora-drift-3 6.2s ease-in-out infinite alternate;}
-.aurora-blob-4{width:360px;height:360px;left:10%;top:-120px;background:var(--infyn-rose);opacity:.44;animation:aurora-drift-4 9s ease-in-out infinite alternate;}
-.aurora-sheen{position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(var(--infyn-paper-rgb), 0) 0%,rgba(var(--infyn-paper-rgb), .25) 60%,rgba(var(--infyn-paper-rgb), 0) 100%);
-  animation:aurora-sheen 4.8s ease-in-out infinite alternate;}
-@keyframes aurora-mesh-flow{
-  0%{opacity:.72;transform:translate3d(0,72px,0) scale(1.04) rotate(-3deg);}
-  45%{opacity:.98;transform:translate3d(-26px,12px,0) scale(1.1) rotate(2deg);}
-  100%{opacity:.86;transform:translate3d(24px,-42px,0) scale(1.16) rotate(5deg);}
-}
-@keyframes aurora-bottom-bloom{
-  0%{opacity:.58;transform:translate3d(0,90px,0) scale(.96) rotate(-8deg);}
-  100%{opacity:.9;transform:translate3d(0,-26px,0) scale(1.12) rotate(8deg);}
-}
-@keyframes aurora-drift-1{0%{transform:translate3d(-28px,80px,0) scale(.95);opacity:.36;}100%{transform:translate3d(94px,-72px,0) scale(1.18);opacity:.68;}}
-@keyframes aurora-drift-2{0%{transform:translate3d(50px,58px,0) scale(.96);opacity:.3;}100%{transform:translate3d(-118px,18px,0) scale(1.18);opacity:.56;}}
-@keyframes aurora-drift-3{0%{transform:translate3d(-50%,118px,0) scale(.9);opacity:.48;}100%{transform:translate3d(-60%,-150px,0) scale(1.28);opacity:.9;}}
-@keyframes aurora-drift-4{0%{transform:translate3d(-20px,40px,0) scale(.94);opacity:.22;}100%{transform:translate3d(78px,120px,0) scale(1.18);opacity:.48;}}
-@keyframes aurora-sheen{0%{opacity:.18;transform:translateY(32px);}100%{opacity:.46;transform:translateY(-38px);}}
-@media (prefers-reduced-motion: reduce){
-  .aurora-blob,.aurora-stage::before,.aurora-stage::after,.aurora-sheen{animation:none;}
-}
-`;
-
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   google_auth_failed: 'Google sign-in was cancelled or failed. Please try again.',
   invalid_state: 'Your sign-in session expired. Please try again.',
@@ -165,248 +105,136 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="fixed inset-0 h-full w-full overflow-hidden bg-gradient-to-b from-infyn-blush to-infyn-beige text-infyn-ink">
+    <div className={`welcome-root fixed inset-0 h-full w-full overflow-hidden bg-infyn-paper text-infyn-ink ${focused ? 'welcome-typing' : ''}`}>
       <div id="recaptcha-container" />
 
       <GoogleSignInModal isOpen={showGoogleModal} onClose={() => setShowGoogleModal(false)} />
-      {/* Inject animated background CSS — self-contained, no external file needed */}
-      <style dangerouslySetInnerHTML={{ __html: AURORA_CSS }} />
 
-      {/* Ambient aurora background */}
-      <div aria-hidden className="aurora-stage pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="aurora-blob aurora-blob-1" />
-        <div className="aurora-blob aurora-blob-2" />
-        <div className="aurora-blob aurora-blob-3" />
-        <div className="aurora-blob aurora-blob-4" />
-        <div className="aurora-sheen" />
-        <div
-          className="absolute inset-0 opacity-[0.2]"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(26,26,46,0.06) 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-      </div>
-
-      {/* Mobile frame */}
-      <div className="relative mx-auto flex h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex-col justify-between px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 overflow-hidden">
-        {/* Brand row */}
+      <div className="relative mx-auto flex h-full w-full max-w-[440px] flex-col px-6 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
         <header className="flex flex-shrink-0 items-center justify-between">
-          <BrandLogo size={32} withWordmark />
-          <a
-            href="/help"
-            className="text-[13px] font-medium text-infyn-ink/60 transition hover:text-infyn-ink"
-          >
-            Need help?
+          <BrandLogo size={30} withWordmark wordmarkClassName="font-display text-[20px] tracking-tight" />
+          <a href="/help" className="min-h-[44px] flex items-center px-1 text-[14px] font-medium text-infyn-secondary">
+            Help
           </a>
         </header>
 
-        {/* Hero & Card Container */}
-        <div className="my-auto flex flex-col justify-center flex-1 min-h-0 py-2 sm:py-4 overflow-y-auto scrollbar-none">
-          {/* Hero */}
-          <section className="flex-shrink-0 mb-4 sm:mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-infyn-ink/8 bg-infyn-surface/60 px-3 py-1 backdrop-blur-md">
-              <span className="h-1.5 w-1.5 rounded-full bg-infyn-rose" />
-              <span className="text-[11px] font-medium tracking-wide text-infyn-ink/70 uppercase">
-                New · Gen Z Edition
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none flex flex-col -mx-6 px-6">
+          {/* Illustration: a first conversation. Decorative only. */}
+          <div className="welcome-hero" aria-hidden="true">
+            <div className="welcome-hero-inner">
+              <div className="welcome-bubble welcome-bubble-theirs" style={{ '--d': '150ms', '--f': '7s' } as React.CSSProperties}>
+                Coffee this weekend?
+              </div>
+              <div className="welcome-bubble welcome-bubble-mine" style={{ '--d': '550ms', '--f': '8s' } as React.CSSProperties}>
+                Only if I get to pick the place.
+              </div>
+              <div className="welcome-bubble welcome-bubble-theirs" style={{ '--d': '950ms', '--f': '6.5s' } as React.CSSProperties}>
+                Deal. Somewhere with good music.
+              </div>
+              <span className="welcome-heart" style={{ '--d': '1300ms' } as React.CSSProperties}>
+                <BrandLogo size={26} />
               </span>
             </div>
-            <h1 className="mt-3 sm:mt-4 text-[34px] sm:text-[40px] leading-[1.05] font-normal tracking-[-0.03em] text-infyn-ink font-display">
-              Find your{" "}
-              <span className="bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose bg-clip-text text-transparent">
-                vibe.
-              </span>
+          </div>
+
+          <section className="flex-shrink-0 mt-auto pt-4">
+            <h1 className="font-display text-[40px] leading-[1.05] tracking-[-0.03em] text-infyn-ink">
+              Find your <span className="text-infyn-rose">vibe.</span>
             </h1>
-            <p className="mt-2 max-w-[300px] text-[14px] sm:text-[15px] leading-relaxed text-infyn-ink/60">
-              India&apos;s most loved dating app for a generation that dates differently.
+            <p className="mt-2 max-w-[320px] text-[16px] leading-relaxed text-infyn-secondary">
+              Meet people who share your interests, and take the conversation from there.
             </p>
           </section>
 
-          {/* Card */}
-          <section className="flex-shrink-0">
-            <div className="rounded-[28px] border border-infyn-border/60 bg-infyn-surface/70 p-4 sm:p-5 shadow-[0_20px_60px_-30px_rgba(32,26,22,0.16)] backdrop-blur-xl">
-              <label
-                htmlFor="phone"
-                className="block text-[12px] font-medium tracking-wide text-infyn-ink/60 uppercase"
-              >
-                Phone number
-              </label>
-
-              <div
-                className={`mt-2 flex items-stretch gap-2 rounded-2xl border bg-infyn-surface/80 p-1.5 transition-all duration-200 ${
-                  focused
-                    ? "border-transparent ring-2 ring-infyn-rose/40 shadow-[0_8px_24px_-12px_rgba(32,26,22,0.16)]"
-                    : "border-infyn-ink/10"
-                }`}
-              >
-                <div className="font-system flex items-center gap-1.5 rounded-xl bg-infyn-ink/[0.04] px-3 text-[15px] font-medium text-infyn-ink">
-                  <span className="text-base leading-none">🇮🇳</span>
-                  <span>+91</span>
-                </div>
-                <input
-                  id="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  maxLength={10}
-                  value={phoneNumber}
-                  onFocus={() => setFocused(true)}
-                  onBlur={() => setFocused(false)}
-                  onChange={(e) =>
-                    setPhoneNumber(e.target.value.replace(/\D/g, ""))
-                  }
-                  placeholder="98765 43210"
-                  className="min-w-0 flex-1 bg-transparent px-2 text-[17px] font-medium tracking-wide text-infyn-ink placeholder-infyn-ink/25 outline-none"
-                />
-                {isValid && (
-                  <div className="flex items-center pr-2 text-[#22C55E]">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </div>
-                )}
+          <section className="flex-shrink-0 mt-6">
+            <label htmlFor="phone" className="block text-[13px] font-semibold text-infyn-secondary">
+              Phone number
+            </label>
+            <div
+              className={`mt-2 flex items-stretch gap-2 rounded-2xl border bg-infyn-surface p-1.5 transition-[border-color,box-shadow] duration-200 ${
+                focused ? 'border-infyn-rose shadow-[0_0_0_3px_rgba(158,27,65,0.12)]' : 'border-infyn-border'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 rounded-xl bg-infyn-surface-soft px-3 text-[16px] font-medium text-infyn-ink">
+                <span className="font-system text-base leading-none" aria-hidden>🇮🇳</span>
+                <span>+91</span>
               </div>
-
-              {otpError && (
-                <div className="mt-2.5 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-[12.5px] font-semibold text-center leading-snug">
-                  {otpError}
-                </div>
-              )}
-
-              <button
-                onClick={handleSendOTP}
-                disabled={isLoading || !isValid}
-                className="group relative mt-3 sm:mt-4 flex h-13 sm:h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-[15px] font-semibold text-white shadow-[0_16px_40px_-16px_rgba(32,26,22,0.16)] transition-all duration-200 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none min-h-[44px]"
-              >
-                <span
-                  aria-hidden
-                  className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    background:
-                      "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%)",
-                  }}
-                />
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-infyn-border/40 border-t-infyn-border" />
-                    Sending code…
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Send verification code
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="transition-transform group-hover:translate-x-0.5"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-
-              {/* Divider */}
-              <div className="my-3 sm:my-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-infyn-ink/10" />
-                <span className="text-[11px] font-medium tracking-widest text-infyn-ink/40 uppercase">
-                  or continue with
-                </span>
-                <div className="h-px flex-1 bg-infyn-ink/10" />
-              </div>
-
-              {authError && (
-                <div className="mb-2.5 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-[12.5px] font-semibold text-center leading-snug">
-                  {authError}
-                </div>
-              )}
-
-              {/* Social */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  onClick={() => {
-                    setAuthError("");
-                    setShowGoogleModal(true);
-                  }}
-                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-infyn-ink/10 bg-infyn-surface text-[14px] font-medium text-infyn-ink transition-all hover:border-infyn-ink/25 hover:shadow-sm active:scale-[0.98] cursor-pointer min-h-[44px]"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24">
-                    <path
-                      fill="#EA4335"
-                      d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12S6.7 21.6 12 21.6c6.9 0 9.5-4.8 9.5-9.3 0-.6-.1-1.1-.2-1.6H12z"
-                    />
-                  </svg>
-                  Google
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  title="Apple sign-in is coming soon"
-                  className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-2xl border border-infyn-ink/10 bg-infyn-surface text-[14px] font-medium text-infyn-ink/35 min-h-[44px] cursor-not-allowed"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                  </svg>
-                  Apple — soon
-                </button>
-              </div>
+              <input
+                id="phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                maxLength={10}
+                value={phoneNumber}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                placeholder="98765 43210"
+                aria-invalid={Boolean(otpError)}
+                aria-describedby={otpError ? 'phone-error' : undefined}
+                className="min-w-0 flex-1 bg-transparent px-2 min-h-[44px] text-[17px] font-medium tracking-wide text-infyn-ink placeholder:text-infyn-muted/60 outline-none"
+              />
             </div>
 
-            {/* Terms */}
-            <p className="mt-3 sm:mt-4 px-2 text-center text-[12px] leading-relaxed text-infyn-ink/50">
-              By continuing you agree to our{" "}
-              <a
-                href="/terms"
-                className="font-medium text-infyn-ink/80 underline decoration-infyn-rose/40 underline-offset-2 hover:text-infyn-rose"
+            {otpError && (
+              <p id="phone-error" role="alert" className="mt-2 text-[14px] text-infyn-rose">{otpError}</p>
+            )}
+
+            <button
+              onClick={handleSendOTP}
+              disabled={isLoading || !isValid}
+              className="mt-3 flex min-h-[54px] w-full items-center justify-center gap-2 rounded-full bg-infyn-rose text-[16px] font-semibold text-[#fff8f0] shadow-[0_1px_2px_rgba(158,27,65,0.15),0_10px_22px_-10px_rgba(158,27,65,0.6)] transition-[transform,opacity] duration-150 active:scale-[0.985] disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed cursor-pointer"
+            >
+              {isLoading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+                  Sending code…
+                </>
+              ) : (
+                'Send verification code'
+              )}
+            </button>
+
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-infyn-border" />
+              <span className="text-[13px] text-infyn-muted">or</span>
+              <div className="h-px flex-1 bg-infyn-border" />
+            </div>
+
+            {authError && (
+              <p role="alert" className="mb-3 text-[14px] text-infyn-rose text-center">{authError}</p>
+            )}
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={() => { setAuthError(''); setShowGoogleModal(true); }}
+                className="flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-infyn-border bg-infyn-surface text-[15px] font-medium text-infyn-ink active:bg-infyn-surface-soft transition-colors cursor-pointer"
               >
-                Terms
-              </a>{" "}
-              and{" "}
-              <a
-                href="/privacy"
-                className="font-medium text-infyn-ink/80 underline decoration-infyn-rose/40 underline-offset-2 hover:text-infyn-rose"
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+                  <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12S6.7 21.6 12 21.6c6.9 0 9.5-4.8 9.5-9.3 0-.6-.1-1.1-.2-1.6H12z" />
+                </svg>
+                Google
+              </button>
+              <button
+                type="button"
+                disabled
+                title="Apple sign-in is coming soon"
+                className="flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-infyn-border bg-infyn-surface text-[15px] font-medium text-infyn-muted cursor-not-allowed"
               >
-                Privacy Policy
-              </a>
-              .
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                </svg>
+                Apple · soon
+              </button>
+            </div>
+
+            <p className="mt-4 text-center text-[13px] leading-relaxed text-infyn-secondary">
+              By continuing you agree to our{' '}
+              <a href="/terms" className="text-infyn-ink underline underline-offset-2">Terms</a> and{' '}
+              <a href="/privacy" className="text-infyn-ink underline underline-offset-2">Privacy Policy</a>.
             </p>
           </section>
         </div>
-
-        {/* Footer trust badge */}
-        <footer className="mt-auto flex-shrink-0 pt-2 pb-1">
-          <div className="mx-auto flex items-center justify-center gap-2 text-[11px] font-medium tracking-wide text-infyn-ink/45 uppercase">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            Verified profiles · End-to-end secure
-          </div>
-        </footer>
       </div>
     </div>
   );
