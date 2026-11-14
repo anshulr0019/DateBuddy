@@ -551,7 +551,7 @@ export default function DiscoverPage() {
       {/* SAFETY SHEET */}
       {safetySheetOpen && currentProfile && (
         <div
-          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-[#201A16]/55"
           role="dialog"
           aria-modal="true"
           aria-label={`Safety options for ${currentProfile.name}`}
@@ -564,20 +564,21 @@ export default function DiscoverPage() {
             <div className="flex justify-center pb-3 sm:hidden">
               <div className="h-1 w-10 rounded-full bg-[#201A16]/15" />
             </div>
-            <h2 className="text-[17px] font-extrabold text-[#201A16] mb-1">Report {currentProfile.name}</h2>
-            <p className="text-[13px] text-[#201A16]/55 mb-4">
+            <h2 className="font-display text-[24px] leading-tight text-[#201A16] mb-1.5">Report {currentProfile.name}</h2>
+            <p className="text-[14px] leading-relaxed text-[#665849] mb-4">
               They won&apos;t be told. We&apos;ll also stop showing you this person.
             </p>
 
-            <div className="space-y-2 mb-4">
+            <div className="rounded-2xl bg-[#FFFEFA] border border-[#E8DDC9] divide-y divide-[#E8DDC9] overflow-hidden mb-3">
               {REPORT_REASONS.map((r) => (
                 <button
                   key={r.value}
                   disabled={reportSubmitting}
                   onClick={() => handleReport(r.value)}
-                  className="w-full min-h-[48px] px-4 py-3 rounded-2xl bg-white border border-[#201A16]/8 text-left text-[14px] font-medium text-[#201A16] active:scale-[0.98] transition-transform disabled:opacity-50"
+                  className="w-full min-h-[52px] px-4 flex items-center justify-between gap-3 text-left text-[15px] text-[#201A16] active:bg-[#F5EFE4] transition-colors disabled:opacity-50"
                 >
-                  {r.label}
+                  <span>{r.label}</span>
+                  <span className="text-[#8A7A67] -rotate-90" aria-hidden="true"><Ic.ChevDown /></span>
                 </button>
               ))}
             </div>
@@ -585,14 +586,14 @@ export default function DiscoverPage() {
             <button
               disabled={reportSubmitting}
               onClick={handleBlock}
-              className="w-full min-h-[48px] py-3 rounded-2xl bg-[#FEF2F2] border border-[#FCA5A5]/60 text-[14px] font-bold text-[#B91C1C] active:scale-[0.98] transition-transform disabled:opacity-50 mb-2"
+              className="w-full min-h-[52px] px-4 rounded-2xl bg-[#FFFEFA] border border-[#E8DDC9] flex items-center gap-3 text-[15px] font-semibold text-[#9E1B41] active:bg-[#F6E0E4] transition-colors disabled:opacity-50 mb-1"
             >
-              Block without reporting
+              <Ic.Ban className="w-[18px] h-[18px]" /> Block without reporting
             </button>
             <button
               disabled={reportSubmitting}
               onClick={() => setSafetySheetOpen(false)}
-              className="w-full min-h-[48px] py-3 text-[14px] font-semibold text-[#201A16]/50 active:opacity-60 disabled:opacity-50"
+              className="w-full min-h-[48px] py-3 text-[14px] font-semibold text-[#665849] active:opacity-60 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -603,50 +604,46 @@ export default function DiscoverPage() {
       {/* SWIPE LIMIT PAYWALL */}
       {paywallOpen && (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 backdrop-blur-xl p-6 animate-popover-enter"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#201A16]/60 p-6 animate-popover-enter"
           role="dialog"
           aria-modal="true"
           aria-label="Upgrade to Infyn Gold"
         >
-          <div className="w-full max-w-[360px] rounded-[32px] bg-white p-8 text-center shadow-2xl flex flex-col items-center overflow-hidden relative">
-            {/* Ambient gradient */}
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[32px] overflow-hidden">
-              <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-[#9E1B41]/12 blur-[40px]" />
-              <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-[#9E1B41]/12 blur-[40px]" />
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center w-full">
-              <div className="text-[52px] mb-3">👑</div>
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#9E1B41] bg-[#F6E0E4] border border-[#E8DDC9]/60 px-4 py-1.5 rounded-full">
-                Daily Limit Reached
+          <div className="w-full max-w-[360px] rounded-[28px] bg-[#FFFEFA] border border-[#E8DDC9] p-7 shadow-[0_24px_64px_-16px_rgba(32,26,22,0.35)] flex flex-col">
+            <div className="flex flex-col w-full">
+              <div className="h-12 w-12 rounded-full bg-[#F6E0E4] text-[#9E1B41] grid place-items-center mb-5">
+                <Ic.Sparkle className="w-6 h-6" />
               </div>
-              <h2 className="text-[26px] font-extrabold text-[#201A16] mt-3 mb-2 tracking-tight leading-tight">
-                Upgrade to Gold
+              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#9E1B41] mb-2">
+                Daily limit reached
+              </p>
+              <h2 className="font-display text-[30px] text-[#201A16] mb-2 tracking-tight leading-[1.15]">
+                Keep the conversation going with Gold
               </h2>
-              <p className="text-[14px] text-[#201A16]/60 mb-6 leading-relaxed max-w-[260px]">
+              <p className="text-[15px] text-[#665849] mb-6 leading-relaxed">
                 {paywallMessage || "You've used all your free likes for today. Gold gives you unlimited likes every day."}
               </p>
 
-              <div className="w-full space-y-2.5 mb-4">
+              <ul className="w-full space-y-3.5 mb-7">
                 {[
-                  { icon: '💛', text: 'Unlimited likes every day' },
-                  { icon: '👀', text: 'See who already liked you' },
-                  { icon: '⭐', text: '5 Super Likes per day' },
-                  { icon: '🚀', text: 'Profile boost once a week' },
+                  { icon: <Ic.Heart filled />, text: 'Unlimited likes every day' },
+                  { icon: <Ic.User />, text: 'See who already liked you' },
+                  { icon: <Ic.Star className="w-[18px] h-[18px]" />, text: '5 Super Likes per day' },
+                  { icon: <Ic.Sparkle className="w-[18px] h-[18px]" />, text: 'Profile boost once a week' },
                 ].map(({ icon, text }) => (
-                  <div key={text} className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-[#FAF5EB] border border-[#201A16]/6 text-left">
-                    <span className="text-[18px]">{icon}</span>
-                    <span className="text-[13px] font-semibold text-[#201A16]/80">{text}</span>
-                  </div>
+                  <li key={text} className="flex items-center gap-3 text-left">
+                    <span className="text-[#9E1B41] w-5 flex justify-center [&_svg]:w-[18px] [&_svg]:h-[18px]" aria-hidden="true">{icon}</span>
+                    <span className="text-[15px] text-[#201A16]">{text}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
               <button className={styles.primary} onClick={() => { setPaywallOpen(false); router.push('/premium'); }}>
                 Get Infyn Gold
               </button>
               <button
                 onClick={() => setPaywallOpen(false)}
-                className="w-full min-h-[44px] py-3 text-[14px] font-semibold text-[#201A16]/50 transition-opacity active:opacity-60 mt-1"
+                className="w-full min-h-[44px] py-3 text-[14px] font-semibold text-[#665849] transition-opacity active:opacity-60 mt-1"
               >
                 Maybe later
               </button>

@@ -28,7 +28,7 @@
 .topCard { position: absolute; inset: 0; touch-action: pan-y; }
 .underCard { position: absolute; inset: 0; border-radius: 24px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; pointer-events: none; }
 .exiting { pointer-events: none; }
-.dragBadge { position: absolute; top: 24px; opacity: 0; pointer-events: none; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 16px; border-radius: 12px; border: 2.5px solid; background: #fffefaf2; }
+.dragBadge { position: absolute; top: 84px; opacity: 0; pointer-events: none; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 16px; border-radius: 12px; border: 2.5px solid; background: #fffefaf2; }
 .badgeLike { left: 16px; transform: rotate(-8deg); color: var(--rose); border-color: var(--rose); }
 .badgePass { right: 16px; transform: rotate(8deg); color: var(--secondary); border-color: var(--secondary); }
 .profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); -webkit-user-select: none; user-select: none; }
@@ -41,20 +41,23 @@
 .photoProgress span[data-active='true'] { background: #fffefa; }
 .online { position: absolute; top: 26px; left: 14px; display: flex; align-items: center; gap: 6px; border-radius: 20px; background: #201a1699; color: white; font-size: 12px; padding: 6px 10px; }
 .online > span { width: 6px; height: 6px; border-radius: 50%; background: #b6e5c0; }
-.safety { position: absolute; top: 24px; right: 12px; width: 44px; height: 44px; border-radius: 50%; background: #fffefaed; color: var(--ink); letter-spacing: 2px; font-weight: 700; }
+.safety { position: absolute; top: 24px; right: 12px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #201a1647; color: #fffefa; }
+.safety svg { width: 20px; height: 20px; }
 .identity { position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 18px 18px; color: #fffefa; background: linear-gradient(transparent, #201a16d9); pointer-events: none; }
 .nameRow { display: flex; align-items: center; gap: 9px; }
-.nameRow h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 30px; line-height: 1.18; font-weight: 400; min-width: 0; display: flex; align-items: baseline; }
-.profileName { overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.age { flex-shrink: 0; white-space: pre; }
+.nameRow h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 30px; line-height: 1.18; font-weight: 400; min-width: 0; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.profileName { display: inline; }
+.age { white-space: nowrap; }
 .verified { background: #fffefa; color: var(--rose); display: inline-flex; padding: 3px; border-radius: 50%; flex-shrink: 0; }
 .verified svg { width: 15px; height: 15px; }
 .identity p { font-size: 14px; display: flex; gap: 5px; margin-top: 7px; align-items: center; }
 .identity p span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .identity p svg { width: 14px; height: 14px; flex-shrink: 0; }
-.photoArrow { position: absolute; top: 40%; height: 44px; width: 44px; color: white; font-size: 30px; text-shadow: 0 1px 4px #000; background: #201a1633; border-radius: 10px; }
-.previous { left: 6px; } .next { right: 6px; }
-.photoCount { position: absolute; bottom: 18px; right: 15px; font-size: 11px; padding: 3px 7px; border-radius: 20px; color: white; background: #201a1688; }
+.photoArrow { position: absolute; top: calc(50% - 22px); height: 44px; width: 44px; display: grid; place-items: center; color: var(--ink); background: #fffefaeb; border-radius: 50%; opacity: 0; pointer-events: none; }
+.photoArrow:focus-visible { opacity: 1; pointer-events: auto; }
+.photoArrow svg { width: 20px; height: 20px; }
+.previous { left: 10px; } .previous svg { transform: rotate(-90deg); }
+.next { right: 10px; } .next svg { transform: rotate(90deg); }
 .identity { padding-right: 56px; }
 .preview { padding: 12px 18px 8px; }
 .excerptLabel { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; }
@@ -64,7 +67,7 @@
 .excerptLabel button { margin: -6px -6px -6px 0; }
 .excerpt { font-size: 16px; line-height: 24px; margin-top: 4px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
 .viewProfile { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; font-size: 12px; font-weight: 600; color: var(--rose); margin-top: 3px; }
-.viewProfile span { font-size: 18px; }
+.viewProfileIcon { width: 18px; height: 18px; }
 .details { padding: 24px 18px; border-top: 1px solid var(--border); scroll-margin-top: 0; outline: none; }
 .details section + section { margin-top: 28px; }
 .details h3 { font-family: 'Infyn Serif', Georgia, serif; font-size: 20px; margin-bottom: 12px; font-weight: 400; }
@@ -78,14 +81,14 @@
 .prompt p { margin-top: 6px; }
 .safetyFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; border-top: 1px solid var(--border); padding-top: 16px; font-size: 12px; color: var(--secondary); }
 .safetyFooter button { min-height: 44px; text-decoration: underline; flex-shrink: 0; }
-.actionBar { display: grid; grid-template-columns: 48px 1fr 1fr 58px; align-items: center; gap: 10px; padding: 12px 20px 10px; background: var(--paper); flex-shrink: 0; }
-.pass, .like { min-height: 54px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 600; }
-.pass { background: var(--surface); border: 1px solid #d8cab7; }
-.pass > span { font-size: 27px; font-weight: 400; line-height: 1; }
-.like { background: var(--rose); color: #fff8f0; border: 1px solid var(--rose); }
+.actionBar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px 12px; background: var(--paper); flex-shrink: 0; }
+.roundAction { flex-shrink: 0; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 1px solid var(--border); box-shadow: 0 1px 2px #201a160d, 0 6px 16px -8px #201a1626; }
+.roundSmall { width: 46px; height: 46px; color: var(--secondary); box-shadow: none; }
+.superAction { color: var(--rose); }
+.actionIcon { width: 20px; height: 20px; }
+.actionIconLarge { width: 24px; height: 24px; }
+.like { flex: 1; max-width: 200px; min-height: 58px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 600; letter-spacing: .01em; background: var(--rose); color: #fff8f0; border: 1px solid var(--rose); box-shadow: 0 1px 2px #9e1b4126, 0 10px 22px -10px #9e1b4199; }
 .like svg { width: 19px; height: 19px; }
-.secondaryAction { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 54px; font-size: 11px; color: var(--secondary); gap: 3px; }
-.secondaryAction > span:first-child { font-size: 25px; line-height: 26px; }
 .actionError { display: flex; align-items: center; gap: 10px; margin: 8px 20px 0; padding: 6px 12px; border-radius: 12px; background: #f6e0e4; color: #801c37; font-size: 13px; flex-shrink: 0; }
 .actionError button { min-width: 44px; min-height: 44px; font-size: 24px; margin-left: auto; }
 .actionError .retryFeed { font-size: 13px; font-weight: 600; }
@@ -121,7 +124,7 @@
 @keyframes leaveRight { to { opacity: .25; transform: translateX(85%) rotate(8deg); } }
 @keyframes breathe { 50% { opacity: .65; } }
 @keyframes empty-state-breathe { 0% { opacity: .72; transform: scale(.94); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
-@media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 6px; grid-template-columns: 44px 1fr 1fr 50px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }
+@media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 8px; } .roundAction { width: 52px; height: 52px; } .roundSmall { width: 44px; height: 44px; } .like { min-height: 52px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }
 @media (max-height: 700px) { .header { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; }  .preview { padding-top: 8px; } .actionBar { padding-top: 8px; padding-bottom: 8px; } }
 @media (prefers-reduced-motion: reduce) { .root *, .nav *, .filterTheme *, .matchTheme * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
 /* Shared overlays receive these hooks only while opened from Discover. */
