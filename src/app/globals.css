@@ -996,3 +996,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .welcome-bubble, .welcome-heart { animation: none !important; opacity: 1; transform: none; }
   .welcome-hero { transition: none; }
 }
+
+/* Home: a small live globe that leads into Anonymous Chat. */
+.home-globe { --globe-size: 84px; width: 84px; }
+.home-globe figure { max-width: 84px; }
+@media (max-width: 360px) { .home-globe { --globe-size: 68px; width: 68px; } }

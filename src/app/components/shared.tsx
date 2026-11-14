@@ -104,7 +104,18 @@ export function AuroraBackground({ subtle = false, children, className = '' }: {
 
 export function GlassCard({ children, className = '', style, onClick }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void }) {
   return (
-    <div onClick={onClick} className={`rounded-[24px] border border-infyn-border/80 bg-infyn-surface/85 shadow-[0_12px_36px_-18px_rgba(32,26,22,0.12)] backdrop-blur-md ${onClick ? 'infyn-card-press' : ''} ${className}`} style={style}>
+    <div
+      onClick={onClick}
+      // Clickable cards must be reachable and operable from the keyboard.
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+      } : undefined}
+      className={`rounded-[24px] border border-infyn-border/80 bg-infyn-surface shadow-[0_12px_36px_-18px_rgba(32,26,22,0.12)] ${onClick ? 'infyn-card-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-infyn-rose' : ''} ${className}`}
+      style={style}
+    >
       {children}
     </div>
   );

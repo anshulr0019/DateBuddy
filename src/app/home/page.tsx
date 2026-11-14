@@ -7,6 +7,7 @@ import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from
 import { VenuePickerModal } from '../components/VenuePickerModal';
 import { useNotifications } from '../context/NotificationContext';
 import { PERSONAS, DEFAULT_PERSONA, calculateDynamicVibe } from '@/lib/personaGreeting';
+import { PremiumGlobe } from '../random-chat/components/PremiumGlobe';
 import { hapticLight, hapticMedium } from '../lib/haptics';
 import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 import { loadFeedPage } from '../lib/feedCache';
@@ -300,28 +301,24 @@ export default function HomePage() {
         <AuroraBackground subtle>
           <div className="flex flex-col h-full w-full z-10 overflow-hidden">
 
-            <div className="flex-shrink-0 z-20 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-surface/90 backdrop-blur-xl border-b border-infyn-border/50 flex items-center justify-between shadow-2xs">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-[20px] font-extrabold tracking-tight text-infyn-ink font-system">
-                    {activePersona.title}
-                  </h1>
-                  <button
-                    onClick={() => setShowPersonaPicker(true)}
-                    className="font-system px-2.5 py-0.5 rounded-full bg-infyn-ink/08 border border-infyn-ink/12 text-infyn-ink/55 text-[10px] font-semibold uppercase tracking-wider hover:bg-infyn-ink/12 transition-all duration-200 active:scale-95 cursor-pointer"
-                  >
-                    Vibe
-                  </button>
-                </div>
-                <p className="text-[12.5px] text-infyn-ink/60 font-medium mt-0.5">
-                  &ldquo;{activePersona.subline}&rdquo;
-                </p>
-              </div>
+            <div className="flex-shrink-0 z-20 px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-paper flex items-center justify-between gap-3">
+              <button
+                onClick={() => setShowPersonaPicker(true)}
+                className="min-w-0 text-left cursor-pointer"
+                aria-label={`Your vibe: ${activePersona.title}. Change vibe`}
+              >
+                <span className="block text-[12px] font-semibold uppercase tracking-[0.1em] text-infyn-muted">Your vibe</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="font-display text-[26px] leading-tight tracking-tight text-infyn-ink truncate">{activePersona.title}</span>
+                  <span className="text-infyn-secondary shrink-0" aria-hidden><Ic.ChevDown /></span>
+                </span>
+                <span className="block text-[14px] text-infyn-secondary truncate">{activePersona.subline}</span>
+              </button>
 
               <button
                 onClick={openNotifications}
                 aria-label="Open notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface border border-infyn-border/70 shadow-2xs hover:bg-infyn-surface-soft transition-all duration-200 active:scale-90 cursor-pointer font-system"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-infyn-surface border border-infyn-border active:scale-95 transition-transform cursor-pointer"
               >
                 <Ic.Bell />
               </button>
@@ -329,12 +326,45 @@ export default function HomePage() {
 
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] space-y-6">
 
+              {/* ANONYMOUS CHAT — a small live globe that grows into the full one on tap */}
+              <div>
+                <GlassCard
+                  onClick={() => router.push('/random-chat')}
+                  className="animate-bubble-enter overflow-hidden cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 p-3 pr-4">
+                    <div className="home-globe shrink-0" aria-hidden>
+                      <PremiumGlobe vibe={null} onlineCount={0} caption={null} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display text-[20px] leading-tight text-infyn-ink">Anonymous Chat</h3>
+                      <p className="mt-1 text-[14px] text-infyn-secondary leading-snug">
+                        Talk to someone new, no names or photos.
+                      </p>
+                      {randomChat && (
+                        <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-infyn-secondary">
+                          {randomChat.onlineCount > 0 ? (
+                            <>
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                              {randomChat.onlineCount} online now
+                            </>
+                          ) : (
+                            'Quiet right now'
+                          )}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-infyn-muted -rotate-90" aria-hidden><Ic.ChevDown /></span>
+                  </div>
+                </GlassCard>
+              </div>
+
               {/* TODAY'S PICKS */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Today&apos;s Picks</h2>
-                  <button onClick={() => router.push('/discover')} className="font-system text-[12px] font-bold text-infyn-rose hover:underline cursor-pointer">
-                    View All &rarr;
+                  <h2 className="font-display text-[22px] text-infyn-ink">Today&apos;s picks</h2>
+                  <button onClick={() => router.push('/discover')} className="min-h-[44px] px-1 text-[14px] font-semibold text-infyn-rose cursor-pointer">
+                    See all
                   </button>
                 </div>
 
@@ -369,101 +399,40 @@ export default function HomePage() {
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="text-[15.5px] font-bold text-infyn-ink truncate">
+                            <h3 className="text-[16px] font-semibold text-infyn-ink truncate">
                               {person.name}{person.age ? `, ${person.age}` : ''}
                             </h3>
                             {person.verified && <VerifiedBadge />}
                           </div>
                           {(person.distance || person.city) && (
-                            <div className="flex items-center gap-1 text-infyn-ink/45 text-[11px]">
+                            <div className="flex items-center gap-1 text-infyn-secondary text-[13px]">
                               <Ic.MapPin />
                               <span>{person.distance ?? person.city}</span>
                             </div>
                           )}
                         </div>
 
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push('/discover');
-                          }}
-                          className="font-system flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose hover:bg-infyn-rose hover:text-white transition-all duration-200 active:scale-90 cursor-pointer shadow-2xs"
-                          aria-label="Connect"
-                        >
-                          <Ic.Heart filled />
-                        </button>
+                        <span className="shrink-0 text-infyn-muted -rotate-90" aria-hidden>
+                          <Ic.ChevDown />
+                        </span>
                       </div>
                     </GlassCard>
                   ))}
                 </div>
               </div>
 
-              {/* ANONYMOUS CHAT */}
-              <div>
-                <GlassCard
-                  onClick={() => router.push('/random-chat')}
-                  className="animate-bubble-enter overflow-hidden border border-infyn-rose/25 bg-gradient-to-r from-infyn-rose/[0.06] via-infyn-rose/[0.05] to-infyn-rose/[0.06] hover:border-infyn-rose/50 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99] relative"
-                >
-                  <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-infyn-rose/15 blur-2xl" />
-                  <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-infyn-rose/15 blur-2xl" />
-                  <div className="relative flex items-center gap-3.5 p-4">
-                    <div className="relative h-14 w-14 flex-shrink-0">
-                      <div className="rc-pulse absolute inset-0 rounded-full bg-infyn-rose/30" />
-                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-infyn-rose to-infyn-rose text-white text-2xl shadow-md">
-                        🎲
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="text-[15px] font-extrabold text-infyn-ink">Anonymous Chat</h3>
-                        <span className="rounded-full bg-infyn-rose text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 shadow-2xs">
-                          New
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-infyn-ink/60 font-medium mt-0.5 leading-snug">
-                        Talk to a stranger about anything — stay anonymous until you&apos;re ready.
-                      </p>
-                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {randomChat ? (
-                          <>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/25 px-2.5 py-0.5 text-[10.5px] font-bold text-[#16A34A]">
-                              <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] animate-pulse" /> {Math.max(0, randomChat.onlineCount)} online
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-infyn-rose/10 border border-infyn-rose/25 px-2.5 py-0.5 text-[10.5px] font-bold text-infyn-rose">
-                              💬 {Math.max(0, randomChat.chattingNow)} chatting
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-infyn-surface-soft border border-infyn-border px-2 py-0.5 text-[10.5px] font-bold text-infyn-secondary">
-                              🎭 Anonymous
-                            </span>
-                          </>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-infyn-rose/10 border border-infyn-rose/25 px-2.5 py-0.5 text-[10.5px] font-bold text-infyn-rose">
-                            ✨ Tap to join queue
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-infyn-rose/10 text-infyn-rose">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </span>
-                  </div>
-                </GlassCard>
-              </div>
-
               {/* ACTIVITY SQUADS */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <div>
-                    <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Gym &amp; Activity Squads</h2>
-                    <p className="text-[11.5px] text-infyn-ink/55 font-medium">Find workout partners &amp; sports sessions nearby</p>
+                    <h2 className="font-display text-[22px] text-infyn-ink">Activity squads</h2>
+                    <p className="text-[14px] text-infyn-secondary">Workout partners and sports sessions nearby</p>
                   </div>
                   <button
                     onClick={() => setShowHostModal(true)}
-                    className="font-system px-3 py-1.5 rounded-xl bg-infyn-blush border border-infyn-rose-line/60 text-infyn-rose text-[12px] font-bold hover:bg-infyn-rose hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1"
+                    className="min-h-[40px] px-4 rounded-full border border-infyn-rose-line text-infyn-rose text-[14px] font-semibold active:bg-infyn-blush transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
                   >
-                    <span>+ Host</span>
+                    <Ic.Plus /> <span>Host</span>
                   </button>
                 </div>
 
@@ -472,21 +441,22 @@ export default function HomePage() {
                     <button
                       key={cat}
                       onClick={() => { hapticLight(); setSquadFilter(cat); }}
-                      className={`font-system px-3 py-1 rounded-full text-[12px] font-bold transition-all duration-200 flex-shrink-0 cursor-pointer ${
+                      aria-pressed={squadFilter === cat}
+                      className={`min-h-[40px] px-4 rounded-full text-[14px] transition-colors duration-150 flex-shrink-0 cursor-pointer ${
                         squadFilter === cat
-                          ? 'bg-infyn-rose text-white shadow-2xs scale-105'
-                          : 'bg-infyn-surface border border-infyn-border/80 text-infyn-ink/60 hover:text-infyn-ink hover:bg-infyn-surface-soft'
+                          ? 'bg-infyn-ink text-infyn-paper font-semibold'
+                          : 'bg-infyn-surface border border-infyn-border text-infyn-secondary'
                       }`}
                     >
-                      {CATEGORY_EMOJI[cat] ?? ''}{cat}
+                      {cat}
                     </button>
                   ))}
                 </div>
 
                 {!loadingMeetups && filteredMeetups.length === 0 && (
                   <GlassCard className="p-5 text-center border border-infyn-border/70">
-                    <p className="text-[13.5px] font-bold text-infyn-ink/70">No sessions here yet</p>
-                    <p className="text-[12px] text-infyn-ink/50 mt-1">Be the first — tap <span className="font-bold">+ Host</span> to start one.</p>
+                    <p className="text-[15px] font-semibold text-infyn-ink">No sessions here yet</p>
+                    <p className="text-[14px] text-infyn-secondary mt-1">Be the first: tap Host to start one.</p>
                   </GlassCard>
                 )}
 
@@ -534,7 +504,7 @@ export default function HomePage() {
                               toggleJoin(m);
                             }}
                             disabled={busyId === m.id || (isFull && m.userJoinStatus !== 'going' && m.userJoinStatus !== 'pending') || m.userJoinStatus === 'kicked'}
-                            className={`font-system px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs disabled:opacity-60 ${
+                            className={`min-h-[40px] px-4 rounded-full text-[14px] font-semibold transition-colors duration-150 active:scale-[0.97] cursor-pointer disabled:opacity-60 ${
                               m.userJoinStatus === 'going'
                                 ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'
                                 : m.userJoinStatus === 'pending'
@@ -543,20 +513,20 @@ export default function HomePage() {
                                 ? 'bg-red-50 border border-red-200 text-red-600'
                                 : isFull
                                 ? 'bg-infyn-surface-soft border border-infyn-border text-infyn-secondary'
-                                : 'bg-infyn-rose text-white hover:bg-[#E11D48]'
+                                : 'bg-infyn-rose text-[#fff8f0]'
                             }`}
                           >
                             {m.userJoinStatus === 'going'
-                              ? 'Joined ✓'
+                              ? 'Joined'
                               : m.userJoinStatus === 'pending'
-                              ? 'Requested ⏳'
+                              ? 'Requested'
                               : m.userJoinStatus === 'kicked'
-                              ? 'Removed ⚠️'
+                              ? 'Removed'
                               : isFull
-                              ? 'Full 🔒'
+                              ? 'Full'
                               : m.requireApproval
-                              ? 'Request ✋'
-                              : 'Join 🚀'}
+                              ? 'Request to join'
+                              : 'Join'}
                           </button>
                         </div>
                       </GlassCard>
@@ -568,9 +538,9 @@ export default function HomePage() {
               {/* EVENTS NEAR YOU */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-infyn-ink/45">Events Near You</h2>
-                  <button onClick={() => router.push('/discover/meetups')} className="font-system text-[12px] font-bold text-infyn-rose hover:underline cursor-pointer">
-                    See All Events &rarr;
+                  <h2 className="font-display text-[22px] text-infyn-ink">Events near you</h2>
+                  <button onClick={() => router.push('/discover/meetups')} className="min-h-[44px] px-1 text-[14px] font-semibold text-infyn-rose cursor-pointer">
+                    See all
                   </button>
                 </div>
 
