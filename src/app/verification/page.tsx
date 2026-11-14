@@ -61,8 +61,8 @@ const BENEFITS = [
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
-    title: 'Get 50% more matches',
-    sub: 'Verified profiles are trusted and get seen more often',
+    title: 'Build trust faster',
+    sub: 'People can see your photos have been checked by our team',
   },
   {
     icon: (
@@ -72,13 +72,13 @@ const BENEFITS = [
       </svg>
     ),
     title: 'Quick & easy',
-    sub: 'Takes under 2 minutes — reviewed within 24 hours',
+    sub: 'Takes about 2 minutes, then our team reviews it',
   },
 ];
 
 const HOW_STEPS = [
   { n: '1', text: 'Take a quick selfie video following the on-screen pose' },
-  { n: '2', text: 'Our team reviews your submission within 24 hours' },
+  { n: '2', text: 'Our team reviews your submission' },
   { n: '3', text: 'Your blue verified badge appears on your profile' },
 ];
 

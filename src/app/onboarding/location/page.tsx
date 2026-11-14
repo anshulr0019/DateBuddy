@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Ic } from '../../components/icons';
 
 const INDIAN_CITIES = [
   'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata',
@@ -122,7 +123,7 @@ export default function LocationPage() {
             </div>
           )}
           <div className="mb-6">
-            <h1 className="text-[26px] font-black text-infyn-ink tracking-tight">Where are you located?</h1>
+            <h1 className="font-display text-[30px] text-infyn-ink tracking-tight leading-[1.1]">Where are you based?</h1>
             <p className="text-[14px] text-infyn-ink/60 mt-1">This helps us discover nearby matches for you</p>
           </div>
 
@@ -143,7 +144,7 @@ export default function LocationPage() {
                 </>
               ) : (
                 <>
-                  <span className="text-base">📍</span>
+                  <Ic.MapPin className="w-[18px] h-[18px]" />
                   <span>Auto-detect my location</span>
                 </>
               )}
@@ -186,7 +187,7 @@ export default function LocationPage() {
                       }}
                       className="w-full text-left px-5 py-3 hover:bg-infyn-rose/10 border-b border-infyn-ink/5 last:border-b-0 text-[14px] font-medium text-infyn-ink transition-colors"
                     >
-                      📍 {cityName}
+                      <Ic.MapPin className="w-4 h-4 inline -mt-0.5 mr-1" />{cityName}
                     </button>
                   ))}
                   {filteredCities.length === 0 && (

@@ -151,8 +151,8 @@ export default function PhotosPage() {
           )}
 
           <div className="mb-6">
-            <h1 className="text-[28px] font-black text-infyn-ink tracking-tight leading-[1.1]">Add your best photos</h1>
-            <p className="text-[14.5px] text-infyn-ink/55 mt-1.5">At least 2 photos · Profiles with 4+ photos get 3× more matches</p>
+            <h1 className="font-display text-[30px] text-infyn-ink tracking-tight leading-[1.1]">Add your best photos</h1>
+            <p className="text-[15px] text-infyn-secondary mt-1.5">Add at least 2. Clear, recent photos of you work best.</p>
           </div>
 
           {/* Photo grid */}
@@ -191,7 +191,7 @@ export default function PhotosPage() {
                     {!url && !uploading && (
                       <div className="flex flex-col items-center text-center p-3">
                         <div className={`flex h-11 w-11 items-center justify-center rounded-full mb-1.5 ${required ? 'bg-infyn-rose/15' : 'bg-infyn-ink/[0.06]'}`}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={required ? '#FF6B9D' : '#1A1A2E'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: required ? 1 : 0.45 }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={required ? 'var(--infyn-rose)' : 'var(--infyn-ink)'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: required ? 1 : 0.45 }}>
                             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
                         </div>

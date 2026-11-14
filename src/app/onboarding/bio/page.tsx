@@ -130,7 +130,7 @@ export default function BioPage() {
                 {BackChevron}
               </button>
               <div>
-                <h1 className="text-[20px] font-black text-infyn-ink leading-tight">Pick a Prompt</h1>
+                <h1 className="font-display text-[24px] text-infyn-ink leading-tight">Pick a prompt</h1>
                 <p className="text-[12px] text-infyn-ink/45 font-medium">
                   {editingIndex !== null ? 'Choose a replacement' : `${selectedPrompts.length}/${MAX_PROMPTS} selected`}
                 </p>
@@ -220,7 +220,7 @@ export default function BioPage() {
         {/* Content */}
         <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6">
           <div className="mb-6">
-            <h1 className="text-[28px] font-black text-infyn-ink tracking-tight leading-[1.1]">Tell us about yourself</h1>
+            <h1 className="font-display text-[30px] text-infyn-ink tracking-tight leading-[1.1]">Tell us about yourself</h1>
             <p className="text-[14.5px] text-infyn-ink/55 mt-1.5">Write a bio and add up to 3 prompts to show your personality</p>
           </div>
 

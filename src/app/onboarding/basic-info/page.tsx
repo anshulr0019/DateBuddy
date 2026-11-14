@@ -485,28 +485,13 @@ export default function BasicInfoPage() {
               aria-label={`Onboarding progress: step 1 of ${TOTAL_STEPS}`}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)] transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ width: progressIn ? `${(1 / TOTAL_STEPS) * 100}%` : '2%' }}
+                className="h-full rounded-full bg-infyn-rose transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ width: progressIn ? `${((step + 1) / STEP_COUNT) * (100 / TOTAL_STEPS)}%` : '2%' }}
               />
             </div>
             <span className="text-[12px] font-bold tabular-nums text-infyn-ink/45">1 of {TOTAL_STEPS}</span>
           </div>
 
-          {/* Sub-step segments — shows where you are inside this question group */}
-          <div className="mt-3 flex gap-1.5 px-1">
-            {Array.from({ length: STEP_COUNT }).map((_, i) => (
-              <div
-                key={i}
-                className={`h-[4px] flex-1 rounded-full transition-all duration-500 ${
-                  i < step
-                    ? 'bg-gradient-to-r from-infyn-rose/70 to-infyn-rose/70'
-                    : i === step
-                      ? 'bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)]'
-                      : 'bg-infyn-ink/[0.07]'
-                }`}
-              />
-            ))}
-          </div>
         </div>
 
         {/* CONTENT */}
