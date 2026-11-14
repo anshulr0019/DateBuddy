@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { SafeImage } from '../../components/shared';
 import { Ic } from '../../components/icons';
 import type { FeedProfile } from '../../lib/feedCache';
@@ -14,17 +13,16 @@ interface Props {
   likedPrompts: Record<string, boolean>;
   onPromptLike: (key: string) => void;
   disabled: boolean;
+  /* Opens the full profile; omitted for the decorative under-card. */
+  onOpenDetail?: () => void;
+  /* True while this card's photo should morph into the detail hero. */
+  sharedPhoto?: boolean;
 }
 
-export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange, onSafety, likedPrompts, onPromptLike, disabled }: Props) {
-  const details = useRef<HTMLDivElement>(null);
+export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange, onSafety, likedPrompts, onPromptLike, disabled, onOpenDetail, sharedPhoto = false }: Props) {
   const firstPromptIndex = profile.prompts.findIndex(p => p.a.trim());
   const prompt = profile.prompts[firstPromptIndex];
   const excerpt = prompt?.a || profile.bio?.trim();
-  const viewDetails = () => {
-    details.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-    details.current?.focus({ preventScroll: true });
-  };
   // Background refreshes can replace a profile with fewer photos.
   const visiblePhotoIndex = Math.min(photoIndex, Math.max(0, profile.photos.length - 1));
   const changePhoto = (delta: number) => {
@@ -34,6 +32,7 @@ export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange
     <div className={styles.portrait}>
       <SafeImage key={`${profile.id}-${visiblePhotoIndex}`} eager src={profile.photos[visiblePhotoIndex]} name={profile.name}
         alt={`${profile.name}, photo ${visiblePhotoIndex + 1} of ${profile.photos.length}`} className={styles.photo}
+        style={sharedPhoto ? { viewTransitionName: 'discover-photo' } as React.CSSProperties : undefined}
         onClick={profile.photos.length > 1 ? e => { const r = e.currentTarget.getBoundingClientRect(); changePhoto(e.clientX - r.left > r.width / 2 ? 1 : -1); } : undefined} />
       {profile.photos.length > 1 && <>
         <div className={styles.photoProgress} aria-hidden="true">{profile.photos.map((_, i) => <span key={i} data-active={i === visiblePhotoIndex} />)}</div>
@@ -53,15 +52,7 @@ export default function DiscoverProfileCard({ profile, photoIndex, onPhotoChange
         <div className={styles.excerptLabel}><span>{prompt?.q || 'A little about me'}</span>{prompt && <button disabled={disabled} aria-label={`Like ${profile.name}'s answer to "${prompt.q}"`} aria-pressed={Boolean(likedPrompts[`${profile.id}-${firstPromptIndex}`])} onClick={() => onPromptLike(`${profile.id}-${firstPromptIndex}`)}><Ic.Heart filled={Boolean(likedPrompts[`${profile.id}-${firstPromptIndex}`])} /></button>}</div>
         <p className={styles.excerpt}>{excerpt}</p>
       </> : profile.tags.length ? <><span className={styles.eyebrow}>A few things I love</span><p className={styles.excerpt}>{profile.tags.slice(0, 3).join(' · ')}</p></> : <p className={styles.excerpt}>There’s more to someone than a first impression.</p>}
-      <button className={styles.viewProfile} onClick={viewDetails}>View full profile <Ic.ChevDown className={styles.viewProfileIcon} /></button>
-    </div>
-    <div className={styles.details} ref={details} tabIndex={-1} aria-label="Full profile">
-      {profile.bio?.trim() && <section><h3>About {profile.name}</h3><p>{profile.bio}</p></section>}
-      {profile.tags.length > 0 && <section><h3>Things we could talk about</h3><div className={styles.tags}>{profile.tags.map(tag => <span key={tag}>{tag}</span>)}</div></section>}
-      {profile.prompts.filter(p => p.a.trim()).length > 0 && <section><h3>A little more personality</h3><div className={styles.prompts}>{profile.prompts.map((p, i) => p.a.trim() && <div key={i} className={styles.prompt}>
-        <div><span>{p.q}</span><p>{p.a}</p></div><button disabled={disabled} aria-label={`Like ${profile.name}'s answer to "${p.q}"`} aria-pressed={Boolean(likedPrompts[`${profile.id}-${i}`])} onClick={() => onPromptLike(`${profile.id}-${i}`)}><Ic.Heart filled={Boolean(likedPrompts[`${profile.id}-${i}`])} /></button>
-      </div>)}</div></section>}
-      <div className={styles.safetyFooter}><span>{profile.verified ? 'Verified profile' : 'Take your time. Trust your instincts.'}</span><button disabled={disabled} onClick={onSafety}>Report or block</button></div>
+      {onOpenDetail && <button className={styles.viewProfile} onClick={onOpenDetail} disabled={disabled} aria-haspopup="dialog">View full profile <Ic.ChevUp /></button>}
     </div>
   </article>;
 }
