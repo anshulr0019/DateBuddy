@@ -68,7 +68,9 @@ export default function PWAInstallBanner() {
 
   // Safe path check: handle null pathname safely during SSR/hydration
   const currentPath = pathname || '';
-  const HIDDEN_PREFIXES = ['/onboarding', '/verification', '/verify-otp', '/welcome'];
+  // /discover, /chat and /random-chat keep their primary actions at the
+  // bottom edge — the floating banner would sit on top of them.
+  const HIDDEN_PREFIXES = ['/onboarding', '/verification', '/verify-otp', '/welcome', '/discover', '/chat', '/random-chat'];
   const isHiddenPage =
     !currentPath ||
     currentPath === '/' ||

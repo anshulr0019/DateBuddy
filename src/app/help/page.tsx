@@ -17,7 +17,7 @@ export default function HelpPage() {
     <div className="h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-sans">
       <div className="relative h-full w-full max-w-[440px] sm:max-w-lg md:max-w-xl flex flex-col justify-between bg-infyn-paper shadow-2xl sm:border-x sm:border-infyn-ink/5 overflow-hidden">
         <AuroraBackground subtle>
-          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-8">
+          <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(11rem+env(safe-area-inset-bottom,0px))]">
             {/* Top Bar */}
             <div className="flex items-center gap-3 mb-6">
               <button
@@ -50,7 +50,7 @@ export default function HelpPage() {
             </div>
 
             {/* Contact Card */}
-            <div className="rounded-[20px] bg-infyn-surface border border-infyn-ink/8 p-5 text-center shadow-2xs">
+            <div className="rounded-[20px] bg-infyn-surface border border-infyn-ink/8 p-5 text-center shadow-2xs mb-6">
               <p className="text-[13px] font-medium text-infyn-ink/60 mb-2">Still need assistance?</p>
               <a
                 href="mailto:support@infyn.app"
@@ -58,6 +58,32 @@ export default function HelpPage() {
               >
                 📧 Email Support
               </a>
+            </div>
+
+            {/* Credits — required attribution for bundled assets */}
+            <div className="px-1">
+              <h3 className="text-[12px] font-bold text-infyn-ink/40 uppercase tracking-wider mb-2">Credits</h3>
+              <p className="text-[12.5px] text-infyn-ink/55 leading-relaxed">
+                Earth textures in Anonymous Chat by{' '}
+                <a
+                  href="https://www.solarsystemscope.com/textures/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-infyn-rose underline underline-offset-2"
+                >
+                  Solar System Scope
+                </a>{' '}
+                / INOVE, licensed under{' '}
+                <a
+                  href="https://creativecommons.org/licenses/by/4.0/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-infyn-rose underline underline-offset-2"
+                >
+                  CC BY 4.0
+                </a>
+                , adapted for our cartoon globe.
+              </p>
             </div>
           </div>
         </AuroraBackground>

@@ -25,7 +25,13 @@
 .count { background: var(--rose); color: white; border-radius: 50%; min-width: 18px; line-height: 18px; font-size: 11px; }
 .unread { position: absolute; width: 7px; height: 7px; background: var(--rose); border-radius: 50%; top: 8px; right: 8px; }
 .deck { container-type: size; flex: 1; min-height: 0; position: relative; margin: 0 20px; }
-.profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); }
+.topCard { position: absolute; inset: 0; touch-action: pan-y; }
+.underCard { position: absolute; inset: 0; border-radius: 24px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; pointer-events: none; }
+.exiting { pointer-events: none; }
+.dragBadge { position: absolute; top: 24px; opacity: 0; pointer-events: none; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 16px; border-radius: 12px; border: 2.5px solid; background: #fffefaf2; }
+.badgeLike { left: 16px; transform: rotate(-8deg); color: var(--rose); border-color: var(--rose); }
+.badgePass { right: 16px; transform: rotate(8deg); color: var(--secondary); border-color: var(--secondary); }
+.profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); -webkit-user-select: none; user-select: none; }
 .profileScroll::-webkit-scrollbar { display: none; }
 .profileCard { background: var(--surface); min-height: 100%; }
 .portrait { height: clamp(200px, calc(100dvh - 388px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 530px); position: relative; overflow: hidden; background: #e9dfcf; }
@@ -104,14 +110,15 @@
 .navTab[aria-current='page'] { color: #9e1b41; font-weight: 600; }
 .navTab[aria-current='page'] .navIcon { background: #f6e0e4; }
 .navUnread { position: absolute; top: 2px; right: calc(50% - 17px); width: 7px; height: 7px; background: #9e1b41; border: 1px solid #fffefa; border-radius: 50%; }
-.enter { animation: arrive 220ms ease-out both; }
+/* No forward fill: a filled animation would override the drag's inline transform. */
+.enter { animation: arrive 220ms ease-out backwards; }
 .exitleft { animation: leaveLeft 260ms ease-in both; pointer-events: none; }
 .exitright { animation: leaveRight 260ms ease-in both; pointer-events: none; }
 .exitup { animation: leaveUp 260ms ease-in both; pointer-events: none; }
-@keyframes leaveUp { to { opacity: 0; transform: translateY(-35px); } }
+@keyframes leaveUp { to { opacity: 0; transform: translateY(-60%) rotate(-3deg) scale(1.02); } }
 @keyframes arrive { from { opacity: .5; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-@keyframes leaveLeft { to { opacity: 0; transform: translateX(-35px) rotate(-2deg); } }
-@keyframes leaveRight { to { opacity: 0; transform: translateX(35px) rotate(2deg); } }
+@keyframes leaveLeft { to { opacity: .25; transform: translateX(-85%) rotate(-8deg); } }
+@keyframes leaveRight { to { opacity: .25; transform: translateX(85%) rotate(8deg); } }
 @keyframes breathe { 50% { opacity: .65; } }
 @keyframes empty-state-breathe { 0% { opacity: .72; transform: scale(.94); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
 @media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 6px; grid-template-columns: 44px 1fr 1fr 50px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }

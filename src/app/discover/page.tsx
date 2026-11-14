@@ -21,6 +21,7 @@ import {
 import { hapticLight, hapticMedium, hapticWarning } from '../lib/haptics';
 import { useFilters } from '../context/FilterContext';
 import { getCachedUserProfile, loadUserProfile } from '../lib/userProfileCache';
+import { useCardDrag, UNDER_CARD_REST } from './useCardDrag';
 
 const SWIPE_ANIMATION_MS = 260;
 const REDUCED_EXIT_MS = 160;
@@ -89,6 +90,10 @@ export default function DiscoverPage() {
   const [paywallMessage, setPaywallMessage] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const underRef = useRef<HTMLDivElement>(null);
+  const likeBadgeRef = useRef<HTMLDivElement>(null);
+  const passBadgeRef = useRef<HTMLDivElement>(null);
+  const dragEnabledRef = useRef(true);
   const swipeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitLockRef = useRef(false);
   const pendingAdvanceRef = useRef<{ id: number } | null>(null);
@@ -204,8 +209,14 @@ export default function DiscoverPage() {
 
   const resetDragVisuals = useCallback((_animate: boolean) => {
     if (scrollRef.current) {
+      scrollRef.current.style.transition = '';
       scrollRef.current.style.transform = '';
       scrollRef.current.style.opacity = '';
+      scrollRef.current.style.willChange = '';
+    }
+    if (underRef.current) {
+      underRef.current.style.transition = '';
+      underRef.current.style.transform = UNDER_CARD_REST;
     }
   }, []);
 
@@ -222,6 +233,16 @@ export default function DiscoverPage() {
     hapticMedium();
     const dir: ExitDir = action === 'pass' ? 'left' : action === 'super_like' ? 'up' : 'right';
     setExit({ dir, viaDrag });
+    // Promote the next card to full size while the current one leaves, so
+    // the deck never collapses to a blank background between swipes.
+    if (underRef.current && profiles.length > 1) {
+      underRef.current.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+      underRef.current.style.transform = 'scale(1) translateY(0)';
+    }
+    if (!viaDrag) {
+      const badge = action === 'like' ? likeBadgeRef.current : action === 'pass' ? passBadgeRef.current : null;
+      if (badge) badge.style.opacity = '1';
+    }
 
     const promise: Promise<SwipeResponse> = fetch('/api/swipes', {
       method: 'POST',
@@ -286,19 +307,30 @@ export default function DiscoverPage() {
       setActionError('Your decision wasn’t saved. Check your connection and try again.');
     });
 
+    const hadUnderCard = profiles.length > 1;
     pendingAdvanceRef.current = { id: target.id };
     swipeTimerRef.current = setTimeout(() => {
       pendingAdvanceRef.current = null;
       setExit(null);
       setCurrentPhotoIndex(0);
-      // Drag exits already promoted the next card to full size, so the
-      // incoming top card renders in place; button exits play the enter.
-      setEnterAnim(!viaDrag);
+      // The promoted under-card is already rendered at full size, so the
+      // incoming top card appears in place; without one, play the enter.
+      setEnterAnim(!hadUnderCard);
       setCardKey((k) => k + 1);
       setProfiles((prev) => prev.filter((p) => p.id !== target.id));
+      resetDragVisuals(false);
       exitLockRef.current = false;
     }, reducedMotionRef.current ? REDUCED_EXIT_MS : SWIPE_ANIMATION_MS);
   }, [profiles, router, resetDragVisuals, addNotification, filtersKey]);
+
+  const drag = useCardDrag({
+    cardRef: scrollRef,
+    underRef,
+    likeBadgeRef,
+    passBadgeRef,
+    enabledRef: dragEnabledRef,
+    onCommit: (action) => commitSwipe(action, true),
+  });
 
   const togglePromptLike = useCallback((promptKey: string) => {
     if (exitLockRef.current) return;
@@ -361,6 +393,7 @@ export default function DiscoverPage() {
   // entry is pushed while an overlay is open and consumed again on close, so
   // the back stack is left exactly as we found it.
   const overlayOpen = Boolean(matchedUser) || safetySheetOpen || paywallOpen;
+  dragEnabledRef.current = !exit && !undoBusy && !overlayOpen && status === 'ready';
   const pushedOverlayRef = useRef(false);
   const closingFromPopRef = useRef(false);
 
@@ -487,11 +520,26 @@ export default function DiscoverPage() {
         <button className={failed ? styles.primary : styles.textButton} onClick={() => { setStatus('loading'); loadFeed(nextCursor); }}>{failed ? 'Try again' : 'Refresh profiles'}</button>
         {lastSwipe && <button className={styles.textButton} disabled={undoBusy} onClick={handleUndo}>{undoBusy ? 'Undoing…' : 'Undo last decision'}</button>}
       </div> : <div className={styles.deck}>
-        <div key={`${currentProfile.id}-${cardKey}`} ref={scrollRef} className={`${styles.profileScroll} ${exit ? styles['exit' + exit.dir] : enterAnim ? styles.enter : ''}`}>
-          <DiscoverProfileCard profile={currentProfile} photoIndex={currentPhotoIndex}
-            onPhotoChange={(index) => { hapticLight(); setCurrentPhotoIndex(index); }}
-            onSafety={() => setSafetySheetOpen(true)}
-            likedPrompts={likedPrompts} onPromptLike={togglePromptLike} disabled={Boolean(exit) || undoBusy} />
+        {profiles[1] && <div key={profiles[1].id} ref={underRef} className={styles.underCard}
+          style={{ transform: UNDER_CARD_REST }} aria-hidden="true" inert>
+          <DiscoverProfileCard profile={profiles[1]} photoIndex={0}
+            onPhotoChange={() => {}} onSafety={() => {}}
+            likedPrompts={{}} onPromptLike={() => {}} disabled />
+        </div>}
+        <div key={`${currentProfile.id}-${cardKey}`} ref={scrollRef}
+          className={`${styles.topCard} ${exit ? (exit.viaDrag ? styles.exiting : styles['exit' + exit.dir]) : enterAnim ? styles.enter : ''}`}
+          onPointerDown={drag.onPointerDown} onPointerMove={drag.onPointerMove}
+          onPointerUp={drag.onPointerUp} onPointerCancel={drag.onPointerCancel}
+          onClickCapture={drag.onClickCapture}
+          onDragStartCapture={(e) => e.preventDefault()}>
+          <div className={styles.profileScroll}>
+            <DiscoverProfileCard profile={currentProfile} photoIndex={currentPhotoIndex}
+              onPhotoChange={(index) => { hapticLight(); setCurrentPhotoIndex(index); }}
+              onSafety={() => setSafetySheetOpen(true)}
+              likedPrompts={likedPrompts} onPromptLike={togglePromptLike} disabled={Boolean(exit) || undoBusy} />
+          </div>
+          <div ref={likeBadgeRef} className={`${styles.dragBadge} ${styles.badgeLike}`} aria-hidden="true">Like</div>
+          <div ref={passBadgeRef} className={`${styles.dragBadge} ${styles.badgePass}`} aria-hidden="true">Pass</div>
         </div>
       </div>}
       {feedError && currentProfile && <div role="alert" className={styles.actionError}><span>Couldn’t load more profiles.</span><button className={styles.retryFeed} onClick={() => loadFeed(nextCursor)}>Retry</button></div>}
