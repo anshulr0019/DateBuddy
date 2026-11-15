@@ -66,7 +66,7 @@
 .excerptLabel button, .prompt button { min-width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--rose); background: #f6e0e44d; border-radius: 50%; flex-shrink: 0; }
 .excerptLabel button { margin: -6px -6px -6px 0; }
 .excerpt { font-size: 16px; line-height: 24px; margin-top: 4px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
-.viewProfile { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--rose); margin-top: 3px; }
+.viewProfile { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; font-size: 12px; font-weight: 600; color: var(--rose); margin-top: 3px; }
 .viewProfileIcon { width: 18px; height: 18px; }
 .details { padding: 24px 18px; border-top: 1px solid var(--border); scroll-margin-top: 0; outline: none; }
 .details section + section { margin-top: 28px; }
@@ -141,33 +141,3 @@
 @supports (height: 1cqh) {
   .portrait, .skeletonPhoto { height: clamp(160px, calc(100cqh - 156px), 530px); }
 }
-
-/* ── Full profile (DiscoverProfileDetail) ── */
-.detailRoot { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; background: var(--paper, #faf5eb); font-family: 'Infyn DM', -apple-system, BlinkMacSystemFont, sans-serif; color: #201a16; --paper: #faf5eb; --surface: #fffefa; --ink: #201a16; --secondary: #665849; --border: #e8ddc9; --rose: #9e1b41; }
-.detailRoot button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.detailRoot button:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; }
-.detailScroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; max-width: 480px; width: 100%; margin: 0 auto; }
-.detailScroll::-webkit-scrollbar { display: none; }
-.detailHero { position: relative; height: min(66dvh, 620px); background: #e9dfcf; }
-.detailPhoto { position: absolute; inset: 0; overflow: hidden; }
-.detailClose, .detailSafety { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #201a1659; color: #fffefa; }
-.detailClose { left: 12px; }
-.detailSafety { right: 12px; }
-.detailSafety svg { width: 20px; height: 20px; }
-.detailHero .photoProgress { top: calc(8px + env(safe-area-inset-top, 0px)); left: 68px; right: 68px; }
-.detailBody { padding: 20px 0 8px; }
-.detailName { display: flex; align-items: center; gap: 9px; padding: 0 20px; }
-.detailName h2 { font-family: 'Infyn Serif', Georgia, serif; font-size: 34px; line-height: 1.15; font-weight: 400; letter-spacing: -.02em; overflow-wrap: anywhere; }
-.detailName .verified { background: var(--rose); color: #fffefa; }
-.detailVerified { display: inline-flex; vertical-align: middle; margin-left: 10px; position: relative; top: -3px; }
-@media (max-height: 700px) { .detailHero { height: 52dvh; } .detailName h2 { font-size: 28px; } }
-.detailPlace { display: flex; align-items: center; gap: 6px; padding: 6px 20px 0; font-size: 15px; color: var(--secondary); }
-.detailPlace svg { width: 16px; height: 16px; flex-shrink: 0; }
-.detailOnline { display: flex; align-items: center; gap: 7px; padding: 6px 20px 0; font-size: 14px; color: var(--secondary); }
-.detailOnline > span { width: 7px; height: 7px; border-radius: 50%; background: #4caf72; }
-.detailBody .details { border-top: 1px solid var(--border); margin-top: 18px; padding: 24px 20px 12px; }
-.detailActions { flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--border); }
-.detailActions .like { max-width: none; }
-.detailSlideIn > * { animation: detail-slide-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-@keyframes detail-slide-in { from { transform: translateY(100%); } }
-@media (prefers-reduced-motion: reduce) { .detailSlideIn > * { animation: none; } }

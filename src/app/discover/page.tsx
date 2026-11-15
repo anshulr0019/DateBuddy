@@ -4,8 +4,6 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import styles from './discover.module.css';
 import DiscoverProfileCard from './components/DiscoverProfileCard';
 import DiscoverActionBar from './components/DiscoverActionBar';
-import DiscoverProfileDetail from './components/DiscoverProfileDetail';
-import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
 import { MatchScreen } from '../components/MatchScreen';
@@ -87,9 +85,6 @@ export default function DiscoverPage() {
   const [feedError, setFeedError] = useState(false);
 
   const [safetySheetOpen, setSafetySheetOpen] = useState(false);
-  const [detailOpen, setDetailOpen] = useState(false);
-  // 'morph' when the View Transition API animates the photo; 'slide' otherwise.
-  const [detailEnter, setDetailEnter] = useState<'morph' | 'slide' | 'none'>('none');
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallMessage, setPaywallMessage] = useState('');
@@ -398,103 +393,8 @@ export default function DiscoverPage() {
   // entry is pushed while an overlay is open and consumed again on close, so
   // the back stack is left exactly as we found it.
   const overlayOpen = Boolean(matchedUser) || safetySheetOpen || paywallOpen;
-  dragEnabledRef.current = !exit && !undoBusy && !overlayOpen && !detailOpen && status === 'ready';
-
-  /* ---- Full profile (card photo morphs into the detail hero) ---- */
-  const detailOpenRef = useRef(false);
-  detailOpenRef.current = detailOpen;
-  const detailHistoryRef = useRef(false);
-  const ignoreDetailPopRef = useRef(false);
-  const detailTriggerRef = useRef<HTMLElement | null>(null);
-
-  // Return focus to whatever opened the detail once it closes.
-  const wasDetailOpenRef = useRef(false);
-  useEffect(() => {
-    if (wasDetailOpenRef.current && !detailOpen) {
-      const trigger = detailTriggerRef.current;
-      const id = requestAnimationFrame(() => {
-        if (trigger?.isConnected) trigger.focus({ preventScroll: true });
-      });
-      wasDetailOpenRef.current = detailOpen;
-      return () => cancelAnimationFrame(id);
-    }
-    wasDetailOpenRef.current = detailOpen;
-  }, [detailOpen]);
-
-  const withPhotoMorph = useCallback((update: () => void) => {
-    const canMorph = !reducedMotionRef.current && typeof document !== 'undefined' && 'startViewTransition' in document;
-    if (canMorph) document.startViewTransition(() => { flushSync(update); });
-    else update();
-    return canMorph;
-  }, []);
-
-  const releaseDetailHistory = useCallback(() => {
-    if (!detailHistoryRef.current) return;
-    detailHistoryRef.current = false;
-    if (window.history.state?.dsDetail) {
-      ignoreDetailPopRef.current = true;
-      window.history.back();
-    }
-  }, []);
-
-  const openDetail = useCallback(() => {
-    if (!currentProfile || exitLockRef.current || detailOpenRef.current) return;
-    detailTriggerRef.current = document.activeElement as HTMLElement | null;
-    const morph = withPhotoMorph(() => {
-      setDetailEnter(reducedMotionRef.current ? 'none' : 'morph');
-      setDetailOpen(true);
-    });
-    if (!morph) setDetailEnter(reducedMotionRef.current ? 'none' : 'slide');
-    window.history.pushState({ dsDetail: true }, '');
-    detailHistoryRef.current = true;
-  }, [currentProfile, withPhotoMorph]);
-
-  /* animate=false when a decision is made from the detail: the card's own
-     exit animation then explains what happened. */
-  const closeDetail = useCallback((animate: boolean) => {
-    if (!detailOpenRef.current) return;
-    if (animate) withPhotoMorph(() => setDetailOpen(false));
-    else setDetailOpen(false);
-    releaseDetailHistory();
-  }, [withPhotoMorph, releaseDetailHistory]);
-
-  // Android back / browser back closes the detail, unless an overlay above
-  // it owns the entry being popped (its own listener handles that).
-  useEffect(() => {
-    if (!detailOpen) return;
-    const onPop = () => {
-      if (ignoreDetailPopRef.current) { ignoreDetailPopRef.current = false; return; }
-      if (window.history.state?.dsDetail) return;
-      detailHistoryRef.current = false;
-      withPhotoMorph(() => setDetailOpen(false));
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !overlayOpenRef.current) closeDetail(true);
-    };
-    window.addEventListener('popstate', onPop);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('popstate', onPop);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [detailOpen, withPhotoMorph, closeDetail]);
-
-  // If the profile underneath changes (blocked, reported, refreshed), the
-  // detail no longer describes the top card.
-  const detailProfileIdRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (!detailOpen) { detailProfileIdRef.current = null; return; }
-    if (detailProfileIdRef.current === null) detailProfileIdRef.current = currentProfile?.id ?? null;
-    else if (detailProfileIdRef.current !== currentProfile?.id) closeDetail(false);
-  }, [detailOpen, currentProfile?.id, closeDetail]);
-
-  const decideFromDetail = useCallback((action: SwipeAction) => {
-    closeDetail(false);
-    commitSwipe(action, false);
-  }, [closeDetail, commitSwipe]);
+  dragEnabledRef.current = !exit && !undoBusy && !overlayOpen && status === 'ready';
   const pushedOverlayRef = useRef(false);
-  const overlayOpenRef = useRef(false);
-  overlayOpenRef.current = overlayOpen;
   const closingFromPopRef = useRef(false);
 
   useEffect(() => {
@@ -636,8 +536,7 @@ export default function DiscoverPage() {
             <DiscoverProfileCard profile={currentProfile} photoIndex={currentPhotoIndex}
               onPhotoChange={(index) => { hapticLight(); setCurrentPhotoIndex(index); }}
               onSafety={() => setSafetySheetOpen(true)}
-              likedPrompts={likedPrompts} onPromptLike={togglePromptLike} disabled={Boolean(exit) || undoBusy}
-              onOpenDetail={openDetail} sharedPhoto={!detailOpen} />
+              likedPrompts={likedPrompts} onPromptLike={togglePromptLike} disabled={Boolean(exit) || undoBusy} />
           </div>
           <div ref={likeBadgeRef} className={`${styles.dragBadge} ${styles.badgeLike}`} aria-hidden="true">Like</div>
           <div ref={passBadgeRef} className={`${styles.dragBadge} ${styles.badgePass}`} aria-hidden="true">Pass</div>
@@ -648,22 +547,6 @@ export default function DiscoverPage() {
       {!unavailable || loading ? <DiscoverActionBar onPass={() => commitSwipe('pass', false)} onLike={() => commitSwipe('like', false)}
         onSuperLike={() => commitSwipe('super_like', false)} onUndo={handleUndo}
         canUndo={Boolean(lastSwipe)} undoBusy={undoBusy} disabled={Boolean(exit) || undoBusy || unavailable} /> : null}
-
-      {detailOpen && currentProfile && (
-        <div className={detailEnter === 'slide' ? styles.detailSlideIn : undefined}>
-          <DiscoverProfileDetail
-            profile={currentProfile}
-            photoIndex={currentPhotoIndex}
-            onPhotoChange={(index) => { hapticLight(); setCurrentPhotoIndex(index); }}
-            onClose={() => closeDetail(true)}
-            onPass={() => decideFromDetail('pass')}
-            onLike={() => decideFromDetail('like')}
-            onSafety={() => setSafetySheetOpen(true)}
-            likedPrompts={likedPrompts}
-            onPromptLike={(key) => { closeDetail(false); togglePromptLike(key); }}
-          />
-        </div>
-      )}
 
       {/* SAFETY SHEET */}
       {safetySheetOpen && currentProfile && (

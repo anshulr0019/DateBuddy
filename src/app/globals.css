@@ -1042,12 +1042,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .match-photo-them { animation: none !important; transform: rotate(4deg); }
   .match-ripple { display: none; }
 }
-
-/* Discover: card photo ⇄ full-profile hero (View Transitions API).
-   Snapshots are composited by the browser; nothing lays out per frame. */
-::view-transition-group(discover-photo) { animation-duration: 340ms; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-::view-transition-old(discover-photo), ::view-transition-new(discover-photo) { height: 100%; width: 100%; object-fit: cover; animation-duration: 340ms; }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: 240ms; }
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
-}
