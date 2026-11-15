@@ -21,11 +21,12 @@ import {
 import { hapticLight, hapticMedium, hapticWarning } from '../lib/haptics';
 import { useFilters } from '../context/FilterContext';
 import { getCachedUserProfile, loadUserProfile } from '../lib/userProfileCache';
-import { useCardDrag, UNDER_CARD_REST } from './useCardDrag';
 
 const SWIPE_ANIMATION_MS = 260;
 const REDUCED_EXIT_MS = 160;
 const REFILL_THRESHOLD = 3;
+// Resting pose of the next card waiting underneath the top card.
+const UNDER_CARD_REST = 'scale(0.965) translateY(10px)';
 
 const REPORT_REASONS = [
   { value: 'inappropriate', label: 'Inappropriate content' },
@@ -93,7 +94,6 @@ export default function DiscoverPage() {
   const underRef = useRef<HTMLDivElement>(null);
   const likeBadgeRef = useRef<HTMLDivElement>(null);
   const passBadgeRef = useRef<HTMLDivElement>(null);
-  const dragEnabledRef = useRef(true);
   const swipeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitLockRef = useRef(false);
   const pendingAdvanceRef = useRef<{ id: number } | null>(null);
@@ -323,15 +323,6 @@ export default function DiscoverPage() {
     }, reducedMotionRef.current ? REDUCED_EXIT_MS : SWIPE_ANIMATION_MS);
   }, [profiles, router, resetDragVisuals, addNotification, filtersKey]);
 
-  const drag = useCardDrag({
-    cardRef: scrollRef,
-    underRef,
-    likeBadgeRef,
-    passBadgeRef,
-    enabledRef: dragEnabledRef,
-    onCommit: (action) => commitSwipe(action, true),
-  });
-
   const togglePromptLike = useCallback((promptKey: string) => {
     if (exitLockRef.current) return;
     const willLike = !likedPrompts[promptKey];
@@ -393,7 +384,6 @@ export default function DiscoverPage() {
   // entry is pushed while an overlay is open and consumed again on close, so
   // the back stack is left exactly as we found it.
   const overlayOpen = Boolean(matchedUser) || safetySheetOpen || paywallOpen;
-  dragEnabledRef.current = !exit && !undoBusy && !overlayOpen && status === 'ready';
   const pushedOverlayRef = useRef(false);
   const closingFromPopRef = useRef(false);
 
@@ -527,11 +517,7 @@ export default function DiscoverPage() {
             likedPrompts={{}} onPromptLike={() => {}} disabled />
         </div>}
         <div key={`${currentProfile.id}-${cardKey}`} ref={scrollRef}
-          className={`${styles.topCard} ${exit ? (exit.viaDrag ? styles.exiting : styles['exit' + exit.dir]) : enterAnim ? styles.enter : ''}`}
-          onPointerDown={drag.onPointerDown} onPointerMove={drag.onPointerMove}
-          onPointerUp={drag.onPointerUp} onPointerCancel={drag.onPointerCancel}
-          onClickCapture={drag.onClickCapture}
-          onDragStartCapture={(e) => e.preventDefault()}>
+          className={`${styles.topCard} ${exit ? styles['exit' + exit.dir] : enterAnim ? styles.enter : ''}`}>
           <div className={styles.profileScroll}>
             <DiscoverProfileCard profile={currentProfile} photoIndex={currentPhotoIndex}
               onPhotoChange={(index) => { hapticLight(); setCurrentPhotoIndex(index); }}

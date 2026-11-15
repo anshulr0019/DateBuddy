@@ -25,13 +25,12 @@
 .count { background: var(--rose); color: white; border-radius: 50%; min-width: 18px; line-height: 18px; font-size: 11px; }
 .unread { position: absolute; width: 7px; height: 7px; background: var(--rose); border-radius: 50%; top: 8px; right: 8px; }
 .deck { container-type: size; flex: 1; min-height: 0; position: relative; margin: 0 20px; }
-.topCard { position: absolute; inset: 0; touch-action: pan-y; }
+.topCard { position: absolute; inset: 0; }
 .underCard { position: absolute; inset: 0; border-radius: 24px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; pointer-events: none; }
-.exiting { pointer-events: none; }
-.dragBadge { position: absolute; top: 84px; opacity: 0; pointer-events: none; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 16px; border-radius: 12px; border: 2.5px solid; background: #fffefaf2; }
+.dragBadge { position: absolute; transition: opacity 120ms ease-out; top: 84px; opacity: 0; pointer-events: none; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 16px; border-radius: 12px; border: 2.5px solid; background: #fffefaf2; }
 .badgeLike { left: 16px; transform: rotate(-8deg); color: var(--rose); border-color: var(--rose); }
 .badgePass { right: 16px; transform: rotate(8deg); color: var(--secondary); border-color: var(--secondary); }
-.profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); -webkit-user-select: none; user-select: none; }
+.profileScroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; border-radius: 24px; touch-action: pan-y; border: 1px solid var(--border); background: var(--surface); }
 .profileScroll::-webkit-scrollbar { display: none; }
 .profileCard { background: var(--surface); min-height: 100%; }
 .portrait { height: clamp(200px, calc(100dvh - 388px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 530px); position: relative; overflow: hidden; background: #e9dfcf; }
@@ -65,9 +64,7 @@
 .excerptLabel > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .excerptLabel button, .prompt button { min-width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--rose); background: #f6e0e44d; border-radius: 50%; flex-shrink: 0; }
 .excerptLabel button { margin: -6px -6px -6px 0; }
-.excerpt { font-size: 16px; line-height: 24px; margin-top: 4px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
-.viewProfile { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; font-size: 12px; font-weight: 600; color: var(--rose); margin-top: 3px; }
-.viewProfileIcon { width: 18px; height: 18px; }
+.excerpt { font-size: 16px; line-height: 24px; margin-top: 4px; overflow-wrap: anywhere; white-space: pre-wrap; }
 .details { padding: 24px 18px; border-top: 1px solid var(--border); scroll-margin-top: 0; outline: none; }
 .details section + section { margin-top: 28px; }
 .details h3 { font-family: 'Infyn Serif', Georgia, serif; font-size: 20px; margin-bottom: 12px; font-weight: 400; }
