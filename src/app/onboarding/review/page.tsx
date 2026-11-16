@@ -150,7 +150,7 @@ export default function ReviewPage() {
             >
               <div className="h-full w-full rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose shadow-[0_0_8px_rgba(32,26,22,0.16)]" />
             </div>
-            <span className="text-[12px] font-bold text-[#22C55E]">Done!</span>
+            <span className="text-[13px] font-semibold text-infyn-secondary">Done</span>
           </div>
         </div>
 
@@ -158,7 +158,7 @@ export default function ReviewPage() {
         <div className="flex-1 min-h-0 z-10 px-6 overflow-y-auto scrollbar-none pb-6 animate-page-enter">
           <div className="mb-6">
             <h1 className="text-[28px] font-normal text-infyn-ink tracking-tight leading-[1.1] font-display">
-              Looking good! 🔥
+              Looking good
             </h1>
             <p className="text-[14.5px] text-infyn-ink/55 mt-1.5">Here&apos;s your profile in Discover</p>
           </div>
@@ -260,7 +260,7 @@ export default function ReviewPage() {
               </>
             ) : (
               <>
-                Start Discovering ✨
+                Start discovering
               </>
             )}
           </button>

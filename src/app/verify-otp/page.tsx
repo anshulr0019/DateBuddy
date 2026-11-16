@@ -2,15 +2,23 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import BrandLogo, { BRAND_NAME } from '../components/BrandLogo';
+import BrandLogo from '../components/BrandLogo';
 import { hapticLight, hapticMedium, hapticSuccess, hapticWarning } from '../lib/haptics';
 import { verifyFirebaseOTP, sendFirebaseOTP } from '@/lib/firebase';
 
 const RESEND_SECONDS = 30;
 
+function maskPhone(raw: string | null): string | null {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, '').slice(-10);
+  return digits.length === 10 ? `+91 ${digits.slice(0, 2)}••• ••${digits.slice(7)}` : null;
+}
+
 export default function VerifyOtpPage() {
   const router = useRouter();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [maskedPhone, setMaskedPhone] = useState<string | null>(null);
+  useEffect(() => { setMaskedPhone(maskPhone(localStorage.getItem('phoneNumber'))); }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(RESEND_SECONDS);
@@ -214,43 +222,32 @@ export default function VerifyOtpPage() {
         paddingRight: '1.5rem',
       }}
     >
-      {/* Aurora background */}
-      <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-12 -left-12 w-72 h-72 rounded-full bg-infyn-rose/15 blur-[60px]" />
-        <div className="absolute top-1/3 -right-16 w-80 h-80 rounded-full bg-infyn-rose/12 blur-[60px]" />
-        <div className="absolute -bottom-10 left-1/4 w-72 h-72 rounded-full bg-infyn-rose/10 blur-[60px]" />
-      </div>
-
       {/* Top bar */}
       <div className="w-full flex items-center justify-between z-10">
         <button
           onClick={() => router.back()}
           aria-label="Go back"
-          className="font-system flex h-11 w-11 items-center justify-center rounded-2xl border border-infyn-border/80 bg-infyn-surface/70 text-infyn-ink/70 shadow-[0_4px_16px_-8px_rgba(32,26,22,0.12)] backdrop-blur-xl active:scale-[0.92] transition-all cursor-pointer"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-infyn-ink active:bg-infyn-surface-soft transition-colors cursor-pointer"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <div className="flex items-center gap-1.5 rounded-full border border-infyn-border/60 bg-infyn-surface/70 px-3 py-1.5 backdrop-blur-xl shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-infyn-ink/60">Secure Verification</span>
-        </div>
       </div>
 
       {/* Center content */}
       <div className="w-full z-10 flex flex-col items-center my-auto py-4">
-        <BrandLogo size={72} className="mb-5" />
+        <BrandLogo size={56} className="mb-5" />
 
         <h1 className="text-[30px] sm:text-[36px] font-normal tracking-[-0.03em] leading-[1.05] text-center mb-2 text-infyn-ink font-display">
-          Enter Code
+          Enter your code
         </h1>
-        <p className="text-[14.5px] leading-relaxed text-infyn-ink/55 text-center mb-7 max-w-[280px]">
-          We sent a 6-digit code to your registered mobile number.
+        <p className="text-[16px] leading-relaxed text-infyn-secondary text-center mb-7 max-w-[300px]">
+          We sent a 6-digit code to <span className="whitespace-nowrap text-infyn-ink">{maskedPhone ?? 'your phone'}</span>.
         </p>
 
         {/* Glass card */}
-        <div className="w-full rounded-[28px] border border-infyn-border/60 bg-infyn-surface/75 p-5 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(32,26,22,0.16)] flex flex-col items-center">
+        <div className="w-full flex flex-col items-center">
           <form onSubmit={handleVerify} className="w-full flex flex-col items-center">
             {/* OTP inputs — shake on wrong code */}
             <div
@@ -297,7 +294,7 @@ export default function VerifyOtpPage() {
             <button
               type="submit"
               disabled={loading || !allFilled}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[15px] shadow-[0_12px_32px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 cursor-pointer flex items-center justify-center gap-2 min-h-[44px] font-system"
+              className="w-full min-h-[54px] rounded-full bg-infyn-rose text-[#fff8f0] font-semibold text-[16px] active:scale-[0.985] transition-transform duration-150 disabled:opacity-40 disabled:active:scale-100 cursor-pointer flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -306,16 +303,16 @@ export default function VerifyOtpPage() {
                   </svg>
                   Verifying…
                 </>
-              ) : 'Verify Code'}
+              ) : 'Verify'}
             </button>
 
-            <div className="mt-5 flex items-center justify-center gap-2 text-[14px] text-infyn-ink/55">
+            <div className="mt-5 flex items-center justify-center gap-2 text-[15px] text-infyn-secondary">
               <span>Didn&apos;t receive it?</span>
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={cooldown > 0 || resending}
-                className="font-system font-bold transition-all disabled:opacity-40 cursor-pointer min-h-[44px] inline-flex items-center"
+                className="font-semibold transition-all disabled:opacity-40 cursor-pointer min-h-[44px] inline-flex items-center"
                 style={{ color: cooldown > 0 ? undefined : 'var(--infyn-rose)' }}
               >
                 {resending ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend'}
@@ -325,12 +322,6 @@ export default function VerifyOtpPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="w-full text-center z-10">
-        <p className="text-[11.5px] uppercase tracking-wide font-medium text-infyn-ink/35">
-          {BRAND_NAME} · Secure Verification
-        </p>
-      </div>
     </main>
   );
 }

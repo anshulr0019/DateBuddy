@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SafeImage } from '../components/shared';
 import { hapticMedium, hapticSuccess, hapticLight } from '../lib/haptics';
+import { Ic } from '../components/icons';
 
 // ── Types ──────────────────────────────────────────────────
 interface AdminUser {
@@ -494,9 +495,7 @@ export default function AdminDashboardPage() {
           <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-infyn-rose/30 blur-[60px]" />
           <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-infyn-rose/30 blur-[60px]" />
           <div className="relative z-10">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-infyn-surface/10 border border-white/15 mx-auto mb-4 text-3xl shadow-md">
-              👑
-            </div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-infyn-surface/10 border border-white/15 mx-auto mb-4 text-white"><Ic.Shield className="w-7 h-7" /></div>
             <h1 className="text-[22px] font-normal tracking-tight mb-1 font-display">Founder Access</h1>
             <p className="text-[13px] text-white/55 mb-6">Enter your secret PIN to access Infyn Live Hub.</p>
             <form onSubmit={handleLoginSubmit} className="space-y-4">
@@ -516,7 +515,7 @@ export default function AdminDashboardPage() {
                 disabled={loading || !inputPin.trim()}
                 className="w-full h-12 rounded-2xl bg-gradient-to-r from-infyn-rose to-infyn-rose text-white font-extrabold text-[14px] shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center"
               >
-                {loading ? 'Verifying…' : 'Unlock Dashboard ✨'}
+                {loading ? 'Verifying…' : 'Unlock dashboard'}
               </button>
             </form>
           </div>
@@ -545,9 +544,7 @@ export default function AdminDashboardPage() {
       <header className="sticky top-0 z-30 bg-infyn-dark/85 backdrop-blur-xl border-b border-white/10 px-5 py-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-infyn-rose to-infyn-rose text-xl shadow-sm">
-              👑
-            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-infyn-rose to-infyn-rose text-white"><Ic.Shield className="w-5 h-5" /></div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-[18px] font-normal tracking-tight leading-none font-display">Infyn Founder Hub</h1>
@@ -713,7 +710,7 @@ export default function AdminDashboardPage() {
                   { id: 'women', label: '👩 Women' },
                   { id: 'men', label: '👨 Men' },
                   { id: 'onboarded', label: '✅ Onboarded' },
-                  { id: 'vip', label: '👑 VIP Gold' },
+                  { id: 'vip', label: 'Gold' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -780,7 +777,7 @@ export default function AdminDashboardPage() {
                                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10.5px] font-bold">Incomplete</span>
                               )}
                               {u.tier !== 'free' && (
-                                <span className="px-2 py-0.5 rounded-md bg-amber-400/20 border border-amber-400/30 text-amber-300 text-[10px] font-black">👑 VIP GOLD</span>
+                                <span className="px-2 py-0.5 rounded-md bg-amber-400/20 border border-amber-400/30 text-amber-300 text-[10px] font-black">GOLD</span>
                               )}
                             </div>
                           </td>

@@ -132,44 +132,41 @@ export function MediaDrawer({ initialTab = 'emoji', onPickEmoji, onPickGif }: Me
   };
 
   return (
-    <div className="z-30 bg-infyn-surface/95 backdrop-blur-2xl border-t border-infyn-border/80 shadow-[0_-12px_36px_rgba(0,0,0,0.08)] animate-popover-enter flex flex-col h-[290px] select-none">
+    <div className="z-30 bg-infyn-surface border-t border-infyn-border/80 shadow-[0_-12px_36px_rgba(0,0,0,0.08)] animate-popover-enter flex flex-col h-[290px] select-none">
       {/* ── TOP TAB NAV BAR ── */}
       <div className="flex-shrink-0 flex items-center justify-between px-3.5 pt-2.5 pb-2 border-b border-infyn-border bg-infyn-surface-soft/70">
         <div className="flex items-center gap-1 bg-infyn-surface-soft/70 p-1 rounded-2xl">
           <button
             type="button"
             onClick={() => setActiveTab('emoji')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
+            className={`min-h-[36px] px-4 rounded-xl text-[14px] font-semibold transition-colors cursor-pointer ${
               activeTab === 'emoji'
-                ? 'bg-infyn-surface text-infyn-rose shadow-xs scale-102'
+                ? 'bg-infyn-surface text-infyn-ink shadow-[0_1px_3px_rgba(32,26,22,0.1)]'
                 : 'text-infyn-secondary hover:text-infyn-ink'
             }`}
           >
-            <span>😀</span>
             <span>Emoji</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('gif')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
+            className={`min-h-[36px] px-4 rounded-xl text-[14px] font-semibold transition-colors cursor-pointer ${
               activeTab === 'gif'
-                ? 'bg-infyn-surface text-infyn-rose shadow-xs scale-102'
+                ? 'bg-infyn-surface text-infyn-ink shadow-[0_1px_3px_rgba(32,26,22,0.1)]'
                 : 'text-infyn-secondary hover:text-infyn-ink'
             }`}
           >
-            <span>🎬</span>
             <span>GIF</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('sticker')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[12px] font-extrabold transition-all cursor-pointer ${
+            className={`min-h-[36px] px-4 rounded-xl text-[14px] font-semibold transition-colors cursor-pointer ${
               activeTab === 'sticker'
-                ? 'bg-infyn-surface text-infyn-rose shadow-xs scale-102'
+                ? 'bg-infyn-surface text-infyn-ink shadow-[0_1px_3px_rgba(32,26,22,0.1)]'
                 : 'text-infyn-secondary hover:text-infyn-ink'
             }`}
           >
-            <span>✨</span>
             <span>Stickers</span>
           </button>
         </div>

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { AuroraBackground, GlassCard, PrimaryButton } from './components/shared';
+import { Ic } from './components/icons';
 
 export default function NotFound() {
   const router = useRouter();
@@ -12,9 +13,7 @@ export default function NotFound() {
         <AuroraBackground subtle>
           <div className="flex flex-1 items-center justify-center px-6">
             <GlassCard className="w-full p-8 text-center">
-              <p className="text-[40px] mb-3" aria-hidden>
-                🧭
-              </p>
+              <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-infyn-surface border border-infyn-border text-infyn-rose" aria-hidden><Ic.Compass className="w-7 h-7" /></div>
               <h1 className="text-[18px] font-normal text-infyn-ink mb-1.5 font-display">Page not found</h1>
               <p className="text-[13px] text-infyn-ink/60 mb-6">
                 That page doesn&apos;t exist or has moved.

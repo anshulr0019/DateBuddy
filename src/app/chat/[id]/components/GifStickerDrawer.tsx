@@ -108,13 +108,13 @@ export function GifStickerDrawer({ onSelect }: GifStickerDrawerProps) {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3.5 py-1 text-[12px] font-extrabold rounded-full transition-all cursor-pointer ${
+              className={`min-h-[36px] px-4 text-[14px] font-semibold rounded-full transition-colors cursor-pointer ${
                 tab === t
-                  ? 'bg-white text-[#F43F5E] shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800'
+                  ? 'bg-infyn-surface text-infyn-ink shadow-[0_1px_3px_rgba(32,26,22,0.1)]'
+                  : 'text-infyn-secondary'
               }`}
             >
-              {t === 'gifs' ? '🎬 GIFs' : '✨ Stickers'}
+              {t === 'gifs' ? 'GIFs' : 'Stickers'}
             </button>
           ))}
         </div>

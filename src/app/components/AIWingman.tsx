@@ -103,17 +103,17 @@ export default function AIWingman({
     return [
       {
         tag: 'Playful',
-        badgeColor: 'bg-rose-500/10 text-rose-600 border-rose-500/20',
+        badgeColor: 'bg-infyn-blush text-infyn-rose border-infyn-rose-line',
         text: playful,
       },
       {
-        tag: interest ? `Hook (${interest})` : 'Curious',
-        badgeColor: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+        tag: interest ? `About ${interest}` : 'Curious',
+        badgeColor: 'bg-infyn-blush text-infyn-rose border-infyn-rose-line',
         text: promptHook,
       },
       {
-        tag: 'Activity Vibe',
-        badgeColor: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+        tag: 'Easy opener',
+        badgeColor: 'bg-infyn-blush text-infyn-rose border-infyn-rose-line',
         text: casual,
       },
     ];

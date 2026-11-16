@@ -41,7 +41,7 @@ export default function GoogleSignInModal({ isOpen, onClose }: GoogleSignInModal
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
           </div>
-          <h2 className="text-[20px] font-extrabold text-infyn-ink">Sign in with Google</h2>
+          <h2 className="font-display text-[24px] text-infyn-ink">Sign in with Google</h2>
           <p className="text-[13px] text-infyn-ink/55 mt-1">Connect your Google account to Infyn</p>
         </div>
 
@@ -73,7 +73,7 @@ export default function GoogleSignInModal({ isOpen, onClose }: GoogleSignInModal
 
         <div className="mt-5 pt-3 border-t border-infyn-ink/[0.06] text-center">
           <p className="text-[11px] text-infyn-ink/55 leading-relaxed">
-            🔒 Secured by Google OAuth 2.0
+            Google handles your sign-in. We never see your password.
           </p>
         </div>
       </div>
