@@ -70,37 +70,37 @@ export function GuessNumberGame({
   }, [storageKey]);
 
   return (
-    <div className="w-full space-y-4 text-white select-none animate-page-entry">
+    <div className="w-full space-y-4 text-infyn-ink select-none animate-page-entry">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+      <div className="flex items-center justify-between pb-3 border-b border-infyn-border">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={onClose}
             aria-label="Back to menu"
-            className="h-8 w-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-sm"
+            className="h-8 w-8 rounded-full bg-infyn-surface-soft hover:bg-infyn-blush flex items-center justify-center text-infyn-secondary hover:text-infyn-ink transition-colors cursor-pointer text-sm"
           >
             &larr;
           </button>
           <div>
-            <span className="text-[10px] font-mono font-bold tracking-[0.16em] uppercase text-white/40">
+            <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-infyn-muted">
               01 • Game
             </span>
-            <h3 className="text-[16px] font-extrabold text-white leading-tight">Guess The Number</h3>
+            <h3 className="text-[16px] font-semibold text-infyn-ink leading-tight">Guess The Number</h3>
           </div>
         </div>
 
-        <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] font-mono text-white/60">
+        <span className="px-2 py-0.5 rounded-full bg-infyn-surface-soft border border-infyn-border text-[10px] text-infyn-secondary">
           0–100
         </span>
       </div>
 
       {/* Before lock-in: input field */}
       {!gameState.isLockedIn ? (
-        <form onSubmit={handleLockIn} className="space-y-3.5 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+        <form onSubmit={handleLockIn} className="space-y-3.5 p-4 rounded-2xl bg-infyn-surface border border-infyn-border">
           <div>
-            <p className="text-[13px] font-bold text-white">Choose your secret number</p>
-            <p className="text-[11.5px] text-white/50 mt-0.5">
+            <p className="text-[13px] font-bold text-infyn-ink">Choose your secret number</p>
+            <p className="text-[11.5px] text-infyn-secondary mt-0.5">
               Only you can see this. {cleanPartnerName} will try to guess it.
             </p>
           </div>
@@ -112,7 +112,7 @@ export function GuessNumberGame({
               value={inputNumber}
               onChange={(e) => setInputNumber(e.target.value)}
               placeholder="e.g. 74"
-              className="flex-1 rounded-xl bg-black/50 border border-white/15 focus:border-white/40 px-3.5 py-2.5 text-[15px] font-mono text-white placeholder:text-white/25 outline-none transition-colors"
+              className="flex-1 rounded-xl bg-infyn-surface-soft border border-infyn-border focus:border-infyn-rose-line px-3.5 py-2.5 text-[15px] text-infyn-ink placeholder:text-infyn-muted/70 outline-none transition-colors"
             />
             <button
               type="submit"
@@ -127,20 +127,20 @@ export function GuessNumberGame({
         /* After lock-in: clean 2-button UI */
         <div className="space-y-4">
           {/* Secret Number Badge */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-infyn-surface border border-infyn-border">
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-white/40">Your Secret Number</p>
-              <p className="text-[24px] font-mono font-black text-white mt-1">
+              <p className="text-[10px] uppercase tracking-wider text-infyn-muted">Your Secret Number</p>
+              <p className="text-[24px] font-semibold text-infyn-ink mt-1">
                 {gameState.mySecretNumber}
               </p>
             </div>
             {gameState.isRevealed ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-bold">
-                👁 Revealed
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-infyn-blush text-infyn-rose text-[12px] font-semibold">
+                Revealed
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-infyn-surface-soft text-infyn-secondary text-[12px] font-semibold">
+                <span className="h-2 w-2 rounded-full bg-infyn-muted" />
                 Hidden
               </span>
             )}
@@ -153,8 +153,8 @@ export function GuessNumberGame({
             disabled={gameState.isRevealed}
             className={`w-full py-3.5 rounded-2xl text-[14px] font-bold transition-all cursor-pointer active:scale-[0.98] disabled:cursor-default disabled:active:scale-100 flex items-center justify-center gap-2.5 ${
               gameState.isRevealed
-                ? 'bg-white/[0.04] border border-white/[0.08] text-white/40'
-                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30'
+                ? 'bg-infyn-surface border border-infyn-border text-infyn-muted'
+                : 'bg-infyn-rose text-[#fff8f0]'
             }`}
           >
             {gameState.isRevealed ? (
@@ -174,14 +174,14 @@ export function GuessNumberGame({
           <button
             type="button"
             onClick={handleNewGame}
-            className="w-full py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl bg-infyn-surface-soft hover:bg-infyn-blush border border-infyn-border text-infyn-secondary hover:text-infyn-ink text-[13px] font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
             Start New Game
           </button>
 
           {/* Hint text */}
-          <p className="text-[11px] text-white/30 text-center">
+          <p className="text-[11px] text-infyn-muted/70 text-center">
             Use the chat to ask clue questions and make guesses
           </p>
         </div>

@@ -262,7 +262,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-infyn-ink/55 transition-opacity duration-300 ${
           isOpen && translateY < 100 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -271,7 +271,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
 
       {/* Sheet container */}
       <div
-        className={`relative w-full max-w-[440px] sm:max-w-lg rounded-t-[32px] bg-infyn-dark shadow-[0_-25px_70px_rgba(0,0,0,0.9)] border-t border-white/10 flex flex-col overflow-hidden ${
+        className={`relative w-full max-w-[440px] sm:max-w-lg rounded-t-[32px] bg-infyn-paper shadow-[0_-12px_40px_-12px_rgba(32,26,22,0.3)] flex flex-col overflow-hidden ${
           isOpen ? 'animate-sheet-slide-up' : 'animate-sheet-slide-down'
         }`}
         style={{
@@ -326,6 +326,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {displayPhotos.length > 0 ? (
               <>
                 <SafeImage
+                  eager
                   src={displayPhotos[photoIndex]}
                   name={displayName}
                   alt={`${displayName} photo ${photoIndex + 1}`}
@@ -376,9 +377,9 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 )}
               </>
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#1E1B4B] to-infyn-dark">
+              <div className="h-full w-full flex items-center justify-center bg-infyn-surface-soft">
                 <div className="h-24 w-24 rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose flex items-center justify-center shadow-xl">
-                  <span className="text-4xl font-black text-white">{displayName.charAt(0).toUpperCase()}</span>
+                  <span className="font-display text-4xl text-white">{displayName.charAt(0).toUpperCase()}</span>
                 </div>
               </div>
             )}
@@ -386,7 +387,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {/* Name, Age, Location Overlay */}
             <div className="absolute bottom-4 left-5 right-5 z-20 pointer-events-none">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-[30px] font-black text-white leading-none tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                <h2 className="font-display text-[32px] text-white leading-tight tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
                   {displayName}{profile?.age ? `, ${profile.age}` : ''}
                 </h2>
                 {displayVerified && <VerifiedBadge />}
@@ -426,14 +427,14 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {/* Loading skeleton */}
             {loading && !profile && (
               <div className="space-y-3 py-3 animate-pulse">
-                <div className="h-4 bg-infyn-surface/10 rounded-full w-3/4" />
-                <div className="h-4 bg-infyn-surface/10 rounded-full w-1/2" />
+                <div className="h-4 bg-infyn-surface-soft rounded-full w-3/4" />
+                <div className="h-4 bg-infyn-surface-soft rounded-full w-1/2" />
               </div>
             )}
 
             {/* Bio */}
             {profile?.bio && (
-              <p className="text-[15px] leading-relaxed text-white/80 mb-5 font-normal">
+              <p className="text-[15px] leading-relaxed text-infyn-secondary mb-5 font-normal">
                 {profile.bio}
               </p>
             )}
@@ -444,10 +445,10 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 {profile.prompts.map((p, i) => (
                   <div
                     key={i}
-                    className="rounded-[22px] bg-infyn-surface/[0.06] border border-white/10 px-4 py-3.5 backdrop-blur-md shadow-xs"
+                    className="rounded-[22px] bg-infyn-surface-soft border border-infyn-border px-4 py-3.5 backdrop-blur-md shadow-xs"
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose-light mb-1.5">{p.question}</p>
-                    <p className="text-[14.5px] font-medium text-white/90 leading-snug">{p.answer}</p>
+                    <p className="text-[13px] text-infyn-secondary mb-1">{p.question}</p>
+                    <p className="text-[14.5px] font-medium text-infyn-secondary leading-snug">{p.answer}</p>
                   </div>
                 ))}
               </div>
@@ -459,21 +460,21 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 {profile.instagramHandle && (
                   <button
                     onClick={handleInstagramTap}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface/[0.07] border border-white/10 hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface-soft border border-infyn-border hover:bg-infyn-blush active:scale-95 transition-all cursor-pointer shadow-xs"
                     aria-label={`Instagram: @${profile.instagramHandle}`}
                   >
                     <InstagramIcon />
-                    <span className="text-[13px] font-bold text-white/90">@{profile.instagramHandle}</span>
+                    <span className="text-[13px] font-bold text-infyn-secondary">@{profile.instagramHandle}</span>
                   </button>
                 )}
                 {profile.snapchatHandle && (
                   <button
                     onClick={handleSnapchatTap}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface/[0.07] border border-white/10 hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-infyn-surface-soft border border-infyn-border hover:bg-infyn-blush active:scale-95 transition-all cursor-pointer shadow-xs"
                     aria-label={`Snapchat: @${profile.snapchatHandle}`}
                   >
                     <SnapchatIcon />
-                    <span className="text-[13px] font-bold text-white/90">@{profile.snapchatHandle}</span>
+                    <span className="text-[13px] font-bold text-infyn-secondary">@{profile.snapchatHandle}</span>
                   </button>
                 )}
               </div>
@@ -482,10 +483,10 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {/* Interests */}
             {profile?.interests && profile.interests.length > 0 && (
               <div className="mb-5">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/40 mb-2.5">Interests</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-infyn-muted mb-2.5">Interests</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.interests.map((interest) => (
-                    <span key={interest} className="px-3 py-1.5 rounded-full bg-infyn-surface/[0.08] border border-white/10 text-[12px] font-semibold text-white/85 shadow-2xs">
+                    <span key={interest} className="px-3 py-1.5 rounded-full bg-infyn-surface-soft border border-infyn-border text-[13px] text-infyn-secondary shadow-2xs">
                       {interest}
                     </span>
                   ))}
@@ -494,33 +495,33 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             )}
 
             {/* Divider */}
-            <div className="h-px bg-infyn-surface/10 mb-5" />
+            <div className="h-px bg-infyn-surface-soft mb-5" />
 
             {/* Action buttons */}
             <div className="grid grid-cols-3 gap-3 mb-5">
               <button
                 onClick={() => { onClose(); if (matchId) router.push(`/chat/${matchId}`); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-infyn-rose/25 to-infyn-rose/25 border border-infyn-rose/25 hover:from-infyn-rose/35 hover:to-infyn-rose/35 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 min-h-[76px] rounded-2xl bg-infyn-surface border border-infyn-border active:bg-infyn-surface-soft transition-colors cursor-pointer"
                 aria-label="Open chat"
               >
-                <span className="text-infyn-rose-light"><ChatIcon /></span>
-                <span className="text-[11px] font-bold text-white/80">Message</span>
+                <span className="text-infyn-rose"><ChatIcon /></span>
+                <span className="text-[13px] font-semibold text-infyn-ink">Message</span>
               </button>
               <button
                 onClick={() => { onClose(); onAudioCall?.(); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-infyn-rose/20 border border-infyn-rose/30 hover:bg-infyn-rose/30 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 min-h-[76px] rounded-2xl bg-infyn-surface border border-infyn-border active:bg-infyn-surface-soft transition-colors cursor-pointer"
                 aria-label="Start audio call"
               >
-                <span className="text-infyn-rose-light"><PhoneIcon /></span>
-                <span className="text-[11px] font-bold text-white/80">Audio</span>
+                <span className="text-infyn-rose"><PhoneIcon /></span>
+                <span className="text-[13px] font-semibold text-infyn-ink">Audio</span>
               </button>
               <button
                 onClick={() => { onClose(); onVideoCall?.(); }}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-gradient-to-br from-infyn-rose/20 to-[#FF8C42]/20 border border-infyn-rose/25 hover:from-infyn-rose/30 hover:to-[#FF8C42]/30 active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex flex-col items-center gap-2 py-4 min-h-[76px] rounded-2xl bg-infyn-surface border border-infyn-border active:bg-infyn-surface-soft transition-colors cursor-pointer"
                 aria-label="Start video call"
               >
-                <span className="text-[#FF8C42]"><VideoIcon /></span>
-                <span className="text-[11px] font-bold text-white/80">Video</span>
+                <span className="text-infyn-rose"><VideoIcon /></span>
+                <span className="text-[13px] font-semibold text-infyn-ink">Video</span>
               </button>
             </div>
 
@@ -528,7 +529,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             <div className="flex gap-3">
               <button
                 onClick={() => setSafetyAction('block')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 text-white/50 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface border border-infyn-border text-infyn-secondary hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
                 aria-label="Block user"
               >
                 <BlockIcon />
@@ -536,7 +537,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
               </button>
               <button
                 onClick={() => setSafetyAction('report')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface/[0.05] border border-white/10 text-white/50 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-infyn-surface border border-infyn-border text-infyn-secondary hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 active:scale-95 transition-all cursor-pointer text-[12px] font-bold"
                 aria-label="Report user"
               >
                 <FlagIcon />
@@ -546,21 +547,21 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
 
             {/* Inline Safety Modals */}
             {safetyAction === 'block' && (
-              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface/10 border border-white/15 text-center animate-scale-up">
-                <p className="text-[15px] font-bold text-white mb-1">Block {displayName}?</p>
-                <p className="text-[12px] text-white/60 mb-3">They won&apos;t be able to contact you, and this match will end.</p>
+              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface-soft border border-infyn-border text-center animate-scale-up">
+                <p className="text-[15px] font-bold text-infyn-ink mb-1">Block {displayName}?</p>
+                <p className="text-[12px] text-infyn-secondary mb-3">They won&apos;t be able to contact you, and this match will end.</p>
                 {safetyError && <p className="text-[12px] text-rose-400 font-semibold mb-2">{safetyError}</p>}
                 <div className="flex gap-2">
                   <button
                     onClick={handleConfirmBlock}
                     disabled={safetyBusy}
-                    className="flex-1 py-2.5 rounded-xl bg-rose-600 text-white font-bold text-[13px] hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-60 cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-rose-600 text-infyn-ink font-bold text-[13px] hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-60 cursor-pointer"
                   >
                     {safetyBusy ? 'Blocking…' : 'Yes, Block'}
                   </button>
                   <button
                     onClick={() => setSafetyAction('none')}
-                    className="flex-1 py-2.5 rounded-xl bg-infyn-surface/10 text-white/70 font-semibold text-[13px] hover:bg-infyn-surface/15 active:scale-95 transition-all cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-infyn-surface-soft text-infyn-secondary font-semibold text-[13px] hover:bg-infyn-blush active:scale-95 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -569,9 +570,9 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             )}
 
             {safetyAction === 'report' && (
-              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface/10 border border-white/15 text-center animate-scale-up">
-                <p className="text-[15px] font-bold text-white mb-1">Report {displayName}</p>
-                <p className="text-[12px] text-white/60 mb-3">Select a reason (anonymous):</p>
+              <div className="mt-4 p-4 rounded-2xl bg-infyn-surface-soft border border-infyn-border text-center animate-scale-up">
+                <p className="text-[15px] font-bold text-infyn-ink mb-1">Report {displayName}</p>
+                <p className="text-[12px] text-infyn-secondary mb-3">Select a reason (anonymous):</p>
                 {safetyError && <p className="text-[12px] text-rose-400 font-semibold mb-2">{safetyError}</p>}
                 <div className="space-y-1.5 mb-3 text-left">
                   {[
@@ -585,7 +586,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                       key={r.key}
                       onClick={() => handleConfirmReport(r.key)}
                       disabled={safetyBusy}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface/5 hover:bg-infyn-surface/10 text-[13px] text-white/90 font-medium text-left transition-all active:scale-[0.99] cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-[13px] text-infyn-secondary font-medium text-left transition-all active:scale-[0.99] cursor-pointer"
                     >
                       {r.label}
                     </button>
@@ -593,7 +594,7 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
                 </div>
                 <button
                   onClick={() => setSafetyAction('none')}
-                  className="w-full py-2 rounded-xl bg-infyn-surface/5 text-white/60 font-semibold text-[12px] hover:bg-infyn-surface/10 cursor-pointer"
+                  className="w-full py-2 rounded-xl bg-infyn-surface-soft text-infyn-secondary font-semibold text-[12px] hover:bg-infyn-surface-soft cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -603,10 +604,10 @@ export function PartnerProfileSheet({ isOpen, partnerId, matchId, initialData, o
             {safetyAction === 'reported' && (
               <div className="mt-4 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center animate-scale-up">
                 <p className="text-[15px] font-bold text-emerald-400 mb-1">Report Submitted</p>
-                <p className="text-[12px] text-white/70 mb-3">Thank you for helping keep Infyn safe.</p>
+                <p className="text-[12px] text-infyn-secondary mb-3">Thank you for helping keep Infyn safe.</p>
                 <button
                   onClick={() => setSafetyAction('none')}
-                  className="px-4 py-1.5 rounded-xl bg-infyn-surface/10 text-white text-[12px] font-bold hover:bg-infyn-surface/20 cursor-pointer"
+                  className="px-4 py-1.5 rounded-xl bg-infyn-surface-soft text-infyn-ink text-[12px] font-bold hover:bg-infyn-blush cursor-pointer"
                 >
                   Done
                 </button>
