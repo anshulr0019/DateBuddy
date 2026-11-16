@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { hapticLight, hapticMedium, hapticSuccess } from '../lib/haptics';
+import { Ic } from '../components/icons';
 
 /* ─────────────────────────────────────────────────
    Plan definitions (must match /api/premium/create-order)
@@ -14,7 +15,7 @@ const PLANS = [
     price: 999,
     priceDisplay: '₹999',
     perDay: '₹33/day',
-    save: 'Save 34%',
+    save: 'Save 32%',
     popular: true,
     durationDays: 30,
     badge: 'Best Value',
@@ -25,7 +26,7 @@ const PLANS = [
     price: 299,
     priceDisplay: '₹299',
     perDay: '₹43/day',
-    save: 'Save 14%',
+    save: 'Save 13%',
     popular: false,
     durationDays: 7,
     badge: '',
@@ -45,43 +46,11 @@ const PLANS = [
 
 type PlanId = (typeof PLANS)[number]['id'];
 
-const FEATURES = [
-  { icon: '❤️', label: 'Daily Likes',        free: '20/day',  gold: 'Unlimited' },
-  { icon: '⭐', label: 'Super Likes',         free: '1/day',   gold: '5/day' },
-  { icon: '👀', label: 'See Who Liked You',   free: '—',       gold: 'Unlimited' },
-  { icon: '↩️', label: 'Rewinds',            free: '1/day',   gold: 'Unlimited' },
-  { icon: '🚀', label: 'Profile Boost',      free: '—',       gold: 'Included' },
-  { icon: '🎛️', label: 'Advanced Filters',   free: '—',       gold: 'Included' },
-  { icon: '✓',  label: 'Read Receipts',      free: '—',       gold: 'Included' },
-  { icon: '🚫', label: 'Ad-Free',            free: '—',       gold: 'Included' },
+/* Only benefits the server actually gates on Gold (see /api/likes). */
+const BENEFITS = [
+  { title: 'See who liked you', body: 'Everyone who has already liked your profile, with their photos.' },
+  { title: 'Match in one tap', body: 'Like them back from the list and you’ll match straight away.' },
 ];
-
-/* ─────────────────────────────────────────────────
-   Scoped animations
-───────────────────────────────────────────────── */
-const STYLES = `
-  @keyframes pm-rise {
-    0%   { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  .pm-rise { opacity: 0; animation: pm-rise 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
-
-  @keyframes pm-sheen {
-    0%,80%  { transform: translateX(-180%) skewX(-18deg); }
-    22%     { transform: translateX(280%)  skewX(-18deg); }
-  }
-  .pm-sheen { animation: pm-sheen 4.5s ease-in-out 1s infinite; }
-
-  @keyframes pm-glow-pulse {
-    0%, 100% { opacity: 0.55; }
-    50%       { opacity: 0.85; }
-  }
-  .pm-glow { animation: pm-glow-pulse 3s ease-in-out infinite; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .pm-rise, .pm-sheen, .pm-glow { animation: none !important; opacity: 1 !important; transform: none !important; }
-  }
-`;
 
 type SubStatus = {
   tier: string;
@@ -147,11 +116,12 @@ export default function PremiumPage() {
         if (orderRes.status === 503) {
           setNotice({
             type: 'info',
-            text: 'Payments are not configured yet. Add your Razorpay keys to .env.local to go live.',
+            text: 'Payments aren’t available yet. You haven’t been charged.',
           });
         } else {
           setNotice({ type: 'error', text: orderData.message || 'Could not start payment.' });
         }
+        setPaying(false);
         return;
       }
 
@@ -159,6 +129,7 @@ export default function PremiumPage() {
       const loaded = await loadRazorpayScript();
       if (!loaded || !window.Razorpay) {
         setNotice({ type: 'error', text: 'Could not load payment gateway. Check your connection.' });
+        setPaying(false);
         return;
       }
 
@@ -171,7 +142,7 @@ export default function PremiumPage() {
         description: `Gold ${activePlan.label} Plan`,
         order_id:    orderData.orderId,
         prefill:     { name: '', email: '', contact: '' },
-        theme:       { color: '#FF6B9D' },
+        theme:       { color: '#9E1B41' },
         modal: {
           ondismiss: () => { setPaying(false); },
         },
@@ -196,7 +167,7 @@ export default function PremiumPage() {
             if (verifyData.success) {
               hapticSuccess();
               setSub({ tier: selected, isActive: true, expiresAt: verifyData.expiresAt, daysLeft: activePlan.durationDays });
-              setNotice({ type: 'success', text: `🎉 Gold activated! Enjoy ${activePlan.durationDays === 1 ? 'today' : `${activePlan.durationDays} days`} of unlimited access.` });
+              setNotice({ type: 'success', text: `Gold is active for ${activePlan.durationDays === 1 ? 'today' : `the next ${activePlan.durationDays} days`}.` });
             } else {
               setNotice({ type: 'error', text: verifyData.message || 'Payment verification failed. Contact support.' });
             }
@@ -217,218 +188,114 @@ export default function PremiumPage() {
 
   const isGold = sub?.isActive === true;
 
-  return (
-    <div className="h-dvh w-full bg-infyn-dark flex justify-center overflow-hidden font-sans">
-      <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <div className="relative h-full w-full max-w-[440px] flex flex-col overflow-hidden">
+  const expiry = sub?.expiresAt ? new Date(sub.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }) : null;
 
-        {/* Deep background gradients */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-          <div className="pm-glow absolute -top-24 -left-24 h-80 w-80 rounded-full bg-infyn-rose/25 blur-[80px]" />
-          <div className="pm-glow absolute -top-16 -right-16 h-72 w-72 rounded-full bg-infyn-rose/22 blur-[80px]" style={{ animationDelay: '1.5s' }} />
-          <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-infyn-blush/10 blur-[60px]" />
+  return (
+    <div className="h-dvh w-full bg-infyn-paper flex justify-center overflow-hidden font-sans">
+      <div className="relative h-full w-full max-w-[440px] flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 px-5 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-infyn-ink active:bg-infyn-surface-soft transition-colors cursor-pointer"
+          >
+            <Ic.X />
+          </button>
+          {isGold && (
+            <span className="rounded-full bg-infyn-blush px-3 py-1 text-[13px] font-semibold text-infyn-rose">
+              Active · {sub.daysLeft} {sub.daysLeft === 1 ? 'day' : 'days'} left
+            </span>
+          )}
         </div>
 
-        {/* HEADER */}
-        <div className="relative flex-shrink-0 z-10 px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-5">
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => router.back()}
-              aria-label="Close"
-              className="font-system flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface/10 text-white/70 active:scale-90 transition-all cursor-pointer backdrop-blur-md"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-            {isGold && (
-              <div className="flex items-center gap-1.5 rounded-full bg-infyn-surface/10 border border-[#FFD700]/30 px-3 py-1 backdrop-blur-md">
-                <span className="text-[#FFD700] text-[11px]">★</span>
-                <span className="text-[11px] font-bold text-white/80">Gold Active · {sub.daysLeft}d left</span>
-              </div>
-            )}
-          </div>
-
-          {/* Brand mark */}
-          <div className="text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 mb-4"
-              style={{ background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 50%, var(--infyn-rose) 100%)' }}>
-              <span className="text-[13px] font-black uppercase tracking-[0.1em] text-white">✦ Infyn Gold</span>
-            </div>
-            <h1 className="text-[30px] font-normal tracking-tight text-white leading-[1.15] mb-2 font-display">
-              {isGold ? 'You\'re a Gold Member ✨' : 'Unlock Unlimited\nConnections'}
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-5 pb-4">
+          <div className="animate-soft-arrive pt-2">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-infyn-blush text-infyn-rose" aria-hidden>
+              <Ic.Sparkle className="w-6 h-6" />
+            </span>
+            <p className="mt-5 text-[12px] font-semibold uppercase tracking-[0.12em] text-infyn-rose">Infyn Gold</p>
+            <h1 className="mt-1 font-display text-[34px] leading-[1.1] tracking-tight text-infyn-ink">
+              {isGold ? 'You’re on Gold' : 'See who already likes you'}
             </h1>
-            <p className="text-[14px] text-white/50">
-              {isGold
-                ? `Your Gold plan is active until ${sub.expiresAt ? new Date(sub.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }) : '—'}`
-                : 'More matches. More conversations. Cancel anytime.'}
+            <p className="mt-2 text-[16px] leading-relaxed text-infyn-secondary">
+              {isGold && expiry ? `Your Gold access lasts until ${expiry}.` : 'Skip the guessing and start with people who are already interested.'}
             </p>
           </div>
-        </div>
 
-        {/* SCROLLABLE BODY */}
-        <div className="flex-1 min-h-0 z-10 overflow-y-auto scrollbar-none px-5 pb-4 space-y-4">
-
-          {/* Active Gold banner */}
-          {isGold && !loadingStatus && (
-            <div className="pm-rise rounded-[22px] border border-[#FFD700]/30 bg-gradient-to-br from-[#FFD700]/10 to-infyn-rose/10 p-4 flex items-center gap-3.5 backdrop-blur-md">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFD700] to-infyn-rose shadow-[0_4px_16px_-6px_rgba(32,26,22,0.16)] flex-shrink-0 text-xl">
-                ✦
-              </div>
-              <div>
-                <p className="text-[14.5px] font-extrabold text-white">Gold Membership Active</p>
-                <p className="text-[12.5px] text-white/55 mt-0.5">
-                  {sub.daysLeft} {sub.daysLeft === 1 ? 'day' : 'days'} remaining · All features unlocked
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Plan picker — hidden while already active (can still upgrade) */}
-          {!loadingStatus && (
-            <div className="pm-rise" style={{ animationDelay: '50ms' }}>
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/35 mb-2.5 px-0.5">
-                {isGold ? 'Renew or Upgrade' : 'Choose your plan'}
-              </p>
-              <div className="flex gap-2.5">
-                {PLANS.map(plan => (
-                  <button
-                    key={plan.id}
-                    onClick={() => { hapticLight(); setSelected(plan.id); }}
-                    className={`font-system relative flex-1 rounded-[20px] p-3.5 text-left transition-all duration-200 active:scale-[0.96] cursor-pointer border ${
-                      selected === plan.id
-                        ? 'bg-gradient-to-br from-infyn-rose/20 to-infyn-rose/20 border-infyn-rose/60 shadow-[0_0_24px_-8px_rgba(32,26,22,0.16)]'
-                        : 'bg-infyn-surface/[0.06] border-white/10'
-                    }`}
-                  >
-                    {plan.popular && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose px-2.5 py-0.5 text-[9px] font-black text-white uppercase tracking-wider shadow-md">
-                        Most Popular
-                      </span>
-                    )}
-                    {plan.badge && !plan.popular && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-infyn-surface/15 border border-white/20 px-2 py-0.5 text-[9px] font-bold text-white/70 uppercase tracking-wider">
-                        {plan.badge}
-                      </span>
-                    )}
-                    <p className="text-[12.5px] font-bold text-white/70">{plan.label}</p>
-                    <p className="text-[22px] font-black text-white leading-tight mt-0.5">{plan.priceDisplay}</p>
-                    <p className="text-[10.5px] text-white/35 font-medium mt-0.5">{plan.perDay}</p>
-                    {plan.save && (
-                      <span className="mt-1.5 inline-block rounded-full bg-emerald-500/15 border border-emerald-500/25 px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-400">
-                        {plan.save}
-                      </span>
-                    )}
-                    {selected === plan.id && (
-                      <div className="absolute top-2.5 right-2.5 h-4 w-4 rounded-full bg-gradient-to-br from-infyn-rose to-infyn-rose flex items-center justify-center shadow-sm">
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Features comparison */}
-          <div
-            className="pm-rise rounded-[22px] border border-white/[0.08] bg-infyn-surface/[0.04] backdrop-blur-md overflow-hidden"
-            style={{ animationDelay: '100ms' }}
-          >
-            <div className="grid grid-cols-[1fr_60px_80px] items-center px-4 py-2.5 border-b border-white/[0.06] bg-infyn-surface/[0.03]">
-              <span className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/30">Feature</span>
-              <span className="text-center text-[10.5px] font-bold text-white/30">Free</span>
-              <span className="text-center text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-infyn-rose to-infyn-rose bg-clip-text text-transparent">Gold ✦</span>
-            </div>
-            {FEATURES.map((f, i) => (
-              <div
-                key={f.label}
-                className={`grid grid-cols-[1fr_60px_80px] items-center px-4 py-3 ${i < FEATURES.length - 1 ? 'border-b border-white/[0.05]' : ''}`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[15px] leading-none">{f.icon}</span>
-                  <span className="text-[13px] font-medium text-white/65">{f.label}</span>
-                </div>
-                <span className="text-center text-[12px] font-medium text-white/25">
-                  {f.free !== '—' ? f.free : <span className="text-rose-500/70 font-bold text-[10px]">✕</span>}
+          <ul className="mt-7 space-y-4">
+            {BENEFITS.map(b => (
+              <li key={b.title} className="flex gap-3">
+                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-infyn-rose text-[#fff8f0]" aria-hidden><Ic.Check /></span>
+                <span>
+                  <span className="block text-[16px] font-semibold text-infyn-ink">{b.title}</span>
+                  <span className="block text-[14px] leading-relaxed text-infyn-secondary">{b.body}</span>
                 </span>
-                <span className="text-center text-[12px] font-bold text-infyn-rose-light">{f.gold}</span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
 
-          {/* Trust badges */}
-          <div
-            className="pm-rise rounded-[22px] border border-white/[0.06] bg-infyn-surface/[0.03] p-4 flex items-center justify-around"
-            style={{ animationDelay: '150ms' }}
-          >
-            {[
-              { icon: '🔒', text: 'Secure\nPayment' },
-              { icon: '↩️', text: 'Cancel\nAnytime' },
-              { icon: '💳', text: 'UPI &\nCards' },
-              { icon: '🔐', text: '256-bit\nEncrypted' },
-            ].map(b => (
-              <div key={b.text} className="flex flex-col items-center gap-1">
-                <span className="text-xl leading-none">{b.icon}</span>
-                <span className="text-[10px] font-semibold text-white/35 text-center leading-tight whitespace-pre">{b.text}</span>
+          {!loadingStatus && (
+            <div className="mt-8">
+              <p className="mb-3 text-[13px] font-semibold text-infyn-secondary">{isGold ? 'Extend your access' : 'Choose how long'}</p>
+              <div className="space-y-2.5" role="radiogroup" aria-label="Plan">
+                {PLANS.map(plan => {
+                  const on = selected === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => { hapticLight(); setSelected(plan.id); }}
+                      className={`w-full min-h-[68px] flex items-center gap-3 rounded-2xl border px-4 text-left transition-colors cursor-pointer ${
+                        on ? 'border-infyn-rose bg-infyn-surface shadow-[0_0_0_1px_var(--infyn-rose)]' : 'border-infyn-border bg-infyn-surface'
+                      }`}
+                    >
+                      <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-infyn-rose' : 'border-infyn-border'}`} aria-hidden>
+                        {on && <span className="h-2.5 w-2.5 rounded-full bg-infyn-rose" />}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-center gap-2">
+                          <span className="text-[16px] font-semibold text-infyn-ink">{plan.label}</span>
+                          {plan.popular && <span className="rounded-full bg-infyn-blush px-2 py-0.5 text-[12px] font-semibold text-infyn-rose">Best value</span>}
+                        </span>
+                        <span className="block text-[13px] text-infyn-secondary">{plan.perDay}{plan.save ? ` · ${plan.save}` : ''}</span>
+                      </span>
+                      <span className="text-[20px] font-semibold text-infyn-ink tabular-nums">{plan.priceDisplay}</span>
+                    </button>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          <p className="text-center text-[11px] text-white/20 leading-relaxed px-4">
-            Auto-renews until cancelled · Billed in INR · Secure Razorpay checkout
+          <p className="mt-6 text-[13px] leading-relaxed text-infyn-secondary">
+            One payment for the period you choose. It doesn’t renew automatically. Secure checkout by Razorpay with UPI and cards.
           </p>
         </div>
 
-        {/* CTA FOOTER */}
-        <div className="flex-shrink-0 z-10 px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-gradient-to-t from-infyn-dark via-infyn-dark/95 to-transparent border-t border-white/[0.06]">
+        <div className="flex-shrink-0 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-infyn-border bg-infyn-paper">
           {notice && (
-            <div
+            <p
               role="status"
-              className={`mb-3 rounded-2xl px-4 py-3 text-center text-[13px] font-semibold leading-snug ${
-                notice.type === 'success'
-                  ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-                  : notice.type === 'error'
-                  ? 'border border-rose-500/30 bg-rose-500/15 text-rose-300'
-                  : 'border border-amber-500/30 bg-amber-500/10 text-amber-300'
-              }`}
+              className={`mb-3 text-center text-[14px] leading-snug ${notice.type === 'error' ? 'text-infyn-rose' : 'text-infyn-ink'}`}
             >
               {notice.text}
-            </div>
+            </p>
           )}
-
-          {!isGold || notice?.type === 'success' ? (
-            <button
-              onClick={handleSubscribe}
-              disabled={paying || loadingStatus}
-              className="group relative w-full h-[58px] rounded-2xl overflow-hidden text-white text-[15px] font-bold shadow-[0_12px_36px_-10px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed font-system"
-              style={{ background: 'linear-gradient(135deg, var(--infyn-rose) 0%, var(--infyn-rose) 50%, var(--infyn-rose) 100%)' }}
-            >
-              <div aria-hidden className="pm-sheen pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-              <span className="relative z-10 flex items-center gap-2">
-                {paying ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <path d="M21 12a9 9 0 1 1-6.2-8.56" />
-                    </svg>
-                    Opening Checkout…
-                  </>
-                ) : (
-                  <>
-                    <span>✦</span>
-                    Get Gold · {activePlan.priceDisplay}
-                  </>
-                )}
-              </span>
-            </button>
-          ) : (
-            <div className="w-full h-[58px] rounded-2xl flex items-center justify-center gap-2 border border-[#FFD700]/30 bg-[#FFD700]/10">
-              <span className="text-[#FFD700] text-lg">✦</span>
-              <span className="text-[15px] font-bold text-[#FFD700]">Gold Active · {sub?.daysLeft}d left</span>
-            </div>
-          )}
+          <button
+            onClick={handleSubscribe}
+            disabled={paying || loadingStatus}
+            className="w-full min-h-[56px] rounded-full bg-infyn-rose text-[#fff8f0] text-[16px] font-semibold shadow-[0_1px_2px_rgba(158,27,65,0.15),0_10px_22px_-10px_rgba(158,27,65,0.6)] active:scale-[0.985] transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {paying ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+                Opening checkout…
+              </>
+            ) : (
+              <>{isGold ? 'Extend' : 'Get Gold'} · {activePlan.priceDisplay}</>
+            )}
+          </button>
         </div>
       </div>
     </div>

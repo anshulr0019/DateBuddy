@@ -607,15 +607,13 @@ export default function DiscoverPage() {
                 Keep the conversation going with Gold
               </h2>
               <p className="text-[15px] text-[#665849] mb-6 leading-relaxed">
-                {paywallMessage || "You've used all your free likes for today. Gold gives you unlimited likes every day."}
+                {paywallMessage || "You've reached today's limit. Come back tomorrow, or see who already likes you with Gold."}
               </p>
 
               <ul className="w-full space-y-3.5 mb-7">
                 {[
-                  { icon: <Ic.Heart filled />, text: 'Unlimited likes every day' },
                   { icon: <Ic.User />, text: 'See who already liked you' },
-                  { icon: <Ic.Star className="w-[18px] h-[18px]" />, text: '5 Super Likes per day' },
-                  { icon: <Ic.Sparkle className="w-[18px] h-[18px]" />, text: 'Profile boost once a week' },
+                  { icon: <Ic.Heart filled />, text: 'Like them back to match in one tap' },
                 ].map(({ icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-left">
                     <span className="text-[#9E1B41] w-5 flex justify-center [&_svg]:w-[18px] [&_svg]:h-[18px]" aria-hidden="true">{icon}</span>
