@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { users, photos, interests, userInterests, matches, blocks, prompts, userPromptAnswers } from '@/db/schema';
 import { eq, and, or } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
+import { plainInterest } from '@/lib/interest-label';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,7 @@ export async function GET(
         snapchatHandle: user.snapchatHandle,
         lastActiveAt: user.lastActiveAt,
         photos: userPhotos.map((p) => p.url),
-        interests: tags.map((t) => t.name),
+        interests: [...new Set(tags.map((t) => plainInterest(t.name)))],
         prompts: userPrompts,
       },
     });

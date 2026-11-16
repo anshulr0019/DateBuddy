@@ -12,6 +12,7 @@ import {
 } from '@/db/schema';
 import { eq, ne, notInArray, inArray, and, gt, asc, gte, lte } from 'drizzle-orm';
 import { getAuthSession } from '@/lib/auth';
+import { plainInterest } from '@/lib/interest-label';
 
 export const dynamic = 'force-dynamic';
 
@@ -184,7 +185,8 @@ export async function GET(request: NextRequest) {
     const interestsByUser = new Map<number, string[]>();
     for (const row of allInterests) {
       const list = interestsByUser.get(row.userId) ?? [];
-      list.push(row.name);
+      const name = plainInterest(row.name);
+      if (!list.includes(name)) list.push(name);
       interestsByUser.set(row.userId, list);
     }
 

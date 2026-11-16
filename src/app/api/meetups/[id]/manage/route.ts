@@ -63,7 +63,7 @@ export async function POST(
       await db.insert(notifications).values({
         userId: targetId,
         type: 'event_kick',
-        title: 'Removed from Squad ⚠️',
+        title: 'Removed from session',
         body: `You were removed from "${meetup.title}" by the host.`,
         metadata: { meetupId },
       });
@@ -80,7 +80,7 @@ export async function POST(
       await db.insert(notifications).values({
         userId: targetId,
         type: 'event_approved',
-        title: 'Request Approved! 🎉',
+        title: 'Request approved',
         body: `The host accepted your request to join "${meetup.title}".`,
         metadata: { meetupId },
       });

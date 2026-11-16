@@ -53,13 +53,6 @@ let cachedMeetups: Meetup[] | null = null;
 let cachedRandomChat: RandomChatCard | null = null;
 
 const CATEGORIES = ['Gym', 'Badminton', 'Football', 'Running', 'Yoga'] as const;
-const CATEGORY_EMOJI: Record<string, string> = {
-  Gym: '🏋️ ',
-  Badminton: '🏸 ',
-  Football: '⚽ ',
-  Running: '🏃 ',
-  Yoga: '🧘 ',
-};
 
 function formatWhen(iso: string): string {
   const d = new Date(iso);
@@ -195,7 +188,7 @@ export default function HomePage() {
       const data = await res.json();
       if (!data.success) {
         addNotification({
-          title: res.status === 409 ? 'Session Full 🔒' : 'Could not update RSVP',
+          title: res.status === 409 ? 'Session full' : 'Could not update RSVP',
           message: data.message ?? 'Please try again.',
           type: 'system',
           actionUrl: '/home',
@@ -205,7 +198,7 @@ export default function HomePage() {
       await loadMeetups();
       setSelectedDetail(null);
       addNotification({
-        title: data.action === 'requested' ? 'Request Sent ⏳' : 'Session Joined! 🎉',
+        title: data.action === 'requested' ? 'Request sent' : 'You’re in',
         message: data.action === 'requested'
           ? `Your request to join '${m.title}' was sent to ${m.hostName} for approval.`
           : `You joined '${m.title}' hosted by ${m.hostName}.`,
@@ -234,7 +227,7 @@ export default function HomePage() {
       setSelectedDetail(null);
       if (m) {
         addNotification({
-          title: m.userJoinStatus === 'pending' ? 'Request Cancelled 🚫' : 'Left Session 👟',
+          title: m.userJoinStatus === 'pending' ? 'Request cancelled' : 'You left the session',
           message: m.userJoinStatus === 'pending'
             ? `Your join request for '${m.title}' was cancelled.`
             : `You left '${m.title}'. Your spot has been re-opened.`,
@@ -285,7 +278,7 @@ export default function HomePage() {
       setHostVenue('');
       setHostDate('');
       addNotification({
-        title: 'Session Published! 🚀',
+        title: 'Session published',
         message: `'${data.meetup.title}' is live. Activity partners can now join!`,
         type: 'system',
         actionUrl: '/home',
@@ -616,168 +609,132 @@ export default function HomePage() {
         )}
       </BottomSheet>
 
-      {/* HOST MODAL */}
-      {showHostModal && (
-        <div role="dialog" aria-modal="true" data-modal="true" className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
-          <div
-            onClick={() => setShowHostModal(false)}
-            className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
-          />
-          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[32px] sm:rounded-[28px] max-h-[88dvh] flex flex-col shadow-2xl animate-sheet-up">
-            {/* handle */}
-            <div className="pt-3 pb-0 flex-shrink-0 flex justify-center">
-              <div className="h-1 w-10 bg-infyn-surface-soft rounded-full" />
-            </div>
-            {/* header */}
-            <div className="flex items-center justify-between px-5 pt-3 pb-3 border-b border-infyn-border flex-shrink-0">
-              <div>
-                <h3 className="text-[17px] font-extrabold text-infyn-ink">Host a Squad Session</h3>
-                <p className="text-[12px] text-infyn-ink/50">Find gym partners &amp; activity teammates</p>
-              </div>
-              <button
-                onClick={() => setShowHostModal(false)}
-                className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* scrollable fields */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 scrollbar-none text-[13px] min-h-0">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Activity Category</label>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setHostCategory(cat)}
-                      className={`font-system px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
-                        hostCategory === cat
-                          ? 'bg-infyn-rose text-white shadow-2xs'
-                          : 'bg-infyn-surface-soft text-infyn-secondary hover:bg-infyn-surface-soft'
-                      }`}
-                    >
-                      {CATEGORY_EMOJI[cat]}{cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Session Title</label>
-                <input
-                  type="text"
-                  value={hostTitle}
-                  onChange={(e) => setHostTitle(e.target.value)}
-                  placeholder="e.g. Leg Day & Heavy Squats 🏋️"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px]"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted">Venue / Location</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowVenuePicker(true)}
-                    className="font-system text-[11px] font-bold text-infyn-rose hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    📍 Pick {hostCategory} venue →
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={hostVenue}
-                    onFocus={() => setShowVenuePicker(true)}
-                    onChange={(e) => setHostVenue(e.target.value)}
-                    placeholder={`Tap to select ${hostCategory} venue or area...`}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px] cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Date &amp; Time</label>
-                <input
-                  type="datetime-local"
-                  value={hostDate}
-                  onChange={(e) => setHostDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-infyn-surface-soft border border-infyn-border outline-none focus:border-infyn-rose focus:bg-infyn-surface text-[16px]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Partner Slots</label>
-                <div className="flex gap-2">
-                  {[2, 4, 6, 8, 10].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setHostSlots(num)}
-                      className={`font-system flex-1 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
-                        hostSlots === num ? 'bg-infyn-rose text-white shadow-2xs' : 'bg-infyn-surface-soft text-infyn-secondary hover:bg-infyn-surface-soft'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-infyn-muted mb-1">Host Admin Control</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setHostRequireApproval(false)}
-                    className={`font-system py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
-                      !hostRequireApproval
-                        ? 'bg-infyn-rose text-white border-transparent shadow-2xs'
-                        : 'bg-infyn-surface-soft border-infyn-border text-infyn-secondary hover:bg-infyn-surface-soft'
-                    }`}
-                  >
-                    ⚡ Instant Join
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHostRequireApproval(true)}
-                    className={`font-system py-2 px-3 rounded-xl text-[12px] font-bold transition-all cursor-pointer border ${
-                      hostRequireApproval
-                        ? 'bg-infyn-rose text-white border-transparent shadow-2xs'
-                        : 'bg-infyn-surface-soft border-infyn-border text-infyn-secondary hover:bg-infyn-surface-soft'
-                    }`}
-                  >
-                    🔒 Require Approval
-                  </button>
-                </div>
-                <p className="text-[11px] text-infyn-muted mt-1">
-                  {hostRequireApproval
-                    ? 'Interested users must be approved by you before joining.'
-                    : 'Anyone can join your squad directly until slots fill up.'}
-                </p>
-              </div>
-            </div>
-
-            {/* sticky footer — elevated above floating nav bar */}
-            <div className="flex-shrink-0 px-5 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] border-t border-infyn-border bg-infyn-surface rounded-b-[32px] sm:rounded-b-[28px] space-y-2">
-              {hostError && (
-                <p className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[12px] font-semibold text-red-600">
-                  {hostError}
-                </p>
-              )}
-              <button
-                onClick={publishSquad}
-                disabled={publishing}
-                className="w-full py-3.5 rounded-2xl bg-infyn-rose text-white font-extrabold text-[15px] shadow-lg hover:bg-[#E11D48] active:scale-95 transition-all cursor-pointer disabled:opacity-60 font-system"
-              >
-                {publishing ? 'Publishing…' : 'Publish Squad Session 🚀'}
-              </button>
+      {/* HOST SHEET */}
+      <BottomSheet
+        open={showHostModal}
+        onClose={() => setShowHostModal(false)}
+        title="Host a session"
+        footer={
+          <>
+            {hostError && (
+              <p role="alert" className="mb-3 text-[14px] text-infyn-rose">{hostError}</p>
+            )}
+            <button
+              onClick={publishSquad}
+              disabled={publishing}
+              className="w-full min-h-[54px] rounded-full bg-infyn-rose text-[#fff8f0] text-[16px] font-semibold active:scale-[0.985] transition-transform cursor-pointer disabled:opacity-60"
+            >
+              {publishing ? 'Publishing…' : 'Publish session'}
+            </button>
+          </>
+        }
+      >
+        <p className="-mt-1 mb-5 text-[15px] text-infyn-secondary">Find workout partners and teammates nearby.</p>
+        <div className="space-y-6">
+          <div>
+            <p className="block text-[13px] font-semibold text-infyn-secondary mb-2">Activity</p>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Activity">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  role="radio"
+                  aria-checked={hostCategory === cat}
+                  onClick={() => setHostCategory(cat)}
+                  className={`min-h-[44px] px-4 rounded-full text-[14px] transition-colors cursor-pointer ${hostCategory === cat ? 'bg-infyn-ink text-infyn-paper font-semibold' : 'bg-infyn-surface border border-infyn-border text-infyn-secondary'}`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
+
+          <div>
+            <label htmlFor="host-title" className="block text-[13px] font-semibold text-infyn-secondary mb-2">Title</label>
+            <input
+              id="host-title"
+              type="text"
+              value={hostTitle}
+              onChange={(e) => setHostTitle(e.target.value)}
+              placeholder="e.g. Leg day at Gold's Gym"
+              className="w-full min-h-[48px] px-4 rounded-2xl bg-infyn-surface border border-infyn-border outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)] text-[16px] text-infyn-ink placeholder:text-infyn-muted/70"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="host-venue" className="block text-[13px] font-semibold text-infyn-secondary mb-2">Venue</label>
+            <button
+              id="host-venue"
+              type="button"
+              onClick={() => setShowVenuePicker(true)}
+              className="w-full min-h-[48px] px-4 rounded-2xl bg-infyn-surface border border-infyn-border outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)] text-[16px] text-infyn-ink placeholder:text-infyn-muted/70 flex items-center gap-2 text-left cursor-pointer"
+            >
+              <span className="text-infyn-rose shrink-0" aria-hidden><Ic.MapPin className="w-[18px] h-[18px]" /></span>
+              <span className={`flex-1 truncate ${hostVenue ? 'text-infyn-ink' : 'text-infyn-muted/70'}`}>
+                {hostVenue || `Choose a ${hostCategory.toLowerCase()} venue or area`}
+              </span>
+              <span className="shrink-0 text-infyn-muted -rotate-90" aria-hidden><Ic.ChevDown /></span>
+            </button>
+          </div>
+
+          <div>
+            <label htmlFor="host-date" className="block text-[13px] font-semibold text-infyn-secondary mb-2">Date and time</label>
+            <input
+              id="host-date"
+              type="datetime-local"
+              value={hostDate}
+              onChange={(e) => setHostDate(e.target.value)}
+              className="w-full min-h-[48px] px-4 rounded-2xl bg-infyn-surface border border-infyn-border outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)] text-[16px] text-infyn-ink placeholder:text-infyn-muted/70"
+            />
+          </div>
+
+          <div>
+            <p className="block text-[13px] font-semibold text-infyn-secondary mb-2">Spots</p>
+            <div className="flex gap-2" role="radiogroup" aria-label="Spots">
+              {[2, 4, 6, 8, 10].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  role="radio"
+                  aria-checked={hostSlots === num}
+                  onClick={() => setHostSlots(num)}
+                  className={`flex-1 min-h-[44px] rounded-full text-[15px] tabular-nums transition-colors cursor-pointer ${hostSlots === num ? 'bg-infyn-ink text-infyn-paper font-semibold' : 'bg-infyn-surface border border-infyn-border text-infyn-secondary'}`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="block text-[13px] font-semibold text-infyn-secondary mb-2">Who can join</p>
+            <div className="flex p-1 rounded-2xl bg-infyn-surface-soft" role="radiogroup" aria-label="Who can join">
+              {[
+                { value: false, label: 'Anyone' },
+                { value: true, label: 'I approve' },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  role="radio"
+                  aria-checked={hostRequireApproval === opt.value}
+                  onClick={() => setHostRequireApproval(opt.value)}
+                  className={`flex-1 min-h-[44px] rounded-xl text-[14px] transition-colors cursor-pointer ${
+                    hostRequireApproval === opt.value ? 'bg-infyn-surface text-infyn-ink font-semibold shadow-[0_1px_3px_rgba(32,26,22,0.1)]' : 'text-infyn-secondary'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[13px] text-infyn-secondary">
+              {hostRequireApproval
+                ? 'People ask to join and you approve each one.'
+                : 'Anyone can join until the spots fill up.'}
+            </p>
+          </div>
         </div>
-      )}
+      </BottomSheet>
 
       {/* DETAIL SHEET */}
       {selectedDetail && (
@@ -880,7 +837,7 @@ export default function HomePage() {
                     : selectedDetail.userJoinStatus === 'kicked'
                     ? 'Removed by Host ⚠️'
                     : selectedDetail.attendeesCount >= (selectedDetail.maxAttendees ?? 10)
-                    ? 'Session Full 🔒'
+                    ? 'Session full'
                     : selectedDetail.requireApproval
                     ? 'Request to Join ✋'
                     : 'Join Session 🚀'}

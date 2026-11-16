@@ -13,6 +13,7 @@ import {
   randomChatMessages,
   randomChatReports,
 } from '@/db/schema';
+import { plainInterest } from './interest-label';
 import {
   and,
   asc,
@@ -374,7 +375,7 @@ async function interestsFor(userId: number): Promise<string[]> {
     .from(userInterests)
     .innerJoin(interests, eq(userInterests.interestId, interests.id))
     .where(eq(userInterests.userId, userId));
-  return rows.map((r) => r.name);
+  return [...new Set(rows.map((r) => plainInterest(r.name)))];
 }
 
 export async function getSessionState(userId: number): Promise<SessionState> {
@@ -623,14 +624,14 @@ export async function requestConnection(sessionId: number, userId: number, want:
       {
         userId,
         type: 'match',
-        title: "It's a Match! 🎉",
+        title: "It's a match",
         body: 'You and a stranger became a connection.',
         metadata: { matchId },
       },
       {
         userId: partnerId,
         type: 'match',
-        title: "It's a Match! 🎉",
+        title: "It's a match",
         body: 'Someone you met anonymously wants to connect.',
         metadata: { matchId },
       },

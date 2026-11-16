@@ -1,7 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import discoverStyles from '../discover/discover.module.css';
+import { BottomSheet } from '../components/BottomSheet';
 import React, { createContext, useContext, useState } from 'react';
 
 export interface FilterState {
@@ -22,10 +21,6 @@ const DEFAULT_FILTERS: FilterState = {
   interests: [],
 };
 
-const AVAILABLE_INTERESTS = [
-  'Design', 'Coffee', 'Travel', 'Music', 'Fitness',
-  'Yoga', 'Books', 'Films', 'Art', 'Gaming', 'Cooking', 'Hiking'
-];
 
 interface FilterContextType {
   isOpen: boolean;
@@ -40,10 +35,8 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
-  const editorial = usePathname() === '/discover';
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [animateIn, setAnimateIn] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // Temporary local state for editing inside drawer
@@ -58,20 +51,12 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const openFilters = () => {
     setLocalFilters(filters);
     setIsMounted(true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setAnimateIn(true);
-        setIsOpen(true);
-      });
-    });
+    setIsOpen(true);
   };
 
   const closeFilters = () => {
-    setAnimateIn(false);
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsMounted(false);
-    }, 300);
+    setIsMounted(false);
+    setIsOpen(false);
   };
 
   const handleApply = () => {
@@ -82,18 +67,6 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const resetFilters = () => {
     setLocalFilters(DEFAULT_FILTERS);
     setFilters(DEFAULT_FILTERS);
-  };
-
-  const toggleInterest = (interest: string) => {
-    setLocalFilters(prev => {
-      const exists = prev.interests.includes(interest);
-      return {
-        ...prev,
-        interests: exists
-          ? prev.interests.filter(i => i !== interest)
-          : [...prev.interests, interest],
-      };
-    });
   };
 
   return (
@@ -110,205 +83,72 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* ── FILTER DRAWER SHEET OVERLAY ── */}
-      {isMounted && (
-        <div className={`${editorial ? discoverStyles.filterTheme : ''} fixed inset-0 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 overflow-hidden pointer-events-auto`} role="dialog" aria-modal="true" aria-label="Discovery preferences">
-          {/* Backdrop */}
-          <div
-            onClick={closeFilters}
-            className={`absolute inset-0 bg-black/40 transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)] ${
-              animateIn ? 'backdrop-blur-md opacity-100' : 'backdrop-blur-none opacity-0'
-            }`}
-            style={{ willChange: 'backdrop-filter, opacity' }}
-          />
-
-          {/* Sliding Sheet Container */}
-          <div
-            className={`relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-[var(--infyn-paper,#FAFAF7)] rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-infyn-border/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] transition-all duration-350 cubic-bezier(0.32,1.25,0.32,1) ${
-              animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-full sm:translate-y-8 sm:scale-95 opacity-0'
-            }`}
-            style={{ willChange: 'transform, opacity' }}
-          >
-            {/* Drag Handle */}
-            <div className="pt-3 pb-1 flex justify-center">
-              <div className="h-1 w-10 rounded-full bg-[var(--infyn-ink,#1A1A2E)]/15" />
-            </div>
-
-            {/* Header */}
-            <div className="px-6 py-3 flex items-center justify-between border-b border-[var(--infyn-ink,#1A1A2E)]/[0.06]">
-              <h2 className="text-[20px] font-extrabold tracking-tight text-[var(--infyn-ink,#1A1A2E)]">
-                Discovery Preferences
-              </h2>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={resetFilters}
-                  className="text-[12px] font-semibold text-[var(--infyn-pink,#FF6B9D)] active:opacity-60 transition-opacity cursor-pointer"
-                >
-                  Reset
-                </button>
-                <button
-                  onClick={closeFilters}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--infyn-ink,#1A1A2E)]/5 text-[var(--infyn-ink,#1A1A2E)]/60 active:scale-95 transition-transform cursor-pointer"
-                  aria-label="Close filters"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Filter Options Form */}
-            <div className="flex-1 overflow-y-auto scrollbar-none p-6 space-y-6">
-              
-              {/* 1. Show Me */}
-              <div>
-                <label className="block text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)] mb-2.5">
-                  Show Me
-                </label>
-                <div className="grid grid-cols-3 gap-2 p-1 bg-[var(--infyn-ink,#1A1A2E)]/5 rounded-2xl">
-                  {(['Everyone', 'Women', 'Men'] as const).map((gender) => (
-                    <button
-                      key={gender}
-                      onClick={() => setLocalFilters(prev => ({ ...prev, lookingFor: gender }))}
-                      className={`py-2 text-[13px] font-semibold rounded-xl transition-all cursor-pointer ${
-                        localFilters.lookingFor === gender
-                          ? 'bg-infyn-surface text-[var(--infyn-ink,#1A1A2E)] shadow-sm'
-                          : 'text-[var(--infyn-ink,#1A1A2E)]/50 hover:text-[var(--infyn-ink,#1A1A2E)]'
-                      }`}
-                    >
-                      {gender}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. Maximum Distance */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)]">
-                    Maximum Distance
-                  </label>
-                  <span className="text-[13px] font-bold text-[var(--infyn-pink,#FF6B9D)]">
-                    {localFilters.maxDistance} km
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="2"
-                  max="100"
-                  value={localFilters.maxDistance}
-                  onChange={(e) => setLocalFilters(prev => ({ ...prev, maxDistance: Number(e.target.value) }))}
-                  className="w-full accent-[var(--infyn-pink,#FF6B9D)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
-                />
-                <div className="flex justify-between text-[11px] font-medium text-[var(--infyn-ink,#1A1A2E)]/40 mt-1.5">
-                  <span>2 km</span>
-                  <span>50 km</span>
-                  <span>100 km</span>
-                </div>
-              </div>
-
-              {/* 3. Age Range */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)]">
-                    Age Range
-                  </label>
-                  <span className="text-[13px] font-bold text-[var(--infyn-purple,#7B68EE)]">
-                    {localFilters.ageMin} – {localFilters.ageMax} yrs
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="18"
-                    max="50"
-                    value={localFilters.ageMin}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      if (val <= localFilters.ageMax) {
-                        setLocalFilters(prev => ({ ...prev, ageMin: val }));
-                      }
-                    }}
-                    className="w-full accent-[var(--infyn-purple,#7B68EE)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
-                  />
-                  <input
-                    type="range"
-                    min="18"
-                    max="60"
-                    value={localFilters.ageMax}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      if (val >= localFilters.ageMin) {
-                        setLocalFilters(prev => ({ ...prev, ageMax: val }));
-                      }
-                    }}
-                    className="w-full accent-[var(--infyn-purple,#7B68EE)] cursor-pointer h-2 bg-[var(--infyn-ink,#1A1A2E)]/10 rounded-lg appearance-none"
-                  />
-                </div>
-              </div>
-
-              {/* 4. Verified Profiles Only Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-infyn-surface border border-[var(--infyn-ink,#1A1A2E)]/[0.06] shadow-sm">
-                <div>
-                  <p className="text-[14px] font-bold text-[var(--infyn-ink,#1A1A2E)]">Verified Profiles Only</p>
-                  <p className="text-[12px] text-[var(--infyn-ink,#1A1A2E)]/50 mt-0.5">Only show photos with a blue checkmark badge</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLocalFilters(prev => ({ ...prev, verifiedOnly: !prev.verifiedOnly }))}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                    localFilters.verifiedOnly ? 'bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)]' : 'bg-[var(--infyn-ink,#1A1A2E)]/20'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-infyn-surface shadow ring-0 transition duration-200 ease-in-out ${
-                      localFilters.verifiedOnly ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* 5. Vibe & Interest Chips */}
-              <div>
-                <label className="block text-[13px] font-bold text-[var(--infyn-ink,#1A1A2E)] mb-2.5">
-                  Filter by Interest Vibe
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_INTERESTS.map((interest) => {
-                    const isSelected = localFilters.interests.includes(interest);
-                    return (
-                      <button
-                        key={interest}
-                        onClick={() => toggleInterest(interest)}
-                        className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-white shadow-sm scale-105'
-                            : 'bg-infyn-surface border border-[var(--infyn-ink,#1A1A2E)]/10 text-[var(--infyn-ink,#1A1A2E)]/60 hover:border-[var(--infyn-ink,#1A1A2E)]/25'
-                        }`}
-                      >
-                        {interest}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Bottom Apply CTA */}
-            <div className="p-4 border-t border-[var(--infyn-ink,#1A1A2E)]/[0.06] bg-infyn-surface">
-              <button
-                onClick={handleApply}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[var(--infyn-pink,#FF6B9D)] to-[var(--infyn-purple,#7B68EE)] text-[15px] font-bold text-white shadow-[0_8px_24px_-6px_rgba(32,26,22,0.16)] active:scale-[0.985] transition-all cursor-pointer"
-              >
-                Apply Preferences
-              </button>
-            </div>
+      <BottomSheet
+        open={isMounted}
+        onClose={closeFilters}
+        title="Discovery filters"
+        footer={
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setLocalFilters(prev => ({ ...prev, ageMin: DEFAULT_FILTERS.ageMin, ageMax: DEFAULT_FILTERS.ageMax, verifiedOnly: false }))}
+              className="min-h-[52px] px-5 text-[15px] font-semibold text-infyn-secondary cursor-pointer"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={handleApply}
+              className="flex-1 min-h-[52px] rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
+            >
+              Show profiles
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-[13px] font-semibold text-infyn-secondary">Age range</h3>
+            <span className="font-display text-[22px] text-infyn-ink tabular-nums" aria-live="polite">{localFilters.ageMin}–{localFilters.ageMax}</span>
+          </div>
+          <label className="block">
+            <span className="text-[13px] text-infyn-secondary">Youngest</span>
+            <input
+              type="range" min={18} max={60} value={localFilters.ageMin}
+              aria-label="Youngest age"
+              onChange={(e) => { const v = Number(e.target.value); setLocalFilters(prev => ({ ...prev, ageMin: Math.min(v, prev.ageMax) })); }}
+              className="mt-1 w-full accent-infyn-rose min-h-[32px] cursor-pointer"
+            />
+          </label>
+          <label className="block mt-3">
+            <span className="text-[13px] text-infyn-secondary">Oldest</span>
+            <input
+              type="range" min={18} max={60} value={localFilters.ageMax}
+              aria-label="Oldest age"
+              onChange={(e) => { const v = Number(e.target.value); setLocalFilters(prev => ({ ...prev, ageMax: Math.max(v, prev.ageMin) })); }}
+              className="mt-1 w-full accent-infyn-rose min-h-[32px] cursor-pointer"
+            />
+          </label>
+        </section>
+
+        <section className="mt-7">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={localFilters.verifiedOnly}
+            onClick={() => setLocalFilters(prev => ({ ...prev, verifiedOnly: !prev.verifiedOnly }))}
+            className="w-full flex items-center justify-between gap-4 rounded-2xl bg-infyn-surface border border-infyn-border p-4 text-left cursor-pointer"
+          >
+            <span>
+              <span className="block text-[15px] font-semibold text-infyn-ink">Verified profiles only</span>
+              <span className="block mt-0.5 text-[13px] text-infyn-secondary">People whose photos our team has checked</span>
+            </span>
+            <span className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors duration-200 ${localFilters.verifiedOnly ? 'bg-infyn-rose' : 'bg-infyn-ink/15'}`} aria-hidden>
+              <span className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-infyn-surface shadow transition-transform duration-200 ${localFilters.verifiedOnly ? 'translate-x-5' : ''}`} />
+            </span>
+          </button>
+        </section>
+      </BottomSheet>
     </FilterContext.Provider>
   );
 }

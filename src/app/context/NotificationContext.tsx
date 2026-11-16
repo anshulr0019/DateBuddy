@@ -6,6 +6,7 @@ import { hapticLight, hapticSuccess } from '../lib/haptics';
 import { Ic } from '../components/icons';
 import { useCurrentUser } from '../lib/useCurrentUser';
 import { getPusherClient } from '@/lib/pusher-client';
+import { BottomSheet } from '../components/BottomSheet';
 
 export interface AppNotification {
   id: number;
@@ -217,127 +218,71 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     >
       {children}
 
-      {/* Notifications Bottom Sheet */}
-      {isOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-fade-in select-none"
-        >
-          <div onClick={closeNotifications} className="absolute inset-0" />
-
-          <div
-            className="relative z-10 w-full max-w-[440px] sm:max-w-[480px] bg-infyn-paper rounded-t-[32px] sm:rounded-[32px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] border border-infyn-border/80 overflow-hidden flex flex-col max-h-[85dvh] sm:max-h-[80vh] animate-sheet-up"
+      {/* Notifications */}
+      <BottomSheet
+        open={isOpen}
+        onClose={closeNotifications}
+        title={unreadCount > 0 ? `Notifications · ${unreadCount} new` : 'Notifications'}
+        footer={unreadCount > 0 ? (
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="w-full min-h-[48px] rounded-full border border-infyn-border bg-infyn-surface text-[15px] font-semibold text-infyn-ink active:bg-infyn-surface-soft transition-colors cursor-pointer"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-infyn-ink/[0.06] bg-infyn-surface/80">
-              <div className="flex items-center gap-2">
-                <h3 className="text-[17px] font-extrabold text-infyn-ink">Notifications</h3>
-                {unreadCount > 0 && (
-                  <span key={unreadCount} className="animate-attention-pop px-2 py-0.5 rounded-full bg-infyn-rose text-white text-[10px] font-black">
-                    {unreadCount} new
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllRead}
-                    className="text-[11.5px] font-bold text-infyn-rose hover:underline cursor-pointer"
-                  >
-                    Mark all read
-                  </button>
-                )}
-                <button
-                  onClick={closeNotifications}
-                  className="h-8 w-8 rounded-full bg-infyn-ink/[0.05] flex items-center justify-center text-infyn-ink/60 hover:text-infyn-ink cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
+            Mark all as read
+          </button>
+        ) : undefined}
+      >
+        {notifications.length === 0 ? (
+          <div className="animate-soft-arrive py-10 text-center">
+            <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-infyn-surface border border-infyn-border text-infyn-rose" aria-hidden>
+              <Ic.Bell />
             </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-2.5">
-              {notifications.length === 0 ? (
-                <div className="animate-soft-arrive py-12 text-center text-infyn-ink/40 text-[13px]">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-infyn-rose-line/70 bg-infyn-blush text-infyn-rose">
-                    <Ic.Bell />
-                  </div>
-                  <p className="font-semibold">No notifications yet</p>
-                  <p className="text-[11.5px] mt-1">Likes, matches, and messages will appear here</p>
-                </div>
-              ) : (
-                notifications.map((notif, index) => {
-                  const isUnread = !notif.read && !notif.isRead;
-                  const isLike = notif.type === 'like' || notif.title.toLowerCase().includes('liked');
-                  const isMatch = notif.type === 'match' || notif.title.toLowerCase().includes('match');
-                  const isCall = notif.type === 'call';
-                  const isEvent = notif.type === 'event' || notif.type === 'event_request' || notif.type === 'meetup';
-
-                  return (
-                    <div
-                      key={notif.id}
-                      onClick={() => handleNotificationClick(notif)}
-                      className={`animate-soft-arrive p-3.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
-                        isUnread
-                          ? 'bg-infyn-surface border-infyn-rose/30 shadow-xs ring-1 ring-infyn-rose/15'
-                          : 'bg-infyn-surface/60 border-infyn-border/60'
-                      }`}
-                      style={{ animationDelay: `${Math.min(index, 6) * 45}ms` }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border ${
-                            isMatch
-                              ? 'border-infyn-rose bg-infyn-rose text-white shadow-xs'
-                              : isLike
-                              ? 'border-infyn-rose-line bg-infyn-blush text-infyn-rose'
-                              : 'border-infyn-border bg-infyn-surface-soft text-infyn-secondary'
-                          }`}
-                        >
-                          {isMatch || isLike ? (
-                            <Ic.Heart filled={isMatch} />
-                          ) : isCall ? (
-                            <Ic.Phone className="h-5 w-5" />
-                          ) : isEvent ? (
-                            <Ic.Calendar className="h-5 w-5" />
-                          ) : notif.type === 'message' ? (
-                            <Ic.Chat />
-                          ) : (
-                            <Ic.Bell />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <p className={`text-[13.5px] leading-tight truncate ${isUnread ? 'font-extrabold text-infyn-ink' : 'font-bold text-infyn-ink/80'}`}>
-                              {notif.title}
-                            </p>
-                            {isUnread && (
-                              <span className="animate-attention-pop h-2 w-2 rounded-full bg-infyn-rose flex-shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-[12px] text-infyn-ink/60 leading-snug mt-0.5 line-clamp-2">
-                            {notif.message || notif.body || (isLike ? 'Tap to view who liked you' : 'Tap to open')}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-[10px] text-infyn-ink/40">
-                              {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            <span className="text-[10.5px] font-bold text-infyn-rose">
-                              {isLike ? 'View in Who Liked You →' : isMatch ? 'Chat now →' : 'View →'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+            <p className="font-display text-[22px] text-infyn-ink">You’re all caught up</p>
+            <p className="mt-1 text-[14px] text-infyn-secondary">Likes, matches and messages will appear here.</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <ul className="-mx-2">
+            {notifications.map((notif, index) => {
+              const isUnread = !notif.read && !notif.isRead;
+              const isLike = notif.type === 'like' || notif.title.toLowerCase().includes('liked');
+              const isMatch = notif.type === 'match' || notif.title.toLowerCase().includes('match');
+              const isCall = notif.type === 'call';
+              const isEvent = notif.type === 'event' || notif.type === 'event_request' || notif.type === 'meetup';
+              return (
+                <li key={notif.id} className="animate-soft-arrive" style={{ animationDelay: `${Math.min(index, 6) * 40}ms` }}>
+                  <button
+                    type="button"
+                    onClick={() => handleNotificationClick(notif)}
+                    className="w-full flex items-start gap-3 rounded-2xl px-2 py-3 text-left active:bg-infyn-surface-soft transition-colors cursor-pointer"
+                  >
+                    <span
+                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-full [&_svg]:h-[18px] [&_svg]:w-[18px] ${
+                        isMatch ? 'bg-infyn-rose text-[#fff8f0]' : isLike ? 'bg-infyn-blush text-infyn-rose' : 'bg-infyn-surface border border-infyn-border text-infyn-secondary'
+                      }`}
+                      aria-hidden
+                    >
+                      {isMatch || isLike ? <Ic.Heart filled={isMatch} /> : isCall ? <Ic.Phone /> : isEvent ? <Ic.Calendar /> : notif.type === 'message' ? <Ic.Chat /> : <Ic.Bell />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className={`truncate text-[15px] ${isUnread ? 'font-semibold text-infyn-ink' : 'text-infyn-ink'}`}>{notif.title.replace(/\s*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\uFE0F?/gu, '')}</span>
+                        {isUnread && <span className="h-2 w-2 shrink-0 rounded-full bg-infyn-rose" aria-label="Unread" />}
+                      </span>
+                      <span className="mt-0.5 block text-[14px] leading-snug text-infyn-secondary line-clamp-2">
+                        {notif.message || notif.body || (isLike ? 'See who liked you' : 'Tap to open')}
+                      </span>
+                      <span className="mt-1 block text-[12px] text-infyn-muted">
+                        {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </BottomSheet>
     </NotificationContext.Provider>
   );
 }

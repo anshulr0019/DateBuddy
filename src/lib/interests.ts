@@ -1,6 +1,7 @@
 import { db } from '@/db';
 import { interests, userInterests } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
+import { plainInterest } from './interest-label';
 
 const MAX_INTERESTS = 25;
 const MAX_NAME_LENGTH = 50;
@@ -17,7 +18,7 @@ export async function syncUserInterests(userId: number, rawNames: unknown) {
     new Set(
       rawNames
         .filter((n: unknown): n is string => typeof n === 'string')
-        .map((n) => n.trim().slice(0, MAX_NAME_LENGTH))
+        .map((n) => plainInterest(n).slice(0, MAX_NAME_LENGTH))
         .filter((n) => n.length > 0)
     )
   ).slice(0, MAX_INTERESTS);

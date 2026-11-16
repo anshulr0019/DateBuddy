@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
         await db.insert(notifications).values({
           userId: swipedId,
           type: 'match',
-          title: "It's a Match! 💕",
+          title: "It's a match",
           body: `You and ${senderName} matched! Start the conversation now.`,
           metadata: { actionUrl: `/chat/${matchId}` },
         });
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
         await db.insert(notifications).values({
           userId: swipedId,
           type: 'like',
-          title: action === 'super_like' ? 'New Super Like! ⭐' : 'Someone liked your profile! ✨',
+          title: action === 'super_like' ? 'New Super Like' : 'Someone liked your profile',
           body: action === 'super_like'
             ? `${senderName} super liked you! See who liked you and connect.`
             : 'Someone liked you! See who liked you and vibe check back.',
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
       try {
         await triggerUserNotification(swipedId, {
           type: 'like',
-          title: 'Someone liked your profile! ✨',
+          title: 'Someone liked your profile',
           actionUrl: '/likes',
         });
       } catch {

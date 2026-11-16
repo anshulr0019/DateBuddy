@@ -66,7 +66,7 @@ export async function POST(
       await db.insert(notifications).values({
         userId: meetup.hostId,
         type: 'event_request',
-        title: 'Join Request ✋',
+        title: 'Join request',
         body: `${currentUser?.name ?? 'Someone'} requested to join your squad "${meetup.title}".`,
         metadata: { meetupId, applicantUserId: userId, actionUrl: `/meetups/${meetupId}` },
       });

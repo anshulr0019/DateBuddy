@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { hapticLight, hapticMedium, hapticWarning } from '../../lib/haptics';
+import { INTEREST_OPTIONS } from '@/lib/interest-label';
 
 const BackChevron = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -10,13 +11,7 @@ const BackChevron = (
   </svg>
 );
 
-const INTERESTS = [
-  '📷 Photography', '✈️ Travel', '🎵 Music', '💪 Fitness', '🍕 Food',
-  '🎨 Art', '🎮 Gaming', '📚 Reading', '🎬 Movies', '💃 Dancing',
-  '👨‍🍳 Cooking', '⚽ Sports', '👗 Fashion', '🐶 Pets', '🏃 Running',
-  '🧘 Yoga', '🎤 Karaoke', '🌱 Plants', '☕ Coffee', '🍺 Beer',
-  '🎭 Theater', '📱 Tech', '🏔️ Hiking', '🏖️ Beach', '🌃 Nightlife',
-];
+const INTERESTS = INTEREST_OPTIONS;
 
 const MIN_INTERESTS = 5;
 

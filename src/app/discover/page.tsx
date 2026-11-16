@@ -299,7 +299,7 @@ export default function DiscoverPage() {
         setLastSwipe(cur => cur?.profile.id === target.id ? null : cur);
         setMatchedUser({ ...data.matchedUser, matchId: data.matchId });
         const firstName = data.matchedUser.name?.split(' ')[0] ?? 'Someone';
-        addNotification({ type: 'match', title: "It's a Match! 🎉", message: `You and ${firstName} liked each other. Say hi! 💬`, avatar: data.matchedUser.photo ?? undefined, actionUrl: data.matchId ? `/chat/${data.matchId}` : '/messages' });
+        addNotification({ type: 'match', title: "It's a match", message: `You and ${firstName} liked each other. Say hi.`, avatar: data.matchedUser.photo ?? undefined, actionUrl: data.matchId ? `/chat/${data.matchId}` : '/messages' });
       }
     }).catch(() => {
       hapticWarning();

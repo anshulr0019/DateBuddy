@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ic } from '../components/icons';
+import { INTEREST_OPTIONS, plainInterest } from '@/lib/interest-label';
+import { BottomSheet } from '../components/BottomSheet';
 import { AuroraBackground, GlassCard, VerifiedBadge, GradientText, SafeImage, Skeleton } from '../components/shared';
 import { hapticLight } from '../lib/haptics';
 import {
@@ -118,13 +120,6 @@ const TABS = [
   { id: 'events', label: 'Events' },
 ] as const;
 
-const INTEREST_OPTIONS = [
-  '📷 Photography', '✈️ Travel', '🎵 Music', '💪 Fitness', '🍕 Food',
-  '🎨 Art', '🎮 Gaming', '📚 Reading', '🎬 Movies', '💃 Dancing',
-  '👨‍🍳 Cooking', '⚽ Sports', '👗 Fashion', '🐶 Pets', '🏃 Running',
-  '🧘 Yoga', '🎤 Karaoke', '🌱 Plants', '☕ Coffee', '🍺 Beer',
-  '🎭 Theater', '📱 Tech', '🏔️ Hiking', '🏖️ Beach', '🌃 Nightlife',
-];
 
 type TabId = (typeof TABS)[number]['id'];
 
@@ -674,68 +669,51 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {isEditing && (
-            <div
-              className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Edit profile"
-              onClick={() => !isSaving && setIsEditing(false)}
-            >
-              <div
-                onClick={e => e.stopPropagation()}
-                className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] bg-infyn-paper p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl animate-sheet-up"
+          <BottomSheet
+            open={isEditing}
+            onClose={() => { if (!isSaving) setIsEditing(false); }}
+            title="Edit profile"
+            footer={
+              <button
+                onClick={saveProfile}
+                disabled={isSaving}
+                className="w-full min-h-[54px] rounded-full bg-infyn-rose text-[16px] font-semibold text-[#fff8f0] active:scale-[0.985] transition-transform cursor-pointer disabled:opacity-60"
               >
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-[20px] font-bold tracking-tight text-infyn-ink">Edit Profile</h2>
-                  <button
-                    onClick={() => !isSaving && setIsEditing(false)}
-                    disabled={isSaving}
-                    aria-label="Close editor"
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-infyn-ink/8 text-infyn-ink/60 hover:bg-infyn-ink/15 transition-all active:scale-90 cursor-pointer disabled:opacity-40"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                </div>
-
-                {editError && (
-                  <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600">
-                    {editError}
-                  </div>
-                )}
-
-                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">Name</label>
-                <input
-                  value={editDraft.name}
+                {isSaving ? 'Saving…' : 'Save changes'}
+              </button>
+            }
+          >
+            {editError && (
+              <p role="alert" className="mb-4 text-[14px] text-infyn-rose">{editError}</p>
+            )}
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="edit-name" className="mb-2 block text-[13px] font-semibold text-infyn-secondary">Name</label>
+                <input id="edit-name" value={editDraft.name} maxLength={100}
                   onChange={e => setEditDraft(d => ({ ...d, name: e.target.value }))}
-                  maxLength={100}
-                  className="mb-4 w-full rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
-                />
-
-                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">City</label>
-                <input
-                  value={editDraft.city}
+                  className="w-full min-h-[48px] rounded-2xl border border-infyn-border bg-infyn-surface px-4 text-[16px] text-infyn-ink outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)]" />
+              </div>
+              <div>
+                <label htmlFor="edit-city" className="mb-2 block text-[13px] font-semibold text-infyn-secondary">City</label>
+                <input id="edit-city" value={editDraft.city} maxLength={100}
                   onChange={e => setEditDraft(d => ({ ...d, city: e.target.value }))}
-                  maxLength={100}
-                  className="mb-4 w-full rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
-                />
-
-                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">
-                  Bio <span className="font-normal text-infyn-ink/40">({editDraft.bio.length}/500)</span>
+                  className="w-full min-h-[48px] rounded-2xl border border-infyn-border bg-infyn-surface px-4 text-[16px] text-infyn-ink outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)]" />
+              </div>
+              <div>
+                <label htmlFor="edit-bio" className="mb-2 block text-[13px] font-semibold text-infyn-secondary flex justify-between">
+                  <span>Bio</span><span className="font-normal text-infyn-muted tabular-nums">{editDraft.bio.length}/500</span>
                 </label>
-                <textarea
-                  value={editDraft.bio}
+                <textarea id="edit-bio" value={editDraft.bio} rows={4}
                   onChange={e => setEditDraft(d => ({ ...d, bio: e.target.value.slice(0, 500) }))}
-                  rows={4}
-                  className="mb-4 w-full resize-none rounded-2xl border border-infyn-ink/10 bg-infyn-surface px-4 py-3 text-[14px] text-infyn-ink outline-none focus:border-infyn-rose/50"
-                />
-
-                <label className="mb-1.5 block text-[13px] font-semibold text-infyn-ink/70">
-                  Interests <span className="font-normal text-infyn-ink/40">({editDraft.interests.length} selected)</span>
-                </label>
-                <div className="mb-6 flex flex-wrap gap-2">
+                  className="w-full min-h-[48px] rounded-2xl border border-infyn-border bg-infyn-surface px-4 text-[16px] text-infyn-ink outline-none focus:border-infyn-rose focus:shadow-[0_0_0_3px_rgba(158,27,65,0.12)] py-3 resize-none leading-relaxed" />
+              </div>
+              <div>
+                <p className="mb-2 block text-[13px] font-semibold text-infyn-secondary flex justify-between">
+                  <span>Interests</span><span className="font-normal text-infyn-muted">{editDraft.interests.length} selected</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
                   {INTEREST_OPTIONS.map(opt => {
-                    const on = editDraft.interests.includes(opt);
+                    const on = editDraft.interests.some(i => plainInterest(i) === opt);
                     return (
                       <button
                         key={opt}
@@ -744,13 +722,11 @@ export default function ProfilePage() {
                         onClick={() =>
                           setEditDraft(d => ({
                             ...d,
-                            interests: on ? d.interests.filter(i => i !== opt) : [...d.interests, opt],
+                            interests: on ? d.interests.filter(i => plainInterest(i) !== opt) : [...d.interests.map(plainInterest), opt],
                           }))
                         }
-                        className={`rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-all cursor-pointer active:scale-95 ${
-                          on
-                            ? 'border-transparent bg-infyn-rose text-white'
-                            : 'border-infyn-ink/10 bg-infyn-surface text-infyn-ink/75 hover:border-infyn-ink/25'
+                        className={`min-h-[40px] rounded-full px-4 text-[14px] transition-colors cursor-pointer ${
+                          on ? 'bg-infyn-ink text-infyn-paper font-semibold' : 'border border-infyn-border bg-infyn-surface text-infyn-secondary'
                         }`}
                       >
                         {opt}
@@ -758,26 +734,9 @@ export default function ProfilePage() {
                     );
                   })}
                 </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    disabled={isSaving}
-                    className="h-12 flex-1 rounded-2xl border border-infyn-ink/15 bg-infyn-surface text-[14px] font-semibold text-infyn-ink transition-all active:scale-95 cursor-pointer disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={saveProfile}
-                    disabled={isSaving}
-                    className="h-12 flex-1 rounded-2xl bg-infyn-rose text-[14px] font-bold text-white transition-all hover:bg-[#E11D48] active:scale-95 cursor-pointer disabled:opacity-60"
-                  >
-                    {isSaving ? 'Saving…' : 'Save Changes'}
-                  </button>
-                </div>
               </div>
             </div>
-          )}
+          </BottomSheet>
 
           {/* PHOTO LIGHTBOX — Premium Instagram/Hinge style fullscreen viewer */}
           {photoLightboxOpen && profile.photo && (

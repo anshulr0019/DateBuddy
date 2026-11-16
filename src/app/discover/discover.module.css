@@ -1,7 +1,7 @@
 @font-face { font-family: 'Infyn DM'; src: url('/fonts/dm-sans-regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Infyn DM'; src: url('/fonts/dm-sans-semibold.ttf') format('truetype'); font-weight: 500 700; font-display: swap; }
 @font-face { font-family: 'Infyn Serif'; src: url('/fonts/pt-serif.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-.root, .nav, .filterTheme {
+.root, .nav {
   --paper: #faf5eb; --surface: #fffefa; --ink: #201a16; --secondary: #665849; --border: #e8ddc9; --rose: #9e1b41;
   --infyn-ink: #201a16; --infyn-paper: #faf5eb; --infyn-pink: #9e1b41; --infyn-purple: #9e1b41;
   font-family: 'Infyn DM', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -12,7 +12,7 @@
 .root button, .nav button { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 150ms ease, background-color 150ms ease; }
 .root button:active:not(:disabled), .nav button:active { transform: scale(.98); }
 .root button:disabled { opacity: .4; cursor: default; }
-.root button:focus-visible, .nav button:focus-visible, .filterTheme button:focus-visible { outline: 2px solid var(--rose); outline-offset: 4px; }
+.root button:focus-visible, .nav button:focus-visible { outline: 2px solid var(--rose); outline-offset: 4px; }
 .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 14px; flex-shrink: 0; }
 .brand { display: flex; gap: 9px; align-items: center; }
 .brandMark { width: 30px; height: 25px; background: var(--rose); mask: url('/brand/logo-mark.png') center / contain no-repeat; }
@@ -123,13 +123,7 @@
 @keyframes empty-state-breathe { 0% { opacity: .72; transform: scale(.94); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
 @media (max-width: 360px) { .header { padding-left: 14px; padding-right: 14px; } .deck { margin: 0 14px; } .actionBar { padding-left: 14px; padding-right: 14px; gap: 8px; } .roundAction { width: 52px; height: 52px; } .roundSmall { width: 44px; height: 44px; } .like { min-height: 52px; } .filterButton { padding: 0 10px; } .headerActions { gap: 5px; } .nameRow h2 { font-size: 27px; } }
 @media (max-height: 700px) { .header { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; }  .preview { padding-top: 8px; } .actionBar { padding-top: 8px; padding-bottom: 8px; } }
-@media (prefers-reduced-motion: reduce) { .root *, .nav *, .filterTheme * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
-/* Shared overlays receive these hooks only while opened from Discover. */
-.filterTheme h2 { font-family: 'Infyn Serif', Georgia, serif; font-weight: 400; }
-.filterTheme button { min-height: 44px; }
-.filterTheme input[type='range'] { accent-color: var(--rose); min-height: 24px; }
-.filterTheme button[class*='bg-gradient'] { background: var(--rose); box-shadow: none; }
-.filterTheme button[aria-label='Close filters'] { min-width: 44px; }
+@media (prefers-reduced-motion: reduce) { .root *, .nav * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .exitleft, .exitright, .exitup { opacity: .3; } }
 
 :global(html):has(.root), :global(body):has(.root) { scrollbar-gutter: auto; }
 

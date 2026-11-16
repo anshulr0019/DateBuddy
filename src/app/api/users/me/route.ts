@@ -18,6 +18,7 @@ import {
 import { eq, inArray } from 'drizzle-orm';
 import { getAuthSession, clearAuthSession } from '@/lib/auth';
 import { syncUserInterests } from '@/lib/interests';
+import { plainInterest } from '@/lib/interest-label';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,7 @@ export async function GET() {
       user: {
         ...user,
         photos: userPhotos.map((p) => p.url),
-        interests: tags.map((t) => t.name),
+        interests: [...new Set(tags.map((t) => plainInterest(t.name)))],
         preferences: userPrefs[0] ?? null,
         prompts: userPrompts,
       },

@@ -621,42 +621,40 @@ export default function SettingsPage() {
               </div>
 
               {/* Premium Plan Banner */}
-              <GlassCard
-                onClick={() => router.push('/premium')}
-                className="p-4 bg-gradient-to-r from-infyn-rose/15 via-infyn-rose/15 to-infyn-rose/15 border-none cursor-pointer hover:scale-[1.01] transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[10px] font-black uppercase tracking-wider mb-1 shadow-sm">
-                      ✨ Infyn Gold
-                    </div>
-                    <h3 className="text-[15px] font-bold text-infyn-ink">Unlimited Swipes & See Who Liked You</h3>
+              <GlassCard onClick={() => router.push('/premium')} className="p-4 cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-infyn-blush text-infyn-rose" aria-hidden>
+                    <Ic.Sparkle className="w-5 h-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-[19px] leading-tight text-infyn-ink">Infyn Gold</p>
+                    <p className="text-[13px] text-infyn-secondary">See who liked you and more</p>
                   </div>
-                  <span className="text-[20px]">👑</span>
+                  <span className="shrink-0 text-infyn-muted -rotate-90" aria-hidden><Ic.ChevDown /></span>
                 </div>
               </GlassCard>
 
               {/* Logout & Delete Account Actions */}
               <div className="pt-2 space-y-2.5">
                 {(saveError || deleteError) && (
-                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-600" role="alert">
+                  <div className="rounded-2xl border border-infyn-rose-line bg-infyn-blush px-4 py-3 text-[13px] font-semibold text-infyn-rose" role="alert">
                     {deleteError || saveError}
                   </div>
                 )}
                 <button
                   onClick={() => setConfirmSheet('logout')}
                   disabled={isLoggingOut || isDeleting}
-                  className="font-system w-full py-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 text-rose-600 text-[14.5px] font-bold hover:bg-rose-100/60 active:scale-[0.985] transition-all cursor-pointer disabled:opacity-60"
+                  className="w-full min-h-[52px] rounded-full border border-infyn-border bg-infyn-surface text-infyn-ink text-[15px] font-semibold active:bg-infyn-surface-soft transition-colors cursor-pointer disabled:opacity-60"
                 >
-                  {isLoggingOut ? 'Logging out…' : 'Log Out & Switch Account'}
+                  {isLoggingOut ? 'Logging out…' : 'Log out'}
                 </button>
 
                 <button
                   onClick={() => setConfirmSheet('delete')}
                   disabled={isLoggingOut || isDeleting}
-                  className="font-system w-full py-2 text-center text-[12.5px] font-medium text-infyn-muted hover:text-rose-500 transition-colors cursor-pointer disabled:opacity-60"
+                  className="w-full min-h-[44px] text-center text-[14px] text-infyn-secondary underline underline-offset-2 transition-colors cursor-pointer disabled:opacity-60"
                 >
-                  {isDeleting ? 'Deleting your account…' : 'Delete Account Permanently'}
+                  {isDeleting ? 'Deleting your account…' : 'Delete account'}
                 </button>
               </div>
             </div>
@@ -669,11 +667,11 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-hidden">
           <div
             onClick={() => setShowBlockedModal(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md"
+            className="absolute inset-0 bg-infyn-ink/50"
           />
-          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry max-h-[75dvh] flex flex-col">
+          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-t-3xl sm:rounded-[28px] p-6 space-y-4 shadow-[0_24px_64px_-16px_rgba(32,26,22,0.35)] animate-page-entry max-h-[75dvh] flex flex-col">
             <div className="flex items-center justify-between flex-shrink-0">
-              <h3 className="text-[18px] font-bold text-infyn-ink">Blocked Users</h3>
+              <h3 className="font-display text-[24px] text-infyn-ink">Blocked Users</h3>
               <button
                 onClick={() => setShowBlockedModal(false)}
                 className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-ink/60 active:scale-90 transition-all cursor-pointer"
@@ -718,7 +716,7 @@ export default function SettingsPage() {
                           setUnblockingId(null);
                         }
                       }}
-                      className="font-system flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-bold border border-infyn-rose/30 text-infyn-rose bg-rose-50 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                      className="font-system flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-bold border border-infyn-rose/30 text-infyn-rose bg-infyn-blush active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                     >
                       {unblockingId === u.id ? '…' : 'Unblock'}
                     </button>
@@ -740,20 +738,20 @@ export default function SettingsPage() {
       {/* Logout Confirmation */}
       {confirmSheet === 'logout' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
-          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-black/40 backdrop-blur-md animate-popover-enter" />
-          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-[28px] p-5 space-y-4 shadow-2xl animate-popover-enter">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-500 mb-2 mx-auto">
+          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-infyn-ink/50 animate-popover-enter" />
+          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-[28px] p-6 space-y-4 shadow-[0_24px_64px_-16px_rgba(32,26,22,0.35)] animate-popover-enter">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line text-infyn-rose mb-2 mx-auto">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
               </svg>
             </div>
-            <h3 className="text-[18px] font-bold text-infyn-ink text-center">Log Out?</h3>
+            <h3 className="font-display text-[24px] text-infyn-ink text-center">Log Out?</h3>
             <p className="text-[14px] text-infyn-ink/60 text-center leading-relaxed">You&apos;ll need to sign in again next time you open the app.</p>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setConfirmSheet(null)} className="font-system flex-1 py-3 rounded-2xl border border-infyn-ink/15 bg-infyn-surface text-infyn-ink text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+              <button onClick={() => setConfirmSheet(null)} className="flex-1 min-h-[48px] rounded-full border border-infyn-ink/15 bg-infyn-surface text-infyn-ink text-[15px] font-semibold active:scale-[0.98] transition-all cursor-pointer">
                 Cancel
               </button>
-              <button onClick={() => { setConfirmSheet(null); handleLogout(); }} className="font-system flex-1 py-3 rounded-2xl bg-rose-500 text-white text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+              <button onClick={() => { setConfirmSheet(null); handleLogout(); }} className="flex-1 min-h-[48px] rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.98] transition-all cursor-pointer">
                 Log Out
               </button>
             </div>
@@ -764,35 +762,35 @@ export default function SettingsPage() {
       {/* Delete Confirmation */}
       {confirmSheet === 'delete' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
-          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-black/40 backdrop-blur-md animate-popover-enter" />
-          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-[28px] p-5 space-y-4 shadow-2xl animate-popover-enter">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-500 mb-2 mx-auto">
+          <div onClick={() => setConfirmSheet(null)} className="absolute inset-0 bg-infyn-ink/50 animate-popover-enter" />
+          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-[28px] p-6 space-y-4 shadow-[0_24px_64px_-16px_rgba(32,26,22,0.35)] animate-popover-enter">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-infyn-blush border border-infyn-rose-line text-infyn-rose mb-2 mx-auto">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <h3 className="text-[18px] font-bold text-infyn-ink text-center">Delete Account?</h3>
+            <h3 className="font-display text-[24px] text-infyn-ink text-center">Delete your account?</h3>
             <p className="text-[14px] text-infyn-ink/60 text-center leading-relaxed">This permanently erases your profile, photos, matches, and messages. This action cannot be undone.</p>
-            <div className="rounded-2xl border border-rose-200/60 bg-rose-50 p-3">
-              <label htmlFor="delete-confirm" className="block text-[12px] font-bold text-rose-600 mb-2">Type DELETE to confirm</label>
+            <div className="rounded-2xl border border-infyn-rose-line bg-infyn-blush p-3">
+              <label htmlFor="delete-confirm" className="block text-[12px] font-bold text-infyn-rose mb-2">Type DELETE to confirm</label>
               <input
                 id="delete-confirm"
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full h-11 px-3 rounded-xl border border-rose-200 bg-infyn-surface text-infyn-ink text-[16px] font-medium focus:outline-none focus:border-rose-400"
+                className="w-full h-11 px-3 rounded-xl border border-infyn-rose-line bg-infyn-surface text-infyn-ink text-[16px] font-medium focus:outline-none focus:border-infyn-rose"
                 autoFocus
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setConfirmSheet(null); setDeleteConfirmText(''); }} className="font-system flex-1 py-3 rounded-2xl border border-infyn-ink/15 bg-infyn-surface text-infyn-ink text-[14px] font-bold active:scale-95 transition-all cursor-pointer">
+              <button onClick={() => { setConfirmSheet(null); setDeleteConfirmText(''); }} className="flex-1 min-h-[48px] rounded-full border border-infyn-ink/15 bg-infyn-surface text-infyn-ink text-[15px] font-semibold active:scale-[0.98] transition-all cursor-pointer">
                 Cancel
               </button>
               <button
                 onClick={() => { if (deleteConfirmText === 'DELETE') { setConfirmSheet(null); setDeleteConfirmText(''); handleDeleteAccount(); } }}
                 disabled={deleteConfirmText !== 'DELETE'}
-                className="font-system flex-1 py-3 rounded-2xl bg-rose-500 text-white text-[14px] font-bold active:scale-95 transition-all cursor-pointer disabled:opacity-40 disabled:active:scale-100"
+                className="flex-1 min-h-[48px] rounded-full bg-infyn-rose text-[#fff8f0] text-[15px] font-semibold active:scale-[0.98] transition-all cursor-pointer disabled:opacity-40 disabled:active:scale-100"
               >
                 Delete
               </button>
@@ -805,13 +803,13 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
           <div
             onClick={() => setShowEditPhoneModal(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)]"
+            className="absolute inset-0 bg-infyn-ink/50 transition-all duration-350 ease-[cubic-bezier(0.32,1,0.32,1)]"
             style={{ willChange: 'backdrop-filter, opacity' }}
           />
-          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-3xl p-5 space-y-4 shadow-2xl animate-page-entry">
-            <h3 className="text-[18px] font-bold text-infyn-ink">Change Phone Number</h3>
-            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
-              <p className="text-[13px] font-semibold text-amber-800 leading-relaxed">
+          <div className="relative z-10 w-full max-w-sm bg-infyn-surface rounded-[28px] p-6 space-y-4 shadow-[0_24px_64px_-16px_rgba(32,26,22,0.35)] animate-page-entry">
+            <h3 className="font-display text-[24px] text-infyn-ink">Change phone number</h3>
+            <div className="rounded-2xl bg-infyn-surface-soft border border-infyn-border p-4">
+              <p className="text-[13px] font-semibold text-infyn-ink leading-relaxed">
                 For security, changing your phone number requires re-verification. Please contact us at{' '}
                 <a href="mailto:support@infyn.app" className="underline">support@infyn.app</a>{' '}
                 and we&apos;ll help you update it.
