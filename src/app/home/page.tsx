@@ -6,7 +6,8 @@ import { Ic } from '../components/icons';
 import { AuroraBackground, GlassCard, OnlineDot, SafeImage, VerifiedBadge } from '../components/shared';
 import { VenuePickerModal } from '../components/VenuePickerModal';
 import { useNotifications } from '../context/NotificationContext';
-import { PERSONAS, DEFAULT_PERSONA, calculateDynamicVibe } from '@/lib/personaGreeting';
+import type { Vibe } from '@/lib/vibe';
+import { BottomSheet } from '../components/BottomSheet';
 import { PremiumGlobe } from '../random-chat/components/PremiumGlobe';
 import { hapticLight, hapticMedium } from '../lib/haptics';
 import { getCategoryCoverImage } from '@/app/lib/meetup-media';
@@ -81,12 +82,8 @@ export default function HomePage() {
   const [loadingMeetups, setLoadingMeetups] = useState(cachedMeetups === null);
   const [randomChat, setRandomChat] = useState<RandomChatCard | null>(cachedRandomChat);
 
-  const [activePersona, setActivePersona] = useState({
-    title: DEFAULT_PERSONA.title,
-    subline: DEFAULT_PERSONA.sublines[0],
-    personaId: DEFAULT_PERSONA.id,
-  });
-  const [showPersonaPicker, setShowPersonaPicker] = useState(false);
+  const [vibe, setVibe] = useState<Vibe | null>(null);
+  const [showVibeInfo, setShowVibeInfo] = useState(false);
 
   const [squadFilter, setSquadFilter] = useState<'All' | (typeof CATEGORIES)[number]>('All');
   const [showHostModal, setShowHostModal] = useState(false);
@@ -163,22 +160,27 @@ export default function HomePage() {
     };
   }, [loadMeetups]);
 
+  // The vibe is computed on the server from recent activity. It changes
+  // slowly, so the last result is shown instantly and refreshed once a day.
   useEffect(() => {
-    // Automatically calculate dynamic AI Vibe based on current time & user activity
-    const computed = calculateDynamicVibe();
-    setActivePersona({
-      title: computed.title,
-      subline: computed.subline,
-      personaId: computed.personaId,
-    });
+    const CACHE_KEY = 'infyn_vibe';
+    const today = new Date().toDateString();
+    let cached: { day: string; vibe: Vibe } | null = null;
+    try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch { /* ignore */ }
+    if (cached?.vibe) setVibe(cached.vibe);
+    if (cached?.day === today) return;
+    const controller = new AbortController();
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    fetch(`/api/vibe?tz=${encodeURIComponent(tz)}`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data?.success || !data.vibe) return;
+        setVibe(data.vibe);
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ day: today, vibe: data.vibe })); } catch { /* ignore */ }
+      })
+      .catch(() => { /* keep the cached vibe */ });
+    return () => controller.abort();
   }, []);
-
-  const selectPersona = (id: string, title: string, subline: string) => {
-    const next = { personaId: id, title, subline };
-    setActivePersona(next);
-    localStorage.setItem('user_active_persona', JSON.stringify(next));
-    setShowPersonaPicker(false);
-  };
 
   const filteredMeetups = meetups.filter((m) => squadFilter === 'All' || m.category === squadFilter);
 
@@ -303,16 +305,17 @@ export default function HomePage() {
 
             <div className="flex-shrink-0 z-20 px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-paper flex items-center justify-between gap-3">
               <button
-                onClick={() => setShowPersonaPicker(true)}
+                onClick={() => setShowVibeInfo(true)}
+                disabled={!vibe}
                 className="min-w-0 text-left cursor-pointer"
-                aria-label={`Your vibe: ${activePersona.title}. Change vibe`}
+                aria-label={vibe ? `Your vibe: ${vibe.title}. Why this vibe?` : 'Your vibe'}
               >
                 <span className="block text-[12px] font-semibold uppercase tracking-[0.1em] text-infyn-muted">Your vibe</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="font-display text-[26px] leading-tight tracking-tight text-infyn-ink truncate">{activePersona.title}</span>
-                  <span className="text-infyn-secondary shrink-0" aria-hidden><Ic.ChevDown /></span>
+                  <span className="font-display text-[26px] leading-tight tracking-tight text-infyn-ink truncate">{vibe?.title ?? <span className="inline-block h-6 w-36 rounded-lg bg-infyn-surface-soft align-middle" aria-hidden />}</span>
+                  {vibe && <span className="text-infyn-rose shrink-0" aria-hidden><Ic.Sparkle className="w-4 h-4" /></span>}
                 </span>
-                <span className="block text-[14px] text-infyn-secondary truncate">{activePersona.subline}</span>
+                <span className="block text-[14px] text-infyn-secondary truncate">{vibe?.subline ?? '\u00a0'}</span>
               </button>
 
               <button
@@ -581,57 +584,37 @@ export default function HomePage() {
         </AuroraBackground>
       </div>
 
-      {/* PERSONA PICKER */}
-      {showPersonaPicker && (
-        <div role="dialog" aria-modal="true" data-modal="true" className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
-          <div
-            onClick={() => setShowPersonaPicker(false)}
-            className="absolute inset-0 bg-black/50 backdrop-blur-md transition-all duration-300"
-          />
-          <div className="relative z-10 w-full max-w-[420px] bg-infyn-surface rounded-t-[32px] sm:rounded-[28px] p-5 space-y-4 max-h-[80dvh] flex flex-col shadow-2xl animate-sheet-up">
-            <div className="w-10 h-1 bg-infyn-surface-soft rounded-full mx-auto" />
-            <div className="flex items-center justify-between border-b border-infyn-border pb-3">
+      {/* WHY THIS VIBE */}
+      <BottomSheet
+        open={showVibeInfo && Boolean(vibe)}
+        onClose={() => setShowVibeInfo(false)}
+        title={vibe?.title ?? 'Your vibe'}
+        footer={
+          <button
+            type="button"
+            onClick={() => setShowVibeInfo(false)}
+            className="w-full min-h-[52px] rounded-full bg-infyn-ink text-infyn-paper text-[15px] font-semibold active:scale-[0.985] transition-transform cursor-pointer"
+          >
+            Got it
+          </button>
+        }
+      >
+        {vibe && (
+          <>
+            <p className="text-[16px] leading-relaxed text-infyn-ink">{vibe.subline}</p>
+            <div className="mt-5 flex gap-3 rounded-2xl bg-infyn-surface border border-infyn-border p-4">
+              <span className="mt-0.5 shrink-0 text-infyn-rose" aria-hidden><Ic.Sparkle className="w-5 h-5" /></span>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[17px] font-extrabold text-infyn-ink">Your Vibe</h3>
-                  <span className="rounded-full bg-gradient-to-r from-infyn-rose to-infyn-rose text-white text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5">
-                    🤖 AI Calculated
-                  </span>
-                </div>
-                <p className="text-[12px] text-infyn-ink/60 font-medium">Auto-updated based on your activity &amp; time of day</p>
+                <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-infyn-muted">Why this vibe</p>
+                <p className="mt-1 text-[15px] leading-relaxed text-infyn-ink">{vibe.reason}</p>
               </div>
-              <button
-                onClick={() => setShowPersonaPicker(false)}
-                className="font-system flex h-8 w-8 items-center justify-center rounded-full bg-infyn-surface-soft text-infyn-muted hover:text-infyn-ink cursor-pointer active:scale-90 transition-transform"
-              >
-                ✕
-              </button>
             </div>
-
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-none">
-              {[DEFAULT_PERSONA, ...PERSONAS].map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => selectPersona(p.id, p.title, p.sublines[0])}
-                  className={`font-system w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
-                    activePersona.personaId === p.id
-                      ? 'border-infyn-rose bg-infyn-blush shadow-2xs'
-                      : 'border-infyn-border/80 bg-infyn-surface-soft/50 hover:bg-infyn-surface-soft/60'
-                  }`}
-                >
-                  <div>
-                    <p className="text-[14.5px] font-bold text-infyn-ink">{p.title}</p>
-                    <p className="text-[12px] text-infyn-ink/60 mt-0.5">&ldquo;{p.sublines[0]}&rdquo;</p>
-                  </div>
-                  {activePersona.personaId === p.id && (
-                    <span className="text-[12px] font-bold text-infyn-rose">Active ✓</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+            <p className="mt-4 text-[14px] leading-relaxed text-infyn-secondary">
+              Worked out from how you’ve used Infyn over the last four weeks and refreshed daily. Only you can see it.
+            </p>
+          </>
+        )}
+      </BottomSheet>
 
       {/* HOST MODAL */}
       {showHostModal && (
