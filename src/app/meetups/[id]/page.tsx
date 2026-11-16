@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { PartnerProfileSheet } from '@/app/components/PartnerProfileSheet';
 import { getCategoryCoverImage } from '@/app/lib/meetup-media';
+import { Ic } from '@/app/components/icons';
 
 interface Attendee {
   id: number;
@@ -104,7 +105,7 @@ function MeetupDetailContent() {
       });
       const data = await response.json();
       if (data.success) {
-        flash(data.action === 'joined' ? 'You joined the squad 🎉' : 'You left the squad');
+        flash(data.action === 'joined' ? 'You joined' : 'You left the squad');
         fetchMeetup();
       } else {
         setError(data.message || 'Something went wrong');
@@ -168,7 +169,7 @@ function MeetupDetailContent() {
         return;
       }
       setShowEdit(false);
-      flash('Squad updated ✓');
+      flash('Meetup updated');
       fetchMeetup();
     } catch (err) {
       console.error('Error updating:', err);
@@ -189,7 +190,7 @@ function MeetupDetailContent() {
       const data = await response.json();
       if (data.success) {
         setShowCancelConfirm(false);
-        flash('Squad cancelled — attendees notified');
+        flash('Meetup cancelled. Attendees were notified.');
         fetchMeetup();
       } else {
         setError(data.message || 'Failed to cancel');
@@ -235,7 +236,7 @@ function MeetupDetailContent() {
       });
       const data = await response.json();
       if (data.success) {
-        flash(action === 'approve' ? 'Applicant accepted 🎉' : 'Request declined');
+        flash(action === 'approve' ? 'Request accepted' : 'Request declined');
         fetchMeetup();
       } else {
         setError(data.message || 'Action failed');
@@ -262,11 +263,11 @@ function MeetupDetailContent() {
               </div>
             ) : !meetup ? (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="text-[40px]">🔍</div>
-                <h2 className="text-[20px] font-extrabold text-infyn-ink">Squad Not Found</h2>
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-infyn-surface border border-infyn-border text-infyn-rose"><Ic.Search className="w-7 h-7" /></div>
+                <h2 className="text-[20px] font-semibold text-infyn-ink">Meetup not found</h2>
                 <button
                   onClick={() => router.back()}
-                  className="font-system px-5 py-2.5 rounded-2xl bg-infyn-rose text-white text-[13px] font-bold shadow-md cursor-pointer"
+                  className="px-5 py-2.5 rounded-2xl bg-infyn-rose text-white text-[13px] font-bold shadow-md cursor-pointer"
                 >
                   ← Go Back
                 </button>
@@ -286,35 +287,35 @@ function MeetupDetailContent() {
                       alt={meetup.title}
                       className="h-full w-full object-cover"
                     />
-                    {isCancelled && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><span className="px-4 py-2 rounded-full bg-red-500 text-white text-[13px] font-extrabold uppercase tracking-wider">Cancelled</span></div>}
+                    {isCancelled && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><span className="px-4 py-2 rounded-full bg-infyn-rose text-[#fff8f0] text-[13px] font-semibold uppercase tracking-wider">Cancelled</span></div>}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
                     <button
                       onClick={() => router.back()}
-                      className="font-system absolute top-[calc(1rem+env(safe-area-inset-top,0px))] left-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface/80 backdrop-blur-md text-infyn-ink shadow-lg active:scale-95 transition-all cursor-pointer z-20"
+                      className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] left-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-infyn-surface/80 backdrop-blur-md text-infyn-ink shadow-lg active:scale-95 transition-all cursor-pointer z-20"
                     >
                       ←
                     </button>
 
                     {/* Top Right Badges: Category & High-Contrast Capacity Pill */}
                     <div className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 flex items-center gap-2 z-20">
-                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-infyn-border/20 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
+                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-infyn-border/20 text-white text-[11px] font-semibold uppercase tracking-wider shadow-md">
                         {meetup.category}
                       </span>
-                      <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-infyn-border/20 text-white text-[11.5px] font-extrabold shadow-md flex items-center gap-1">
-                        👥 {meetup.attendeesCount || 1} / {meetup.maxAttendees}
+                      <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-infyn-border/20 text-white text-[11.5px] font-semibold shadow-md flex items-center gap-1">
+                        <Ic.People /> {meetup.attendeesCount || 1} / {meetup.maxAttendees}
                       </span>
                     </div>
 
                     <div className="absolute bottom-4 left-5 right-5 text-white z-20">
                       <h1 className="text-[22px] font-normal leading-snug drop-shadow-md line-clamp-2 font-display">{meetup.title}</h1>
                       <p className="text-[13px] text-white/90 mt-1 flex items-center gap-1.5 font-medium truncate drop-shadow-sm">
-                        <span className="flex-shrink-0">📍</span>
+                        <span className="flex-shrink-0"><Ic.MapPin /></span>
                         <span className="truncate">{meetup.venueName || 'Mumbai'}</span>
                       </p>
                       {meetup.isHost && (
-                        <span className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-infyn-ink text-[10.5px] font-extrabold uppercase tracking-wider shadow-sm">
-                          👑 You&apos;re the Host
+                        <span className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-infyn-surface text-infyn-ink text-[10.5px] font-semibold uppercase tracking-wider shadow-sm">
+                          You&apos;re hosting
                         </span>
                       )}
                     </div>
@@ -327,7 +328,7 @@ function MeetupDetailContent() {
                     </div>
                   )}
                   {error && (
-                    <div className="mx-5 mt-3 px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-[13px] font-semibold">
+                    <div className="mx-5 mt-3 px-4 py-3 rounded-2xl bg-infyn-blush border border-infyn-rose-line text-infyn-rose text-[13px] font-semibold">
                       {error}
                     </div>
                   )}
@@ -335,7 +336,7 @@ function MeetupDetailContent() {
                   {/* Pinned announcement */}
                   {meetup.pinnedMessage && (
                     <div className="mx-5 mt-4 rounded-2xl bg-infyn-rose/10 border border-infyn-rose/25 p-4 shadow-sm flex gap-3">
-                      <span className="text-[18px]">📌</span>
+                      <span className="text-infyn-rose"><Ic.Pin /></span>
                       <div className="flex-1">
                         <div className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose mb-1">Pinned by Host</div>
                         <p className="text-[14px] font-semibold text-infyn-ink leading-snug">{meetup.pinnedMessage}</p>
@@ -346,12 +347,12 @@ function MeetupDetailContent() {
                   <div className="p-5 space-y-4">
                     {/* Host Admin: Pending Join Requests (Waiting List) — Shown prominently at top */}
                     {meetup.isHost && !isCancelled && (meetup.pendingRequests || []).length > 0 && (
-                      <div className="rounded-2xl bg-amber-50/95 border-2 border-amber-300/80 p-4 shadow-md space-y-3 animate-fade-in ring-2 ring-amber-400/20">
+                      <div className="rounded-2xl bg-infyn-surface border border-infyn-border p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                            <span>✋</span> Waiting List / Requests ({(meetup.pendingRequests || []).length})
+                          <span className="text-[12px] font-semibold uppercase tracking-wider text-infyn-secondary flex items-center gap-1.5">
+                            Requests ({(meetup.pendingRequests || []).length})
                           </span>
-                          <span className="text-[10.5px] font-extrabold text-amber-800 bg-amber-200/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                          <span className="text-[10.5px] font-semibold text-infyn-rose bg-infyn-blush px-2.5 py-0.5 rounded-full">
                             Action Needed
                           </span>
                         </div>
@@ -359,27 +360,24 @@ function MeetupDetailContent() {
                           {(meetup.pendingRequests || []).map((applicant) => (
                             <div
                               key={applicant.id}
-                              className="flex items-center justify-between gap-3 bg-infyn-surface p-3 rounded-2xl border border-amber-200/80 shadow-xs"
+                              className="flex items-center justify-between gap-3 bg-infyn-surface p-3 rounded-2xl border border-infyn-border"
                             >
                               {/* Tappable Profile Preview */}
                               <button
                                 type="button"
                                 onClick={() => setInspectedUser({ id: applicant.id, name: applicant.name, photo: applicant.photo })}
-                                className="font-system flex items-center gap-2.5 min-w-0 text-left cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all flex-1"
+                                className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all flex-1"
                               >
                                 <div className="relative flex-shrink-0">
                                   <SafeImage
-                                    src={applicant.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
-                                    className="h-10 w-10 rounded-full object-cover border border-amber-200 shadow-2xs"
+                                    src={applicant.photo}
+                                    className="h-10 w-10 rounded-full object-cover border border-infyn-border"
                                     name={applicant.name}
                                     alt={applicant.name}
                                   />
-                                  <span className="absolute -bottom-1 -right-1 bg-amber-500 text-white text-[8px] rounded-full px-1 font-bold">
-                                    👁️
-                                  </span>
                                 </div>
                                 <div className="min-w-0">
-                                  <span className="text-[13.5px] font-extrabold text-infyn-ink truncate block">{applicant.name}</span>
+                                  <span className="text-[13.5px] font-semibold text-infyn-ink truncate block">{applicant.name}</span>
                                   <span className="text-[11px] font-bold text-infyn-rose flex items-center gap-0.5">
                                     View Profile →
                                   </span>
@@ -392,17 +390,17 @@ function MeetupDetailContent() {
                                   type="button"
                                   onClick={() => handlePendingAction(applicant.id, 'approve')}
                                   disabled={busy}
-                                  className="font-system px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-extrabold cursor-pointer active:scale-95 transition-all shadow-xs disabled:opacity-50"
+                                  className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-semibold cursor-pointer active:scale-95 transition-all shadow-xs disabled:opacity-50"
                                 >
-                                  Accept ✓
+                                  Accept
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handlePendingAction(applicant.id, 'decline')}
                                   disabled={busy}
-                                  className="font-system px-2.5 py-1.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-infyn-secondary text-[12px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                                  className="px-2.5 py-1.5 rounded-xl bg-infyn-surface-soft hover:bg-infyn-surface-soft text-infyn-secondary text-[12px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
                                 >
-                                  Decline ✕
+                                  Decline
                                 </button>
                               </div>
                             </div>
@@ -421,14 +419,14 @@ function MeetupDetailContent() {
                             disabled={busy}
                             className="px-3 py-2.5 rounded-xl bg-infyn-rose text-white text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50 font-system"
                           >
-                            ✏️ Edit Squad
+                            Edit meetup
                           </button>
                           <button
                             onClick={() => { setEditError(''); setShowCancelConfirm(true); }}
                             disabled={busy}
-                            className="font-system px-3 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
+                            className="px-3 py-2.5 rounded-xl bg-infyn-surface text-infyn-rose border border-infyn-rose-line text-[13px] font-bold cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
                           >
-                            ⛔ Cancel Squad
+                            Cancel meetup
                           </button>
                         </div>
                       </div>
@@ -437,8 +435,8 @@ function MeetupDetailContent() {
                     {/* Date & Time Pill */}
                     <div className="rounded-2xl bg-infyn-surface border border-infyn-ink/8 p-4 shadow-sm flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-infyn-rose/10 flex items-center justify-center text-[18px]">
-                          📅
+                        <div className="h-10 w-10 rounded-full bg-infyn-blush flex items-center justify-center text-infyn-rose">
+                          <Ic.Calendar className="w-5 h-5" />
                         </div>
                         <div>
                           <div className="text-[13px] font-bold text-infyn-ink">
@@ -450,7 +448,7 @@ function MeetupDetailContent() {
                           </div>
                         </div>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${isCancelled ? 'bg-red-50 text-red-600' : 'bg-infyn-rose/10 text-infyn-rose'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${isCancelled ? 'bg-infyn-blush text-infyn-rose' : 'bg-infyn-rose/10 text-infyn-rose'}`}>
                         {isCancelled ? 'Cancelled' : 'Confirmed'}
                       </span>
                     </div>
@@ -458,7 +456,7 @@ function MeetupDetailContent() {
                     {/* Host Card */}
                     {meetup.host && (
                       <div className="rounded-2xl bg-infyn-surface border border-infyn-ink/8 p-4 shadow-sm">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-infyn-ink/40 mb-2 block">Squad Host</span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-infyn-ink/40 mb-2 block">Host</span>
                         <div className="flex items-center gap-3">
                           <SafeImage
                             src={meetup.host.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
@@ -468,7 +466,7 @@ function MeetupDetailContent() {
                           />
                           <div className="flex-1">
                             <h3 className="text-[15px] font-bold text-infyn-ink">{meetup.host.name}</h3>
-                            <p className="text-[12px] text-infyn-ink/50">Community Host 👑</p>
+                            <p className="text-[12px] text-infyn-ink/50">Host</p>
                           </div>
                         </div>
                       </div>
@@ -476,7 +474,7 @@ function MeetupDetailContent() {
 
                     {/* Description */}
                     <div className="rounded-2xl bg-infyn-surface border border-infyn-ink/8 p-4 shadow-sm space-y-2">
-                      <h3 className="text-[13px] font-bold uppercase tracking-wider text-infyn-ink/50">About Squad</h3>
+                      <h3 className="text-[13px] font-bold uppercase tracking-wider text-infyn-ink/50">About</h3>
                       <p className="text-[14px] text-infyn-ink/80 leading-relaxed">
                         {meetup.description || 'Join this squad for a fun group activity! Be punctual and bring good vibes.'}
                       </p>
@@ -486,7 +484,7 @@ function MeetupDetailContent() {
                     <div className="rounded-2xl bg-infyn-surface border border-infyn-ink/8 p-4 shadow-sm space-y-3">
                       <div className="flex items-center justify-between">
                         <h3 className="text-[13px] font-bold uppercase tracking-wider text-infyn-ink/50">
-                          Squad Members ({meetup.attendeesCount || 1} / {meetup.maxAttendees})
+                          Going ({meetup.attendeesCount || 1} / {meetup.maxAttendees})
                         </h3>
                         {meetup.isHost && !isCancelled && (
                           <span className="text-[11px] font-semibold text-infyn-ink/40">Tap Remove to kick</span>
@@ -520,7 +518,7 @@ function MeetupDetailContent() {
                               <button
                                 type="button"
                                 onClick={() => setInspectedUser({ id: att.id, name: att.name, photo: att.photo })}
-                                className="font-system flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer hover:opacity-80 transition-opacity"
+                                className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer hover:opacity-80 transition-opacity"
                               >
                                 <SafeImage
                                   src={att.photo || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=faces'}
@@ -535,7 +533,7 @@ function MeetupDetailContent() {
                                 <button
                                   onClick={() => kickUser(att.id)}
                                   disabled={kickingId === att.id}
-                                  className="font-system px-2.5 py-1 rounded-lg bg-red-50 text-red-600 border border-red-200 text-[11px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                                  className="px-2.5 py-1 rounded-lg bg-infyn-surface text-infyn-rose border border-infyn-rose-line text-[11px] font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
                                 >
                                   {kickingId === att.id ? '...' : 'Remove'}
                                 </button>
@@ -553,35 +551,35 @@ function MeetupDetailContent() {
                   <div className="flex-shrink-0 p-5 bg-infyn-surface/90 backdrop-blur-md border-t border-infyn-ink/5 z-20">
                     {meetup.isHost ? (
                       <p className="text-center text-[13px] font-semibold text-infyn-ink/50 py-2">
-                        You&apos;re hosting this squad 👑
+                        You&apos;re hosting this meetup
                       </p>
                     ) : (
                       <button
                         onClick={handleJoin}
                         disabled={busy || (isFull && meetup.userJoinStatus !== 'going' && meetup.userJoinStatus !== 'pending') || meetup.userJoinStatus === 'kicked'}
-                        className={`font-system w-full h-13 rounded-2xl font-extrabold text-[15px] shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                        className={`w-full h-13 rounded-2xl font-semibold text-[15px] shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${
                           meetup.userJoinStatus === 'going'
                             ? 'bg-infyn-surface border border-infyn-ink/15 text-infyn-ink'
                             : meetup.userJoinStatus === 'pending'
-                            ? 'bg-amber-50 border border-amber-200 text-amber-700'
+                            ? 'bg-infyn-surface-soft border border-infyn-border text-infyn-secondary'
                             : meetup.userJoinStatus === 'kicked'
-                            ? 'bg-red-50 border border-red-200 text-red-600 cursor-not-allowed shadow-none'
+                            ? 'bg-infyn-blush border border-infyn-rose-line text-infyn-rose cursor-not-allowed shadow-none'
                             : isFull
                             ? 'bg-infyn-surface-soft text-infyn-muted cursor-not-allowed shadow-none'
-                            : 'bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white shadow-infyn-ink/30 active:scale-[0.99]'
+                            : 'bg-infyn-rose text-white shadow-infyn-ink/30 active:scale-[0.99]'
                         }`}
                       >
                         {meetup.userJoinStatus === 'going'
-                          ? 'Joined ✓ (Tap to Leave)'
+                          ? 'Joined · Tap to leave'
                           : meetup.userJoinStatus === 'pending'
                           ? 'Request Sent ⏳ (Tap to Cancel)'
                           : meetup.userJoinStatus === 'kicked'
-                          ? 'Removed by Host ⚠️'
+                          ? 'Removed by host'
                           : isFull
-                          ? 'Session Full 🔒'
+                          ? 'Full'
                           : meetup.requireApproval
-                          ? 'Request to Join ✋'
-                          : 'Join Session 🚀'}
+                          ? 'Request to join'
+                          : 'Join'}
                       </button>
                     )}
                   </div>
@@ -594,8 +592,8 @@ function MeetupDetailContent() {
               <div className="absolute inset-0 z-40 bg-black/50 flex items-end sm:items-center justify-center p-4">
                 <div className="bg-infyn-surface w-full max-w-[440px] rounded-3xl p-5 shadow-2xl space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[16px] font-extrabold text-infyn-ink">✏️ Edit Squad</h3>
-                    <button onClick={() => setShowEdit(false)} className="font-system h-8 w-8 rounded-full bg-infyn-ink/5 text-infyn-ink/60 font-bold cursor-pointer">✕</button>
+                    <h3 className="font-display text-[24px] text-infyn-ink">Edit meetup</h3>
+                    <button onClick={() => setShowEdit(false)} className="h-11 w-11 grid place-items-center rounded-full text-infyn-secondary cursor-pointer" aria-label="Close"><Ic.X className="w-4 h-4" /></button>
                   </div>
 
                   <div className="space-y-3">
@@ -605,7 +603,7 @@ function MeetupDetailContent() {
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl border border-infyn-ink/10 text-[14px] font-semibold text-infyn-ink focus:outline-none focus:ring-2 focus:ring-infyn-rose/40"
-                        placeholder="Squad title"
+                        placeholder="Title"
                       />
                     </div>
                     <div>
@@ -640,7 +638,7 @@ function MeetupDetailContent() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-infyn-ink/40 block mb-1">📌 Pinned announcement (shown to all members)</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-infyn-ink/40 block mb-1">Pinned announcement (shown to all members)</label>
                       <textarea
                         value={editForm.pinnedMessage}
                         maxLength={500}
@@ -659,11 +657,11 @@ function MeetupDetailContent() {
                         className="w-full px-3 py-2.5 rounded-xl border border-infyn-ink/10 text-[14px] font-semibold text-infyn-ink focus:outline-none focus:ring-2 focus:ring-infyn-rose/40 resize-none"
                       />
                     </div>
-                    {editError && <p className="text-[12px] font-semibold text-red-600">{editError}</p>}
+                    {editError && <p className="text-[12px] font-semibold text-infyn-rose">{editError}</p>}
                     <button
                       onClick={saveEdit}
                       disabled={busy}
-                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white text-[14px] font-extrabold shadow-lg cursor-pointer active:scale-[0.99] transition-all disabled:opacity-50 font-system"
+                      className="w-full py-3 rounded-2xl bg-infyn-rose text-white text-[14px] font-semibold shadow-lg cursor-pointer active:scale-[0.99] transition-all disabled:opacity-50 font-system"
                     >
                       {busy ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -676,8 +674,8 @@ function MeetupDetailContent() {
             {showCancelConfirm && (
               <div className="absolute inset-0 z-40 bg-black/50 flex items-end sm:items-center justify-center p-4">
                 <div className="bg-infyn-surface w-full max-w-[440px] rounded-3xl p-5 shadow-2xl space-y-4">
-                  <div className="text-[34px]">⛔</div>
-                  <h3 className="text-[16px] font-extrabold text-infyn-ink">Cancel this squad?</h3>
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-infyn-blush text-infyn-rose"><Ic.Alert className="w-6 h-6" /></div>
+                  <h3 className="text-[16px] font-semibold text-infyn-ink">Cancel this squad?</h3>
                   <p className="text-[13px] text-infyn-ink/60 leading-relaxed">
                     All {Math.max(meetup?.attendeesCount ?? 1, 1)} members will be notified and the squad will disappear from the public list. This can&apos;t be undone.
                   </p>
@@ -685,16 +683,16 @@ function MeetupDetailContent() {
                     <button
                       onClick={() => setShowCancelConfirm(false)}
                       disabled={busy}
-                      className="font-system flex-1 py-3 rounded-2xl bg-infyn-ink/5 text-infyn-ink text-[14px] font-bold cursor-pointer active:scale-[0.99]"
+                      className="flex-1 py-3 rounded-2xl bg-infyn-ink/5 text-infyn-ink text-[14px] font-bold cursor-pointer active:scale-[0.99]"
                     >
-                      Keep Squad
+                      Keep meetup
                     </button>
                     <button
                       onClick={cancelMeetup}
                       disabled={busy}
-                      className="flex-1 py-3 rounded-2xl bg-red-500 text-white text-[14px] font-extrabold shadow-lg cursor-pointer active:scale-[0.99] disabled:opacity-50 font-system"
+                      className="flex-1 py-3 rounded-2xl bg-infyn-rose text-[#fff8f0] text-[14px] font-semibold shadow-lg cursor-pointer active:scale-[0.99] disabled:opacity-50 font-system"
                     >
-                      {busy ? 'Cancelling...' : 'Cancel Squad'}
+                      {busy ? 'Cancelling...' : 'Cancel meetup'}
                     </button>
                   </div>
                 </div>
@@ -704,7 +702,7 @@ function MeetupDetailContent() {
             {/* Host Banner for cancelled state */}
             {isCancelled && (
               <div className="flex-shrink-0 p-5 bg-infyn-surface/90 backdrop-blur-md border-t border-infyn-ink/5 z-20">
-                <p className="text-center text-[13px] font-bold text-red-600 py-2">
+                <p className="text-center text-[13px] font-bold text-infyn-rose py-2">
                   This squad has been cancelled.
                 </p>
               </div>

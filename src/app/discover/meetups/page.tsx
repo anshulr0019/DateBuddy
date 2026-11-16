@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuroraBackground, SafeImage } from '@/app/components/shared';
+import { AuroraBackground, SafeImage, EmptyState } from '@/app/components/shared';
+import { Ic } from '@/app/components/icons';
 import { getCategoryCoverImage } from '@/app/lib/meetup-media';
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Squads', icon: '✨' },
-  { id: 'sports', label: 'Sports', icon: '⚽' },
-  { id: 'social', label: 'Social', icon: '🎉' },
-  { id: 'food', label: 'Food & Drinks', icon: '☕' },
-  { id: 'outdoors', label: 'Outdoors', icon: '🏔️' },
-  { id: 'arts', label: 'Arts', icon: '🎨' },
-  { id: 'tech', label: 'Tech', icon: '💻' },
+  { id: 'all', label: 'All' },
+  { id: 'sports', label: 'Sports' },
+  { id: 'social', label: 'Social' },
+  { id: 'food', label: 'Food & Drinks' },
+  { id: 'outdoors', label: 'Outdoors' },
+  { id: 'arts', label: 'Arts' },
+  { id: 'tech', label: 'Tech' },
 ];
 
 interface Meetup {
@@ -80,14 +81,14 @@ export default function DiscoverMeetupsPage() {
             <div className="flex-shrink-0 px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-3 bg-infyn-surface/80 backdrop-blur-md border-b border-infyn-ink/5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-infyn-rose">Community Squads</span>
-                  <h1 className="text-[24px] font-extrabold tracking-tight text-infyn-ink font-system">Discover Meetups</h1>
+                  <h1 className="font-display text-[30px] leading-tight tracking-tight text-infyn-ink">Meetups</h1>
+                  <p className="text-[14px] text-infyn-secondary">Activities and get-togethers near you</p>
                 </div>
                 <button
                   onClick={() => router.push('/meetups/create')}
-                  className="font-system h-10 px-4 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[13px] shadow-md shadow-infyn-ink/25 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="min-h-[44px] px-4 rounded-full border border-infyn-rose-line text-infyn-rose text-[14px] font-semibold active:bg-infyn-blush transition-colors cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>+ Host Squad</span>
+                  <Ic.Plus /> <span>Host</span>
                 </button>
               </div>
 
@@ -100,7 +101,7 @@ export default function DiscoverMeetupsPage() {
                 </span>
                 <input
                   type="text"
-                  placeholder="Search squads, venues, or activities..."
+                  placeholder="Search meetups or venues"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-11 pl-10 pr-4 rounded-2xl bg-infyn-surface border border-infyn-ink/10 text-[16px] font-medium text-infyn-ink placeholder-infyn-ink/30 focus:outline-none focus:ring-2 focus:ring-infyn-rose/30 focus:border-infyn-rose transition-all shadow-sm"
@@ -115,13 +116,12 @@ export default function DiscoverMeetupsPage() {
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={`font-system flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                         isActive
                           ? 'bg-infyn-ink text-white shadow-sm scale-102'
                           : 'bg-infyn-surface/80 border border-infyn-ink/10 text-infyn-ink/70 hover:bg-infyn-surface'
                       }`}
                     >
-                      <span>{cat.icon}</span>
                       <span>{cat.label}</span>
                     </button>
                   );
@@ -134,22 +134,15 @@ export default function DiscoverMeetupsPage() {
               {loading ? (
                 <div className="w-full p-10 text-center rounded-3xl bg-infyn-surface/70 backdrop-blur-md border border-infyn-border/60 shadow-sm space-y-2">
                   <div className="h-6 w-6 rounded-full border-2 border-infyn-rose border-t-transparent animate-spin mx-auto" />
-                  <p className="text-[14px] font-semibold text-infyn-ink/60">Loading squads...</p>
+                  <p className="text-[14px] font-semibold text-infyn-ink/60">Loading meetups…</p>
                 </div>
               ) : filteredMeetups.length === 0 ? (
-                <div className="w-full p-10 text-center rounded-3xl bg-infyn-surface/80 backdrop-blur-md border border-infyn-border/60 shadow-sm space-y-3">
-                  <div className="text-[36px]">🚀</div>
-                  <h3 className="text-[17px] font-bold text-infyn-ink">No Squads Found</h3>
-                  <p className="text-[13px] text-infyn-ink/55 max-w-[260px] mx-auto">
-                    Be the first one to host an activity or try changing your search filter!
-                  </p>
-                  <button
-                    onClick={() => router.push('/meetups/create')}
-                    className="font-system mt-2 inline-flex h-11 px-5 rounded-2xl bg-infyn-rose text-white text-[13px] font-bold shadow-md shadow-infyn-ink/30 active:scale-95 transition-all cursor-pointer"
-                  >
-                    + Host a Squad
-                  </button>
-                </div>
+                <EmptyState
+                  icon={<Ic.Calendar />}
+                  title="No meetups here yet"
+                  body="Host the first one, or try another category."
+                  action={{ label: 'Host a meetup', onClick: () => router.push('/meetups/create') }}
+                />
               ) : (
                 filteredMeetups.map((meetup) => {
                   const coverImg =
@@ -173,15 +166,15 @@ export default function DiscoverMeetupsPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         
                         <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-infyn-border/20 text-white text-[11px] font-bold uppercase tracking-wider">
-                          {meetup.category || 'Squad'}
+                          {meetup.category || 'Meetup'}
                         </span>
 
-                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-infyn-surface/90 backdrop-blur-md text-infyn-ink text-[11px] font-extrabold shadow-sm">
-                          👥 {meetup.attendeesCount || 1} {meetup.maxAttendees ? `/ ${meetup.maxAttendees}` : ''}
+                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-infyn-surface/90 backdrop-blur-md text-infyn-ink text-[11px] font-semibold shadow-sm">
+                          <Ic.People /> {meetup.attendeesCount || 1} {meetup.maxAttendees ? `/ ${meetup.maxAttendees}` : ''}
                         </span>
 
                         <div className="absolute bottom-3 left-4 right-4 text-white">
-                          <h2 className="text-[17px] font-extrabold leading-snug drop-shadow-sm line-clamp-1">
+                          <h2 className="text-[17px] font-semibold leading-snug drop-shadow-sm line-clamp-1">
                             {meetup.title}
                           </h2>
                         </div>
@@ -195,12 +188,12 @@ export default function DiscoverMeetupsPage() {
 
                         <div className="flex items-center justify-between pt-2 border-t border-infyn-ink/5 text-[12px] font-medium text-infyn-ink/60">
                           <span className="flex items-center gap-1.5 truncate">
-                            <span className="text-infyn-rose">📍</span>
+                            <span className="text-infyn-rose"><Ic.MapPin /></span>
                             <span className="truncate">{meetup.venueName || meetup.location || 'Mumbai'}</span>
                           </span>
                           
                           <span className="text-infyn-rose font-bold flex items-center gap-1 flex-shrink-0">
-                            Join Squad →
+                            View
                           </span>
                         </div>
                       </div>

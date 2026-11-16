@@ -7,14 +7,15 @@ import { AuroraBackground, SafeImage } from '@/app/components/shared';
 import { VenuePickerModal } from '@/app/components/VenuePickerModal';
 import { getCategoryCoverImage, PRESET_IMAGE_OPTIONS } from '@/app/lib/meetup-media';
 import { getCachedUserProfile, loadUserProfile } from '@/app/lib/userProfileCache';
+import { Ic } from '@/app/components/icons';
 
 const CATEGORIES = [
-  { id: 'sports', icon: '⚽', label: 'Sports & Fitness', desc: 'Gym, badminton, football & running' },
-  { id: 'social', icon: '🎉', label: 'Social & Parties', desc: 'House parties, mixers & meetups' },
-  { id: 'food', icon: '☕', label: 'Food & Coffee', desc: 'Café hops, dinners & street food' },
-  { id: 'outdoors', icon: '🏔️', label: 'Outdoors & Trips', desc: 'Hikes, weekend getaways & nature' },
-  { id: 'arts', icon: '🎨', label: 'Arts & Culture', desc: 'Museums, live gigs & theatre' },
-  { id: 'tech', icon: '💻', label: 'Tech & Gaming', desc: 'Hackathons, LAN parties & co-working' },
+  { id: 'sports', label: 'Sports & Fitness', desc: 'Gym, badminton, football & running' },
+  { id: 'social', label: 'Social & Parties', desc: 'House parties, mixers & meetups' },
+  { id: 'food', label: 'Food & Coffee', desc: 'Café hops, dinners & street food' },
+  { id: 'outdoors', label: 'Outdoors & Trips', desc: 'Hikes, weekend getaways & nature' },
+  { id: 'arts', label: 'Arts & Culture', desc: 'Museums, live gigs & theatre' },
+  { id: 'tech', label: 'Tech & Gaming', desc: 'Hackathons, LAN parties & co-working' },
 ];
 
 export default function CreateMeetupPage() {
@@ -126,7 +127,7 @@ export default function CreateMeetupPage() {
                   ←
                 </button>
                 <div className="text-center">
-                  <h1 className="text-[17px] font-normal text-infyn-ink font-display">Host a Squad</h1>
+                  <h1 className="text-[17px] font-normal text-infyn-ink font-display">Host a meetup</h1>
                   <p className="text-[12px] font-medium text-infyn-ink/50">Step {step} of 3</p>
                 </div>
                 <div className="w-10" />
@@ -135,7 +136,7 @@ export default function CreateMeetupPage() {
               {/* Step Progress Bar */}
               <div className="h-1.5 w-full rounded-full bg-infyn-ink/5 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose transition-all duration-300 ease-out"
+                  className="h-full bg-infyn-rose transition-all duration-300 ease-out"
                   style={{ width: `${(step / 3) * 100}%` }}
                 />
               </div>
@@ -146,7 +147,7 @@ export default function CreateMeetupPage() {
               {errorMessage && (
                 <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-[13px] font-medium text-rose-700 backdrop-blur-md animate-fade-in flex items-center justify-between">
                   <span>{errorMessage}</span>
-                  <button onClick={() => setErrorMessage('')} className="text-rose-500 font-bold ml-2">✕</button>
+                  <button onClick={() => setErrorMessage('')} className="text-infyn-rose ml-2 min-h-[32px] min-w-[32px] grid place-items-center" aria-label="Dismiss"><Ic.X className="w-4 h-4" /></button>
                 </div>
               )}
 
@@ -155,7 +156,7 @@ export default function CreateMeetupPage() {
                 <div className="space-y-5 animate-fade-slide-up">
                   <div>
                     <label className="block text-[13px] font-semibold uppercase tracking-wider text-infyn-ink/60 mb-2">
-                      Squad Title <span className="text-rose-500">*</span>
+                      Title <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -195,7 +196,6 @@ export default function CreateMeetupPage() {
                                 : 'bg-infyn-surface/80 border-infyn-ink/10 hover:border-infyn-ink/20'
                             }`}
                           >
-                            <div className="text-[26px] mb-1">{cat.icon}</div>
                             <div className="text-[14px] font-bold text-infyn-ink">{cat.label}</div>
                             <div className="text-[11px] text-infyn-ink/50 mt-0.5 line-clamp-1">{cat.desc}</div>
                           </button>
@@ -219,7 +219,7 @@ export default function CreateMeetupPage() {
                         onClick={() => setShowVenuePicker(true)}
                         className="text-[12px] font-bold text-infyn-rose hover:underline cursor-pointer flex items-center gap-1"
                       >
-                        📍 Select from popular {formData.category} locations →
+                        Choose a {formData.category} venue
                       </button>
                     </div>
                     <input
@@ -272,7 +272,7 @@ export default function CreateMeetupPage() {
 
                   <div className="rounded-2xl border border-infyn-ink/10 bg-infyn-surface p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-semibold text-infyn-ink">Max Squad Size</span>
+                      <span className="text-[13px] font-semibold text-infyn-ink">Group size</span>
                       <span className="text-[15px] font-bold text-infyn-rose">{formData.maxAttendees} Members</span>
                     </div>
                     <input
@@ -320,7 +320,7 @@ export default function CreateMeetupPage() {
                       {isUploadingPhoto ? (
                         <><div className="h-4 w-4 rounded-full border-2 border-infyn-rose border-t-transparent animate-spin" /><span>Uploading…</span></>
                       ) : uploadedPreview ? (
-                        <><span>✓</span><span>Custom photo uploaded — tap to change</span></>
+                        <><Ic.Check /><span>Custom photo uploaded — tap to change</span></>
                       ) : (
                         <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload Custom Photo</span></>
                       )}
@@ -354,13 +354,13 @@ export default function CreateMeetupPage() {
                   <div className="rounded-2xl bg-gradient-to-br from-infyn-rose/10 to-infyn-rose/10 border border-infyn-rose/20 p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="px-2.5 py-0.5 rounded-full bg-infyn-rose text-white text-[10px] font-bold uppercase tracking-wider">
-                        {formData.category || 'Squad'}
+                        {formData.category || 'Meetup'}
                       </span>
                       <span className="text-[12px] font-semibold text-infyn-ink/60">Max {formData.maxAttendees} members</span>
                     </div>
-                    <h3 className="text-[16px] font-extrabold text-infyn-ink">{formData.title || 'Squad Title'}</h3>
+                    <h3 className="text-[16px] font-semibold text-infyn-ink">{formData.title || 'Title'}</h3>
                     <p className="text-[12px] font-medium text-infyn-ink/60 mt-0.5">
-                      📍 {formData.venueName || 'Venue'} {formData.date ? `· 📅 ${formData.date}` : ''}
+                      {formData.venueName || 'Venue'}{formData.date ? ` · ${formData.date}` : ''}
                     </p>
                   </div>
                 </div>
@@ -373,7 +373,7 @@ export default function CreateMeetupPage() {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!formData.title.trim()}
-                  className="w-full h-13 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-40 disabled:shadow-none active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full h-13 rounded-2xl bg-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-40 disabled:shadow-none active:scale-[0.99] transition-all cursor-pointer"
                 >
                   Continue: Location & Time →
                 </button>
@@ -390,7 +390,7 @@ export default function CreateMeetupPage() {
                   <button
                     onClick={() => setStep(3)}
                     disabled={!formData.venueName.trim() || !formData.date}
-                    className="flex-2 h-13 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-40 disabled:shadow-none active:scale-[0.99] transition-all cursor-pointer"
+                    className="flex-2 h-13 rounded-2xl bg-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-40 disabled:shadow-none active:scale-[0.99] transition-all cursor-pointer"
                   >
                     Continue: Details →
                   </button>
@@ -408,7 +408,7 @@ export default function CreateMeetupPage() {
                   <button
                     onClick={handleCreate}
                     disabled={isSubmitting}
-                    className="flex-2 h-13 rounded-2xl bg-gradient-to-r from-infyn-rose via-infyn-rose to-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-60 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="flex-2 h-13 rounded-2xl bg-infyn-rose text-white font-bold text-[15px] shadow-lg shadow-infyn-ink/25 disabled:opacity-60 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -416,7 +416,7 @@ export default function CreateMeetupPage() {
                         <span>Publishing...</span>
                       </>
                     ) : (
-                      <span>Publish Squad 🚀</span>
+                      <span>Publish meetup</span>
                     )}
                   </button>
                 </div>
