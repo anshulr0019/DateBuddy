@@ -387,7 +387,7 @@ export default function AdminDashboardPage() {
     setExporting(true);
     hapticMedium();
     try {
-      const res = await fetch(`/api/admin/export?key=${encodeURIComponent(adminKey)}`);
+      const res = await fetch('/api/admin/export', { headers: { 'x-admin-key': adminKey } });
       if (!res.ok) throw new Error('Export failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -504,7 +504,7 @@ export default function AdminDashboardPage() {
                 type="password"
                 value={inputPin}
                 onChange={(e) => setInputPin(e.target.value)}
-                placeholder="Enter PIN (e.g. infyn2026)"
+                placeholder="Admin key"
                 autoFocus
                 className="w-full h-12 rounded-2xl bg-black/50 border border-white/20 px-4 text-center text-[16px] font-bold text-white tracking-widest outline-none focus:border-infyn-rose focus:ring-2 focus:ring-infyn-rose/20 transition-all placeholder:text-white/30 placeholder:tracking-normal"
               />

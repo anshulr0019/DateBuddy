@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAdminRequest } from '@/lib/admin-auth';
 import { db } from '@/db';
 import { users, matches, messages, photos, subscriptions, swipes } from '@/db/schema';
 import { desc, count, sql, gte, inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'infyn2026';
-
-function isAuthorized(request: NextRequest): boolean {
-  const headerKey = request.headers.get('x-admin-key');
-  const queryKey = request.nextUrl.searchParams.get('key');
-  return headerKey === ADMIN_SECRET || queryKey === ADMIN_SECRET;
-}
 
 export async function GET(request: NextRequest) {
   try {
-    if (!isAuthorized(request)) {
+    if (!isAdminRequest(request)) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
